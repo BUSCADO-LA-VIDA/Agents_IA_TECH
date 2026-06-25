@@ -24,17 +24,28 @@ Una carpeta `.github/` portátil que transforma **GitHub Copilot en VS Code** en
 
 ## 🚀 Instalación
 
-### En un proyecto nuevo o existente
+Cada proyecto tiene su propio git. Copias la carpeta `.github/` y cada proyecto queda independiente. Cuando este repo se actualice, puedes descargar los cambios y copiarlos de nuevo.
 
 ```bash
-# Opción 1: Clonar este repo como template
-git clone https://github.com/TU_USER/Agents_IA_TECH.git mi-proyecto
-cd mi-proyecto
-# Reemplaza con el código de tu proyecto, conserva .github/
+# 1. En la raíz de tu proyecto, clona SOLO .github/
+git clone https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents-ia-tech
+cp -r /tmp/agents-ia-tech/.github/ .github/
+rm -rf /tmp/agents-ia-tech
 
-# Opción 2: Copiar solo .github/ a tu proyecto
-cp -r Agents_IA_TECH/.github/ /ruta/de/tu/proyecto/
+# 2. ¡Listo! Ya puedes usar los agentes y skills
 ```
+
+### Mantener actualizado
+
+```bash
+# Cuando haya actualizaciones en Agents_IA_TECH
+git clone https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents-ia-tech
+cp -r /tmp/agents-ia-tech/.github/ .github/
+rm -rf /tmp/agents-ia-tech
+# Revisa los cambios con git diff y commitéalos si te sirven
+```
+
+> 💡 **Tip:** Si quieres trackear cambios específicos, copia skill por skill en lugar de todo `.github/`.
 
 ### Verificar que funciona
 
@@ -95,32 +106,51 @@ Los **agentes** son roles especializados que puedes seleccionar en Copilot Chat.
 2. En el **selector de agente** (dropdown junto al campo de texto), elige el rol deseado
 3. Haz tu consulta — el agente usará sus skills automáticamente
 
+### Flujo de trabajo: Design-First
+
+```
+📝 Arquitecto / Documentador  ──documentan──▶  🐳 DevOps
+                                                 🧪 QA Senior
+🔒 Security Auditor  ──validan──▶                🌐 API Developer
+                                                 ⚛️ Frontend Developer
+                    ╰── Solo documentan ──╯       ╰── Solo implementan lo documentado ──╯
+```
+
+**Regla de oro:** Si no está documentado, no existe. Los agentes que escriben código **solo implementan lo que ya está documentado**. Si falta documentación, llaman a los agentes de documento para crearla primero.
+
 ### Agentes Disponibles
 
-| Agente | Description | Skills clave | Ideal para |
-|--------|-------------|-------------|------------|
-| 🏗️ **Arquitecto** | Diseño y evaluación de arquitecturas | ADRs, hexagonal, api-design, postgres, redis | Decisiones técnicas, diseño de sistemas, ADRs |
-| 📝 **Documentador** | Documentación técnica y ADRs | documentation-lookup, ADRs, code-tour, knowledge-ops | Crear/actualizar docs, onboarding, wikis |
-| 🔒 **Security Auditor** | Auditoría de seguridad y pentesting | security-review, security-scan, bounty-hunter, gateguard | Pre-release, código sensible, OWASP |
-| 🐳 **DevOps** | Docker, deploy, infraestructura | docker-patterns, deployment-patterns, kubernetes, postgres | Dockerfiles, CI/CD, despliegues |
-| 🧪 **QA Senior** | Testing, TDD, benchmark | tdd-workflow, e2e-testing, benchmark, verification-loop | Escribir tests, coverage, calidad |
-| 🌐 **API Developer** | APIs REST, backend, DBs | api-design, backend-patterns, mcp-server, prisma | Diseño de APIs, endpoints, modelos |
-| ⚛️ **Frontend Developer** | UI, React, Laravel | frontend-patterns, react-patterns, laravel-patterns | Componentes, vistas, estilos |
+| Agente | Rol | Escribe código | Tools |
+|--------|-----|:--------------:|-------|
+| 📝 **Documentador** | Documenta especificaciones, flujos de trabajo y requisitos | ❌ | read, search |
+| 🏗️ **Arquitecto** | Documenta la arquitectura, crea estructura y define cómo usarla correctamente | ❌ | read, search, agent |
+| 🔒 **Security Auditor** | Ejecuta tests de seguridad y auditoría | ❌ | read, search, execute |
+| 🐳 **DevOps** | Despliega configuraciones de infraestructura | ✅ | read, search, edit, execute |
+| 🧪 **QA Senior** | Diseña y ejecuta tests. Edita y aprende a testear si se le pide | ✅ | read, search, edit, execute |
+| 🌐 **API Developer** | Implementa APIs REST, backend, modelos y DBs | ✅ | read, search, edit, execute |
+| ⚛️ **Frontend Developer** | Implementa componentes UI, vistas y estilos | ✅ | read, search, edit |
+
+> 💡 Los agentes que **no escriben código** solo documentan, especifican y auditan.  
+> Los agentes que **sí escriben código** implementan lo documentado; si algo no está documentado, piden que se documente primero.
 
 ### Ejemplos de uso
 
 ```
-🧑‍💻 "Necesito diseñar la arquitectura para un sistema de reservas"
-→ Selecciona agente: Arquitecto
-→ Generará ADRs, diagramas y plan de implementación
+🧑‍💻 "Necesito crear un módulo de facturación"
+→ 1. Arquitecto   → documenta arquitectura, estructura, decisiones (ADRs)
+→ 2. Documentador → documenta especificaciones y flujos de trabajo
+→ 3. API Developer → implementa lo documentado
+→ 4. QA Senior     → escribe tests de lo implementado
+→ 5. Security Auditor → audita seguridad antes del deploy
 
 🧑‍💻 "Revísame la seguridad antes del deploy"
 → Selecciona agente: Security Auditor
 → Escanea secrets, OWASP, dependencias
 
-🧑‍💻 "Quiero asegurarme que esta feature tiene buena cobertura"
-→ Selecciona agente: QA Senior
-→ Ejecuta ciclo TDD, mide cobertura
+🧑‍💻 "Agrega validación al formulario de login"
+→ API Developer implementa validación backend
+→ Frontend Developer implementa validación frontend
+→ Si falta especificación, deriva a Documentador primero
 ```
 
 ---
@@ -179,24 +209,13 @@ npx ecc-agentshield scan
 
 ## 📦 Cómo implementarlo en tus proyectos
 
-### 🆕 Proyecto nuevo
+Todos los proyectos siguen el mismo patrón: cada uno con su propio git, `.github/` copiado desde este repo.
 
 ```bash
-git clone https://github.com/TU_USER/Agents_IA_TECH.git mi-nuevo-proyecto
-cd mi-nuevo-proyecto
-# Ahora inicializa tu framework: laravel new . , dotnet new webapi , etc.
-# El .github/ ya está incluido
-```
-
-### 📂 Proyecto existente
-
-```bash
-# Desde la raíz de Agents_IA_TECH
-cp -r .github /ruta/de/tu/proyecto/
-
-# O desde cualquier lado
-git clone https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents
-cp -r /tmp/agents/.github /ruta/de/tu/proyecto/
+# En cualquier proyecto (nuevo o existente)
+git clone https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents-ia-tech
+cp -r /tmp/agents-ia-tech/.github/ .github/
+rm -rf /tmp/agents-ia-tech
 ```
 
 ### 🛠️ Personalización

@@ -12,8 +12,8 @@
 Una carpeta `.github/` portátil que transforma **GitHub Copilot en VS Code** en un equipo de desarrollo con estándares profesionales. Incluye:
 
 - **77 skills** de dominio (arquitectura, seguridad, testing, Docker, APIs, frontend, Python, Java, C#, etc.)
-- **7 agentes especializados** con roles definidos (arquitecto, QA, security auditor, devops, etc.)
-- **5 prompts** tipo slash command (`/plan`, `/tdd`, `/security-review`, etc.)
+- **8 agentes especializados** con roles definidos (orquestador, arquitecto, QA, security auditor, devops, etc.)
+- **6 prompts** tipo slash command (`/plan`, `/tdd`, `/security-review`, `/pensar`, etc.)
 - **Reglas base** estilo "Senior Dev Lazy" (Ponytail): código mínimo, reutilización, YAGNI
 - **AgentShield** — escaneo de seguridad automático
 
@@ -51,7 +51,7 @@ rm -rf /tmp/agents-ia-tech
 
 1. Abre tu proyecto en **VS Code**
 2. Abre **Copilot Chat** (`Ctrl+Shift+I`)
-3. Escribe `/` — deberías ver los prompts disponibles: `plan`, `tdd`, `security-review`, `build-fix`, `refactor`
+3. Escribe `/` — deberías ver los prompts disponibles: `plan`, `tdd`, `security-review`, `build-fix`, `refactor`, `pensar`
 4. En el selector de agente (junto al input de chat), elige un rol como **"Arquitecto"** o **"QA Senior"**
 
 > ℹ️ Si no ves los prompts, asegúrate de que `copilot-instructions.md` esté en `.github/` y que **GitHub Copilot** esté habilitado.
@@ -65,7 +65,8 @@ rm -rf /tmp/agents-ia-tech
 ├── copilot-instructions.md       ← Reglas base siempre activas
 ├── progreso-skills.md            ← Estado de todas las skills
 ├── AGENTS.md                     ← Definición de agentes ECC
-├── agents/                       ← 7 agentes especializados
+├── agents/                       ← 8 agentes especializados
+│   ├── pensador.agent.md              ← 🆕 🧠 Analiza dudas, documenta, pregunta si implementar
 │   ├── arquitecto.agent.md
 │   ├── documentador.agent.md
 │   ├── security-auditor.agent.md
@@ -78,7 +79,8 @@ rm -rf /tmp/agents-ia-tech
 │   ├── tdd.prompt.md
 │   ├── security-review.prompt.md
 │   ├── build-fix.prompt.md
-│   └── refactor.prompt.md
+│   ├── refactor.prompt.md
+│   └── pensar.prompt.md          ← 🆕 🧠 Evalúa dudas, documenta, pregunta si implementar
 ├── skills/                       ← 77 skills organizadas por dominio
 │   ├── api/ (7)
 │   ├── arquitectura/ (4)
@@ -109,7 +111,20 @@ Los **agentes** son roles especializados que puedes seleccionar en Copilot Chat.
 ### Flujo de trabajo: Design-First
 
 ```
-📝 Arquitecto / Documentador  ──documentan──▶  🐳 DevOps
+💭 Duda/Idea ──▶  🧠 Pensador
+                        │
+                        ├── ❓ ¿Idea completa? → preguntar al usuario
+                        │
+                        ├──▶  🏗️ Arquitecto (decisiones, ADRs)
+                        ├──▶  📝 Documentador (specs, flujos)
+                        ├──▶  🔒 Security Auditor (validación diseño)
+                        │
+                        ├── ❓ ¿Documentado? ¿Implementar? → preguntar al usuario
+                        │
+                        └──▶  🌐 API Developer + ⚛️ Frontend + 🐳 DevOps + 🧪 QA
+                              (solo si el usuario aprueba)
+                              
+�📝 Arquitecto / Documentador  ──documentan──▶  🐳 DevOps
                                                  🧪 QA Senior
 🔒 Security Auditor  ──validan──▶                🌐 API Developer
                                                  ⚛️ Frontend Developer
@@ -118,10 +133,11 @@ Los **agentes** son roles especializados que puedes seleccionar en Copilot Chat.
 
 **Regla de oro:** Si no está documentado, no existe. Los agentes que escriben código **solo implementan lo que ya está documentado**. Si falta documentación, llaman a los agentes de documento para crearla primero.
 
-### Agentes Disponibles
+### AgePensador** | 🆕 Recibe dudas, analiza, orquesta documentación, pregunta si implementar. Design-first con approval gate | ❌→✅ | read, search, agent, edi
 
 | Agente | Rol | Escribe código | Tools |
 |--------|-----|:--------------:|-------|
+| 🧠 **Orquestador Pensamiento** | 🆕 Recibe dudas, orquesta agentes documentales en orden. NUNCA toca código | ❌ | read, search, agent |
 | 📝 **Documentador** | Documenta especificaciones, flujos de trabajo y requisitos | ❌ | read, search |
 | 🏗️ **Arquitecto** | Documenta la arquitectura, crea estructura y define cómo usarla correctamente | ❌ | read, search, agent |
 | 🔒 **Security Auditor** | Ejecuta tests de seguridad y auditoría | ❌ | read, search, execute |
@@ -142,6 +158,15 @@ Los **agentes** son roles especializados que puedes seleccionar en Copilot Chat.
 → 3. API Developer → implementa lo documentado
 → 4. QA Senior     → escribe tests de lo implementado
 → 5. Security Auditor → audita seguridad antes del deploy
+
+🧑‍💻 "¿Cómo debería manejar la autenticación de usuarios externos?"
+→ Usa /pensar o selecciona el agente 🧠 Pensador
+→ 1. Pensador analiza la duda y pregunta si está lista para documentar
+→ 2. Arquitecto evalúa patrones (OAuth2, JWT, SAML) → documenta ADR
+→ 3. Documentador crea specs y flujos de autenticación
+→ 4. Pensador pregunta: "¿Querés que lo implemente?"
+→ 5. Si SÍ → API Developer + Frontend + QA implementan
+→ 6. Si NO → documentación queda lista para después
 
 🧑‍💻 "Revísame la seguridad antes del deploy"
 → Selecciona agente: Security Auditor
@@ -166,6 +191,7 @@ Escribe `/` en Copilot Chat para ver los comandos disponibles:
 | `/security-review` | Antes de release | Auditoría OWASP Top 10, secrets, dependencias, rate limiting |
 | `/build-fix` | Error de build/CI | Diagnostica errores de compilación y los resuelve incrementalmente |
 | `/refactor` | Mantenimiento | Identifica código muerto, simplifica, elimina abstracciones innecesarias |
+| `/pensar` | Duda de diseño | 🆕 Analiza la duda, documenta con agentes, pregunta si querés implementar |
 
 ---
 

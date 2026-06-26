@@ -128,11 +128,13 @@ Este archivo es el **único punto de comunicación** entre las fases documental 
 | **`arquitecto`** | Al crear ADRs o decisiones de diseño → agrega tareas de implementación derivadas |
 | **`documentador`** | Al crear/actualizar specs → agrega tareas concretas para el developer |
 | **`security-auditor`** | Al encontrar vulnerabilidades en el diseño → agrega tareas de mitigación |
-| **Implementador** (`api-developer`, `frontend-developer`, `devops`, `qa-senior`) | Marca tareas como `[x]` al implementarlas y las mueve a "Completadas". Si encuentra un error/bug, lo registra como nueva tarea. |
+| **Implementador** (`api-developer`, `frontend-developer`, `devops`) | Marca tareas como `[x]` al implementarlas y las mueve a "Completadas". Si encuentra un error/bug, lo registra como nueva tarea. |
+| **`qa-senior`** | **Solo escribe tests automáticos** (unitarios, integración, API, E2E con Playwright navegando la app). Puede conectarse por SSH y ejecutar queries a bases de datos para diagnosticar. Crea tests repetibles por cada issue. **NO modifica código de aplicación.** Si encuentra un bug, lo documenta en `pendientes-implementacion.md` con el detalle del error y pasa la tarea al desarrollador correspondiente. |
 
 **Reglas de uso:**
 - El implementador **siempre lee `pendientes-implementacion.md` primero** para saber qué hacer
 - Si durante la implementación **surge un error o bug** y no hay especificación que lo cubra → el implementador **NO improvisa**: crea una tarea en el archivo indicando que se necesita una spec, y **pide al `documentador` o `arquitecto`** que la genere
+- **QA (`qa-senior`) solo escribe tests** (unitarios, integración, API, E2E con Playwright), **conexiones SSH y queries a DB** para diagnosticar — si encuentra un bug en el código de aplicación, **no lo corrige**: lo documenta en `pendientes-implementacion.md` con el detalle del error y se lo pasa al desarrollador (`api-developer`, `frontend-developer`, `devops`)
 - El usuario puede decir **"implementa los cambios"** y el agente va directo a este archivo, sin recorrer todas las specs
 
 ### Diagrama del flujo

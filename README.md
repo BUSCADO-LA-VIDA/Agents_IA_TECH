@@ -24,28 +24,61 @@ Una carpeta `.github/` portátil que transforma **GitHub Copilot en VS Code** en
 
 ## 🚀 Instalación
 
-Cada proyecto tiene su propio git. Copias la carpeta `.github/` y cada proyecto queda independiente. Cuando este repo se actualice, puedes descargar los cambios y copiarlos de nuevo.
+Cada proyecto tiene su propio git. Copias el contenido de `.github/` del repo central
+y cada proyecto queda independiente. Cuando este repo se actualice, corres el script
+de sync y ya está.
 
-```bash
-# 1. En la raíz de tu proyecto, clona SOLO .github/
-git clone https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents-ia-tech
-cp -r /tmp/agents-ia-tech/.github/ .github/
-rm -rf /tmp/agents-ia-tech
+### Windows — PowerShell (recomendado)
 
-# 2. ¡Listo! Ya puedes usar los agentes y skills
+```powershell
+# 1. En la raíz de TU proyecto (ej: C:\Proyectos\Control-Acceso\)
+git clone --depth 1 https://github.com/TU_USER/Agents_IA_TECH.git $env:TEMP\agents-temp
+cp -r "$env:TEMP\agents-temp\.github\" .github\
+rm -r $env:TEMP\agents-temp
+
+# 2. ¡Listo! Ya podés usar los agentes y skills
 ```
 
-### Mantener actualizado
+### Linux / macOS — Bash
 
 ```bash
-# Cuando haya actualizaciones en Agents_IA_TECH
-git clone https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents-ia-tech
-cp -r /tmp/agents-ia-tech/.github/ .github/
-rm -rf /tmp/agents-ia-tech
-# Revisa los cambios con git diff y commitéalos si te sirven
+git clone --depth 1 https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents-temp
+cp -r /tmp/agents-temp/.github/ .github/
+rm -rf /tmp/agents-temp
 ```
 
-> 💡 **Tip:** Si quieres trackear cambios específicos, copia skill por skill en lugar de todo `.github/`.
+### ❌ Por qué NO clonar directo a `.github/`
+
+```bash
+# NO HAGAS ESTO — crea .github/.github/ (anidado)
+git clone https://github.com/TU_USER/Agents_IA_TECH.git .github   # ❌ MAL
+```
+
+El repo `Agents_IA_TECH` **contiene una carpeta `.github/`** adentro (ahí están los
+agentes). Si clonás el repo completo *a* `.github/`, el contenido queda en
+`.github/.github/` — Copilot no lo va a encontrar.
+
+### Actualizar cuando haya cambios
+
+La carpeta `Documentacion/` del proyecto **nunca se toca** — está fuera del `cp`.
+
+**Opción A — Script automático** (recomendado):
+
+```powershell
+.\sync-agents.ps1
+```
+
+**Opción B — Manual:**
+
+```powershell
+git clone --depth 1 https://github.com/TU_USER/Agents_IA_TECH.git $env:TEMP\agents-temp
+cp -r "$env:TEMP\agents-temp\.github\" .github\
+rm -r $env:TEMP\agents-temp
+git add .github
+git commit -m "chore: sync agents from upstream"
+```
+
+> 💡 **Tip:** Si querés trackear cambios específicos, copiá skill por skill en lugar de todo `.github/`.
 
 ### Verificar que funciona
 
@@ -195,6 +228,30 @@ Escribe `/` en Copilot Chat para ver los comandos disponibles:
 
 ---
 
+## 📂 Memoria del Proyecto — `Documentacion/00-indice.md` (opcional)
+
+Los agentes documentales (Pensador, Arquitecto, Documentador, Security Auditor) buscan contexto en `Documentacion/` de forma **opcional** — si existe lo usan, si no, trabajan con el estándar.
+
+```
+Documentacion/
+├── 00-indice.md        ← 📋 Si existe, lo leen como contexto del proyecto
+├── adr/                ← Decisiones de arquitectura (opcional)
+├── specs/              ← Especificaciones de features (opcional)
+└── agentes/            ← Extensiones de agentes por proyecto (opcional)
+```
+
+**¿Cómo funciona?**
+1. El agente **verifica si existe** `00-indice.md` — si no está, sigue con su comportamiento estándar
+2. Si existe, lo lee (1 llamada, ~50 líneas) y obtiene contexto del proyecto
+3. Si el índice referencia archivos que no existen, los **omite sin error**
+4. Cuando documenta algo nuevo, puede crear el índice si no existía
+
+> ✅ `Documentacion/` nunca se toca al sincronizar `.github/` desde el repo central.  
+> ✅ Los README.md del proyecto también se consideran documentación y pueden editarse.  
+> ✅ **Todo es opcional** — los agentes funcionan perfectamente sin `Documentacion/`.
+
+---
+
 ## 🧠 Skills por Categoría
 
 Cada skill es un archivo `SKILL.md` con conocimiento experto sobre un tema específico. Las skills se asignan a los agentes según su dominio.
@@ -237,11 +294,17 @@ npx ecc-agentshield scan
 
 Todos los proyectos siguen el mismo patrón: cada uno con su propio git, `.github/` copiado desde este repo.
 
-```bash
+```powershell
 # En cualquier proyecto (nuevo o existente)
-git clone https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents-ia-tech
-cp -r /tmp/agents-ia-tech/.github/ .github/
-rm -rf /tmp/agents-ia-tech
+git clone --depth 1 https://github.com/TU_USER/Agents_IA_TECH.git $env:TEMP\agents-temp
+cp -r "$env:TEMP\agents-temp\.github\" .github\
+rm -r $env:TEMP\agents-temp
+```
+
+O usá el script incluido:
+
+```powershell
+.\sync-agents.ps1
 ```
 
 ### 🛠️ Personalización

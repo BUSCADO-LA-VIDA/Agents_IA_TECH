@@ -24,61 +24,35 @@ Una carpeta `.github/` portátil que transforma **GitHub Copilot en VS Code** en
 
 ## 🚀 Instalación
 
-Cada proyecto tiene su propio git. Copias el contenido de `.github/` del repo central
-y cada proyecto queda independiente. Cuando este repo se actualice, corres el script
-de sync y ya está.
+Solo necesitás 2 pasos:
 
-### Windows — PowerShell (recomendado)
+### 1. Descargá el script a la raíz de tu proyecto
 
-```powershell
-# 1. En la raíz de TU proyecto (ej: C:\Proyectos\Control-Acceso\)
-git clone --depth 1 https://github.com/TU_USER/Agents_IA_TECH.git $env:TEMP\agents-temp
-cp -r "$env:TEMP\agents-temp\.github\" .github\
-rm -r $env:TEMP\agents-temp
-
-# 2. ¡Listo! Ya podés usar los agentes y skills
+```DESDE CMD
+# En la raíz de TU proyecto (ej: C:\Proyectos\Control-Acceso\)
+git clone --depth 1 https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH.git agents-temp
+robocopy agents-temp\.github .github /E
+copy agents-temp\sync-agents.ps1 .
+rmdir /s /q agents-temp
 ```
 
-### Linux / macOS — Bash
-
-```bash
-git clone --depth 1 https://github.com/TU_USER/Agents_IA_TECH.git /tmp/agents-temp
-cp -r /tmp/agents-temp/.github/ .github/
-rm -rf /tmp/agents-temp
-```
-
-### ❌ Por qué NO clonar directo a `.github/`
-
-```bash
-# NO HAGAS ESTO — crea .github/.github/ (anidado)
-git clone https://github.com/TU_USER/Agents_IA_TECH.git .github   # ❌ MAL
-```
-
-El repo `Agents_IA_TECH` **contiene una carpeta `.github/`** adentro (ahí están los
-agentes). Si clonás el repo completo *a* `.github/`, el contenido queda en
-`.github/.github/` — Copilot no lo va a encontrar.
-
-### Actualizar cuando haya cambios
-
-La carpeta `Documentacion/` del proyecto **nunca se toca** — está fuera del `cp`.
-
-**Opción A — Script automático** (recomendado):
+### 2. Ejecutalo
 
 ```powershell
 .\sync-agents.ps1
 ```
 
-**Opción B — Manual:**
+Esto clona el repo completo y copia solo `.github/` en tu proyecto. ¡Listo!
+
+### Actualizar cuando haya cambios
+
+La carpeta `Documentacion/` de tu proyecto **nunca se toca**.
 
 ```powershell
-git clone --depth 1 https://github.com/TU_USER/Agents_IA_TECH.git $env:TEMP\agents-temp
-cp -r "$env:TEMP\agents-temp\.github\" .github\
-rm -r $env:TEMP\agents-temp
+.\sync-agents.ps1
 git add .github
 git commit -m "chore: sync agents from upstream"
 ```
-
-> 💡 **Tip:** Si querés trackear cambios específicos, copiá skill por skill en lugar de todo `.github/`.
 
 ### Verificar que funciona
 
@@ -292,18 +266,9 @@ npx ecc-agentshield scan
 
 ## 📦 Cómo implementarlo en tus proyectos
 
-Todos los proyectos siguen el mismo patrón: cada uno con su propio git, `.github/` copiado desde este repo.
-
 ```powershell
-# En cualquier proyecto (nuevo o existente)
-git clone --depth 1 https://github.com/TU_USER/Agents_IA_TECH.git $env:TEMP\agents-temp
-cp -r "$env:TEMP\agents-temp\.github\" .github\
-rm -r $env:TEMP\agents-temp
-```
-
-O usá el script incluido:
-
-```powershell
+# En la raíz de tu proyecto
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/TU_USER/Agents_IA_TECH/main/sync-agents.ps1" -OutFile "sync-agents.ps1"
 .\sync-agents.ps1
 ```
 

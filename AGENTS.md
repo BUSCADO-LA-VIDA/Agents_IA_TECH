@@ -18,6 +18,7 @@ This is a **production-ready AI coding plugin** providing 67 specialized agents,
 |-------|---------|-------------|
 | planner | Implementation planning | Complex features, refactoring |
 | architect | System design and scalability | Architectural decisions |
+| documentador | Documentation (ADRs, specs, flows) | Writing/updating docs in `Documentacion/` |
 | tdd-guide | Test-driven development | New features, bug fixes |
 | code-reviewer | Code quality and maintainability | After writing/modifying code |
 | security-reviewer | Vulnerability detection | Before commits, sensitive code |
@@ -55,12 +56,22 @@ Use agents proactively without user prompt:
 - Code just written/modified → **code-reviewer**
 - Bug fix or new feature → **tdd-guide**
 - Architectural decision → **architect**
+- Documentation request → **preguntar: ¿código o especificaciones?** → **documentador** (si especificaciones)
 - Security-sensitive code → **security-reviewer**
 - Brownfield project onboarding → **spec-miner**
 - Autonomous loops / loop monitoring → **loop-operator**
 - Harness config reliability and cost → **harness-optimizer**
 
 Use parallel execution for independent operations — launch multiple agents simultaneously.
+
+### Documentation Flow
+
+When the user says "documentar" or "documentación":
+1. Ask: code or specifications?
+2. If **specifications**: invoke **documentador** → writes to `Documentacion/` only
+3. After docs are complete: ask if the user wants to implement
+4. If **yes**: invoke the corresponding agent (api-developer, frontend-developer, devops, qa-senior)
+5. Each agent does ONE thing and delegates the next step explicitly
 
 ## Security Guidelines
 

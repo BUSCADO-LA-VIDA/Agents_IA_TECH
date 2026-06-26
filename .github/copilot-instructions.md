@@ -94,6 +94,9 @@ Una vez que la documentación de especificaciones está completa, el `documentad
 > "La documentación está lista en `Documentacion/` con las tareas pendientes en `pendientes-implementacion.md`. ¿Querés que **implemente** lo documentado ahora?"
 
 ### Paso 5: Implementación (solo si el usuario dice sí)
+
+El agente implementador **siempre empieza leyendo `Documentacion/pendientes-implementacion.md`** — ese archivo contiene la lista exacta de cambios a implementar, sin necesidad de leer todas las especificaciones.
+
 | Si aplica... | Invocar agente |
 |--------------|---------------|
 | Backend / APIs / Modelos | **`api-developer`** |
@@ -102,6 +105,12 @@ Una vez que la documentación de especificaciones está completa, el `documentad
 | Tests | **`qa-senior`** |
 | No sabés cuál | Preguntá al usuario qué área implementar |
 
+Cada agente implementador debe:
+1. Leer `Documentacion/pendientes-implementacion.md` para obtener las tareas
+2. Implementar cada tarea siguiendo la especificación referenciada (si necesita más detalle, leer el archivo indicado en "Basado en")
+3. Marcar la tarea como `[x]` completada en `pendientes-implementacion.md`, moviendo el registro a la sección "Completadas"
+4. Al terminar, delegar al siguiente agente si corresponde
+
 ### Reglas de delegación entre agentes
 
 - **Cada agente hace UNA cosa** y nada más
@@ -109,6 +118,22 @@ Una vez que la documentación de especificaciones está completa, el `documentad
 - **El implementador** solo escribe código, nunca documentación de especificaciones
 - **No mezcles responsabilidades** — si hace falta otro agente, invocalo explícitamente
 - **Autodelegación**: cuando un agente termine su tarea, debe decir "Listo. El siguiente paso debería hacerlo [nombre del agente]." para que el flujo continúe automáticamente
+
+### `pendientes-implementacion.md` — el puente entre docs y código
+
+Este archivo es el **único punto de comunicación** entre las fases documental y de implementación. **Todos los agentes lo actualizan**, cada uno en su rol:
+
+| Agente | Cuándo actualiza `pendientes-implementacion.md` |
+|--------|--------------------------------------------------|
+| **`arquitecto`** | Al crear ADRs o decisiones de diseño → agrega tareas de implementación derivadas |
+| **`documentador`** | Al crear/actualizar specs → agrega tareas concretas para el developer |
+| **`security-auditor`** | Al encontrar vulnerabilidades en el diseño → agrega tareas de mitigación |
+| **Implementador** (`api-developer`, `frontend-developer`, `devops`, `qa-senior`) | Marca tareas como `[x]` al implementarlas y las mueve a "Completadas". Si encuentra un error/bug, lo registra como nueva tarea. |
+
+**Reglas de uso:**
+- El implementador **siempre lee `pendientes-implementacion.md` primero** para saber qué hacer
+- Si durante la implementación **surge un error o bug** y no hay especificación que lo cubra → el implementador **NO improvisa**: crea una tarea en el archivo indicando que se necesita una spec, y **pide al `documentador` o `arquitecto`** que la genere
+- El usuario puede decir **"implementa los cambios"** y el agente va directo a este archivo, sin recorrer todas las specs
 
 ### Diagrama del flujo
 

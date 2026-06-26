@@ -1,7 +1,11 @@
 # Pendientes de Implementación
 
-> Archivo generado y mantenido por los agentes documentales (`arquitecto`, `documentador`).
-> Contiene la lista de tareas concretas que el developer debe implementar basado en las especificaciones documentadas.
+> **Puente vivo entre documentación e implementación.**
+> Mantenido por **todos los agentes** — cada uno en su rol:
+> - **Documentales** (`arquitecto`, `documentador`, `security-auditor`) agregan tareas nuevas.
+> - **Implementadores** (`api-developer`, `frontend-developer`, `devops`, `qa-senior`) marcan como completadas y reportan bugs.
+> - **Si hay un error sin spec** → el implementador crea la tarea y pide al documentador que la especifique (nunca improvisa).
+> El implementador lo lee **primero** para saber exactamente qué hacer, sin recorrer todas las specs.
 
 ## Formato de cada tarea
 
@@ -15,14 +19,22 @@
 
 ---
 
-## Tareas pendientes
+## ⏳ Tareas pendientes
 
 *(El documentador agrega aquí las tareas después de cada fase documental)*
 
 ---
 
-## Historial de cambios
+## ✅ Tareas completadas
 
-| Fecha | Documentador | Descripción |
-|-------|-------------|-------------|
+| Fecha | Tarea | Implementador |
+|-------|-------|---------------|
 | | | |
+
+---
+
+## 📋 Historial de cambios del documento
+
+| Fecha | Quién | Descripción |
+|-------|-------|-------------|
+| 2026-06-26 | system | Creación inicial del archivo |

@@ -46,6 +46,10 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host " OK" -ForegroundColor Green
 
+# Definir rutas fuente
+$sourceGithub = Join-Path $tempDir ".github"
+$sourceDocs   = Join-Path $tempDir "Documentacion"
+
 # 2b. Capturar version del repo central
 $commitHash = (git -C $tempDir rev-parse --short HEAD 2>$null)
 $commitDate = (git -C $tempDir log -1 --format=%ci 2>$null)
@@ -69,7 +73,6 @@ if ((Test-Path $sourceScript) -and ((Get-FileHash $sourceScript).Hash -ne (Get-F
 }
 
 # 3. Sincronizar .github/ — sobreescribe siempre
-$sourceGithub = Join-Path $tempDir ".github"
 if (-not (Test-Path $sourceGithub)) {
     Write-Error "El repo clonado no contiene la carpeta .github/"
     Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -81,7 +84,6 @@ robocopy "$sourceGithub" "$target" /E /NDL /NFL /NJH /NJS >$null 2>&1
 Write-Host " OK" -ForegroundColor Green
 
 # 4. Sincronizar Documentacion/ — solo crea archivos faltantes, no modifica existentes
-$sourceDocs = Join-Path $tempDir "Documentacion"
 $targetDocs = Join-Path $PSScriptRoot "Documentacion"
 
 if (Test-Path $sourceDocs) {

@@ -18,6 +18,7 @@ This is a **production-ready AI coding plugin** providing 67 specialized agents,
 |-------|---------|-------------|
 | planner | Implementation planning | Complex features, refactoring |
 | architect | System design and scalability | Architectural decisions |
+| pensador | Research + orchestration agent | Entry point for "documentar". Navigates external sources, filters info, orchestrates documental agents |
 | documentador | Documentation (ADRs, specs, flows) | Writing/updating docs in `Documentacion/` |
 | tdd-guide | Test-driven development | New features, bug fixes |
 | code-reviewer | Code quality and maintainability | After writing/modifying code |

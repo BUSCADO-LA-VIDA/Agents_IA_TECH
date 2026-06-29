@@ -1,14 +1,15 @@
 <#
 .SYNOPSIS
-    Sincroniza .github/ desde Agents_IA_TECH sin tocar Documentacion/ del proyecto.
+    Sincroniza .github/ y Documentacion/ desde Agents_IA_TECH al proyecto local.
 .DESCRIPTION
-    Descarga agentes, skills y prompts actualizados desde el repo central
-    a la carpeta .github/ del proyecto actual. Documentacion/ nunca se modifica.
+    Descarga agentes, skills y prompts actualizados desde el repo central.
+    .github/ se sobreescribe siempre con la ultima version.
+    Documentacion/ solo crea estructura y archivos faltantes, nunca modifica existentes.
     El script debe estar en la raiz del proyecto (junto a la carpeta .github/).
 .EXAMPLE
     .\sync-agents.ps1
 .NOTES
-    Usa $env:TEMP para la clonacion temporal, nunca toca Documentacion/.
+    Usa $env:TEMP para la clonacion temporal.
 #>
 
 $repoUrl  = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH.git"
@@ -45,22 +46,70 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host " OK" -ForegroundColor Green
 
-# 3. Copiar .github/ del repo clonado al proyecto
-$source = Join-Path $tempDir ".github"
-if (-not (Test-Path $source)) {
+# 2b. Capturar version del repo central
+$commitHash = (git -C $tempDir rev-parse --short HEAD 2>$null)
+$commitDate = (git -C $tempDir log -1 --format=%ci 2>$null)
+$syncInfo = @{
+    repo     = $repoUrl
+    commit   = $commitHash
+    date     = $commitDate
+    syncDate = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+}
+$syncInfo | ConvertTo-Json | Set-Content (Join-Path $sourceGithub "sync-info.json")
+Write-Host "Version: $commitHash ($commitDate)" -ForegroundColor Cyan
+
+# 3. Sincronizar .github/ — sobreescribe siempre
+$sourceGithub = Join-Path $tempDir ".github"
+if (-not (Test-Path $sourceGithub)) {
     Write-Error "El repo clonado no contiene la carpeta .github/"
     Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
     exit 1
 }
 
-Write-Host "Copiando a .github/..." -NoNewline
-robocopy "$source" "$target" /E /NDL /NFL /NJH /NJS >$null 2>&1
+Write-Host "Sincronizando .github/ (sobreescribe)..." -NoNewline
+robocopy "$sourceGithub" "$target" /E /NDL /NFL /NJH /NJS >$null 2>&1
 Write-Host " OK" -ForegroundColor Green
 
-# 4. Limpiar temp (Force para archivos readonly de git)
+# 4. Sincronizar Documentacion/ — solo crea archivos faltantes, no modifica existentes
+$sourceDocs = Join-Path $tempDir "Documentacion"
+$targetDocs = Join-Path $PSScriptRoot "Documentacion"
+
+if (Test-Path $sourceDocs) {
+    Write-Host "Sincronizando Documentacion/ (solo faltantes)..." -NoNewline
+    
+    $addedCount = 0
+    
+    Get-ChildItem $sourceDocs -Recurse -File | ForEach-Object {
+        $relativePath = $_.FullName.Substring($sourceDocs.Length + 1)
+        $destPath = Join-Path $targetDocs $relativePath
+        
+        if (-not (Test-Path $destPath)) {
+            $destDir = Split-Path $destPath -Parent
+            if (-not (Test-Path $destDir)) {
+                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            }
+            Copy-Item $_.FullName -Destination $destPath
+            $addedCount++
+        }
+    }
+    
+    if ($addedCount -gt 0) {
+        Write-Host " OK (+$addedCount archivos nuevos)" -ForegroundColor Green
+    } else {
+        Write-Host " OK (todo actualizado)" -ForegroundColor Green
+    }
+}
+
+# 5. Limpiar temp (Force para archivos readonly de git)
 Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 
-# 5. Resumen
-$count = (Get-ChildItem $target -Recurse -File).Count
-Write-Host "`nSync completado. $count archivos en .github/" -ForegroundColor Green
-Write-Host "Documentacion/ NO fue modificada." -ForegroundColor Yellow
+# 6. Resumen
+$countGithub = (Get-ChildItem $target -Recurse -File).Count
+Write-Host "`nSync completado." -ForegroundColor Green
+Write-Host "  Commit:   $commitHash ($commitDate)" -ForegroundColor Cyan
+Write-Host "  .github/: $countGithub archivos (sobreescrito)" -ForegroundColor Green
+if (Test-Path $targetDocs) {
+    $countDocs = (Get-ChildItem $targetDocs -Recurse -File).Count
+    Write-Host "  Documentacion/: $countDocs archivos (solo faltantes agregados)" -ForegroundColor Yellow
+}
+Write-Host "`n  Verifica cambios con: git diff .github/" -ForegroundColor Gray

@@ -35,6 +35,14 @@ The ladder runs **after** you understand the problem: read the task, trace the r
 - No in-place mutation — always create new objects
 - No hardcoded values — use constants or .env
 
+## Attribution & Legal Compliance
+
+When using patterns, concepts, or code from external projects:
+- **Always document the source** in `Documentacion/referencias.md` with project name, URL, and license
+- Never claim external work as original — maintain proper attribution
+- Respect all licenses (MIT, GPL, Apache, etc.)
+- When in doubt about license compatibility, ask before using
+
 ## Workflow
 
 1. **Research first** — search existing implementations before writing anything new
@@ -57,26 +65,36 @@ Preguntá literalmente:
 | Si dice... | Acción |
 |------------|--------|
 | **"código"** | El **developer correspondiente** (api-developer, frontend-developer, etc.) documenta inline: docstrings, comentarios, README.md técnico. No toques `Documentacion/`. |
-| **"especificaciones"** | Invocá al agente **`documentador`** vía `runSubagent`. El Documentador solo escribe en `Documentacion/` y `.github/`. |
-| **"ambos"** | Primero invocá al **`documentador`** para especificaciones, luego el **developer** documenta el código inline. |
+| **"especificaciones"** | Invocá al agente **`pensador`** vía `runSubagent`. El Pensador analiza, navega fuentes externas si es necesario, y orquesta la fase documental. |
+| **"ambos"** | Primero invocá al **`pensador`** para orquestar las especificaciones, luego el **developer** documenta el código inline. |
+
+### Paso 2b: El Pensador — navegación, generación y validación de specs
+Antes de lanzar la fase documental, el **`pensador`**:
+- **Spec generation**: convierte lenguaje natural en specs estructuradas
+- **Spec validation**: valida estructura, consistencia y completitud de las specs generadas
+- **Navega fuentes externas** (docs oficiales, APIs, repositorios, estándares) para recopilar información
+- **Filtra y resume** la información relevante para el contexto del proyecto
+- **Pasa la información filtrada** a los agentes documentales (`arquitecto`, `documentador`) que no tienen capacidad de navegación
+- **Decide** qué agentes documentales se necesitan y en qué orden
 
 ### Paso 3: Fase Documental — varios agentes, cada uno en su competencia
 Dependiendo del alcance, se invocan uno o más agentes en este orden:
 
 | Orden | Agente | Cuándo invocarlo |
 |-------|--------|------------------|
-| 1º | **`arquitecto`** | Si hay decisiones de arquitectura, estructura, patrones o trade-offs que evaluar. También genera **diagramas de diseño** (Mermaid). |
-| 2º | **`documentador`** | Siempre — para escribir specs, flujos, ADRs y convertir decisiones en documentos |
+| 1º | **`arquitecto`** | Si hay decisiones de arquitectura, estructura, patrones o trade-offs que evaluar. Genera **diagramas de diseño** (Mermaid). Define **spec linking** (trazabilidad entre specs) y **guardrails** (restricciones que el código debe cumplir). |
+| 2º | **`documentador`** | Siempre — escribe specs, flujos, ADRs con **template system** (plantillas por tipo: API, UI, DB). Convierte decisiones en documentos y specs en **plan de implementación** (spec → plan). Mantiene **spec versioning** (control de versiones y diff entre specs). Puede navegar fuentes externas. |
 | 3º | **`security-auditor`** | Solo si el diseño tiene implicaciones de seguridad (autenticación, datos sensibles, etc.) |
 
 Cada agente documental debe:
 1. Leer `Documentacion/00-indice.md` primero para entender el estado actual
-2. Crear/actualizar archivos en `Documentacion/` (ADRs en `adr/`, specs en `specs/`, flujos, diagramas)
-3. Actualizar `Documentacion/00-indice.md` con las nuevas entradas
-4. **NO tocar código fuente** (`src/`, `app/`, `controllers/`, `models/`, `routes/`, etc.) — el Documentador solo escribe **documentación**
-5. Si el usuario pide un cambio, interpretarlo como cambio en la **documentación**, no en el código
-6. Al terminar, crear/actualizar `Documentacion/pendientes-implementacion.md` con la lista de tareas concretas para el developer (qué implementar, en qué archivos, basado en qué specs)
-7. Delegar explícitamente: "Listo. El siguiente paso debería hacerlo [siguiente agente]."
+2. **Investigar fuentes externas** si es necesario (docs oficiales, APIs de referencia, repositorios, estándares) antes de documentar
+3. Crear/actualizar archivos en `Documentacion/` (ADRs en `adr/`, specs en `specs/`, flujos, diagramas)
+4. Actualizar `Documentacion/00-indice.md` con las nuevas entradas
+5. **NO tocar código fuente** (`src/`, `app/`, `controllers/`, `models/`, `routes/`, etc.) — el Documentador solo escribe **documentación**
+6. Si el usuario pide un cambio, interpretarlo como cambio en la **documentación**, no en el código
+7. Al terminar, crear/actualizar `Documentacion/pendientes-implementacion.md` con la lista de tareas concretas para el developer (qué implementar, en qué archivos, basado en qué specs)
+8. Delegar explícitamente: "Listo. El siguiente paso debería hacerlo [siguiente agente]."
 
 **Regla**: si el alcance es solo documentar una spec simple, basta con el `documentador`. Si hay decisiones arquitectónicas de por medio, primero va el `arquitecto`.
 
@@ -108,8 +126,11 @@ El agente implementador **siempre empieza leyendo `Documentacion/pendientes-impl
 Cada agente implementador debe:
 1. Leer `Documentacion/pendientes-implementacion.md` para obtener las tareas
 2. Implementar cada tarea siguiendo la especificación referenciada (si necesita más detalle, leer el archivo indicado en "Basado en")
-3. Marcar la tarea como `[x]` completada en `pendientes-implementacion.md`, moviendo el registro a la sección "Completadas"
-4. Al terminar, delegar al siguiente agente si corresponde
+3. Aplicar **spec → code**: generar código directamente desde la spec, respetando los **guardrails** definidos por el arquitecto
+4. Manejar **multi-file orchestration**: cuando una tarea toca varios archivos, seguir el plan de implementación definido en la spec
+5. Ejecutar **feedback loop**: validar el código implementado contra la spec original antes de marcar como completado
+6. Marcar la tarea como `[x]` completada en `pendientes-implementacion.md`, moviendo el registro a la sección "Completadas"
+7. Al terminar, delegar al siguiente agente si corresponde
 
 ### Reglas de delegación entre agentes
 
@@ -129,7 +150,7 @@ Este archivo es el **único punto de comunicación** entre las fases documental 
 | **`documentador`** | Al crear/actualizar specs → agrega tareas concretas para el developer |
 | **`security-auditor`** | Al encontrar vulnerabilidades en el diseño → agrega tareas de mitigación |
 | **Implementador** (`api-developer`, `frontend-developer`, `devops`) | Marca tareas como `[x]` al implementarlas y las mueve a "Completadas". Si encuentra un error/bug, lo registra como nueva tarea. |
-| **`qa-senior`** | **Solo escribe tests automáticos** (unitarios, integración, API, E2E con Playwright navegando la app). Puede conectarse por SSH y ejecutar queries a bases de datos para diagnosticar. Crea tests repetibles por cada issue. **NO modifica código de aplicación.** Si encuentra un bug, lo documenta en `pendientes-implementacion.md` con el detalle del error y pasa la tarea al desarrollador correspondiente. |
+| **`qa-senior`** | **Solo escribe tests automáticos** (unitarios, integración, API, E2E con Playwright navegando la app). Puede conectarse por SSH y ejecutar queries a bases de datos para diagnosticar. Crea tests repetibles por cada issue. Ejecuta **feedback loop**: valida código implementado contra la spec. **NO modifica código de aplicación.** Si encuentra un bug, lo documenta en `pendientes-implementacion.md` con el detalle del error y pasa la tarea al desarrollador correspondiente. |
 
 **Reglas de uso:**
 - El implementador **siempre lee `pendientes-implementacion.md` primero** para saber qué hacer
@@ -143,7 +164,7 @@ Este archivo es el **único punto de comunicación** entre las fases documental 
 flowchart TD
     A[Usuario: "documentar"] --> B{¿Código o Especificaciones?}
     B -->|Código| C[Documentar inline\ndocstrings/comentarios]
-    B -->|Especificaciones| D[Iniciar fase documental]
+    B -->|Especificaciones| D[pensador\nNavega, filtra, orquesta]
     B -->|Ambos| D
     
     D --> E{¿Decisiones\nde arquitectura?}

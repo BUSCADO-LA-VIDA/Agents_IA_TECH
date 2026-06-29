@@ -58,6 +58,16 @@ $syncInfo = @{
 $syncInfo | ConvertTo-Json | Set-Content (Join-Path $sourceGithub "sync-info.json")
 Write-Host "Version: $commitHash ($commitDate)" -ForegroundColor Cyan
 
+# 2c. Auto-actualizar este script desde el repo central
+$sourceScript = Join-Path $tempDir "sync-agents.ps1"
+$thisScript = $PSCommandPath
+if ((Test-Path $sourceScript) -and ((Get-FileHash $sourceScript).Hash -ne (Get-FileHash $thisScript).Hash)) {
+    Copy-Item $sourceScript -Destination $thisScript -Force
+    Write-Host "Script actualizado. Re-ejecutando..." -ForegroundColor Yellow
+    & $thisScript
+    exit 0
+}
+
 # 3. Sincronizar .github/ — sobreescribe siempre
 $sourceGithub = Join-Path $tempDir ".github"
 if (-not (Test-Path $sourceGithub)) {

@@ -1,184 +1,58 @@
-# Everything Claude Code (ECC) — Agent Instructions
+# AGENTS.md
 
-This is a **production-ready AI coding plugin** providing 67 specialized agents, 271 skills, 92 commands, and automated hook workflows for software development.
+> **What this repo is**: a portable kit of agents, skills, and prompts for GitHub Copilot (VS Code) and OpenCode. It is **not an application** — there is no `src/`, no build, no tests, no runtime. All code here is configuration: `.md` files that define agent behavior.
 
-**Version:** 2.0.0
+## Core facts an agent must know
 
-## Core Principles
+- **Dual-tool target**: `.github/` is for GitHub Copilot; `.opencode/` is for OpenCode. Both define the same 8 agents + 6 slash commands, in parallel structures. Keep them in sync when editing agent definitions.
+- **Agent road assignment** — 8 agents, two tiers:
 
-1. **Agent-First** — Delegate to specialized agents for domain tasks
-2. **Test-Driven** — Write tests before implementation, 80%+ coverage required
-3. **Security-First** — Never compromise on security; validate all inputs
-4. **Immutability** — Always create new objects, never mutate existing ones
-5. **Plan Before Execute** — Plan complex features before writing code
+  | Tier | Agents | Can write code? |
+  |------|--------|:---:|
+  | Documental | `pensador`, `arquitecto`, `documentador`, `security-auditor` | ❌ only `Documentacion/`, `.github/`, `.opencode/`, `README.md` |
+  | Implementador | `api-developer`, `frontend-developer`, `devops`, `qa-senior` | ✅ app code |
 
-## Available Agents
+- **`Documentacion/` is project-local, not part of the kit**. `sync-agents.ps1` never overwrites existing files there — only creates missing ones. Treat it as user-owned state.
+- **`pendientes-implementacion.md`** is the single bridge between documentation and implementation phases. Implementadores read it first; QA writes bugs back to it (never fixes them).
 
-| Agent | Purpose | When to Use |
-|-------|---------|-------------|
-| planner | Implementation planning | Complex features, refactoring |
-| architect | System design and scalability | Architectural decisions |
-| pensador | Research + orchestration agent | Entry point for "documentar". Navigates external sources, filters info, orchestrates documental agents |
-| documentador | Documentation (ADRs, specs, flows) | Writing/updating docs in `Documentacion/` |
-| tdd-guide | Test-driven development | New features, bug fixes |
-| code-reviewer | Code quality and maintainability | After writing/modifying code |
-| security-reviewer | Vulnerability detection | Before commits, sensitive code |
-| spec-miner | Brownfield spec extraction | Onboarding brownfield projects to spec-driven development |
-| build-error-resolver | Fix build/type errors | When build fails |
-| e2e-runner | End-to-end Playwright testing | Critical user flows |
-| refactor-cleaner | Dead code cleanup | Code maintenance |
-| doc-updater | Documentation and codemaps | Updating docs |
-| cpp-reviewer | C/C++ code review | C and C++ projects |
-| cpp-build-resolver | C/C++ build errors | C and C++ build failures |
-| fsharp-reviewer | F# functional code review | F# projects |
-| docs-lookup | Documentation lookup via Context7 | API/docs questions |
-| go-reviewer | Go code review | Go projects |
-| go-build-resolver | Go build errors | Go build failures |
-| kotlin-reviewer | Kotlin code review | Kotlin/Android/KMP projects |
-| kotlin-build-resolver | Kotlin/Gradle build errors | Kotlin build failures |
-| database-reviewer | PostgreSQL/Supabase specialist | Schema design, query optimization |
-| python-reviewer | Python code review | Python projects |
-| django-reviewer | Django code review | Django apps, DRF APIs, ORM, migrations |
-| django-build-resolver | Django build, migration, and setup errors | Django startup, dependency, migration, collectstatic failures |
-| java-reviewer | Java and Spring Boot code review | Java/Spring Boot projects |
-| java-build-resolver | Java/Maven/Gradle build errors | Java build failures |
-| loop-operator | Autonomous loop execution | Run loops safely, monitor stalls, intervene |
-| harness-optimizer | Harness config tuning | Reliability, cost, throughput |
-| rust-reviewer | Rust code review | Rust projects |
-| rust-build-resolver | Rust build errors | Rust build failures |
-| pytorch-build-resolver | PyTorch runtime/CUDA/training errors | PyTorch build/training failures |
-| mle-reviewer | Production ML pipeline review | ML pipelines, evals, serving, monitoring, rollback |
-| typescript-reviewer | TypeScript/JavaScript code review | TypeScript/JavaScript projects |
+## Commands
 
-## Agent Orchestration
+```powershell
+# Sync .github/ from upstream (overwrites .github/, creates-only in Documentacion/)
+.\sync-agents.ps1
 
-Use agents proactively without user prompt:
-- Complex feature requests → **planner**
-- Code just written/modified → **code-reviewer**
-- Bug fix or new feature → **tdd-guide**
-- Architectural decision → **architect**
-- Documentation request → **preguntar: ¿código o especificaciones?** → **documentador** (si especificaciones)
-- Security-sensitive code → **security-reviewer**
-- Brownfield project onboarding → **spec-miner**
-- Autonomous loops / loop monitoring → **loop-operator**
-- Harness config reliability and cost → **harness-optimizer**
-
-Use parallel execution for independent operations — launch multiple agents simultaneously.
-
-### Documentation Flow
-
-When the user says "documentar" or "documentación":
-1. Ask: code or specifications?
-2. If **specifications**: invoke **documentador** → writes to `Documentacion/` only
-3. After docs are complete: ask if the user wants to implement
-4. If **yes**: invoke the corresponding agent (api-developer, frontend-developer, devops, qa-senior)
-5. Each agent does ONE thing and delegates the next step explicitly
-
-## Security Guidelines
-
-**Before ANY commit:**
-- No hardcoded secrets (API keys, passwords, tokens)
-- All user inputs validated
-- SQL injection prevention (parameterized queries)
-- XSS prevention (sanitized HTML)
-- CSRF protection enabled
-- Authentication/authorization verified
-- Rate limiting on all endpoints
-- Error messages don't leak sensitive data
-
-**Secret management:** NEVER hardcode secrets. Use environment variables or a secret manager. Validate required secrets at startup. Rotate any exposed secrets immediately.
-
-**If security issue found:** STOP → use security-reviewer agent → fix CRITICAL issues → rotate exposed secrets → review codebase for similar issues.
-
-## Coding Style
-
-**Immutability (CRITICAL):** Always create new objects, never mutate. Return new copies with changes applied.
-
-**File organization:** Many small files over few large ones. 200-400 lines typical, 800 max. Organize by feature/domain, not by type. High cohesion, low coupling.
-
-**Error handling:** Handle errors at every level. Provide user-friendly messages in UI code. Log detailed context server-side. Never silently swallow errors.
-
-**Input validation:** Validate all user input at system boundaries. Use schema-based validation. Fail fast with clear messages. Never trust external data.
-
-**Code quality checklist:**
-- Functions small (<50 lines), files focused (<800 lines)
-- No deep nesting (>4 levels)
-- Proper error handling, no hardcoded values
-- Readable, well-named identifiers
-
-## Testing Requirements
-
-**Minimum coverage: 80%**
-
-Test types (all required):
-1. **Unit tests** — Individual functions, utilities, components
-2. **Integration tests** — API endpoints, database operations
-3. **E2E tests** — Critical user flows
-
-**TDD workflow (mandatory):**
-1. Write test first (RED) — test should FAIL
-2. Write minimal implementation (GREEN) — test should PASS
-3. Refactor (IMPROVE) — verify coverage 80%+
-
-Troubleshoot failures: check test isolation → verify mocks → fix implementation (not tests, unless tests are wrong).
-
-## Development Workflow
-
-1. **Plan** — Use planner agent, identify dependencies and risks, break into phases
-2. **TDD** — Use tdd-guide agent, write tests first, implement, refactor
-3. **Review** — Use code-reviewer agent immediately, address CRITICAL/HIGH issues
-4. **Capture knowledge in the right place**
-   - Personal debugging notes, preferences, and temporary context → auto memory
-   - Team/project knowledge (architecture decisions, API changes, runbooks) → the project's existing docs structure
-   - If the current task already produces the relevant docs or code comments, do not duplicate the same information elsewhere
-   - If there is no obvious project doc location, ask before creating a new top-level file
-5. **Commit** — Conventional commits format, comprehensive PR summaries
-
-## Workflow Surface Policy
-
-- `skills/` is the canonical workflow surface.
-- New workflow contributions should land in `skills/` first.
-- `commands/` is a legacy slash-entry compatibility surface and should only be added or updated when a shim is still required for migration or cross-harness parity.
-
-## Git Workflow
-
-**Commit format:** `<type>: <description>` — Types: feat, fix, refactor, docs, test, chore, perf, ci
-
-**PR workflow:** Analyze full commit history → draft comprehensive summary → include test plan → push with `-u` flag.
-
-## Architecture Patterns
-
-**API response format:** Consistent envelope with success indicator, data payload, error message, and pagination metadata.
-
-**Repository pattern:** Encapsulate data access behind standard interface (findAll, findById, create, update, delete). Business logic depends on abstract interface, not storage mechanism.
-
-**Skeleton projects:** Search for battle-tested templates, evaluate with parallel agents (security, extensibility, relevance), clone best match, iterate within proven structure.
-
-## Performance
-
-**Context management:** Avoid last 20% of context window for large refactoring and multi-file features. Lower-sensitivity tasks (single edits, docs, simple fixes) tolerate higher utilization.
-
-**Build troubleshooting:** Use build-error-resolver agent → analyze errors → fix incrementally → verify after each fix.
-
-## Project Structure
-
-```
-agents/          — 67 specialized subagents
-skills/          — 271 workflow skills and domain knowledge
-commands/        — 92 slash commands
-hooks/           — Trigger-based automations
-rules/           — Always-follow guidelines (common + per-language)
-scripts/         — Cross-platform Node.js utilities
-mcp-configs/     — 14 MCP server configurations
-tests/           — Test suite
+# Security scan (also runs in CI on .github/ changes)
+npx ecc-agentshield scan
 ```
 
-`commands/` remains in the repo for compatibility, but the long-term direction is skills-first.
+No `npm install`, no build, no tests — this repo has no runtime dependencies. `.opencode/package.json` only declares `@opencode-ai/plugin`.
 
-## Success Metrics
+## Where instruction sources live
 
-- All tests pass with 80%+ coverage
-- No security vulnerabilities
-- Code is readable and maintainable
-- Performance is acceptable
-- User requirements are met
+- `opencode.json` → OpenCode config; `instructions` points to `.github/copilot-instructions.md`.
+- **`.github/copilot-instructions.md` is the canonical base-rules file** — it is duplicated into `AGENTS.md` and `copilot-instructions.md` intentionally. When updating base rules, edit `copilot-instructions.md` first; it is the source the tools actually load.
+- `.opencode/config.json` may contain credentials (NVIDIA API key). Do not print, commit, or echo it.
+
+## Editing agent definitions
+
+- Same agent exists in two places: `.github/agents/<name>.agent.md` (Copilot) and `.opencode/agents/<name>.md` (OpenCode). Update both unless the change is tool-specific.
+- Slash commands: `.github/prompts/<name>.prompt.md` ↔ `.opencode/commands/<name>.md`.
+- Skills live only in `.github/skills/<category>/<name>/SKILL.md` (77 total) — no OpenCode mirror.
+
+## Language protocol
+
+Think in English, respond in Spanish, code/docs in English. Spanish domain terms keep their original name.
+
+## Workflow conventions
+
+- **Conventional commits** (`feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`).
+- **Ponytail ladder**: YAGNI → reuse → stdlib → native feature → dependency → one-liner → then write minimum. `ponytail:` marks intentional simplifications.
+- **Design-first flow**: when the user says "documentar", ask "¿código o especificaciones?" — código → developer documents inline; especificaciones → `pensador` orchestrates `arquitecto` → `documentador` → (optional) `security-auditor`, then asks before implementing. Full flowchart in `copilot-instructions.md`.
+- Functions < 50 lines, files < 400 lines, no nesting > 4 levels, no in-place mutation.
+
+## What NOT to do
+
+- Do not treat this repo as an app — no app entrypoints, no `src/` to trace.
+- Do not edit `.opencode/config.json` credentials.
+- Do not overwrite `Documentacion/` files during sync.
+- Implementadores never improvise beyond specs — if a bug has no spec, they add a task to `pendientes-implementacion.md` and request the spec from a documental agent.

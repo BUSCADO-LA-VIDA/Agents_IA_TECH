@@ -4,13 +4,14 @@
 
 ## Core facts an agent must know
 
-- **Dual-tool target**: `.github/` is for GitHub Copilot; `.opencode/` is for OpenCode. Both define the same 8 agents + 6 slash commands, in parallel structures. Keep them in sync when editing agent definitions.
-- **Agent road assignment** — 8 agents, two tiers:
+- **Dual-tool target**: `.github/` is for GitHub Copilot; `.opencode/` is for OpenCode. Both define the same 9 agents + 6 slash commands, in parallel structures. Keep them in sync when editing agent definitions.
+- **Agent road assignment** — 9 agents, three tiers:
 
   | Tier | Agents | Can write code? |
   |------|--------|:---:|
   | Documental | `pensador`, `arquitecto`, `documentador`, `security-auditor` | ❌ only `Documentacion/`, `.github/`, `.opencode/`, `README.md` |
   | Implementador | `api-developer`, `frontend-developer`, `devops`, `qa-senior` | ✅ app code |
+  | Tooling | `gitflow` | ✅ git operations, branching, PRs, reverts |
 
 - **`Documentacion/` is project-local, not part of the kit**. `sync-agents.ps1` never overwrites existing files there — only creates missing ones. Treat it as user-owned state.
 - **`pendientes-implementacion.md`** is the single bridge between documentation and implementation phases. Implementadores read it first; QA writes bugs back to it (never fixes them).

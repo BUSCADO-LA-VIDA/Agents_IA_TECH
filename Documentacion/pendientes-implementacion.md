@@ -24,7 +24,7 @@
 
 ## ⏳ Tareas pendientes
 
-*(El documentador agrega aquí las tareas después de cada fase documental)*
+*(El Pensador agrega tareas aquí cuando el usuario confirma un plan, antes de ejecutar la fase documental)*
 
 ---
 

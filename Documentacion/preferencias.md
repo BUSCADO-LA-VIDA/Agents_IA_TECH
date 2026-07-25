@@ -10,6 +10,8 @@
 | 2026-07-25 | **Por defecto, subir a la rama original (master/main)**. No crear ramas nuevas sin preguntar explícitamente. | git |
 | 2026-07-25 | **Toda decisión del usuario debe guardarse en un archivo.** Sin archivo no hay memoria. | workflow |
 | 2026-07-25 | **Los comandos de git deben usar sintaxis de PowerShell** (`#` para comentarios, no `::`). | git |
+| 2026-07-25 | **Todos los commits deben incluir la nota de atribución de IA al final del cuerpo.** Texto oficial registrado en el agente gitflow. | git |
+| 2026-07-25 | **El inglés no es mi lengua nativa** — me apoyo en IA para redactar y comunicar ideas. | workflow |
 
 ## Historial de cambios
 

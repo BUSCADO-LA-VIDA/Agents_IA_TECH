@@ -4,28 +4,60 @@
 > Este archivo es la **memoria del proyecto** para los agentes. Lo leen primero para entender el contexto sin escanear todo. Los agentes documentales lo mantienen actualizado automáticamente.
 
 ## Stack
-<!-- Completar con el stack del proyecto -->
-- Framework:
-- Lenguaje:
-- Base de datos:
-- Infraestructura:
+- Framework: (kit de agentes — sin framework de aplicación)
+- Lenguaje: Markdown / YAML
+- Base de datos: (ninguna — es configuración de agentes)
+- Infraestructura: GitHub Copilot + OpenCode
 
 ## Estructura del proyecto
 <!-- Completar con las carpetas principales -->
-- `src/` — Código fuente
-- `Documentacion/` — Documentación del proyecto
-  - `00-indice.md` — 📋 Este archivo
-  - `idioma.md` — 🌐 Configuración de idioma para cada tipo de contenido
-  - `preferencias.md` — 👤 Preferencias del usuario (memoria del proyecto)
-  - `preferencias-git.md` — 🏷️ Preferencias de flujo git del usuario
-  - `roadmap.md` — 🗺️ Backlog de evolutivos e ideas futuras
-  - `pendientes-implementacion.md` — 📋 Puente entre docs e implementación
-  - `soluciones-conocidas.md` — 📚 Repositorio de soluciones a problemas recurrentes
-  - `bitacoras/` — 📝 Bitácoras de intervenciones del agente solucionador
-  - `specs/` — 📐 Especificaciones de agentes y features
-    - `agente-solucionador.md` — Spec del agente de altos privilegios
-  - `adr/` — 🏛️ Architectural Decision Records
+- `src/` — Código fuente (si aplica)
 - `.github/` — Configuración de agentes Copilot
+- `.opencode/` — Configuración de agentes OpenCode
+- `Documentacion/` — Documentación del proyecto
+
+### Estructura de `Documentacion/`
+
+```
+Documentacion/
+├── 00-indice.md              ← 📋 Este archivo (índice general)
+├── idioma.md                 ← 🌐 Configuración de idioma
+├── preferencias.md           ← 👤 Preferencias del usuario
+├── preferencias-git.md       ← 🏷️ Preferencias de flujo git
+├── referencias.md            ← 📖 Atribución de fuentes externas
+├── roadmap.md                ← 🗺️ Backlog de evolutivos
+├── pendientes-implementacion.md ← 📋 Puente entre docs y código
+├── soluciones-conocidas.md   ← 📚 Soluciones a problemas recurrentes
+├── capacidad-base.md         ← 🏗️ Catálogo central del kit de agentes
+├── memoria-proyecto.md       ← 🧠 Capacidades instaladas (plataformador)
+│
+├── agents/                   ← 📐 Specs de cada agente
+│   ├── pensador/
+│   │   └── spec.md
+│   ├── arquitecto/
+│   │   └── spec.md
+│   ├── documentador/
+│   │   └── spec.md
+│   ├── security-auditor/
+│   │   └── spec.md
+│   ├── api-developer/
+│   │   └── spec.md
+│   ├── frontend-developer/
+│   │   └── spec.md
+│   ├── devops/
+│   │   └── spec.md
+│   ├── qa-senior/
+│   │   └── spec.md
+│   ├── gitflow/
+│   │   └── spec.md
+│   ├── solucionador/
+│   │   └── spec.md
+│   └── plataformador/
+│       └── spec.md
+│
+├── bitacoras/                ← 📝 Bitácoras del solucionador
+├── adr/                      ← 🏛️ Architectural Decision Records
+```
 
 ## ADRs activos
 <!-- Listar ADRs en Documentacion/adr/ -->
@@ -49,6 +81,7 @@
 | `qa-senior` | Tests automatizados (unit, integración, E2E) | 🟢 Activo |
 | `gitflow` | Git operations, branching, PRs | 🟢 Activo |
 | `solucionador` | 🔧 Diagnóstico y solución de problemas via SSH en servidores remotos | 🟢 Activo 2026-07-25 |
+| `plataformador` | 🏗️ Auditoría, nivelación y replataformado de proyectos contra capacidad-base | 🟢 Activo 2026-07-25 |
 
 ## Convenciones del proyecto
 <!-- Completar con reglas específicas del proyecto -->

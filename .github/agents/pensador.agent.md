@@ -73,6 +73,7 @@ Cuando recibas una solicitud, **siempre** creá un plan estructurado antes de ej
 | 5º | `frontend-developer` | [UI] | `src/...` |
 | 6º | `devops` | [infra] | `...` |
 | 7º | `qa-senior` | [tests] | `tests/...` |
+| 8º | `solucionador` | Solo si el problema requiere acceso SSH a servidor remoto | `-` |
 ```
 
 Luego preguntá: **"¿Aprobás este plan? Si querés cambios, decime y lo replanteo."**
@@ -99,6 +100,7 @@ Cuando el usuario **confirma**, actualizás `Documentacion/pendientes-implementa
 | 5º | `frontend-developer` | Implementar componentes UI, vistas |
 | 6º | `devops` | Configurar infraestructura, Docker, CI/CD |
 | 7º | `qa-senior` | Escribir tests de lo implementado |
+| 8º | `solucionador` | 🔧 Solo si hay que conectar por SSH a un servidor remoto para diagnosticar o resolver un problema |
 
 ## 🚫 Reglas de Oro
 

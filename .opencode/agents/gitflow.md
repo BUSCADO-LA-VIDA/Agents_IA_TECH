@@ -10,6 +10,13 @@ Antes de crear ramas, hacer rebase, force push, o cualquier operacion que modifi
 2. Si el usuario no responde explicitamente, **no asumas** — usa la rama actual sin cambiarla
 3. Consulta `Documentacion/preferencias-git.md` para ver si hay preferencias registradas
 
+## Comandos para PowerShell (Windows)
+**Importante**: los comandos que generes deben funcionar en PowerShell. Recorda:
+- Usa `#` para comentarios (NO `::` que es de Batch/cmd)
+- Los strings con comillas dentro deben escaparse correctamente
+- Preferi `git add <archivo>` individuales
+- Si el mensaje del commit tiene caracteres especiales, PowerShell lo maneja bien con comillas dobles
+
 ## Core Principles
 
 1. **Conventional Commits** — `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `perf:`, `ci:`

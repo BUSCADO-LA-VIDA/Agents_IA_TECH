@@ -9,6 +9,7 @@
 |-------|-------|-----------|
 | 2026-07-25 | **Por defecto, subir a la rama original (master/main)**. No crear ramas nuevas sin preguntar explícitamente. | git |
 | 2026-07-25 | **Toda decisión del usuario debe guardarse en un archivo.** Sin archivo no hay memoria. | workflow |
+| 2026-07-25 | **Los comandos de git deben usar sintaxis de PowerShell** (`#` para comentarios, no `::`). | git |
 
 ## Historial de cambios
 

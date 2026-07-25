@@ -7,8 +7,9 @@ Fusion of **Ponytail** (efficiency) + **ECC** (professional workflow).
 - **Think in English** — all internal reasoning, planning, and code generation happens in English.
 - **Respond in Spanish** — final answers to the user must be in Spanish.
 - **English instructions from user**: translate them, ask if unclear, then execute and respond in Spanish.
-- **Code stays in English** — variable names, comments, commit messages, docs in English unless the project convention says otherwise (check existing code).
+- **Code stays in English** — variable names, functions, classes, comments, commit messages, docs in English unless the project convention says otherwise (check existing code).
 - **Exception**: Spanish-specific domain terms (client names, business rules, local regulations) keep their original name.
+- **Consult `Documentacion/idioma.md`** para saber el idioma exacto de cada tipo de contenido (Documentacion/, README, commits, comentarios). Ese archivo es la fuente de verdad sobre idiomas del proyecto.
 
 ## The Lazy Senior Dev Ladder (Ponytail)
 
@@ -50,6 +51,29 @@ When using patterns, concepts, or code from external projects:
 3. **Test-driven** — test before implementation; minimum 80% coverage
 4. **Review before committing** — security, quality, regressions
 5. **Conventional commits** — `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`
+
+## Persistencia del Comportamiento
+
+> Regla obligatoria: **TODO lo que el usuario decida que es transversal y sirve para futuras decisiones debe quedar en un archivo. Si tienes dudas preguntar si lo quiero para futuras decisiones** Sin excepción.
+
+### ¿Qué se guarda y dónde?
+
+| Qué guardar | Dónde |
+|-------------|-------|
+| Preferencias de usuario (flujo git, convenciones, gustos personales) | `Documentacion/preferencias.md` |
+| Decisiones de diseño y trade-offs | ADR en `Documentacion/adr/` |
+| Problemas resueltos en servidores remotos | `Documentacion/soluciones-conocidas.md` + bitácora en `Documentacion/bitacoras/` |
+| Ideas para el futuro / evolutivos | `Documentacion/roadmap.md` |
+| Cualquier decisión ad-hoc que el usuario diga "guarda esto" | `Documentacion/preferencias.md` o el archivo que corresponda |
+
+### Reglas para los agentes
+
+1. **Si el usuario expresa una preferencia** → guardala en `Documentacion/preferencias.md` inmediatamente. No esperes a que te lo pida dos veces.
+2. **Si el usuario toma una decisión de diseño** → el `arquitecto` debe crear un ADR en `Documentacion/adr/`.
+3. **Si resolvés un problema en un servidor** → el `solucionador` guarda bitácora + ofrece agregar a `soluciones-conocidas.md`.
+4. **Si el usuario menciona una idea futura** → registrala en `Documentacion/roadmap.md` (no la implementes ni la especifiques).
+5. **Estos archivos existen para que el comportamiento persista entre reinicios de VS Code.** Sin archivo, no hay memoria. Sin memoria, el agente empieza de cero.
+6. **Lee `Documentacion/preferencias.md` al inicio de cada sesión** para retomar el estado anterior.
 
 ## Documentation Workflow (Flujo de Documentación)
 

@@ -1,5 +1,5 @@
 # 📋 Índice del Proyecto
-*Última actualización: 2026-07-24*
+*Última actualización: 2026-07-25*
 
 > Este archivo es la **memoria del proyecto** para los agentes. Lo leen primero para entender el contexto sin escanear todo. Los agentes documentales lo mantienen actualizado automáticamente.
 
@@ -14,6 +14,17 @@
 <!-- Completar con las carpetas principales -->
 - `src/` — Código fuente
 - `Documentacion/` — Documentación del proyecto
+  - `00-indice.md` — 📋 Este archivo
+  - `idioma.md` — 🌐 Configuración de idioma para cada tipo de contenido
+  - `preferencias.md` — 👤 Preferencias del usuario (memoria del proyecto)
+  - `preferencias-git.md` — 🏷️ Preferencias de flujo git del usuario
+  - `roadmap.md` — 🗺️ Backlog de evolutivos e ideas futuras
+  - `pendientes-implementacion.md` — 📋 Puente entre docs e implementación
+  - `soluciones-conocidas.md` — 📚 Repositorio de soluciones a problemas recurrentes
+  - `bitacoras/` — 📝 Bitácoras de intervenciones del agente solucionador
+  - `specs/` — 📐 Especificaciones de agentes y features
+    - `agente-solucionador.md` — Spec del agente de altos privilegios
+  - `adr/` — 🏛️ Architectural Decision Records
 - `.github/` — Configuración de agentes Copilot
 
 ## ADRs activos
@@ -37,6 +48,7 @@
 | `devops` | Infraestructura, Docker, CI/CD | 🟢 Activo |
 | `qa-senior` | Tests automatizados (unit, integración, E2E) | 🟢 Activo |
 | `gitflow` | Git operations, branching, PRs | 🟢 Activo |
+| `solucionador` | 🔧 Diagnóstico y solución de problemas via SSH en servidores remotos | 🟢 Activo 2026-07-25 |
 
 ## Convenciones del proyecto
 <!-- Completar con reglas específicas del proyecto -->

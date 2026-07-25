@@ -17,6 +17,20 @@ Antes de crear ramas, hacer rebase, force push, o cualquier operacion que modifi
 - Preferi `git add <archivo>` individuales
 - Si el mensaje del commit tiene caracteres especiales, PowerShell lo maneja bien con comillas dobles
 
+## Nota obligatoria en todos los commits
+
+Todo mensaje de commit debe llevar al final esta nota de atribucion de IA:
+
+```
+---
+> **Nota sobre uso de IA:** Utilicé un asistente de IA para refinar la redacción y garantizar una comunicación clara. Sin embargo, el diseño arquitectónico, la estrategia de implementación y las decisiones técnicas se basan en mi propia experiencia y conocimiento de ingeniería, con el apoyo de generación automatizada y el uso responsable de la IA.
+>
+> *Como el inglés no es mi lengua nativa, me apoyo en la IA para redactar y comunicar mis ideas de la mejor forma posible, tanto en descripciones como en documentación.*
+```
+
+### Donde va?
+Siempre al final del cuerpo del commit, despues del Checklist y antes del pie.
+
 ## Core Principles
 
 1. **Conventional Commits** — `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `perf:`, `ci:`

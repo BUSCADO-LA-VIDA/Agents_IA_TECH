@@ -74,6 +74,37 @@ Antes de crear ramas, hacer rebase, force push, o cualquier operación que modif
 - Preferí `git add <archivo>` individuales o `git add .` cuando sea seguro
 - Si el mensaje del commit tiene caracteres especiales, PowerShell lo maneja bien con comillas dobles
 
+## 📝 Nota obligatoria en todos los commits
+
+Todo mensaje de commit debe llevar al final esta nota de atribución de IA:
+
+```
+---
+> **Nota sobre uso de IA:** Utilicé un asistente de IA para refinar la redacción y garantizar una comunicación clara. Sin embargo, el diseño arquitectónico, la estrategia de implementación y las decisiones técnicas se basan en mi propia experiencia y conocimiento de ingeniería, con el apoyo de generación automatizada y el uso responsable de la IA.
+>
+> *Como el inglés no es mi lengua nativa, me apoyo en la IA para redactar y comunicar mis ideas de la mejor forma posible, tanto en descripciones como en documentación.*
+```
+
+### ¿Dónde va?
+
+Siempre al final del cuerpo del commit, después del Checklist y antes del pie. Si el commit tiene un solo `-m`, agregala al final del cuerpo. Si tiene múltiples `-m`, agregala como un `-m` extra al final.
+
+### Ejemplo
+
+```powershell
+git commit -m "feat: mi cambio" -m "### Descripción
+...
+
+### Checklist
+- [x] ...
+
+---
+
+> **Nota sobre uso de IA:** Como el inglés no es mi lengua nativa, utilicé un asistente de IA para refinar la redacción y garantizar una comunicación clara. Sin embargo, el diseño arquitectónico, la estrategia de implementación y las decisiones técnicas se basan enteramente en mi propia experiencia y conocimiento de ingeniería, no en generación automatizada."
+```
+
+> **Importante**: La nota debe estar en español (el idioma de commits del proyecto según `Documentacion/idioma.md`).
+
 ## Approach
 1. **Understand** the current branch/state (`git status`, `git log`)
 2. **Ask** the user which branch to use (never decide alone)

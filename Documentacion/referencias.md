@@ -7,8 +7,8 @@
 
 | Proyecto | URL | Licencia | Uso en Agents_IA_TECH |
 |----------|-----|----------|----------------------|
+| **Ponytail** | https://github.com/affaan-m/Ponytail | MIT | Principios de eficiencia: YAGNI, reutilización, mínimo código funcional |
 | **spec-kit** | https://github.com/github/spec-kit | MIT | Capacidades de spec-driven development adaptadas al flujo documental (spec generation, validation, spec→plan, spec→code, template system, versioning, linking, guardrails, multi-file orchestration, feedback loop) |
-| **Everything Claude Code (ECC)** | - | - | Base de agentes, skills y comandos. Framework de orquestación. |
 
 ## Capacidades adaptadas de spec-kit
 

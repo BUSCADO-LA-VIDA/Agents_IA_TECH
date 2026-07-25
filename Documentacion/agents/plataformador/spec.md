@@ -28,12 +28,30 @@
 
 | Acción | Descripción |
 |--------|-------------|
-| `crear_archivo` | Crear archivo faltante **desde plantilla incluida en el agente**. Cada archivo de Documentacion/ tiene su plantilla por defecto |
+| `crear_archivo` | Crear archivo faltante **desde plantilla incluida en el agente** |
 | `actualizar_agente` | Reemplazar `.agent.md` por versión nueva |
-| `instalar_mcp` | Ejecutar comando de instalación de MCP server |
-| `crear_estructura` | Crear carpetas faltantes (`Documentacion/adr/`, `Documentacion/agents/<nombre>/`) |
+| `instalar_mcp` | Ejecutar comando de instalación de MCP server (`npm install -g`, `codebase-memory-mcp install`) |
+| `crear_estructura` | Crear carpetas faltantes |
 | `registrar_capacidad` | Marcar en memoria que una capacidad está presente |
 | `eliminar_obsoleto` | Preguntar antes de borrar archivos que ya no aplican |
+| `retroalimentar_pensador` | Dejar tarea en pendientes-implementacion.md para que pensador ajuste agentes |
+| `reorganizar_docs` | Reestructurar documentación existente al formato agents/<nombre>/spec.md |
+
+## Flujo MCP
+
+1. Detectar qué MCP servers están disponibles globalmente
+2. Comparar contra capacidad-base.md
+3. Preguntar al usuario: "¿Cuáles querés instalar?" (con checkboxes)
+4. Instalar los seleccionados
+5. Registrar decisión en memoria-proyecto.md (instalado o rechazado)
+6. Agregar tarea en pendientes-implementacion.md para que pensador ajuste agentes
+
+## Flujo reorganización docs
+
+1. Detectar archivos sueltos en Documentacion/ que no sigan el formato agents/<nombre>/spec.md
+2. Proponer al usuario reorganizar
+3. Mover archivos a sus carpetas correspondientes
+4. Actualizar 00-indice.md y memoria-proyecto.md
 
 ## Archivos que puede crear desde plantilla
 
@@ -47,5 +65,5 @@
 | `Documentacion/roadmap.md` | ✅ Sí — en el agente |
 | `Documentacion/pendientes-implementacion.md` | ✅ Sí — en el agente |
 | `Documentacion/soluciones-conocidas.md` | ✅ Sí — en el agente |
-| `Documentacion/capacidad-base.md` | ✅ Sí — en el agente |
-| `Documentacion/memoria-proyecto.md` | ✅ Sí — en el agente |
+| `Documentacion/agents/plataformador/capacidad-base.md` | ✅ Sí — en el agente |
+| `Documentacion/agents/plataformador/memoria-proyecto.md` | ✅ Sí — en el agente |

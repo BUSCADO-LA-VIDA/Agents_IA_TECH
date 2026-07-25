@@ -127,10 +127,10 @@ Cada agente documental debe:
 Cuando se trabaja en un proyecto que acaba de recibir los agentes copiados desde el proyecto base:
 
 1. El `pensador` o cualquier agente puede invocar al **`plataformador`**
-2. El `plataformador` audita el proyecto contra `Documentacion/capacidad-base.md`
+2. El `plataformador` audita el proyecto contra `Documentacion/agents/plataformador/capacidad-base.md`
 3. Detecta qué falta (archivos, configuraciones, MCP, skills)
 4. Propone nivelar y pregunta antes de ejecutar
-5. Actualiza `Documentacion/memoria-proyecto.md` con el resultado
+5. Actualiza `Documentacion/agents/plataformador/memoria-proyecto.md` con el resultado
 
 Esto asegura que todos los proyectos mantengan la misma estructura de capacidades.
 

@@ -53,11 +53,9 @@ Documentacion/
 │   ├── solucionador/
 │   │   └── spec.md
 │   └── plataformador/
-│       └── spec.md
-│
-├── bitacoras/                ← 📝 Bitácoras del solucionador
-├── adr/                      ← 🏛️ Architectural Decision Records
-```
+│       ├── spec.md
+│       ├── capacidad-base.md    ← 🏗️ Catálogo central (solo plataformador)
+│       └── memoria-proyecto.md  ← 🧠 Capacidades instaladas (solo plataformador)
 
 ## ADRs activos
 <!-- Listar ADRs en Documentacion/adr/ -->

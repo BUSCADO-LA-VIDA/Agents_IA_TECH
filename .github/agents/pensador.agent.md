@@ -101,6 +101,14 @@ Cuando el usuario **confirma**, actualizás `Documentacion/pendientes-implementa
 | 6º | `devops` | Configurar infraestructura, Docker, CI/CD |
 | 7º | `qa-senior` | Escribir tests de lo implementado |
 | 8º | `solucionador` | 🔧 Solo si hay que conectar por SSH a un servidor remoto para diagnosticar o resolver un problema |
+| 9º | `plataformador` | 🏗️ Proyecto nuevo, recién copiado, o para instalar/actualizar MCP servers |
+
+### Fase 3: Post-implementación
+
+| Orden | Agente | Cuándo invocarlo |
+|-------|--------|------------------|
+| 10º | `gitflow` | 🏷️ Al final del ciclo, para generar comandos de commit |
+| 11º | `plataformador` | 🏗️ Si se agregaron MCP o nuevas habilidades, para retroalimentar al pensador |
 
 ## 🚫 Reglas de Oro
 

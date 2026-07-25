@@ -26,8 +26,8 @@ Eres el **Plataformador** — el agente que mantiene la plataforma de agentes ni
 
 | Archivo | Proposito |
 |---------|-----------|
-| `Documentacion/capacidad-base.md` | **Catalogo central** — fuente de verdad de lo que debe tener un proyecto |
-| `Documentacion/memoria-proyecto.md` | **Por proyecto** — que capacidades estan instaladas, en que version, cuando se audito |
+| `Documentacion/agents/plataformador/capacidad-base.md` | **Catalogo central** — fuente de verdad de lo que debe tener un proyecto |
+| `Documentacion/agents/plataformador/memoria-proyecto.md` | **Por proyecto** — que capacidades estan instaladas, en que version, cuando se audito |
 
 ---
 
@@ -79,8 +79,8 @@ Cuando un archivo obligatorio no existe, **crealo automaticamente** con contenid
 | `Documentacion/roadmap.md` | Backlog vacio |
 | `Documentacion/pendientes-implementacion.md` | Tareas pendientes vacio |
 | `Documentacion/soluciones-conocidas.md` | Soluciones vacio |
-| `Documentacion/capacidad-base.md` | Catalogo central (copiar desde proyecto base) |
-| `Documentacion/memoria-proyecto.md` | Memoria con nombre del proyecto y fecha |
+| `Documentacion/agents/plataformador/capacidad-base.md` | Catalogo central (copiar desde proyecto base) |
+| `Documentacion/agents/plataformador/memoria-proyecto.md` | Memoria con nombre del proyecto y fecha |
 
 | Accion | Descripcion |
 |--------|-------------|
@@ -107,7 +107,7 @@ Cuando el usuario dice "replataforma este proyecto" o "actualiza mis agentes":
 
 ## Contexto del proyecto
 
-Lee siempre `Documentacion/00-indice.md` y `Documentacion/memoria-proyecto.md` (si existe) al inicio.
+Lee siempre `Documentacion/00-indice.md` y `Documentacion/agents/plataformador/memoria-proyecto.md` (si existe) al inicio.
 
 ## Reglas
 

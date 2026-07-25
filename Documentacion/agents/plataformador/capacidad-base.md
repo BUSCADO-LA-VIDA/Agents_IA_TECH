@@ -2,6 +2,7 @@
 
 > **Catálogo central** de todas las capacidades que componen el kit.
 > El agente `plataformador` lo usa como fuente de verdad para auditar y nivelar proyectos.
+> **Este archivo es privado del agente `plataformador`** — ningún otro agente lo necesita.
 
 **Versión del kit**: 1.0.0
 **Última actualización**: 2026-07-25
@@ -19,7 +20,7 @@
 | `opencode.json` | ✅ Sí | Configuración OpenCode |
 | `README.md` | ✅ Sí | README del proyecto |
 
-## 2. Agentes (10)
+## 2. Agentes (11)
 
 | Agente | Plataforma | Versión |
 |--------|-----------|---------|
@@ -33,6 +34,7 @@
 | `qa-senior` | GitHub + OpenCode | 1.0 |
 | `gitflow` | GitHub + OpenCode | 1.0 |
 | `solucionador` | GitHub + OpenCode | 1.0 |
+| `plataformador` | GitHub + OpenCode | 1.0 |
 
 ## 3. Documentación base del proyecto (`Documentacion/`)
 
@@ -46,15 +48,13 @@
 | `roadmap.md` | ⚠️ Recomendado | Backlog de evolutivos |
 | `soluciones-conocidas.md` | ✅ Sí | Repositorio de soluciones |
 | `pendientes-implementacion.md` | ✅ Sí | Puente entre docs e implementación |
-| `capacidad-base.md` | ✅ Sí | Catálogo central del kit |
-| `memoria-proyecto.md` | ✅ Sí | Capacidades instaladas (mantenido por plataformador) |
-| `agents/<nombre>/spec.md` | ⚠️ Recomendado | Spec individual de cada agente en `Documentacion/agents/<nombre>/spec.md` |
-| `adr/` | ⚠️ Recomendado | Decisiones arquitectónicas en `Documentacion/adr/` |
-| `bitacoras/` | ⚠️ Recomendado | Bitácoras del solucionador en `Documentacion/bitacoras/` |
+| `agents/<nombre>/spec.md` | ⚠️ Recomendado | Spec individual de cada agente |
+| `capacidad-base.md` | ✅ Sí | Catálogo central del kit (en agents/plataformador/) |
+| `memoria-proyecto.md` | ✅ Sí | Capacidades instaladas (en agents/plataformador/) |
+| `adr/` | ⚠️ Recomendado | Decisiones arquitectónicas |
+| `bitacoras/` | ⚠️ Recomendado | Bitácoras del solucionador |
 
 ## 4. Skills (`.github/skills/`)
-
-*(77 skills disponibles. El instalador de codebase-memory-mcp también puede agregar skills propios)*
 
 | Skill | Propósito |
 |-------|-----------|
@@ -67,7 +67,7 @@
 
 | Servidor | Estado | Integración |
 |----------|--------|-------------|
-| `codebase-memory-mcp` | ⚠️ Recomendado | Grafo de conocimiento del código. Instalar con `npm install -g codebase-memory-mcp` |
+| `codebase-memory-mcp` | ⚠️ Recomendado | Grafo de conocimiento del código. Instalar con `npm install -g codebase-memory-mcp` y luego `codebase-memory-mcp install` |
 | Otros MCP | 📝 Pendiente | Según necesidad del proyecto |
 
 ## 6. Hooks de ciclo de vida

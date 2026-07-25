@@ -24,7 +24,10 @@
 
 ## ⏳ Tareas pendientes
 
-*(El Pensador agrega tareas aquí cuando el usuario confirma un plan, antes de ejecutar la fase documental)*
+- [ ] `[MCP]` **Configurar agentes para usar codebase-memory-mcp**
+  - **Qué implementar**: Ajustar instrucciones del `pensador`, `arquitecto` y `documentador` para que usen las herramientas MCP (index_repository, query, semantic_search, etc.)
+  - **Basado en**: MCP instalado (codebase-memory-mcp)
+  - **Prioridad**: media
 
 ---
 

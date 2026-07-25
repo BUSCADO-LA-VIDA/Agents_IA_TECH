@@ -319,7 +319,7 @@ El archivo `copilot-instructions.md` contiene las reglas que Copilot sigue **sie
 | **VS Code + GitHub Copilot** | ✅ | Experiencia completa: agentes, skills, prompts |
 | **Copilot CLI (GitHub CLI)** | ✅ | Vía `AGENTS.md` — subagentes por `runSubagent` |
 | **Cursor** | ⚠️ | Skills funcionan, prompts requieren adaptación |
-| **Claude Code / Codex** | ⚠️ | Requiere instalar ECC completo: `npx ecc-universal install` |
+| **OpenCode** | ✅ | Compatibilidad completa vía `.opencode/` |
 | **JetBrains AI** | ❌ | No soporta formato `.github/` |
 
 ---
@@ -327,7 +327,6 @@ El archivo `copilot-instructions.md` contiene las reglas que Copilot sigue **sie
 ## 📚 Recursos
 
 - **[Ponytail](https://github.com/DietrichGebert/ponytail)** — Filosofía de código mínimo (MIT)
-- **[ECC](https://github.com/affaan-m/ECC)** — Everything Claude Code — framework de agentes (MIT)
 - **[VS Code Copilot](https://code.visualstudio.com/docs/copilot/overview)** — Documentación oficial
 - **[Custom Instructions](https://code.visualstudio.com/docs/copilot/customizing-copilot)** — Guía de `copilot-instructions.md`
 

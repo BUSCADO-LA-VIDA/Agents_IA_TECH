@@ -35,7 +35,7 @@
 
 | Fecha | Tarea | Implementador |
 |-------|-------|---------------|
-| | | |
+| 2026-07-27 | Reorganizar estructura `Documentacion/`: mover `adr/` → `arquitectura/adr/`, `specs/` → `funcionalidades/`, actualizar specs del plataformador, arquitecto, documentador e índice | `pensador` |
 
 ---
 

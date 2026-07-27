@@ -1,0 +1,16 @@
+# Secrets / credentials
+.env
+.env.*
+*.env
+secrets.*
+**/config.local.json
+.opencode/config.json
+
+# Local opencode runtime
+.opencode/node_modules/
+
+# OS / editor
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/

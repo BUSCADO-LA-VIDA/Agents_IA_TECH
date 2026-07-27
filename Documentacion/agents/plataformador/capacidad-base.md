@@ -51,7 +51,7 @@
 | `agents/<nombre>/spec.md` | ⚠️ Recomendado | Spec individual de cada agente |
 | `capacidad-base.md` | ✅ Sí | Catálogo central del kit (en agents/plataformador/) |
 | `memoria-proyecto.md` | ✅ Sí | Capacidades instaladas (en agents/plataformador/) |
-| `adr/` | ⚠️ Recomendado | Decisiones arquitectónicas |
+| `arquitectura/adr/` | ⚠️ Recomendado | Decisiones arquitectónicas |
 | `bitacoras/` | ⚠️ Recomendado | Bitácoras del solucionador |
 
 ## 4. Skills (`.github/skills/`)

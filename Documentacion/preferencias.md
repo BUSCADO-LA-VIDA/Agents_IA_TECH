@@ -12,6 +12,7 @@
 | 2026-07-25 | **Los comandos de git deben usar sintaxis de PowerShell** (`#` para comentarios, no `::`). | git |
 | 2026-07-25 | **Todos los commits deben incluir la nota de atribución de IA al final del cuerpo.** Texto oficial registrado en el agente gitflow. | git |
 | 2026-07-25 | **El inglés no es mi lengua nativa** — me apoyo en IA para redactar y comunicar ideas. | workflow |
+| 2026-07-27 | **Estructura de Documentacion/**: `adr/` va dentro de `arquitectura/adr/`. `agents/` en inglés (no `agentes/`). `testing/`, `seguridad/`, `despliegue/` son carpetas opcionales — solo se crean si hay contenido. Las specs funcionales van en `funcionalidades/`. | estructura |
 
 ## Historial de cambios
 

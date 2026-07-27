@@ -5,8 +5,8 @@
 ## Responsabilidades
 
 - Evaluar patrones, estructura y trade-offs
-- Crear ADRs para decisiones arquitectónicas
-- Generar diagramas de diseño (Mermaid)
+- Crear ADRs en `Documentacion/arquitectura/adr/`
+- Generar diagramas de diseño (Mermaid) en `Documentacion/arquitectura/diagramas/`
 - Definir guardrails y spec linking
 
 ## Skills utilizados

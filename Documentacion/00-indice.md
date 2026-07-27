@@ -11,10 +11,10 @@
 
 ## Estructura del proyecto
 <!-- Completar con las carpetas principales -->
-- `src/` — Código fuente (si aplica)
+- `Documentacion/` — Documentación del proyecto (NO se copia entre proyectos)
+- `.doc_agents/` — 📐 Documentación transversal del kit de agentes (se copia entre proyectos)
 - `.github/` — Configuración de agentes Copilot
 - `.opencode/` — Configuración de agentes OpenCode
-- `Documentacion/` — Documentación del proyecto
 
 ### Estructura de `Documentacion/`
 
@@ -31,7 +31,13 @@ Documentacion/
 ├── capacidad-base.md         ← 🏗️ Catálogo central del kit de agentes
 ├── memoria-proyecto.md       ← 🧠 Capacidades instaladas (plataformador)
 │
-├── agents/                   ← 📐 Specs de cada agente
+├── arquitectura/             ← 📐 Decisiones de arquitectura
+│   ├── adr/                  ←   Registros de decisiones (ADRs)
+│   └── diagramas/            ←   Diagramas de diseño (Mermaid)
+│
+├── funcionalidades/          ← 📋 Especificaciones funcionales
+│
+├── agents/                   ← 🤖 Docs de cada agente (spec + archivos propios)
 │   ├── pensador/
 │   │   └── spec.md
 │   ├── arquitecto/
@@ -54,15 +60,22 @@ Documentacion/
 │   │   └── spec.md
 │   └── plataformador/
 │       ├── spec.md
-│       ├── capacidad-base.md    ← 🏗️ Catálogo central (solo plataformador)
-│       └── memoria-proyecto.md  ← 🧠 Capacidades instaladas (solo plataformador)
+│       ├── capacidad-base.md
+│       └── memoria-proyecto.md
+│
+├── bitacoras/                ← 📝 Bitácoras de intervenciones (solucionador)
+│
+├── testing/         ← 🧪 Opcional — solo si hay tests documentados
+├── seguridad/       ← 🔒 Opcional — solo si hay auditorías
+└── despliegue/      ← 🚀 Opcional — solo si hay docs de despliegue
+```
 
 ## ADRs activos
-<!-- Listar ADRs en Documentacion/adr/ -->
+<!-- Listar ADRs en Documentacion/arquitectura/adr/ -->
 - (ninguno aún)
 
 ## Features activas
-<!-- Listar specs en Documentacion/specs/ -->
+<!-- Listar specs en Documentacion/funcionalidades/ -->
 - (ninguna aún)
 
 ## Agentes

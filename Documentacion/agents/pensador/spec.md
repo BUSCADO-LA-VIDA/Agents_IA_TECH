@@ -17,6 +17,13 @@
 
 Ver el diagrama y flujo completo en `.github/agents/pensador.agent.md`.
 
+## Capacidades
+
+| Capacidad | Descripción |
+|-----------|-------------|
+| **Terminal** | ✅ Puede ejecutar comandos `rm`, `mv`, `mkdir`, `git` y otros comandos del sistema para limpiar archivos, reorganizar carpetas y gestionar el proyecto directamente |
+| `runSubagent` | ✅ Puede orquestar agentes documentales e implementadores |
+
 ## Agentes que puede invocar
 
 | Agente | Cuándo |

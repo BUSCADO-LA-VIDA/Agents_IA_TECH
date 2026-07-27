@@ -4,7 +4,7 @@
 
 ## Responsabilidades
 
-- Crear specs a partir de lenguaje natural
+- Crear specs en `Documentacion/funcionalidades/` a partir de lenguaje natural
 - Mantener template system por tipo (API, UI, DB)
 - Versionado de specs y diff entre versiones
 - Generar planes de implementación (spec → plan)

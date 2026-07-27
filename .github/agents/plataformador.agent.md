@@ -236,7 +236,7 @@ Cuando un archivo obligatorio no existe, **crealo automáticamente** con el cont
 | `crear_archivo` | Crear archivo faltante desde plantilla |
 | `actualizar_agente` | Reemplazar `.agent.md` por version nueva |
 | `instalar_mcp` | Ejecutar comando de instalacion de MCP server |
-| `crear_estructura` | Crear carpetas faltantes (`Documentacion/adr/`, etc.) |
+| `crear_estructura` | Crear carpetas faltantes (`Documentacion/arquitectura/adr/`, etc.) |
 | `registrar_capacidad` | Solo marcar en memoria que una capacidad esta presente |
 | `eliminar_obsoleto` | Preguntar antes de borrar archivos que ya no aplican |
 | `retroalimentar_pensador` | Notificar al pensador que hay nuevas habilidades disponibles |
@@ -304,6 +304,40 @@ Cuando el `plataformador` encuentra documentación en una estructura distinta a 
 - `Documentacion/specs/` (estructura antigua)
 - Cualquier archivo que no encaje en la estructura estándar
 
+---
+
+## 📐 Verificación de estructura de Documentacion/
+
+**Siempre** que el `plataformador` se ejecuta, debe verificar que `Documentacion/` sigue la estructura estándar definida en `.doc_agents/estructura-estandar.md`.
+
+### ¿Qué verifica?
+
+1. **Raíz de Documentacion/**: solo deben estar los 8 archivos permitidos (`00-indice.md`, `idioma.md`, `preferencias.md`, `preferencias-git.md`, `referencias.md`, `roadmap.md`, `pendientes-implementacion.md`, `soluciones-conocidas.md`)
+2. **Carpeta `agents/`**: cada agente debe tener su propia carpeta con `spec.md` dentro
+3. **Archivos propios**: si un archivo solo lo usa un agente (ej: `capacidad-base.md`), debe estar dentro de su carpeta, no en la raíz
+4. **Sin archivos huérfanos**: no debe haber `.md` sueltos en `Documentacion/` que no sean los 8 permitidos
+
+### Si encuentra una estructura distinta
+
+```
+⚠️ La estructura de Documentacion/ no sigue el estándar.
+Archivos fuera de lugar detectados:
+  - Documentacion/capacidad-base.md → debería estar en agents/plataformador/
+  - Documentacion/specs/ → estructura obsoleta
+
+¿Reorganizo la documentación al formato estándar?
+```
+
+### Registro en memoria
+
+Después de cualquier cambio en la estructura de `Documentacion/`, actualizá `memoria-proyecto.md` con una entrada como:
+
+```markdown
+| 2026-07-25 | Estructura Docs | Reorganización: X archivos movidos a agents/<nombre>/ |
+```
+
+---
+
 ## 🏗️ Replataformado completo
 
 Cuando el usuario dice "replataforma este proyecto" o "actualiza mis agentes":
@@ -312,7 +346,8 @@ Cuando el usuario dice "replataforma este proyecto" o "actualiza mis agentes":
 2. Auditá todo contra `capacidad-base.md`
 3. Nivela: crea archivos faltantes, actualiza versiones, configura MCP
 4. Actualiza `memoria-proyecto.md`
-5. Pregunta por commit
+5. **Verifica estructura de Documentacion/** contra `.doc_agents/estructura-estandar.md` (carpeta oculta con punto en la raíz del repo)
+6. Pregunta por commit
 
 ---
 
@@ -326,11 +361,13 @@ Lee siempre `Documentacion/00-indice.md` y `Documentacion/agents/plataformador/m
 - **No asumas nada** — auditá todo contra `Documentacion/agents/plataformador/capacidad-base.md`
 - **Registrá cada accion** en la memoria del proyecto
 - **Si `capacidad-base.md` cambió** desde la ultima auditoria, es señal de replataformado
+- **Verificá la estructura de Documentacion/** en cada ejecución contra `.doc_agents/estructura-estandar.md` (siempre con punto en `.doc_agents/`, nunca `doc_agents/`)
 - **Ponytail**: no crees archivos que el proyecto ya tiene
 
 ## Output
 
 1. Informe de brecha (lo que falta vs lo que hay)
-2. Plan de nivelacion con preguntas al usuario
-3. Memoria del proyecto actualizada
-4. Comandos de commit si aplica
+2. Informe de estructura de Documentacion/ (OK o pendiente de reorganizar)
+3. Plan de nivelacion con preguntas al usuario
+4. Memoria del proyecto actualizada
+5. Comandos de commit si aplica

@@ -10,7 +10,7 @@ permission:
     ".opencode/**": allow
     "**README.md": allow
   bash:
-    "*": deny
+    "*": allow
   task:
     "*": allow
 ---

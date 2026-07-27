@@ -209,9 +209,9 @@ Los agentes documentales (Pensador, Arquitecto, Documentador, Security Auditor) 
 ```
 Documentacion/
 ├── 00-indice.md        ← 📋 Si existe, lo leen como contexto del proyecto
-├── adr/                ← Decisiones de arquitectura (opcional)
-├── specs/              ← Especificaciones de features (opcional)
-└── agentes/            ← Extensiones de agentes por proyecto (opcional)
+├── arquitectura/adr/  ← Decisiones de arquitectura (opcional)
+├── funcionalidades/   ← Especificaciones de features (opcional)
+└── agents/             ← Extensiones de agentes por proyecto (opcional)
 ```
 
 **¿Cómo funciona?**

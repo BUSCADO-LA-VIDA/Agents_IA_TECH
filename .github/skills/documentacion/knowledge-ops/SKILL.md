@@ -23,7 +23,7 @@ Design the knowledge structure BEFORE creating content. A well-organized knowled
 
 ```
 docs/
-├── adr/              # Architecture Decision Records
+├── arquitectura/adr/  # Architecture Decision Records
 ├── guides/           # How-to guides
 ├── explanations/     # Deep dives and concepts
 ├── reference/        # API docs, configs, specs
@@ -35,8 +35,8 @@ docs/
 ### Design-First Docs Process
 
 ```
-Specification (docs/specs/)
-  → Design (docs/adr/)
+Specification (funcionalidades/)
+  → Design (arquitectura/adr/)
     → Implementation (code + inline docs)
       → Tests (docs verified)
         → Fix specs if test fails

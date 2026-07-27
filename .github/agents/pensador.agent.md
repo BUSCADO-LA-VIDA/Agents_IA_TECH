@@ -62,8 +62,8 @@ Cuando recibas una solicitud, **siempre** creá un plan estructurado antes de ej
 ### Fase documental
 | Orden | Agente | Acción | Archivos esperados |
 |-------|--------|--------|--------------------|
-| 1º | `arquitecto` | [qué va a hacer] | `Documentacion/adr/...` |
-| 2º | `documentador` | [qué va a hacer] | `Documentacion/specs/...` |
+| 1º | `arquitecto` | [qué va a hacer] | `Documentacion/arquitectura/adr/...` |
+| 2º | `documentador` | [qué va a hacer] | `Documentacion/funcionalidades/...` |
 | 3º | `security-auditor` | [si aplica] | `Documentacion/...` |
 
 ### Fase implementación (si aplica)

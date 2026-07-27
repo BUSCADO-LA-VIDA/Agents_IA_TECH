@@ -30,7 +30,7 @@ Before writing ANY code:
 | Source | When |
 |--------|------|
 | Project docs (`.md`, `docs/`) | Always consult first |
-| ADRs (`docs/adr/`) | Architecture decisions |
+| ADRs (`arquitectura/adr/`) | Architecture decisions |
 | Inline code comments | Implementation details |
 | README / CONTRIBUTING | Project conventions |
 | Official library docs | External dependencies |

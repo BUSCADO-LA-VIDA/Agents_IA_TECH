@@ -90,8 +90,8 @@ Cuando recibas una solicitud, **siempre** crea un plan estructurado antes de eje
 ### Fase documental
 | Orden | Agente | Accion | Archivos esperados |
 |-------|--------|--------|--------------------|
-| 1 | `arquitecto` | [que va a hacer] | `Documentacion/adr/...` |
-| 2 | `documentador` | [que va a hacer] | `Documentacion/specs/...` |
+| 1 | `arquitecto` | [que va a hacer] | `Documentacion/arquitectura/adr/...` |
+| 2 | `documentador` | [que va a hacer] | `Documentacion/funcionalidades/...` |
 | 3 | `security-auditor` | [si aplica] | `Documentacion/...` |
 
 ### Fase implementacion (si aplica)

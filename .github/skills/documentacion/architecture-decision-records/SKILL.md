@@ -54,7 +54,7 @@ Design → Write ADR → Review → Accept → Implement → Test → Update ADR
 ## Best Practices
 
 - One ADR per significant decision
-- Store in `docs/adr/` with sequential numbering
+- Store in `arquitectura/adr/` with sequential numbering
 - Link ADRs from code comments: `// See ADR-042`
 - ADRs can be superseded — keep history
 - If implementation contradicts the ADR → update the ADR (the doc is truth)

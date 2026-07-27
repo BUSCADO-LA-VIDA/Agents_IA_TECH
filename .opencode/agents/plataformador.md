@@ -87,7 +87,7 @@ Cuando un archivo obligatorio no existe, **crealo automaticamente** con contenid
 | `crear_archivo` | Crear archivo faltante desde plantilla |
 | `actualizar_agente` | Reemplazar `.agent.md` por version nueva |
 | `instalar_mcp` | Ejecutar comando de instalacion de MCP server |
-| `crear_estructura` | Crear carpetas faltantes |
+| `crear_estructura` | Crear carpetas faltantes (`Documentacion/arquitectura/adr/`, etc.) |
 | `registrar_capacidad` | Solo marcar en memoria que una capacidad esta presente |
 | `eliminar_obsoleto` | Preguntar antes de borrar archivos que ya no aplican |
 

@@ -15,7 +15,7 @@
 ```markdown
 - [ ] `[Área]` **Título descriptivo**
   - **Qué implementar**: descripción concreta
-  - **Basado en**: `Documentacion/specs/archivo-especifico.md` (ADR / Spec)
+  - **Basado en**: `Documentacion/funcionalidades/archivo-especifico.md` (ADR / Spec)
   - **Archivos esperados**: `src/ruta/al/archivo.ts`
   - **Prioridad**: alta / media / baja
 ```

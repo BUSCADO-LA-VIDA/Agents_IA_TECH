@@ -1,5 +1,3 @@
-<!-- Content moved from Documentacion/specs/agente-solucionador.md -->
-
 # Spec: Agente `solucionador`
 
 > **Propósito**: Agente de altos privilegios para diagnóstico y solución de problemas en servidores remotos. Solo se invoca bajo demanda explícita del usuario a través del `pensador`.

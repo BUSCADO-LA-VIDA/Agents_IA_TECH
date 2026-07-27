@@ -61,7 +61,7 @@ When using patterns, concepts, or code from external projects:
 | Qué guardar | Dónde |
 |-------------|-------|
 | Preferencias de usuario (flujo git, convenciones, gustos personales) | `Documentacion/preferencias.md` |
-| Decisiones de diseño y trade-offs | ADR en `Documentacion/adr/` |
+| Decisiones de diseño y trade-offs | ADR en `Documentacion/arquitectura/adr/` |
 | Problemas resueltos en servidores remotos | `Documentacion/soluciones-conocidas.md` + bitácora en `Documentacion/bitacoras/` |
 | Ideas para el futuro / evolutivos | `Documentacion/roadmap.md` |
 | Cualquier decisión ad-hoc que el usuario diga "guarda esto" | `Documentacion/preferencias.md` o el archivo que corresponda |
@@ -69,7 +69,7 @@ When using patterns, concepts, or code from external projects:
 ### Reglas para los agentes
 
 1. **Si el usuario expresa una preferencia** → guardala en `Documentacion/preferencias.md` inmediatamente. No esperes a que te lo pida dos veces.
-2. **Si el usuario toma una decisión de diseño** → el `arquitecto` debe crear un ADR en `Documentacion/adr/`.
+2. **Si el usuario toma una decisión de diseño** → el `arquitecto` debe crear un ADR en `Documentacion/arquitectura/adr/`.
 3. **Si resolvés un problema en un servidor** → el `solucionador` guarda bitácora + ofrece agregar a `soluciones-conocidas.md`.
 4. **Si el usuario menciona una idea futura** → registrala en `Documentacion/roadmap.md` (no la implementes ni la especifiques).
 5. **Estos archivos existen para que el comportamiento persista entre reinicios de VS Code.** Sin archivo, no hay memoria. Sin memoria, el agente empieza de cero.
@@ -113,7 +113,7 @@ Dependiendo del alcance, se invocan uno o más agentes en este orden:
 Cada agente documental debe:
 1. Leer `Documentacion/00-indice.md` primero para entender el estado actual
 2. **Investigar fuentes externas** si es necesario (docs oficiales, APIs de referencia, repositorios, estándares) antes de documentar
-3. Crear/actualizar archivos en `Documentacion/` (ADRs en `adr/`, specs en `specs/`, flujos, diagramas)
+3. Crear/actualizar archivos en `Documentacion/` (ADRs en `arquitectura/adr/`, specs en `funcionalidades/`, flujos, diagramas)
 4. Actualizar `Documentacion/00-indice.md` con las nuevas entradas
 5. **NO tocar código fuente** (`src/`, `app/`, `controllers/`, `models/`, `routes/`, etc.) — el Documentador solo escribe **documentación**
 6. Si el usuario pide un cambio, interpretarlo como cambio en la **documentación**, no en el código

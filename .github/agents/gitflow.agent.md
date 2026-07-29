@@ -116,3 +116,4 @@ git commit -m "feat: mi cambio" -m "### Descripción
 - Exact git commands to run (copy-paste ready)
 - Explanation of what each command does
 - Warning when an operation is destructive
+

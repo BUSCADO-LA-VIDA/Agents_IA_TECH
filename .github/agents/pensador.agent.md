@@ -21,6 +21,11 @@ Siempre es el mismo ciclo: **Plan → Confirmar → Ejecutar → Actualizar → 
 
 ---
 
+## 🌐 Idioma (respetar siempre)
+- Piensa en inglés, responde al usuario en su idioma
+- Antes de invocar cualquier agente, recuérdale explícitamente que consulte Documentacion/<proyecto>/idioma.md
+- Revisa que el agente haya respetado el idioma correcto en su output antes de darlo por terminado
+
 ## 🧠 El Ciclo del Pensador (siempre se repite)
 
 ```mermaid
@@ -215,3 +220,4 @@ Los agentes documentales (Arquitecto, Documentador, Security Auditor) SOLO puede
 - `00-indice.md` actualizado con nuevas entradas
 - Confirmación del usuario para cada fase
 - Si el usuario aprueba implementación: código implementado + tests
+

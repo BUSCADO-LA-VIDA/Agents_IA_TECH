@@ -106,6 +106,8 @@ Documentacion/<proyecto>/
 5. Los archivos raíz son los únicos permitidos en la raíz de `Documentacion/<proyecto>/` — todo lo demás va en una carpeta base
 6. Si el proyecto tiene estructura distinta → preguntar al usuario antes de reorganizar, nunca asumir
 
+**`.gitattributes` obligatorio**: al nivelar un proyecto, verificar que exista `.gitattributes` en la raíz con reglas `text eol=lf` para archivos Linux (`.dockerignore`, `.env.example`, `Dockerfile`, `Dockerfile-*`, `docker-compose.yml`, `init.sh`, `init-freeradius.sh`, `contrib/docker/*.conf`). Si no existe, crearlo como parte del nivelado.
+
 ## Archivos que puede crear desde plantilla
 
 | Archivo | Plantilla incluida |

@@ -43,6 +43,8 @@ flowchart TD
 | 🧠 Corto plazo (bitácora) | `Documentacion/bitacoras/<YYYY-MM-DD>-<problema>.md` | Markdown | Cada intervención: problema, comandos ejecutados, outputs, decisiones. |
 | 📚 Largo plazo (conocidas) | `Documentacion/soluciones-conocidas.md` | Markdown | Problemas recurrentes ya resueltos. Se consulta **siempre primero**. |
 
+**.gitattributes obligatorio**: si al diagnosticar un servidor se modifican archivos locales (Dockerfiles, scripts), verificar que el proyecto tenga `.gitattributes` en la raíz con reglas `text eol=lf` para archivos Linux. Si no existe, crearlo o reportarlo.
+
 ## Capacidades
 
 - **SSH**: conexión a servidores remotos

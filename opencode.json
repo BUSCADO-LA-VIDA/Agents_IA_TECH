@@ -9,7 +9,7 @@
       "name": "NVIDIA",
       "api": "openai",
       "options": {
-        "apiKey": "{env:NVIDIA_API_KEY}",
+        "api_key": "${env:NVIDIA_API_KEY}",
         "baseURL": "https://integrate.api.nvidia.com/v1"
       },
       "models": {
@@ -24,10 +24,48 @@
           "name": "DeepSeek V4 Flash (NVIDIA)",
           "tool_call": true,
           "temperature": true,
-          "limit": { "context": 128000, "output": 16000 }
+          "limit": { "context": 128000, "output": 16384 }
+        }
+      }
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "api": "openai",
+      "options": {
+        "api_key": "${env:DEEPSEEK_API_KEY}",
+        "baseURL": "https://api.deepseek.com/v1"
+      },
+      "models": {
+        "deepseek-chat": {
+          "name": "DeepSeek V3",
+          "tool_call": true,
+          "attachment": true,
+          "temperature": true,
+          "limit": { "context": 65536, "output": 8192 }
+        },
+        "deepseek-reasoner": {
+          "name": "DeepSeek R1",
+          "tool_call": false,
+          "attachment": true,
+          "temperature": false,
+          "limit": { "context": 65536, "output": 8192 }
         }
       }
     }
   },
-  "enabled_providers": ["nvidia"]
+  "enabled_providers": ["nvidia", "deepseek"],
+  "permission": {
+    "edit": "allow",
+    "bash": {
+      "*": "ask",
+      "python *": "allow",
+      "python -m *": "allow",
+      "pip install *": "allow",
+      "pip uninstall *": "allow",
+      "pytest *": "allow",
+      "pytest": "allow",
+      "cd *": "allow",
+      "git *": "allow"
+    }
+  }
 }

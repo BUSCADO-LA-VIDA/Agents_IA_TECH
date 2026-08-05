@@ -1,5 +1,5 @@
 # 📋 Índice del Proyecto
-*Última actualización: 2026-07-25*
+*Última actualización: 2026-08-05*
 
 > Este archivo es la **memoria del proyecto** para los agentes. Lo leen primero para entender el contexto sin escanear todo. Los agentes documentales lo mantienen actualizado automáticamente.
 
@@ -8,6 +8,12 @@
 - Lenguaje: Markdown / YAML
 - Base de datos: (ninguna — es configuración de agentes)
 - Infraestructura: GitHub Copilot + OpenCode
+
+## CI/CD (GitHub Actions)
+- `openwiki-update.yml` — Genera/actualiza documentación OpenWiki (programado + manual)
+- `agentshield.yml` — Security scan de configs de agentes (`ecc-agentshield`, solo `.github/**`)
+- `security-scan.yml` — Detección de secrets (gitleaks) sobre todo el repo (push/PR)
+- `spellcheck.yml` — Revisión de ortografía (codespell) sobre `.md`/`.yaml`/`.yml` (push/PR)
 
 ## Estructura del proyecto
 <!-- Completar con las carpetas principales -->

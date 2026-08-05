@@ -35,6 +35,10 @@
 
 | Fecha | Tarea | Implementador |
 |-------|-------|---------------|
+| 2026-08-05 | Crear workflow de seguridad general (`security-scan.yml`) con gitleaks sobre todo el repo | `devops` |
+| 2026-08-05 | Crear workflow de ortografía (`spellcheck.yml`) con codespell | `devops` |
+| 2026-08-05 | Crear `.gitattributes` con normalización `eol=lf` | `devops` |
+| 2026-08-05 | Actualizar `checkout`/`setup-node` a runtime node24 en `openwiki-update.yml` y `agentshield.yml` (fix warning "Node.js 20 is deprecated") | `pensador` |
 | 2026-07-27 | Reorganizar estructura `Documentacion/`: mover `adr/` → `arquitectura/adr/`, `specs/` → `funcionalidades/`, actualizar specs del plataformador, arquitecto, documentador e índice | `pensador` |
 
 ---

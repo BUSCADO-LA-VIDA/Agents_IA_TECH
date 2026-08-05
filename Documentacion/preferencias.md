@@ -14,9 +14,12 @@
 | 2026-07-25 | **El inglés no es mi lengua nativa** — me apoyo en IA para redactar y comunicar ideas. | workflow |
 | 2026-07-27 | **Estructura de Documentacion/**: `adr/` va dentro de `arquitectura/adr/`. `agents/` en inglés (no `agentes/`). `testing/`, `seguridad/`, `despliegue/` son carpetas opcionales — solo se crean si hay contenido. Las specs funcionales van en `funcionalidades/`. | estructura |
 | 2026-07-29 | **.gitattributes obligatorio en todo proyecto**: agregar reglas `text eol=lf` para archivos Linux (`.dockerignore`, `.env.example`, `Dockerfile`, `Dockerfile-*`, `docker-compose.yml`, `init.sh`, `init-freeradius.sh`, `contrib/docker/*.conf`). Todos los implementadores deben verificar/crear este archivo al tocar un proyecto. | setup |
+| 2026-08-05 | **Idioma de comunicación = Español Latino (neutro)**: el usuario quiere que todos los agentes le hablen en español latino neutro (sin regionalismos marcados de ningún país). | comunicación |
+| 2026-08-05 | **Enlazar commits al terminar la implementación**: el usuario quiere que, una vez implementado, se generen los comandos de commit (convencionales) para registrar los cambios. El `gitflow` se encarga de esto al final del ciclo. | git |
 
 ## Historial de cambios
 
 | Fecha | Descripción |
 |-------|-------------|
 | 2026-07-25 | Creación inicial. Reglas de git y persistencia de comportamiento. |
+| 2026-08-05 | Añadidas preferencias de idioma (español latino neutro) y enlazado de commits tras implementación. |

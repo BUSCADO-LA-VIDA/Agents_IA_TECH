@@ -4,16 +4,14 @@ on:
   push:
     branches: [main, master]
     paths:
-      - '**.md'
-      - '**.yaml'
-      - '**.yml'
-      - '.github/**.yml'
+      - '.github/workflows/**.yml'
+      - '.opencode/**.json'
+      - 'opencode.json'
   pull_request:
     paths:
-      - '**.md'
-      - '**.yaml'
-      - '**.yml'
-      - '.github/**.yml'
+      - '.github/workflows/**.yml'
+      - '.opencode/**.json'
+      - 'opencode.json'
   workflow_dispatch:
 
 permissions:
@@ -21,7 +19,7 @@ permissions:
 
 jobs:
   codespell:
-    name: Check spelling (codespell)
+    name: Check spelling (config, EN)
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -32,4 +30,10 @@ jobs:
         with:
           check_filenames: true
           check_hidden: true
-          skip: .git,*.lock,openwiki
+          # This repo's docs are intentionally in Spanish (see Documentacion/idioma.md),
+          # so this check covers only English-config files (.github/workflows, .opencode, opencode.json).
+          skip: |
+            .git,*.lock,
+            Documentacion,README.md,openwiki,AGENTS.md,CLAUDE.md,
+            .github/agents,.github/prompts,.github/skills,.github/copilot-instructions.md,
+            .opencode/agents,.opencode/commands,sync-agents.ps1

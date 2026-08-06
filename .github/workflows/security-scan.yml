@@ -22,9 +22,12 @@ jobs:
 
       - name: Install gitleaks (open-source CLI)
         run: |
-          # Official install script resolves the latest open-source release (no license required)
-          curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | sh
-          ./bin/gitleaks version
+          # Resolve the latest open-source gitleaks release and download its Linux x64 binary (no license required)
+          VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+          echo "Resolved gitleaks version: ${VERSION}"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/${VERSION}/gitleaks_${VERSION#v}_linux_x64.tar.gz" -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks version
 
       - name: Run gitleaks
-        run: ./bin/gitleaks detect --source . --redact --verbose
+        run: ./gitleaks detect --source . --redact --verbose

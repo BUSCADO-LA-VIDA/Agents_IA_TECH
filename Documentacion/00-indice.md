@@ -10,7 +10,6 @@
 - Infraestructura: GitHub Copilot + OpenCode
 
 ## CI/CD (GitHub Actions)
-- `openwiki-update.yml` — Genera/actualiza documentación OpenWiki (programado + manual)
 - `agentshield.yml` — Security scan de configs de agentes (`ecc-agentshield`, solo `.github/**`)
 - `security-scan.yml` — Detección de secrets (gitleaks) sobre todo el repo (push/PR)
 - `spellcheck.yml` — Revisión de ortografía (codespell) sobre `.md`/`.yaml`/`.yml` (push/PR)

@@ -42,4 +42,56 @@
 
 ---
 
-*(Aún no hay soluciones registradas. El `solucionador` las agrega aquí cuando resuelve un problema nuevo.)*
+## OpenWiki / CI
+
+### <2026-08-06> OpenWiki falla: "400 validation error" / "OPENROUTER_API_KEY is required"
+
+- **Síntomas**:
+  - En CI: `OPENROUTER_API_KEY is required for non-interactive runs` → exit code 1
+  - En local: `400 1 validation error for Message content.0 ... ValidatorIterator` (pydantic)
+- **Causa**: desalineación del **proveedor de IA**. OpenWiki genera la doc con un modelo de IA; el workflow usaba `OPENWIKI_PROVIDER: openrouter` + modelo `z-ai/glm-5.2` (que es de **NVIDIA**, no de OpenRouter), y el secret `OPENROUTER_API_KEY` no existía. En local faltaba `OPENWIKI_PROVIDER` → default incorrecto.
+- **Solución** (alinear al proveedor real del proyecto = **NVIDIA**):
+  - En el workflow `openwiki-update.yml`:
+    ```yaml
+    OPENWIKI_PROVIDER: nvidia
+    NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+    OPENWIKI_MODEL_ID: nvidia/nemotron-3-super-120b-a12b
+    ```
+  - Requiere definir el secret `NVIDIA_API_KEY` en **Settings → Secrets and variables → Actions** del repo.
+  - En local: exportar `OPENWIKI_PROVIDER=nvidia` y `OPENWIKI_MODEL_ID=nvidia/nemotron-3-super-120b-a12b` (la `NVIDIA_API_KEY` ya vive en el shell).
+- **Archivos locales afectados**: `.github/workflows/openwiki-update.yml`, `opencode.json`
+- **Tags**: `openwiki`, `ci`, `nvidia`, `proveedor`, `github-actions`
+
+### <2026-08-06> Security Scan falla: "missing gitleaks license"
+
+- **Síntomas**: workflow `security-scan.yml` falla con `missing gitleaks license. Go grab one at gitleaks.io and store it as a GitHub Secret named GITLEAKS_LICENSE`.
+- **Causa**: la action oficial `gitleaks/gitleaks-action@v2` se volvió un producto con licencia (breaking change reciente). La acción oficial ya no es gratuita en CI.
+- **Solución**: no usar la action con licencia; instalar y ejecutar el **binario CLI open-source de gitleaks**:
+  ```yaml
+  - name: Install gitleaks (open-source CLI)
+    run: |
+      curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | sh
+      ./bin/gitleaks version
+  - name: Run gitleaks
+    run: ./bin/gitleaks detect --source . --redact --verbose
+  ```
+- **Archivos locales afectados**: `.github/workflows/security-scan.yml`
+- **Tags**: `gitleaks`, `ci`, `seguridad`, `secrets`, `license`
+
+### <2026-08-06> Spellcheck falla: codespell marca todo el repo español como typos
+
+- **Síntomas**: workflow `spellcheck.yml` falla con muchos errores tipo `README.md#L6 profesional ==> professional` aunque el texto está correcto.
+- **Causa**: `codespell` es un corrector de **inglés**, pero este repo es **intencionalmente en español** (ver `Documentacion/idioma.md`). Marca todos los docs en español como typos.
+- **Solución**: restringir el spellcheck solo a archivos de **config en inglés técnico** (`.github/workflows/*.yml`, `.opencode/*.json`, `opencode.json`) y excluir la documentación en español en el `skip`:
+  ```yaml
+  on:
+    push/PR paths:
+      - '.github/workflows/**.yml'
+      - '.opencode/**.json'
+      - 'opencode.json'
+  # skip: Documentacion,README.md,openwiki,AGENTS.md,CLAUDE.md,.github/agents,... etc.
+  ```
+- **Archivos locales afectados**: `.github/workflows/spellcheck.yml`
+- **Tags**: `codespell`, `ci`, `ortografía`, `español`, `spellcheck`
+
+---

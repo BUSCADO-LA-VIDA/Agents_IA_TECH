@@ -1,7 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",  
-  "model": "nvidia/z-ai/glm-5.2",
-  "small_model": "nvidia/z-ai/glm-5.2",
+  "model": "deepseek-ai/DeepSeek-V4-Flash-0731",
+  "small_model": "deepseek-ai/DeepSeek-V4-Flash-0731",
   "default_agent": "build",
   "instructions": ["AGENTS.md"],
   "provider": {
@@ -9,7 +9,7 @@
       "name": "NVIDIA",
       "api": "openai",
       "options": {
-        "api_key": "${env:NVIDIA_API_KEY}",
+        "apiKey": "{env:NVIDIA_API_KEY}",
         "baseURL": "https://integrate.api.nvidia.com/v1"
       },
       "models": {
@@ -24,36 +24,38 @@
           "name": "DeepSeek V4 Flash (NVIDIA)",
           "tool_call": true,
           "temperature": true,
-          "limit": { "context": 128000, "output": 16384 }
+          "limit": {
+            "context": 128000,
+            "output": 16000
+          }
         }
       }
     },
-    "deepseek": {
-      "name": "DeepSeek",
+    "deepinfra": {
+      "name": "DeepInfra",
       "api": "openai",
       "options": {
-        "api_key": "${env:DEEPSEEK_API_KEY}",
-        "baseURL": "https://api.deepseek.com/v1"
+        "apiKey": "{env:chat.lm.secret.53001bd5}",
+        "baseURL": "https://deepinfra.com"
       },
       "models": {
-        "deepseek-chat": {
-          "name": "DeepSeek V3",
+        "deepseek-ai/DeepSeek-V4-Flash-0731": {
+          "name": "DeepSeek V4 Flash 0731",
           "tool_call": true,
           "attachment": true,
           "temperature": true,
-          "limit": { "context": 65536, "output": 8192 }
-        },
-        "deepseek-reasoner": {
-          "name": "DeepSeek R1",
-          "tool_call": false,
-          "attachment": true,
-          "temperature": false,
-          "limit": { "context": 65536, "output": 8192 }
+          "limit": {
+            "context": 128000,
+            "output": 16000
+          }
         }
       }
     }
   },
-  "enabled_providers": ["nvidia", "deepseek"],
+  "enabled_providers": [
+    "nvidia",
+    "deepinfra"
+  ],
   "permission": {
     "edit": "allow",
     "bash": {

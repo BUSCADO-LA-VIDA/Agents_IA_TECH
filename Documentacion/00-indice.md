@@ -87,7 +87,7 @@ Documentacion/
 
 | Agente | Rol | Estado |
 |--------|-----|--------|
-| `pensador` | Orquestador del ciclo completo: plan -> confirmar -> ejecutar -> actualizar -> preguntar | ✅ Actualizado 2026-07-24 |
+| `pensador` | Orquestador del ciclo completo: plan -> confirmar -> ejecutar -> actualizar -> preguntar. 🔌 Puede depurar en caliente vía SSH (solo lectura) | ✅ Actualizado 2026-08-19 |
 | `arquitecto` | Decisiones de arquitectura, ADRs, patrones | 🟢 Activo |
 | `documentador` | Documentación de specs, flujos, ADRs | 🟢 Activo |
 | `security-auditor` | Revisión de seguridad en diseños | 🟢 Activo |

@@ -1,0 +1,96 @@
+# 📋 Índice del Proyecto: Agents_IA_TECH
+*Última actualización: 2026-08-30*
+
+> Este archivo es la **memoria del proyecto** para los agentes. Lo leen primero para entender el contexto sin escanear todo. Los agentes documentales lo mantienen actualizado automáticamente.
+
+## Stack
+- Framework: (kit de agentes — sin framework de aplicación)
+- Lenguaje: Markdown / YAML
+- Base de datos: (ninguna — es configuración de agentes)
+- Infraestructura: GitHub Copilot + OpenCode
+
+## CI/CD (GitHub Actions)
+- `agentshield.yml` — Security scan de configs de agentes (`ecc-agentshield`, solo `.github/**`)
+- `security-scan.yml` — Detección de secrets (gitleaks) sobre todo el repo (push/PR)
+- `spellcheck.yml` — Revisión de ortografía (codespell) sobre `.md`/`.yaml`/`.yml` (push/PR)
+
+## Estructura del proyecto
+
+```
+Documentacion/
+└── Agents_IA_TECH/           ← 📁 Carpeta PROPIA de ESTE proyecto
+    ├── 00-indice.md          ← 📋 Este archivo
+    ├── idioma.md             ← 🌐 Config de idioma
+    ├── preferencias.md       ← 👤 Preferencias usuario
+    ├── preferencias-git.md   ← 🏷️ Flujo git
+    ├── referencias.md        ← 📖 Fuentes externas
+    ├── roadmap.md            ← 🗺️ Backlog evolutivos
+    ├── pendientes-implementacion.md ← 📋 Puente docs ↔ código
+    ├── soluciones-conocidas.md ← 📚 Soluciones recurrentes
+    ├── capacidad-base.md     ← 🏗️ Ref. a .doc_agents/capacidad-base.md
+    ├── memoria-proyecto.md   ← 🧠 Capacidades instaladas (plataformador)
+    │
+    ├── specs/                ← 📋 speckit ESCRIBE AQUÍ (spec/plan/tasks)
+    │   └── ...
+    │
+    ├── arquitectura/         ← 📐 Decisiones arquitectura
+    │   ├── adr/              ←   ADRs
+    │   └── diagramas/        ←   Diagramas Mermaid
+    │
+    ├── agents/               ← 🤖 Config agentes para ESTE proyecto
+    │   ├── pensador/spec.md
+    │   ├── arquitecto/spec.md
+    │   ├── documentador/spec.md
+    │   ├── security-auditor/spec.md
+    │   ├── api-developer/spec.md
+    │   ├── frontend-developer/spec.md
+    │   ├── devops/spec.md
+    │   ├── qa-senior/spec.md
+    │   ├── gitflow/spec.md
+    │   ├── solucionador/spec.md
+    │   └── plataformador/
+    │       ├── spec.md
+    │       ├── capacidad-base.md
+    │       └── memoria-proyecto.md
+    │
+    ├── bitacoras/            ← 📝 Bitácoras solucionador
+    │
+    ├── testing/              ← 🧪 Opcional — tests documentados
+    ├── seguridad/            ← 🔒 Opcional — auditorías
+    └── despliegue/           ← 🚀 Opcional — docs despliegue
+```
+
+> **Regla**: `Documentacion/Agents_IA_TECH/` es **propia de este proyecto**. NUNCA se copia ni sobrescribe. El kit transversal (`.github/`, `.opencode/`, `.doc_agents/`) SÍ se sincroniza con `sync-agents.ps1`.
+
+## ADRs activos
+<!-- Listar ADRs en Documentacion/Agents_IA_TECH/arquitectura/adr/ -->
+- (ninguno aún)
+
+## Features activas (specs)
+<!-- Listar specs en Documentacion/Agents_IA_TECH/specs/ -->
+- (ninguna aún)
+
+## Agentes del kit
+
+| Agente | Rol | Estado |
+|--------|-----|--------|
+| `pensador` | Orquestador del ciclo completo: plan -> confirmar -> ejecutar -> actualizar -> preguntar. Complementa Specify (no duplica). 🔌 Puede depurar en caliente vía SSH (solo lectura) | ✅ Actualizado 2026-08-30 |
+| `arquitecto` | Decisiones de arquitectura, ADRs, patrones, guardrails, spec linking | 🟢 Activo |
+| `documentador` | Documentación de specs, flujos, ADRs, template system, spec versioning | 🟢 Activo |
+| `security-auditor` | Revisión de seguridad en diseños | 🟢 Activo |
+| `api-developer` | Implementación backend/API | 🟢 Activo |
+| `frontend-developer` | Implementación frontend/UI | 🟢 Activo |
+| `devops` | Infraestructura, Docker, CI/CD | 🟢 Activo |
+| `qa-senior` | Tests automatizados (unit, integración, E2E), feedback loop | 🟢 Activo |
+| `gitflow` | Git operations, branching, PRs, commits convencionales | 🟢 Activo |
+| `solucionador` | 🔧 Diagnóstico y solución de problemas via SSH en servidores remotos | 🟢 Activo 2026-07-25 |
+| `plataformador` | 🏗️ Auditoría, nivelación y replataformado de proyectos contra capacidad-base. Organiza documentación. | 🟢 Activo 2026-07-25 |
+
+## Convenciones del proyecto
+
+- **Pensador = Orquestador principal** que complementa Specify, no lo duplica
+- **Specify maneja**: spec generation, validation, spec→plan, spec→code, template system, versioning, linking, guardrails, multi-file orchestration, feedback loop
+- **Mis agentes complementan**: SSH debugging (pensador, solucionador), plataformador (auditoría/nivelación), gitflow (commits), orchestración cross-agent
+- **Persistencia obligatoria**: Toda decisión/preferencia en archivo. Sin archivo no hay memoria entre sesiones.
+- **Plan aprobado → Documentar → Implementar** (siempre en ese orden)
+- **Español latino neutro** en toda comunicación

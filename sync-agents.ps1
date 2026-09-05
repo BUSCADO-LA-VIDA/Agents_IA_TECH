@@ -1,127 +1,158 @@
 <#
 .SYNOPSIS
-    Sincroniza .github/ y Documentacion/ desde Agents_IA_TECH al proyecto local.
+    Sincroniza el KIT TRANSVERSAL DE AGENTES desde el repo maestro.
 .DESCRIPTION
-    Descarga agentes, skills y prompts actualizados desde el repo central.
-    .github/ se sobreescribe siempre con la ultima version.
-    Documentacion/ solo crea estructura y archivos faltantes, nunca modifica existentes.
-    El script debe estar en la raiz del proyecto (junto a la carpeta .github/).
+    Descarga y actualiza SOLO los archivos transversales del kit:
+    - .github/ (agents, prompts, skills, copilot-instructions.md)
+    - .opencode/ (agents, commands, config.json)
+    - .doc_agents/ (estructura por app, capacidad-base, templates)
+    - .specify/memory/constitution.md (versión base)
+    - AGENTS.md, opencode.json, README.md, sync-agents.ps1
+    
+    NUNCA toca Documentacion/<AppName>/ de ninguna aplicación —  
+    cada app tiene su propia documentación aislada y propia.
+    
+    El script debe estar en la raiz del proyecto/repo (junto a .github/).
 .EXAMPLE
     .\sync-agents.ps1
+    .\sync-agents.ps1 -DryRun
 .NOTES
     Usa $env:TEMP para la clonacion temporal.
+    Parámetros: -DryRun (simula sin escribir), -Force (fuerza sobrescritura)
 #>
 
-$repoUrl  = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH.git"
-$tempDir  = Join-Path $env:TEMP "agents-sync-temp"
-$target   = Join-Path $PSScriptRoot ".github"
+param (
+    [string]$RepoUrl = "https://github.com/TU_USUARIO/TU_REPO_MAESTRO.git",
+    [switch]$DryRun,
+    [switch]$Force
+)
 
-# Validar que el target no sea un subdirectorio de .github/
+$tempDir = Join-Path $env:TEMP "agents-sync-temp"
+
+# Validar que el script esté en la raíz del proyecto
 $parentDir = Split-Path $PSScriptRoot -Leaf
-if ($parentDir -eq ".github" -or $PSScriptRoot -like "*\.github*") {
-    Write-Host "[ERROR] El script esta DENTRO de una carpeta .github/" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "  Estas en:          $PSScriptRoot" -ForegroundColor Yellow
-    Write-Host "  Deberias estar en: $(Split-Path $PSScriptRoot -Parent)" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "  Corre esto para moverlo:" -ForegroundColor Cyan
-    Write-Host "  move '$PSCommandPath' '$(Split-Path $PSScriptRoot -Parent)\sync-agents.ps1'" -ForegroundColor White
+if ($parentDir -eq ".github" -or $parentDir -eq ".opencode" -or $parentDir -eq ".doc_agents") {
+    Write-Host "[ERROR] El script está DENTRO de una carpeta del kit (.github/, .opencode/, .doc_agents/)" -ForegroundColor Red
+    Write-Host "  Estás en:          $PSScriptRoot" -ForegroundColor Yellow
+    Write-Host "  Deberías estar en: $(Split-Path $PSScriptRoot -Parent)" -ForegroundColor Green
     exit 1
 }
 
-Write-Host "Target: $target"
+Write-Host "=== Sincronización Kit Transversal de Agentes ===" -ForegroundColor Cyan
+Write-Host "Repo origen: $RepoUrl" -ForegroundColor Gray
+Write-Host "Modo: $(if ($DryRun) { 'DRY-RUN (simulación)' } else { 'REAL' })" -ForegroundColor Yellow
+Write-Host ""
 
 # 1. Limpiar temp si existe
 if (Test-Path $tempDir) {
-    Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+    if (-not $DryRun) { Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue }
 }
 
 # 2. Clonar shallow
-Write-Host "Clonando..." -NoNewline
-git clone --depth 1 $repoUrl $tempDir 2>$null
-if ($LASTEXITCODE -ne 0) {
-    Write-Host " ERROR" -ForegroundColor Red
-    Write-Error "No se pudo clonar el repo. Verifica que git este instalado y la URL sea correcta."
-    exit 1
+if (-not $DryRun) {
+    Write-Host "Clonando repo maestro..." -NoNewline
+    git clone --depth 1 $RepoUrl $tempDir 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host " ERROR" -ForegroundColor Red
+        Write-Error "No se pudo clonar el repo. Verifica git y URL."
+        exit 1
+    }
+    Write-Host " OK" -ForegroundColor Green
 }
-Write-Host " OK" -ForegroundColor Green
 
-# Definir rutas fuente
-$sourceGithub = Join-Path $tempDir ".github"
-$sourceDocs   = Join-Path $tempDir "Documentacion"
+# Rutas fuente en el repo clonado
+$sourceGithub   = Join-Path $tempDir ".github"
+$sourceOpencode = Join-Path $tempDir ".opencode"
+$sourceDocAgents = Join-Path $tempDir ".doc_agents"
+$sourceSpecify   = Join-Path $tempDir ".specify/memory/constitution.md"
+$sourceAgentsMd  = Join-Path $tempDir "AGENTS.md"
+$sourceOpencodeJson = Join-Path $tempDir "opencode.json"
+$sourceReadme    = Join-Path $tempDir "README.md"
+$sourceScript    = Join-Path $tempDir "sync-agents.ps1"
 
-# 2b. Capturar version del repo central
-$commitHash = (git -C $tempDir rev-parse --short HEAD 2>$null)
-$commitDate = (git -C $tempDir log -1 --format=%ci 2>$null)
-$syncInfo = @{
-    repo     = $repoUrl
-    commit   = $commitHash
-    date     = $commitDate
-    syncDate = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+# Capturar versión del repo maestro
+if (-not $DryRun) {
+    $commitHash = (git -C $tempDir rev-parse --short HEAD 2>$null)
+    $commitDate = (git -C $tempDir log -1 --format=%ci 2>$null)
+    Write-Host "Versión repo maestro: $commitHash ($commitDate)" -ForegroundColor Cyan
 }
-$syncInfo | ConvertTo-Json | Set-Content (Join-Path $sourceGithub "sync-info.json")
-Write-Host "Version: $commitHash ($commitDate)" -ForegroundColor Cyan
 
-# 2c. Auto-actualizar este script desde el repo central
-$sourceScript = Join-Path $tempDir "sync-agents.ps1"
+# Auto-actualizar este script
 $thisScript = $PSCommandPath
-if ((Test-Path $sourceScript) -and ((Get-FileHash $sourceScript).Hash -ne (Get-FileHash $thisScript).Hash)) {
+if (-not $DryRun -and (Test-Path $sourceScript) -and ((Get-FileHash $sourceScript).Hash -ne (Get-FileHash $thisScript).Hash)) {
     Copy-Item $sourceScript -Destination $thisScript -Force
-    Write-Host "Script actualizado. Re-ejecutando..." -ForegroundColor Yellow
-    & $thisScript
+    Write-Host "Script auto-actualizado. Re-ejecutando..." -ForegroundColor Yellow
+    & $thisScript @PSBoundParameters
     exit 0
 }
 
-# 3. Sincronizar .github/ — sobreescribe siempre
-if (-not (Test-Path $sourceGithub)) {
-    Write-Error "El repo clonado no contiene la carpeta .github/"
-    Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-    exit 1
-}
+# 3. Sincronizar archivos/carpetas transversales
+$transversalItems = @(
+    @{ Source = $sourceGithub;   Target = Join-Path $PSScriptRoot ".github";        Type = "Dir";  Label = ".github/" },
+    @{ Source = $sourceOpencode; Target = Join-Path $PSScriptRoot ".opencode";      Type = "Dir";  Label = ".opencode/" },
+    @{ Source = $sourceDocAgents;Target = Join-Path $PSScriptRoot ".doc_agents";    Type = "Dir";  Label = ".doc_agents/" },
+    @{ Source = $sourceSpecify;  Target = Join-Path $PSScriptRoot ".specify/memory/constitution.md"; Type = "File"; Label = ".specify/memory/constitution.md (base)" },
+    @{ Source = $sourceAgentsMd; Target = Join-Path $PSScriptRoot "AGENTS.md";       Type = "File"; Label = "AGENTS.md" },
+    @{ Source = $sourceOpencodeJson; Target = Join-Path $PSScriptRoot "opencode.json"; Type = "File"; Label = "opencode.json" },
+    @{ Source = $sourceReadme;   Target = Join-Path $PSScriptRoot "README.md";      Type = "File"; Label = "README.md" },
+    @{ Source = $sourceScript;   Target = Join-Path $PSScriptRoot "sync-agents.ps1"; Type = "File"; Label = "sync-agents.ps1" }
+)
 
-Write-Host "Sincronizando .github/ (sobreescribe)..." -NoNewline
-robocopy "$sourceGithub" "$target" /E /NDL /NFL /NJH /NJS >$null 2>&1
-Write-Host " OK" -ForegroundColor Green
+$updatedCount = 0
+$createdCount = 0
 
-# 4. Sincronizar Documentacion/ — solo crea archivos faltantes, no modifica existentes
-$targetDocs = Join-Path $PSScriptRoot "Documentacion"
-
-if (Test-Path $sourceDocs) {
-    Write-Host "Sincronizando Documentacion/ (solo faltantes)..." -NoNewline
+foreach ($item in $transversalItems) {
+    $src = $item.Source
+    $dst = $item.Target
+    $label = $item.Label
     
-    $addedCount = 0
+    if (-not (Test-Path $src)) {
+        Write-Host "  [SKIP] $label — no existe en repo maestro" -ForegroundColor DarkGray
+        continue
+    }
     
-    Get-ChildItem $sourceDocs -Recurse -File | ForEach-Object {
-        $relativePath = $_.FullName.Substring($sourceDocs.Length + 1)
-        $destPath = Join-Path $targetDocs $relativePath
-        
-        if (-not (Test-Path $destPath)) {
-            $destDir = Split-Path $destPath -Parent
-            if (-not (Test-Path $destDir)) {
-                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-            }
-            Copy-Item $_.FullName -Destination $destPath
-            $addedCount++
+    $dstDir = if ($item.Type -eq "File") { Split-Path $dst -Parent } else { $dst }
+    
+    if (-not (Test-Path $dstDir)) {
+        if (-not $DryRun) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
+        Write-Host "  [DIR]  Creando directorio: $dstDir" -ForegroundColor Green
+        $createdCount++
+    }
+    
+    if ($item.Type -eq "Dir") {
+        Write-Host "  [SYNC] $label" -ForegroundColor Cyan
+        if (-not $DryRun) {
+            robocopy "$src" "$dst" /E /NDL /NFL /NJH /NJS >$null 2>&1
+            $updatedCount++
+        }
+    } else {
+        Write-Host "  [FILE] $label" -ForegroundColor Cyan
+        if (-not $DryRun) {
+            Copy-Item $src -Destination $dst -Force
+            $updatedCount++
         }
     }
-    
-    if ($addedCount -gt 0) {
-        Write-Host " OK (+$addedCount archivos nuevos)" -ForegroundColor Green
-    } else {
-        Write-Host " OK (todo actualizado)" -ForegroundColor Green
-    }
 }
 
-# 5. Limpiar temp (Force para archivos readonly de git)
-Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+# 4. NUNCA tocar Documentacion/<AppName>/ — cada app tiene la suya propia
+Write-Host "" 
+Write-Host "=== EXCLUIDOS (NUNCA se tocan) ===" -ForegroundColor Yellow
+Write-Host "  Documentacion/<AppName>/  ← Documentación propia de cada app" -ForegroundColor DarkGray
+Write-Host "  src/                      ← Código de cada app" -ForegroundColor DarkGray
+Write-Host "  tests/                    ← Tests de cada app" -ForegroundColor DarkGray
+
+# 5. Limpiar temp
+if (-not $DryRun) {
+    Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 # 6. Resumen
-$countGithub = (Get-ChildItem $target -Recurse -File).Count
-Write-Host "`nSync completado." -ForegroundColor Green
-Write-Host "  Commit:   $commitHash ($commitDate)" -ForegroundColor Cyan
-Write-Host "  .github/: $countGithub archivos (sobreescrito)" -ForegroundColor Green
-if (Test-Path $targetDocs) {
-    $countDocs = (Get-ChildItem $targetDocs -Recurse -File).Count
-    Write-Host "  Documentacion/: $countDocs archivos (solo faltantes agregados)" -ForegroundColor Yellow
+if (-not $DryRun) {
+    Write-Host "`n=== Resumen ===" -ForegroundColor Green
+    Write-Host "  Directorios creados: $createdCount" -ForegroundColor Green
+    Write-Host "  Items actualizados:  $updatedCount" -ForegroundColor Green
+    Write-Host "  Commit:              $commitHash ($commitDate)" -ForegroundColor Cyan
+    Write-Host "`n  Verifica cambios con: git diff .github/ .opencode/ .doc_agents/" -ForegroundColor Gray
+} else {
+    Write-Host "`n[DRY-RUN] Simulación completada. Ejecuta sin -DryRun para aplicar." -ForegroundColor Yellow
 }
-Write-Host "`n  Verifica cambios con: git diff .github/" -ForegroundColor Gray

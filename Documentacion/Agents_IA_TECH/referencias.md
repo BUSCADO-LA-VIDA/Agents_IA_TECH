@@ -9,6 +9,7 @@
 |----------|-----|----------|----------------------|
 | **Ponytail** | https://github.com/affaan-m/Ponytail | MIT | Principios de eficiencia: YAGNI, reutilización, mínimo código funcional |
 | **spec-kit** | https://github.com/github/spec-kit | MIT | Capacidades de spec-driven development: spec generation, validation, spec→plan, spec→code, template system, versioning, linking, guardrails, multi-file orchestration, feedback loop |
+| **graphify** | https://github.com/tomasgraph/graphify | (verificar) | Knowledge graph: convierte código/docs/imágenes en grafo de conocimiento persistente con god nodes, community detection y herramientas de query/path/explain |
 
 ## Capacidades de Specify vs Mis Agentes (Análisis de complementariedad)
 

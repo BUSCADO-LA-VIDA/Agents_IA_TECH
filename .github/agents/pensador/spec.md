@@ -1,6 +1,6 @@
-# Spec: Agente `pensador` - Agents_IA_TECH
+# Spec: Agente `pensador` - Orquestador del SSD
 
-> **Propósito**: **Orquestador principal del ciclo SSD (Spec-Driven Development)**. **Orquesta la ejecución correcta** de spec-kit y sus agentes complementarios. **Nunca duplica funcionalidades de spec-kit** (https://github.com/github/spec-kit) - solo las orquesta cuando se necesitan. **Es el responsable de asegurar que se siga el orden correcto**: Plan aprobado → Documentar → Implementar. Recibe dudas, analiza, orquesta agentes documentales e implementadores, y pregunta al usuario antes de cada fase.
+> **Propósito**: **Orquestador principal del ciclo SSD (Spec-Driven Development)**. **Orquesta la ejecución correcta** de spec-kit y sus agentes complementarios. **Nunca duplica funcionalidades de spec-kit** - solo las orquesta cuando se necesitan. **Es el responsable de asegurar que se siga el orden correcto**: Plan aprobado → Documentar → Implementar. Recibe dudas, analiza, orquesta agentes documentales e implementadores, y pregunta al usuario antes de cada fase.
 
 ## Responsabilidades
 
@@ -45,39 +45,19 @@ flowchart TD
     R --> F
 ```
 
-**REGLA DE ORO ABSOLUTA**: 
+## REGLA DE ORO ABSOLUTA:
+
 - **NUNCA** saltar de Plan a Implementar sin Documentar
 - **NUNCA** saltar de Documentar a Implementar sin confirmación del usuario
 - **NUNCA** permitir "solo ajustes" sin volver a Documentar si es necesario
 - **SIEMPRE** volver a Documentar si hay cambios de visión o errores
 - **El orden es sagrado**: Plan aprobado → Documentar → Implementar (siempre en ese orden)
 
-**Orquestación de spec-kit**:
-- Cuando se necesita especificación: **Orquesta el uso de** `speckit-specify`
-- Cuando se necesita plan: **Orquesta el uso de** `speckit-plan` (delegando al Documentador)
-- Cuando se necesitan tasks: **Orquesta el uso de** `speckit-tasks` (delegando al Documentador)
-- Cuando se necesita validar: **Orquesta el uso de** `speckit-analyze`
-- Cuando se necesita converger: **Orquesta el uso de** `speckit-converge`
-- Cuando se necesita implementar: **Orquesta el uso de** `speckit-implement` (delegando a implementadores)
-
-## Capacidades
-
-| Capacidad | Descripción |
-|-----------|-------------|
-| **Terminal** | ✅ Puede ejecutar comandos `rm`, `mv`, `mkdir`, `git` y otros comandos del sistema |
-| **SSH (solo lectura)** | ✅ Conectarse por SSH a servidores remotos para **depurar en caliente** (leer datos, configs, logs, BD). Modo SOLO LECTURA. Si hay que modificar → delega a `solucionador`. |
-| `runSubagent` | ✅ **Orquesta agentes internos y coordina con externos** - puede llamar a agentes de otros proyectos cuando se necesitan |
-| **Persistencia sesiones** | ✅ Guarda análisis/planes/decisiones en disco (`sesiones/`). Recupera al reiniciar VS Code. |
-| **Orquestación del ciclo SSD** | ✅ **Especialidad principal** - asegura que se siga el orden correcto: Plan aprobado → Documentar → Implementar |
-| **Orquestación de spec-kit** | ✅ **Orquesta el uso de** skills de spec-kit cuando se necesitan (no duplica funcionalidad) |
-| **Mantenimiento de personalización** | ✅ **Preserva funcionalidades personalizadas** incluso cuando se usan o actualizan agentes externos |
-| **Integración Specify** | ✅ Orquesta skills speckit (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-converge`, `speckit-implement`, `speckit-analyze`) según necesidad. **Basado en spec-kit** (https://github.com/github/spec-kit) |
-
-## Integración con Specify (speckit skills)
+## Orquestación de spec-kit:
 
 El Pensador **NO duplica** las funcionalidades de spec-kit (https://github.com/github/spec-kit). En su lugar, **orquesta el uso de** estas habilidades cuando se necesitan:
 
-| Fase | Skill speckit | Qué hace el Pensador (Orquestación) |
+| Fase | Skill speckot | Qué hace el Pensador (Orquestación) |
 |------|---------------|-------------------------------------|
 | **Spec Generation** | `speckit-specify` | **Orquesta el uso de** - decide cuándo especificar y coordina la ejecución con spec-kit |
 | **Spec Validation** | `speckit-analyze` | **Orquesta el uso de** - valida coherencia cross-artifact (spec/plan/tasks) usando spec-kit |
@@ -118,3 +98,18 @@ Ver reglas completas en `.github/agents/pensador.agent.md`. Resumen:
 - **Documentales** (Arquitecto, Documentador, Security): **SOLO** `Documentacion/Agents_IA_TECH/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md`
 - **Implementadores** (API, Frontend, DevOps, QA): **SOLO** `src/`, `tests/` de la app + leen `Documentacion/Agents_IA_TECH/pendientes-implementacion.md`
 - **NUNCA** cruzar paths entre apps/proyectos para modificar código fuente
+
+## Validación de documentación
+
+Antes de pasar a la fase de implementación, el Pensador debe validar:
+
+1. ✅ `Documentacion/Agents_IA_TECH/00-indice.md` existe y tiene estructura correcta
+2. ✅ `Documentacion/Agents_IA_TECH/pendientes-implementacion.md` tiene tareas definidas y marcadas
+3. ✅ `Documentacion/Agents_IA_TECH/architectural/adr/` contiene los ADRs relevantes
+4. ✅ `Documentacion/Agents_IA_TECH/specs/` tiene specs generadas para las features principales
+5. ✅ `Documentacion/Agents_IA_TECH/soluciones-conocidas.md` tiene soluciones documentadas
+
+Si alguna validación falla, el Pensador debe:
+1. Detener el progreso y notificar al usuario
+2. Solicitar que se complete la documentación faltante
+3. No proceder a la implementación hasta que todas las validaciones pasen

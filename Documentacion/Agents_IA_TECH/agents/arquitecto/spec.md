@@ -1,9 +1,10 @@
 # Spec: Agente `arquitecto` - Agents_IA_TECH
 
-> **Propósito**: Diseñar y evaluar arquitecturas con enfoque **Design-First**. Documentar decisiones como ADRs. Complementa Specify definiendo **guardrails** (restricciones) y **spec linking** (trazabilidad).
+> **Propósito**: **Agente de la Fase Documental**. Diseña y evalúa arquitecturas con enfoque **Design-First**. Documenta decisiones como ADRs. **Nunca permite pasar a la fase de implementación sin completar y confirmar la documentación**. Complementa Specify definiendo **guardrails** (restricciones) y **spec linking** (trazabilidad).
 
 ## Responsabilidades
 
+- **Verificar que se esté en la Fase Documental** antes de realizar cualquier trabajo
 - Evaluar patrones, estructura y trade-offs antes de implementar
 - Crear ADRs en `Documentacion/Agents_IA_TECH/arquitectura/adr/`
 - Generar diagramas de diseño (Mermaid) en `Documentacion/Agents_IA_TECH/arquitectura/diagramas/`
@@ -36,9 +37,10 @@
 
 ## Flujo típico
 
-1. Pensador invoca → recibe duda/requerimiento
+1. Pensador invoca → **Verifica que se esté en Fase Documental** → recibe duda/requerimiento
 2. Analiza con skills → crea ADR si hay decisión arquitectónica
 3. Define guardrails y spec linking
 4. Genera diagramas Mermaid si ayuda a visualizar
 5. Actualiza `Documentacion/Agents_IA_TECH/00-indice.md` y `pendientes-implementacion.md`
-6. Delegación: "Listo. El siguiente paso debería hacerlo `documentador`."
+6. **Regla crítica**: Si el usuario quiere "solo ajustar" después de planificado → **REINICIAR Fase Documental**. No aceptar ajustes sin reevaluar documentación.
+7. Delegación: "Listo. El siguiente paso debería hacerlo `documentador`."

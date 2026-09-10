@@ -1,0 +1,33 @@
+# Manifest de Dependencias Externas
+# Este archivo lista todos los proyectos externos que el agente upgrade_framework gestiona
+# Al clonar el repositorio principal, este manifest indica qué proyectos externos descargar
+# y qué versiones se deben usar
+
+dependencias_externas:
+  - nombre: spec-kit
+    url: https://github.com/github/spec-kit
+    rama: main
+    version_actual: v0.0.0  # Se actualizará en la primera ejecución
+    ultimo_check: 2026-09-05
+    componentes_a_copiar:
+      - src/speckit-specify/ → .github/skills/speckit-specify/
+      - src/speckit-plan/ → .github/skills/speckit-plan/
+      - src/speckit-tasks/ → .github/skills/speckit-tasks/
+      - src/speckit-converge/ → .github/skills/speckit-converge/
+      - src/speckit-implement/ → .github/skills/speckit-implement/
+      - src/speckit-analyze/ → .github/skills/speckit-analyze/
+      - src/speckit-checklist/ → .github/skills/speckit-checklist/
+
+  - nombre: graphify
+    url: https://github.com/tomasgraph/graphify
+    rama: main
+    version_actual: v0.0.0
+    ultimo_check: 2026-09-05
+    componentes_a_copiar:
+      - bin/graphify → .opencode/bin/
+      - lib/ → .opencode/lib/graphify/
+
+# Historial de cambios del manifest
+# Formato: [YYYY-MM-DD] Descripción del cambio
+# [2026-09-05] Manifiesto inicial creado con spec-kit y graphify como dependencias base
+# [2026-09-05] Análisis de impacto completado. Clonado pendiente (requiere ejecución de git clone en proyect_ext/). Ver Documentacion/Agents_IA_TECH/agents/upgrade_framework/2026-09-05-integracion-dependencias.md

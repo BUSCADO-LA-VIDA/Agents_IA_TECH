@@ -18,6 +18,63 @@ The project must work seamlessly with both GitHub Copilot and VS Code Opencode. 
 ### V. Observability and Monitoring
 All agent interactions, decisions, and errors must be fully observable. Structured logging, tracing, and monitoring are non-negotiable. Every agent must emit traceable events for its lifecycle events, decisions, and errors.
 
+### VI. Gestión de Dependencias Externas y Estructura proyect_ext
+
+Para gestionar eficientemente múltiples proyectos externos (spec-kit, graphify, herramientas de seguridad, etc.) sin comprometer la integridad del proyecto principal, se establece la siguiente estructura y protocolo:
+
+#### Estructura de Directorios
+- **proyect_ext/** - Directorio raíz para clonar y mantener todos los proyectos externos
+  - **proyect_ext/spec-kit/** - Clon del repositorio https://github.com/github/spec-kit
+  - **proyect_ext/graphify/** - Clon del repositorio de graphify (u otras herramientas)
+  - **proyect_ext/[nombre-herramienta]/** - Cada proyecto externo en su propio subdirectorio
+- **Manifest de Dependencias** - Archivo que lista todos los proyectos externos, sus versiones y URLs
+
+#### Protocolo de Trabajo
+1. **Clonación inicial**: Todos los proyectos externos se clonan bajo proyect_ext/ usando el manifest de dependencias
+2. **Actualización controlada**: El agente `upgrade_framework` gestiona actualizaciones desde proyect_ext/ hacia el proyecto principal
+3. **Integración dirigida**: Solo se copian los componentes necesarios (agentes, skills, scripts, configuración) desde proyect_ext/ a las rutas correctas en Agents_IA_TECH/
+4. **Personalización preservada**: Los cambios de configuración del usuario en Agents_IA_TECH/ nunca se sobrescriben
+5. **Manifest actualizado**: Después de cada actualización exitosa, se actualiza el manifest para reflejar las nuevas versiones
+
+#### Archivo Manifest de Dependencias (dependencias-manifest.yml)
+Este archivo debe mantenerse en la raíz del proyecto y contiene:
+```yaml
+dependencias_externas:
+  - nombre: spec-kit
+    url: https://github.com/github/spec-kit
+    rama: main
+    version_actual: vX.Y.Z  # Actualizado automáticamente
+    ultimo_check: YYYY-MM-DD
+    componentes_a_copiar:
+      - src/speckit-specify/ → .github/skills/speckit-specify/
+      - src/speckit-plan/ → .github/skills/speckit-plan/
+      - [otros componentes específicos]
+  - nombre: graphify
+    url: https://github.com/tomasgraph/graphify
+    rama: main
+    version_actual: vA.B.C
+    ultimo_check: YYYY-MM-DD
+    componentes_a_copiar:
+      - bin/graphify → .opencode/bin/
+      - lib/ → .opencode/lib/graphify/
+      - [otros componentes específicos]
+```
+
+### Beneficios de esta Estructura
+- **Reproducibilidad**: Al clonar el repositorio principal, el manifest indica exactamente qué proyectos externos descargar
+- **Actualizaciones controladas**: Cada proyecto externo se puede actualizar independientemente
+- **Integración selectiva**: Solo se copian los componentes necesarios, evitando conflictos y bloat
+- **Personalización preservada**: Los cambios locales del usuario nunca se pierden durante las actualizaciones
+- **Rollback seguro**: Fácil de volver a versiones anteriores si una actualización causa problemas
+- **Escalabilidad**: Fácil de agregar nuevos proyectos externos siguiendo el mismo patrón
+
+### Responsabilidad del Agente upgrade_framework
+El agente `upgrade_framework` es responsable de:
+- Mantener actualizado el manifest de dependencias
+- Gestionar el directorio proyect_ext/
+- Ejecutar el flujo de integración dirigida desde proyect_ext/ hacia Agents_IA_TECH/
+- Notificar al Pensador cuando las actualizaciones requieren revisión de orquetación
+
 ## Additional Constraints
 
 ### Technology Stack Requirements

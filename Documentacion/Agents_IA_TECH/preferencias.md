@@ -29,3 +29,7 @@
 | 2026-07-25 | Creación inicial. Reglas de git y persistencia de comportamiento. |
 | 2026-08-05 | Añadidas preferencias de idioma (español latino neutro) y enlazado de commits tras implementación. |
 | 2026-08-30 | Reestructuración: Pensador complementa Specify, persistencia de sesiones, ciclo obligatorio plan-doc-impl, plataformador organiza docs. |
+| 2026-09-05 | **Ciclo Plan→Doc→Impl siempre vigente**: NUNCA permitir saltar de Plan a Implementar sin Documentar, NUNCA saltar de Documentar a Implementar sin confirmación del usuario, NUNCA permitir "solo ajustes" sin volver a Documentar si es necesario, SIEMPRE volver a Documentar si hay cambios de visión o errores. El orden es sagrado: Plan aprobado → Documentar → Implementar (siempre en ese orden) | workflow |
+| 2026-09-05 | **Detección de causa raíz en debugging**: Siempre buscar causa raíz, no ajustes superficiales. Si error reaparece → regresar a causa raíz documentada, no a ajustes parciales. Documentar el fix siempre. | debugging |
+| 2026-09-05 | **Reinicio automático al cambio de visión**: Si el usuario cambia de visión en cualquier punto del proceso → REINICIAR el ciclo completo desde el análisis inicial | workflow |
+| 2026-09-05 | **Agente de dependencias externas**: El agente `upgrade_framework` se encarga de mantener actualizadas de forma segura las dependencias de proyectos comunitarios (spec-kit, graphify, etc.). Usa IA solo para analizar cómo los cambios afectan la integración existente, nunca repite flujos completos de análisis. | mantenimiento |

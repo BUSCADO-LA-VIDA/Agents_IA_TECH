@@ -85,12 +85,12 @@ Documentacion/
 | `gitflow` | Git operations, branching, PRs, commits convencionales | 🟢 Activo |
 | `solucionador` | 🔧 Diagnóstico y solución de problemas via SSH en servidores remotos | 🟢 Activo 2026-07-25 |
 | `plataformador` | 🏗️ Auditoría, nivelación y replataformado de proyectos contra capacidad-base. Organiza documentación. | 🟢 Activo 2026-07-25 |
+| `upgrade_framework` | 🔧 Mantenedor inteligente de dependencias externas. Gestiona proyect_ext/, clona/actualiza proyectos externos (spec-kit, graphify, etc.), y ejecuta integraciones dirigidas desde proyect_ext/ hacia Agents_IA_TECH/ usando plantillas predefinidas. Usa IA solo para analizar impacto de integración. | 🟢 Activo 2026-09-05 |
 
 ## Convenciones del proyecto
 
 - **Pensador = Orquestador principal** que complementa Specify, no lo duplica
 - **Specify maneja**: spec generation, validation, spec→plan, spec→code, template system, versioning, linking, guardrails, multi-file orchestration, feedback loop
-- **Mis agentes complementan**: SSH debugging (pensador, solucionador), plataformador (auditoría/nivelación), gitflow (commits), orchestración cross-agent
-- **Persistencia obligatoria**: Toda decisión/preferencia en archivo. Sin archivo no hay memoria entre sesiones.
+- **Mis agentes complementan**: SSH debugging (pensador, solucionador), plataformador (auditoría/nivelación), gitflow (commits), orchestración cross-agent- **Mantenedor de dependencias**: `dependencias` - verifica y actualiza de forma segura proyectos comunitarios externos sin repetir análisis de flujos- **Persistencia obligatoria**: Toda decisión/preferencia en archivo. Sin archivo no hay memoria entre sesiones.
 - **Plan aprobado → Documentar → Implementar** (siempre en ese orden)
 - **Español latino neutro** en toda comunicación

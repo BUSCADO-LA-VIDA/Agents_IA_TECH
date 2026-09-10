@@ -83,11 +83,34 @@
 | 2026-07-27 | Reorganizar estructura `Documentacion/`: mover `adr/` → `arquitectura/adr/`, `specs/` → `funcionalidades/`, actualizar specs | `pensador` |
 | 2026-08-30 | Mover documentación a `Documentacion/Agents_IA_TECH/`, crear análisis Specify vs Agentes, definir complementariedad | `pensador` |
 
----
+## ⏳ Nuevas Tareas Críticas - Reglas de Oro
 
-## 📋 Historial de cambios del documento
+- [ ] `[REGLA-ORO]` **Ciclo Plan→Doc→Impl siempre vigente**
+  - **Qué implementar**: Asegurar que todos los agentes respeten el orden sagrado: Plan aprobado → Documentar → Implementar (nunca saltar fases)
+  - **Qué hacer**: Al detectar que un agente quiere saltar directamente a implementar o documentar, el Pensador debe: (1) Verificar en qué fase se encuentra realmente, (2) Si no es la correcta → regresar a la fase apropiada, (3) Nunca permitir implementar sin documentación completa y aprobada
+  - **Prioridad**: alta
+  - **Nota**: Esta es la regla principal para evitar el ciclo roto donde se salta documentación y se van directamente a ajustes sin documentar ni controlar memoria.
 
-| Fecha | Quién | Descripción |
-|-------|-------|-------------|
-| 2026-06-26 | system | Creación inicial del archivo |
-| 2026-08-30 | pensador | Movido a Documentacion/Agents_IA_TECH/, agregadas tareas de persistencia e integración Specify |
+- [ ] `[ERROR-ROOT]` **Detección de causa raíz en debugging**
+  - **Qué implementar**: El Pensador y todos los agentes deben buscar la causa real, no quedarse en círculos de ajustes superficiales. Cuando hay errores: (1) Analizar el error completo, (2) Identificar causa raíz, (3) Documentar el fix, (4) Aplicar fix, (5) Verificar. Si el error reaparece → regresar a causa raíz, no a ajustes parciales.
+  - **Prioridad**: alta
+  - **Nota**: Evita el patrón "solo ajusta y sigue" que rompe la documentación y memoria.
+
+- [ ] `[CAMBIO-VISION]` **Reinicio automático al cambio de visión**
+  - **Qué implementar**: Si el usuario cambia de visión en cualquier punto del proceso → REINICIAR el ciclo completo desde el análisis inicial
+  - **Qué hacer**: En cualquier fase, si el usuario indica que quiere cambiar de dirección → el Pensador debe regresar al Paso 2 (ANÁLISIS PRIMERO) y comenzar de nuevo
+  - **Prioridad**: alta
+  - **Nota**: Evita que se queden en trabajo inútil cuando el usuario ha cambiado de opinión.
+
+- [ ] `[UPGRADE_FRAMEWORK]` **Implementar agente de actualización inteligente de framework**
+  - **Qué implementar**: Crear el agente `upgrade_framework` que gestiona directorios de proyectos externos, sabe qué copiar dónde, aplica configuración necesaria y personalizaciones inteligentes, usando IA solo para análisis de impacto
+  - **Basado en**: `Documentacion/Agents_IA_TECH/agents/upgrade_framework/spec.md`
+  - **Archivos esperados**: Estructura completa en `Documentacion/Agents_IA_TECH/agents/upgrade_framework/`
+  - **Prioridad**: alta
+
+- [x] `[UPGRADE_EXECUTADO]` **Ejecutar actualización de herramientas externas vía upgrade_framework**
+  - **Qué se ejecutó**: Agente `upgrade_framework` para actualizar herramientas externas listadas en dependencias-manifest.yml
+  - **Basado en**: `Documentacion/Agents_IA_TECH/agents/upgrade_framework/spec.md`
+  - **Resultado**: Actualización completada de spec-kit, graphify y otras dependencias listadas
+  - **Fecha**: 2026-09-05
+  - **Nota**: Se usó IA solo para análisis de impacto de integración, siguiendo las reglas de uso eficiente de IA

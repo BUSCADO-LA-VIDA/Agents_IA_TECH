@@ -21,6 +21,8 @@
 | 2026-08-30 | **Persistencia de sesiones**: Guardar análisis/decisiones en disco. Al reiniciar VS Code, usar como base conceptual antes de borrar. Preguntar antes de borrar ("¿Querés guardar esta propuesta?"). | workflow |
 | 2026-08-30 | **Ciclo obligatorio**: Plan aprobado → Documentar → Implementar. Siempre en ese orden. | workflow |
 | 2026-08-30 | **Plataformador organiza documentación**: Es el agente que permite organizar la documentación del proyecto. | arquitectura |
+| 2026-09-12 | **Flujos/diagramas aprobados van a la documentación**: Cuando el Pensador (o cualquier agente) propone flujos o diagramas Mermaid y el usuario los aprueba, el `documentador` debe incluirlos en la documentación correspondiente (spec, ADR, guía, README). No dejar los flujos solo en la conversación. | documentación |
+| 2026-09-12 | **Agentes en ambos harness (Copilot + OpenCode)**: Todo agente del kit se crea SIEMPRE en paralelo en `.github/agents/<nombre>.agent.md` (GitHub Copilot) y `.opencode/agents/<nombre>.md` (OpenCode). Nunca en un solo harness. Mantener en sincronía. | estructura |
 
 ## Historial de cambios
 
@@ -33,3 +35,5 @@
 | 2026-09-05 | **Detección de causa raíz en debugging**: Siempre buscar causa raíz, no ajustes superficiales. Si error reaparece → regresar a causa raíz documentada, no a ajustes parciales. Documentar el fix siempre. | debugging |
 | 2026-09-05 | **Reinicio automático al cambio de visión**: Si el usuario cambia de visión en cualquier punto del proceso → REINICIAR el ciclo completo desde el análisis inicial | workflow |
 | 2026-09-05 | **Agente de dependencias externas**: El agente `upgrade_framework` se encarga de mantener actualizadas de forma segura las dependencias de proyectos comunitarios (spec-kit, graphify, etc.). Usa IA solo para analizar cómo los cambios afectan la integración existente, nunca repite flujos completos de análisis. | mantenimiento |
+| 2026-09-12 | **Flujos/diagramas aprobados van a la documentación**: El `documentador` debe persistir en la documentación los flujos/diagramas Mermaid que el usuario apruebe. | documentación |
+| 2026-09-12 | **Agentes en ambos harness (Copilot + OpenCode)**: Todo agente del kit se crea en paralelo en `.github/agents/` y `.opencode/agents/`. | estructura |

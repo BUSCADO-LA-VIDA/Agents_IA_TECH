@@ -13,6 +13,7 @@
 - Actualizar `Documentacion/Agents_IA_TECH/pendientes-implementacion.md` con tareas concretas
 - Actualizar `Documentacion/Agents_IA_TECH/00-indice.md` con nuevas entradas
 - **Spec linking** (trazabilidad): vincular specs → ADRs → código (coordinado con Arquitecto)
+- **Persistir flujos/diagramas aprobados**: Cuando el `pensador` (o cualquier agente) presenta una propuesta con **flujos o diagramas Mermaid** y el **usuario los aprueba**, el Documentador debe **incluirlos en la documentación** correspondiente (specs, ADRs, guías, README). Los diagramas aprobados son parte del diseño y deben quedar persistidos, no solo mostrados en la conversación.
 
 ## Skills utilizados
 
@@ -61,6 +62,7 @@ El Documentador **NO duplica** las funcionalidades de spec-kit (https://github.c
    - **Toma la salida del checklist como entrada** para validar y complementar su trabajo de documentación
    - Usa los resultados para mejorar specs, planos o tasks según sea necesario
 5. **Regla crítica**: Si el usuario quiere "solo ajustar" después de planificado → **REINICIAR Fase Documental**. No generar tasks ni código sin spec y plan completos y aprobados.
-6. Actualiza `pendientes-implementacion.md` con tareas para implementadores
-7. Actualiza `00-indice.md`
-8. Delegación: "Listo. El siguiente paso debería hacerlo `api-developer` / `frontend-developer` / `devops` según corresponda."
+6. **Persistir flujos aprobados**: Si en la propuesta del Pensador hay **diagramas Mermaid / flujos** que el usuario **aprobó**, copiarlos a la documentación (spec, ADR, guía o README) en formato ```` ```mermaid ````. No dejar los flujos solo en la conversación.
+7. Actualiza `pendientes-implementacion.md` con tareas para implementadores
+8. Actualiza `00-indice.md`
+9. Delegación: "Listo. El siguiente paso debería hacerlo `api-developer` / `frontend-developer` / `devops` según corresponda."

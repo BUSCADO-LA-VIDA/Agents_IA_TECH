@@ -9,6 +9,9 @@
 - [ ] **Integración Specify + Pensador completa**: Definir específicamente qué skills de speckit invoca Pensador y en qué orden.
 - [ ] **Plataformador v2**: Auditoría automática contra `.doc_agents/capacidad-base.md` con reporte detallado y auto-nivelación opcional.
 - [ ] **MCP codebase-memory-mcp**: Configurar agentes para usar grafo de conocimiento del código (index_repository, query, semantic_search).
+- [ ] **Integración MCP context-mode**: Instalar y configurar `context-mode` (`.vscode/mcp.json`, hooks, fusión de `copilot-instructions.md`) para optimizar la ventana de contexto del kit. Guía: `Documentacion/Agents_IA_TECH/MCPs/context-mode.md`.
+- [ ] **Ecosistema de documentación técnica sin IA de entrada**: Integrar el pipeline completo (markitdown → graphify/codebase-memory-mcp → context-mode) + agente `analista_tecnico` + archivo de memoria `analisis-memoria.md`. Plan aprobado: `README-ECOSISTEMA-DOCUMENTACION.md`; ADR: `arquitectura/adr/adr-0001-ecosistema-documentacion-sin-ia.md`. Guías: `MCPs/markitdown.md`, `MCPs/codebase-memory-mcp.md`.
+- [ ] **Integración MCP markitdown**: Instalar y configurar `markitdown` + `markitdown-mcp` (`.vscode/mcp.json`) para convertir cualquier formato a Markdown sin IA. Guía: `Documentacion/Agents_IA_TECH/MCPs/markitdown.md`.
 
 ## Mejoras medias
 

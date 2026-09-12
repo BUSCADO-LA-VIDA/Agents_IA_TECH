@@ -14,6 +14,7 @@
 - Actualizar `Documentacion/Agents_IA_TECH/00-indice.md` con nuevas entradas
 - **Spec linking** (trazabilidad): vincular specs → ADRs → código (coordinado con Arquitecto)
 - **Persistir flujos/diagramas aprobados**: Cuando el `pensador` (o cualquier agente) presenta una propuesta con **flujos o diagramas Mermaid** y el **usuario los aprueba**, el Documentador debe **incluirlos en la documentación** correspondiente (specs, ADRs, guías, README). Los diagramas aprobados son parte del diseño y deben quedar persistidos, no solo mostrados en la conversación.
+- **Documentar MCPs del ecosistema**: mantener las guías prácticas en `Documentacion/Agents_IA_TECH/MCPs/<mcp>.md` (instalación, configuración, uso, mantenimiento) para cada MCP del ecosistema (markitdown, codebase-memory-mcp, context-mode). Si un MCP no tiene guía → crearla. Usar las herramientas MCP (`ctx_search`, `query`, `semantic_search`) para contexturar specs y decisiones.
 
 ## Skills utilizados
 

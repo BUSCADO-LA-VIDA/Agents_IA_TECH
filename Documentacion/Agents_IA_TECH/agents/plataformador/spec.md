@@ -24,6 +24,20 @@
 - **Siempre que se ejecuta**: verifica `Documentacion/<AppName>/` contra `.doc_agents/estructura-estandar.md`
 - **Siempre que se ejecuta**: documenta el proyecto con estructura correcta o reorganiza la existente
 
+## Validación de MCPs y documentación técnica (transparente)
+
+El plataformador **valida la existencia de la documentación técnica y los MCPs asociados** en cada ejecución, e instala los que falten de forma transparente:
+
+1. **Verificar documentación técnica**: para cada MCP del ecosistema (markitdown, codebase-memory-mcp, context-mode), comprobar que existe su guía en `Documentacion/Agents_IA_TECH/MCPs/<mcp>.md` y su revisión de seguridad en `Documentacion/Agents_IA_TECH/seguridad/<mcp>.md`. Si falta → orquestar al `documentador` y `security-auditor` para crearlas.
+2. **Verificar instalación del MCP**: comprobar que el comando del MCP responde (ej. `markitdown --version`, `codebase-memory-mcp --version`, `context-mode --version`). Si no está instalado → instalarlo (`pip install 'markitdown[all]'`, `npm install -g codebase-memory-mcp`, `npm install -g context-mode`).
+3. **Verificar registro en `.vscode/mcp.json`**: comprobar que cada MCP tiene su entrada. Si falta → agregarla.
+4. **Verificar hooks** (solo context-mode): comprobar que existe `.github/hooks/context-mode.json`. Si falta → crearlo.
+5. **Registrar en `memoria-proyecto.md`**: actualizar el estado de cada MCP (🟢 instalado / 🟡 en integración).
+6. **Registrar en `dependencias-manifest.yml`**: si el MCP es una dependencia externa, registrarla (o delegar a `upgrade_framework`).
+7. **Preguntar antes de instalar**: si un MCP no está instalado, **preguntar al usuario** antes de ejecutar la instalación (regla de oro: no ejecutar acciones de nivelación sin confirmación).
+
+> **Regla**: la validación de MCPs es **transparente** — el plataformador la hace automáticamente en cada ejecución, sin que el usuario tenga que pedirla. Pero la **instalación** de un MCP faltante siempre requiere confirmación del usuario.
+
 ## Documentación del proyecto (obligatoria en cada ejecución)
 
 El plataformador **siempre** asegura que el proyecto quede documentado con estructura correcta:

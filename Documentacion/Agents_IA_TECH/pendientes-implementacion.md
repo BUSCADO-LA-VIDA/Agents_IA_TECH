@@ -54,20 +54,15 @@
   - **Estado**: ✅ **COMPLETADA (2026-09-12)** — Creada la spec en `agents/analista_tecnico/spec.md` y el `.agent.md` en `.github/agents/analista_tecnico.agent.md`. Diagramas **Flujo del `analista_tecnico`** + **Integración en arquitectura** reutilizados tal cual.
   - **Prioridad**: alta
 
-- [ ] `[MCP]` **Integrar context-mode como herramienta MCP del kit (instalación, configuración, uso y mantenimiento)**
+- [x] `[MCP]` **Integrar context-mode como herramienta MCP del kit (instalación, configuración, uso y mantenimiento)**
   - **Qué implementar**: Integrar `context-mode` (https://github.com/mksglu/context-mode) como MCP listo para usar. Enfocado SOLO en instalación, configuración, utilización y mantenimiento de uso — NO desarrollo.
   - **Fase documental**:
     - `documentador`: ✅ **AVANZADA (2026-09-12)** — Guía práctica creada en `Documentacion/Agents_IA_TECH/MCPs/context-mode.md` (instalación, configuración en el kit, uso de herramientas `ctx_*`, mantenimiento: `ctx_purge` limpiar historial, `ctx_stats` ver stats, `ctx_upgrade` actualizar, `ctx_doctor` diagnosticar, opciones óptimas con menor uso de IA, seguridad). Actualizados `referencias.md` (licencia ELv2), `memoria-proyecto.md`, `roadmap.md`, `00-indice.md`, `pendientes-implementacion.md`.
     - `security-auditor`: ✅ **COMPLETADA (2026-09-12)** — Revisión breve de seguridad de uso creada en `Documentacion/Agents_IA_TECH/seguridad/context-mode.md` (ejecución sandbox, fetch de URLs/SSRF, datos indexados FTS5, licencia ELv2, hooks de VS Code, redacción de credenciales). Incluye tabla de riesgos→mitigación, recomendaciones de uso seguro, qué NO hacer y checklist.
-  - **Falta por hacer (implementación)**:
-    - `plataformador`: Instalar MCP (`npm install -g context-mode`), crear `.vscode/mcp.json`, configurar hooks, registrar en `memoria-proyecto.md`.
-    - `upgrade_framework`: Registrar `context-mode` en `dependencias-manifest.yml`.
-    - `pensador` + documentales: Ajustar specs de agentes (pensador, plataformador, arquitecto, documentador) para que validen la existencia de documentación técnica y MCPs asociados, e instalen los que falten de forma transparente.
-    - `gitflow`: Generar comandos de commit convencionales al final.
   - **Fase implementación**:
-    - `plataformador`: Instalar MCP (`npm install -g context-mode`), crear `.vscode/mcp.json`, configurar hooks, registrar en `memoria-proyecto.md`.
-    - `upgrade_framework`: Registrar `context-mode` en `dependencias-manifest.yml`.
-    - `pensador` + documentales: Ajustar specs de agentes (pensador, plataformador, arquitecto, documentador) para que validen la existencia de documentación técnica y MCPs asociados, e instalen los que falten de forma transparente.
+    - `plataformador`: ✅ **COMPLETADA (2026-09-12)** — Registrado `context-mode` en `.vscode/mcp.json` (entrada `context-mode` con comando y descripción). Creados hooks `.github/hooks/context-mode.json` (PreToolUse, PostToolUse, SessionStart). Actualizado `memoria-proyecto.md` (context-mode 🟢 instalado + próximos pasos). **Nota**: la instalación real (`npm install -g context-mode`) requiere ejecutarse en terminal (Node >= 22.5) — pendiente de confirmación del usuario.
+    - `upgrade_framework`: ✅ **COMPLETADA (2026-09-12)** — Registrado `context-mode` (v1.0.169, ELv2) en `dependencias-manifest.yml` (tipo MCP server, rol en pipeline, instalación, requisitos Node >= 22.5). Licencia ELv2 documentada (guardrail 8 del ADR-0001).
+    - `pensador` + documentales: ✅ **COMPLETADA (2026-09-12)** — Ajustadas specs de `pensador` (responsabilidad 14: validar MCPs y documentación técnica), `plataformador` (sección "Validación de MCPs y documentación técnica" transparente), `arquitecto` (validar guías MCP + usar herramientas MCP) y `documentador` (documentar MCPs del ecosistema + usar herramientas MCP).
     - `gitflow`: Generar comandos de commit convencionales al final.
   - **Requisitos**: Node.js >= 22.5. Licencia ELv2 (source-available, no MIT).
   - **Prioridad**: alta

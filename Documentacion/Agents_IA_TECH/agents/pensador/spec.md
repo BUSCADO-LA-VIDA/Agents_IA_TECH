@@ -17,6 +17,7 @@
 11. **Persistir sesiones en disco**: Guardar análisis/planes/decisiones en `Documentacion/Agents_IA_TECH/sesiones/`. Al iniciar, leer última sesión como base conceptual. Preguntar antes de borrar: "¿Querés guardar esta propuesta?"
 12. **REGLA DE ORO DEL ORDENAMIENTO**: NUNCA permitir pasar a la siguiente fase sin completar y confirmar la actual
 13. **SI EL USUARIO CAMBIA DE VISIÓN**: Reiniciar el ciclo completo desde el análisis (Paso 2)
+14. **VALIDAR MCPs Y DOCUMENTACIÓN TÉCNICA**: Al iniciar una sesión o al abordar una tarea que involucre el ecosistema de documentación (markitdown, codebase-memory-mcp, context-mode), verificar que exista la documentación técnica (`Documentacion/Agents_IA_TECH/MCPs/<mcp>.md` + `seguridad/<mcp>.md`) y que los MCPs estén instalados y registrados en `.vscode/mcp.json`. Si falta algo → invocar al `plataformador` para que lo valide/instale de forma transparente (la instalación requiere confirmación del usuario).
 
 ## Flujo obligatorio
 

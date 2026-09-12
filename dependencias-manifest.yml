@@ -64,8 +64,22 @@ dependencias_externas:
     componentes_a_copiar:
       - (MCP server instalado vía npm — se registra en .vscode/mcp.json)
 
+  - nombre: context-mode
+    url: https://github.com/mksglu/context-mode
+    rama: main
+    version_actual: v1.0.169
+    ultimo_check: 2026-09-12
+    licencia: ELv2  # ⚠️ Elastic License 2.0 — source-available, NO MIT. No ofrecer como SaaS ni quitar avisos de licencia.
+    tipo: MCP server
+    rol_pipeline: Optimiza la ventana de contexto de los agentes — indexación FTS5+BM25 (ctx_index, ctx_search, ctx_fetch_and_index), ejecución sandbox (ctx_execute), agrupación (ctx_batch_execute), mantenimiento (ctx_purge, ctx_stats, ctx_upgrade, ctx_doctor).
+    instalacion: npm install -g context-mode
+    requisitos: Node.js >= 22.5
+    componentes_a_copiar:
+      - (MCP server instalado vía npm — se registra en .vscode/mcp.json + hooks .github/hooks/context-mode.json)
+
 # Historial de cambios del manifest
 # Formato: [YYYY-MM-DD] Descripción del cambio
 # [2026-09-05] Manifiesto inicial creado con spec-kit y graphify como dependencias base
 # [2026-09-05] Análisis de impacto completado. Clonado pendiente (requiere ejecución de git clone en proyect_ext/). Ver Documentacion/Agents_IA_TECH/agents/upgrade_framework/2026-09-05-integracion-dependencias.md
 # [2026-09-12] Registradas markitdown (0.1.7, MIT), markitdown-mcp (0.0.1a3, MIT) y codebase-memory-mcp (0.9.0, MIT) del ecosistema de documentación sin IA (ADR-0001, fase implementación paso 5º). graphify marcada con licencia pendiente de verificar (guardrail 8 del ADR-0001).
+# [2026-09-12] Registrado context-mode (v1.0.169, ELv2) del ecosistema de documentación sin IA (tarea [MCP]). Licencia ELv2 (source-available, no MIT) — guardrail 8 del ADR-0001 documentado.

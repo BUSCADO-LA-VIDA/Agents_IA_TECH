@@ -11,6 +11,7 @@
 - Definir **guardrails** (restricciones que el código debe cumplir)
 - Definir **spec linking** (trazabilidad entre specs, ADRs, código)
 - Validar que el diseño sigue `coding-standards` y `hexagonal-architecture`
+- **Validar documentación técnica de MCPs**: al diseñar arquitecturas que usan el ecosistema de documentación (markitdown, codebase-memory-mcp, context-mode), verificar que exista la guía en `Documentacion/Agents_IA_TECH/MCPs/<mcp>.md`. Si falta → pedir al `documentador` que la cree. Usar las herramientas MCP (`ctx_search`, `query`, `semantic_search`) para contexturar decisiones.
 
 ## Skills utilizados
 

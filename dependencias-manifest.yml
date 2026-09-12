@@ -23,11 +23,49 @@ dependencias_externas:
     rama: main
     version_actual: v0.0.0
     ultimo_check: 2026-09-05
+    licencia: ⚠️ pendiente de verificar  # Guardrail 8 del ADR-0001 — verificar antes de integrar definitivamente
     componentes_a_copiar:
       - bin/graphify → .opencode/bin/
       - lib/ → .opencode/lib/graphify/
+
+  - nombre: markitdown
+    url: https://github.com/microsoft/markitdown
+    rama: main
+    version_actual: 0.1.7
+    ultimo_check: 2026-09-12
+    licencia: MIT  # ✅ Verificada (2026-09-12)
+    tipo: Python + CLI
+    rol_pipeline: Paso 1 — convierte cualquier formato (PDF, DOCX, PPTX, XLSX, HTML, etc.) a Markdown. 100% offline, sin IA.
+    instalacion: pip install 'markitdown[all]'
+    componentes_a_copiar:
+      - (herramienta Python instalada vía pip — no se copia código al kit; se usa como CLI/MCP)
+
+  - nombre: markitdown-mcp
+    url: https://github.com/microsoft/markitdown
+    rama: main
+    version_actual: 0.0.1a3  # Versión funcional (requiere mcp<2). PyPI 0.0.1a1 es un stub sin servidor.
+    ultimo_check: 2026-09-12
+    licencia: MIT  # ✅ Verificada (2026-09-12)
+    tipo: MCP server (oficial de Microsoft)
+    rol_pipeline: Paso 1 — expone la herramienta convert_to_markdown(uri) para convertir documentos a MD desde el contexto.
+    instalacion: pip install markitdown-mcp==0.0.1a3 + pip install "mcp<2"
+    componentes_a_copiar:
+      - (MCP server instalado vía pip — se registra en .vscode/mcp.json)
+
+  - nombre: codebase-memory-mcp
+    url: https://github.com/DeusData/codebase-memory-mcp
+    rama: main
+    version_actual: 0.9.0
+    ultimo_check: 2026-09-12
+    licencia: MIT  # ✅ Verificada por security-auditor (2026-09-12)
+    tipo: MCP server
+    rol_pipeline: Paso 2 — grafo de conocimiento del código (index_repository, query, semantic_search). Bisturí quirúrgico para código.
+    instalacion: npm install -g codebase-memory-mcp
+    componentes_a_copiar:
+      - (MCP server instalado vía npm — se registra en .vscode/mcp.json)
 
 # Historial de cambios del manifest
 # Formato: [YYYY-MM-DD] Descripción del cambio
 # [2026-09-05] Manifiesto inicial creado con spec-kit y graphify como dependencias base
 # [2026-09-05] Análisis de impacto completado. Clonado pendiente (requiere ejecución de git clone en proyect_ext/). Ver Documentacion/Agents_IA_TECH/agents/upgrade_framework/2026-09-05-integracion-dependencias.md
+# [2026-09-12] Registradas markitdown (0.1.7, MIT), markitdown-mcp (0.0.1a3, MIT) y codebase-memory-mcp (0.9.0, MIT) del ecosistema de documentación sin IA (ADR-0001, fase implementación paso 5º). graphify marcada con licencia pendiente de verificar (guardrail 8 del ADR-0001).

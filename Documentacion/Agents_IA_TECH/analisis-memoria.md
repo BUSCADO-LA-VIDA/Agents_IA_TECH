@@ -21,7 +21,7 @@
 - [x] `Documentacion/Agents_IA_TECH/` — documentación del kit ya está en Markdown (no requiere conversión).
 
 ### Indexado/Graficado (graphify / codebase-memory-mcp)
-- [ ] Pendiente de indexar el grafo de conocimiento del kit (se hará en la primera ejecución del pipeline).
+- [x] `codebase-memory-mcp` — repositorio indexado (proyecto `C-Proyectos-Agents_IA_TECH`, 13216 nodos / 64097 aristas, 2026-09-12).
 
 ### Requiere IA
 - [ ] Ninguna documentación del kit requiere IA de entrada por el momento.

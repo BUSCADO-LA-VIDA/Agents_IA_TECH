@@ -44,6 +44,13 @@ Esto aplica a funciones, clases, configuraciones, consultas SQL, endpoints, todo
 3. **Documentacion** OpenAPI como fuente de verdad
 4. **Base de datos** — schema, indices, migraciones sin downtime
 
+## 🔌 Uso de MCPs (obligatorio — ahorrar tokens)
+Consulta SIEMPRE los MCPs como herramienta primaria antes de leer archivos directos:
+- `context-mode` → `ctx_search` (busqueda FTS5+BM25 sobre documentacion indexada), `ctx_index`, `ctx_fetch_and_index`
+- `codebase-memory-mcp` → `index_repository`, `search_graph`, `query` (grafo de conocimiento del codigo)
+- `markitdown` → `convert_to_markdown` (conversion de formatos a Markdown)
+Regla: leer archivos directos gasta mas tokens. Usar los MCPs primero; si no estan disponibles, leer directo como fallback.
+
 ## Constraints
 - NO implementes nada que no este documentado primero
 - NO expongas entidades directamente como responses — usa DTOs

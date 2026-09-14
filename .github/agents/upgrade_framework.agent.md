@@ -7,6 +7,13 @@ user-invocable: true
 
 Este agente gestiona la actualización inteligente de dependencias externas siguiendo el patrón de `proyect_ext/`.
 
+## 🔌 Uso de MCPs (obligatorio — ahorrar tokens)
+Consulta SIEMPRE los MCPs como herramienta primaria antes de leer archivos directos:
+- `context-mode` → `ctx_search` (búsqueda FTS5+BM25 sobre documentación indexada), `ctx_index`, `ctx_fetch_and_index`
+- `codebase-memory-mcp` → `index_repository`, `search_graph`, `query` (grafo de conocimiento del código)
+- `markitdown` → `convert_to_markdown` (conversión de formatos a Markdown)
+Regla: leer archivos directos gasta más tokens. Usar los MCPs primero; si no están disponibles, leer directo como fallback.
+
 ## Responsabilidades
 
 1. **Gestionar el directorio proyect_ext/** - mantener un directorio raíz donde cada proyecto externo se clona en su propio subdirectorio

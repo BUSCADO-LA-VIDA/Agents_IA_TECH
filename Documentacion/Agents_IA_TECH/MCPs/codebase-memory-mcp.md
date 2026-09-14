@@ -63,11 +63,14 @@ Crear (o actualizar) el archivo `.vscode/mcp.json` en la raíz del proyecto:
 {
   "servers": {
     "codebase-memory-mcp": {
-      "command": "codebase-memory-mcp"
+      "command": "codebase-memory-mcp",
+      "type": "stdio"
     }
   }
 }
 ```
+
+> ⚠️ **`"type": "stdio"` es obligatorio** (decisión del usuario, 2026-09-12): especifica explícitamente el transporte del MCP. `stdio` es el transporte por defecto para MCPs locales que se lanzan como proceso hijo vía `command`. **Incluirlo siempre al configurar `codebase-memory-mcp` en cualquier proyecto.**
 
 > ⚠️ **Nota**: la configuración exacta del comando puede variar según la versión. Verificar con `codebase-memory-mcp --help` tras la instalación.
 
@@ -148,6 +151,24 @@ Los agentes documentales (`pensador`, `arquitecto`, `documentador`) pueden usar 
 - **Licencia a verificar**: confirmar la licencia antes de integrarlo definitivamente (guardrail 8 del ADR-0001). El `security-auditor` la revisa en la fase documental.
 - **Indexa el código local**: el grafo se construye sobre el repositorio local; no envía el código a servicios externos (verificar en la revisión de seguridad).
 - **Entrada no confiable**: el código indexado puede contener contenido externo — aplicar prompt defense (regla del kit).
+
+---
+
+## Validación de instalación y configuración
+
+> **Script de validación**: `scripts/validar-mcps.ps1` (decisión del usuario, 2026-09-12).
+
+Verifica que este MCP esté **instalado, configurado en `.vscode/mcp.json` con `"type": "stdio"` y ejecutándose** correctamente. **Ejecutarlo siempre después de instalar o configurar los MCPs** en un proyecto.
+
+```powershell
+# Validación completa (instalación + configuración + runtime)
+.\scripts\validar-mcps.ps1
+
+# Validar solo este MCP
+.\scripts\validar-mcps.ps1 -MCP codebase-memory-mcp
+```
+
+Detalle completo del script (qué valida, exit codes, notas técnicas): ver sección **9. Validación** en `Documentacion/Agents_IA_TECH/MCPs/context-mode.md`.
 
 ---
 

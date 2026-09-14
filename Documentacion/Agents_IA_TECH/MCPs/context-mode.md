@@ -70,11 +70,14 @@ Crear (o actualizar) el archivo `.vscode/mcp.json` en la raíz del proyecto:
 {
   "servers": {
     "context-mode": {
-      "command": "context-mode"
+      "command": "context-mode",
+      "type": "stdio"
     }
   }
 }
 ```
+
+> ⚠️ **`"type": "stdio"` es obligatorio** (decisión del usuario, 2026-09-12): especifica explícitamente el transporte del MCP. `stdio` (standard input/output) es el transporte por defecto para MCPs locales que se lanzan como proceso hijo vía `command`. Declararlo explícitamente hace la configuración más clara y evita ambigüedad si en el futuro se usara otro transporte (`sse`, `http`). **Incluirlo siempre al configurar `context-mode` en cualquier proyecto.**
 
 ### 4.2 Hooks de contexto
 
@@ -167,6 +170,51 @@ Para minimizar el consumo de tokens/IA, usar estas herramientas en lugar de leer
 - **Fetch de URLs**: `ctx_fetch_and_index` descarga contenido externo. Tratar el contenido como **no confiable** (regla de prompt defense del kit).
 - **Datos indexados**: `ctx_purge` borra permanentemente el contenido indexado. Usar con cuidado.
 - **Dashboard Insight**: `ctx_insight` abre analítica alojada de org — revisar qué datos se comparten.
+
+---
+
+## 9. Validación de instalación y configuración
+
+> **Script de validación**: `scripts/validar-mcps.ps1` (decisión del usuario, 2026-09-12).
+
+Verifica que los MCPs del ecosistema de documentación sin IA estén **instalados, configurados y ejecutándose** correctamente. **Ejecutarlo siempre después de instalar o configurar los MCPs** en un proyecto.
+
+### Qué valida
+
+| # | Sección | Qué verifica |
+|---|---------|--------------|
+| 1 | Instalación y versión | Comando disponible en PATH + versión instalada vs. esperada (según `dependencias-manifest.yml`) |
+| 2 | Configuración | `.vscode/mcp.json` con los MCPs registrados y `"type": "stdio"` presente |
+| 3 | Hooks | `.github/hooks/context-mode.json` con `PreToolUse`, `PostToolUse`, `SessionStart` |
+| 4 | Runtime | Ejecución real del MCP (responde sin colgarse) |
+
+### Uso
+
+```powershell
+# Validación completa (instalación + configuración + runtime)
+.\scripts\validar-mcps.ps1
+
+# Validar un MCP específico
+.\scripts\validar-mcps.ps1 -MCP context-mode
+.\scripts\validar-mcps.ps1 -MCP codebase-memory-mcp,markitdown
+
+# Omitir la prueba de runtime (más rápido)
+.\scripts\validar-mcps.ps1 -SkipRuntime
+```
+
+### Exit codes
+
+| Código | Significado |
+|--------|-------------|
+| `0` | Todos los MCPs validados correctamente |
+| `1` | Al menos un MCP falló la validación |
+
+### Notas técnicas
+
+- **`context-mode --version` inicia el servidor MCP en modo stdio y se cuelga** (espera entrada). Por eso el script obtiene la versión del `package.json` del paquete npm global y usa `context-mode doctor` (que termina solo) para la prueba de runtime.
+- **`markitdown --version`** imprime un warning de `pydub` (ffmpeg) antes de la versión; el script filtra la línea que contiene el patrón `X.Y.Z`.
+- **`markitdown-mcp` no expone `--version`**; el script verifica la versión vía `pip show markitdown-mcp` y solo confirma que el binario existe en la prueba de runtime.
+- En `.vscode/mcp.json`, el server de markitdown se llama `markitdown` (con command `markitdown-mcp`); `markitdown` (la librería CLI) no requiere registro en `mcp.json`.
 
 ---
 

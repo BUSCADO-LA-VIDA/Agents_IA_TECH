@@ -30,6 +30,7 @@ Documentacion/
     ├── capacidad-base.md     ← 🏗️ Ref. a .doc_agents/capacidad-base.md
     ├── memoria-proyecto.md   ← 🧠 Capacidades instaladas (plataformador)
     ├── analisis-memoria.md   ← 📝 Memoria del pipeline de documentación (analista_tecnico)
+    ├── reglas-transversales-agentes.md ← 🧭 Gobernanza: reglas que se cumplen SIEMPRE al crear/modificar agentes
     │
     ├── specs/                ← 📋 speckit ESCRIBE AQUÍ (spec/plan/tasks)
     │   └── ...
@@ -74,6 +75,7 @@ Documentacion/
 ## ADRs activos
 <!-- Listar ADRs en Documentacion/Agents_IA_TECH/arquitectura/adr/ -->
 - `adr-0001-ecosistema-documentacion-sin-ia.md` — Ecosistema de documentación técnica sin IA de entrada (pipeline de 4 herramientas + agente `analista_tecnico` + archivo de memoria `analisis-memoria.md`). **Aceptado 2026-09-12**.
+- `adr-0002-flujos-kit.md` — Flujo de contexto (consultar `Documentacion/` + MCPs como optimización + actualización de memoria/índice) y flujo de actualización automática de herramientas externas. **Aceptado 2026-09-12**.
 
 ## Features activas (specs)
 <!-- Listar specs en Documentacion/Agents_IA_TECH/specs/ -->
@@ -114,3 +116,5 @@ Documentacion/
 | `markitdown` (+ `markitdown-mcp`) | https://github.com/microsoft/markitdown | 🟢 Instalado (2026-09-12) | Convierte cualquier formato (PDF, DOCX, PPTX, XLSX, HTML, etc.) a Markdown. 100% offline, sin IA. Paso 1 del pipeline del ecosistema. Instalado: `pip install 'markitdown[all]'` (v0.1.7) + `markitdown-mcp` 0.0.1a3 (requiere `mcp<2`). Registrado en `.vscode/mcp.json`. Licencia MIT. Guía: `MCPs/markitdown.md` |
 
 > **Regla MCP**: Los agentes validan al iniciar sesión si la documentación técnica y los MCPs asociados existen; si falta alguno, lo instalan o lo reportan de forma transparente.
+
+> **⚠️ Estado de activación (2026-09-12)**: Los MCPs están **instalados y configurados** en `.vscode/mcp.json`, pero **NO están disponibles como herramientas para los agentes** en la sesión actual (requieren reiniciar la sesión de Copilot para cargarse). Por eso los agentes leen archivos directos (gastando más tokens). Ver tarea `[MCP-ACTIVAR]` en `pendientes-implementacion.md` — plan aprobado para activarlos y usarlos como herramienta primaria.

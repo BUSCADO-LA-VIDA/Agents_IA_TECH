@@ -63,6 +63,19 @@ Think in English, respond in Spanish, code/docs in English. Spanish domain terms
 - **Plan → Document → Implement cycle**: El `pensador` orquesta este ciclo en este orden estricto. Si cambian las specs, el ciclo se reinicia desde la validación de specs. Testing sigue SSD y Spec-KIT. `ponytail:` marca simplificaciones intencionales.
 - Functions < 50 lines, files < 400 lines, no nesting > 4 levels, no in-place mutation.
 
+## Reglas transversales de los agentes (gobernanza)
+
+> **Regla del usuario (2026-09-12)**: Todo agente del kit debe cumplir las reglas transversales definidas en `Documentacion/<AppName>/reglas-transversales-agentes.md`. Estas reglas se aplican **SIEMPRE** al crear o modificar agentes.
+
+- **Consultar los MCPs** como herramienta primaria (Regla 1) — `context-mode` (`ctx_search`), `codebase-memory-mcp` (`search_graph`), `markitdown` (`convert_to_markdown`).
+- **Estructura estándar** de agente (Regla 2) — frontmatter, introducción, skills, enfoque, MCPs, idioma, constraints.
+- **Sincronización entre arneses** (Regla 3) — `.github/agents/` y `.opencode/agents/` en paralelo.
+- **Orquestación y delegación** (Regla 4) — cada agente hace UNA cosa; los orquestadores hacen cumplir las reglas a los agentes debajo.
+- **Persistencia del comportamiento** (Regla 5) — las decisiones transversales quedan en archivos.
+- **Contexto mínimo necesario** — cada agente recibe solo el contexto necesario para ejecutar su tarea, sin sobrecargar.
+- **Buenas prácticas** — seguir la Ponytail ladder, conventional commits, mínimo 80% cobertura, seguridad pre-commit.
+- **Si un agente no está configurado correctamente** (falta sección MCPs, estructura, etc.) → llamar al agente correspondiente (`plataformador` para nivelar, `arquitecto`/`documentador` para specs) para que todo tenga la estructura correcta.
+
 ## What NOT to do
 
 - Do not treat this repo as an app — no app entrypoints, no `src/` to trace.

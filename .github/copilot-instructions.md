@@ -264,6 +264,32 @@ Use AAA structure (Arrange / Act / Assert). Descriptive names.
 - **Exception**: read files directly if the user explicitly asks.
 - **Does not apply** to config files (`.json`, `.yaml`, `.yml`, `.md`, `.env`).
 
+## Uso de MCPs (ahorrar tokens)
+
+> **Regla del usuario (2026-09-12)**: Leer archivos directos gasta más tokens. Los MCPs deben usarse como **herramienta primaria** de consulta cuando estén disponibles.
+
+- **Usar los MCPs como herramienta primaria** para consultar documentación/código en lugar de leer archivos directos cuando sea posible:
+  - `context-mode` → `ctx_search` (búsqueda FTS5+BM25 sobre documentación indexada), `ctx_index`, `ctx_fetch_and_index`.
+  - `codebase-memory-mcp` → `index_repository`, `query`, `semantic_search` (grafo de conocimiento del código).
+  - `markitdown` → `convert_to_markdown` (conversión de formatos a Markdown).
+- **Re-indexación forzada en la primera consulta (sin IA)**: en la primera consulta de cada sesión, forzar la re-indexación de `context-mode` y `codebase-memory-mcp` (procesamiento local sin IA) y actualizar `analisis-memoria.md` **antes** de consultar por MCP. Garantiza índice/grafo siempre fresco.
+- **Si un MCP no está instalado**: instalarlo (con confirmación del usuario) y repetir la re-indexación antes de consultar. Flujo: **instalar → re-indexar → consultar**.
+- **Los MCPs optimizan, NO reemplazan**: `Documentacion/Agents_IA_TECH/` sigue siendo la fuente de verdad. Primero leer la documentación directa (mínimo `00-indice.md` + `pendientes-implementacion.md`), luego usar los MCPs para búsquedas eficientes sobre lo ya leído.
+- **Si los MCPs no están disponibles como herramientas** en la sesión (no aparecen `ctx_*`, `index_repository`, etc.): leer directo como fallback, y reportar que los MCPs no están activos (requieren reiniciar la sesión de Copilot).
+
+## Reglas transversales de los agentes (gobernanza)
+
+> **Regla del usuario (2026-09-12)**: Todo agente del kit debe cumplir las reglas transversales definidas en `Documentacion/<AppName>/reglas-transversales-agentes.md`. Estas reglas se aplican **SIEMPRE** al crear o modificar agentes.
+
+- **Consultar los MCPs** como herramienta primaria (Regla 1) — ver sección "Uso de MCPs" arriba.
+- **Estructura estándar** de agente (Regla 2) — frontmatter, introducción, skills, enfoque, MCPs, idioma, constraints.
+- **Sincronización entre arneses** (Regla 3) — `.github/agents/` y `.opencode/agents/` en paralelo.
+- **Orquestación y delegación** (Regla 4) — cada agente hace UNA cosa; los orquestadores hacen cumplir las reglas a los agentes debajo.
+- **Persistencia del comportamiento** (Regla 5) — las decisiones transversales quedan en archivos.
+- **Contexto mínimo necesario** — cada agente recibe solo el contexto necesario para ejecutar su tarea, sin sobrecargar.
+- **Buenas prácticas** — seguir la Ponytail ladder, conventional commits, mínimo 80% cobertura, seguridad pre-commit.
+- **Si un agente no está configurado correctamente** (falta sección MCPs, estructura, etc.) → llamar al agente correspondiente (`plataformador` para nivelar, `arquitecto`/`documentador` para specs) para que todo tenga la estructura correcta.
+
 ## Don't be lazy about
 
 - Understanding the problem (read it fully, trace the real flow)

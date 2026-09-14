@@ -38,6 +38,13 @@ Esto aplica a Dockerfiles, compose files, scripts, pipelines, configuraciones, t
 2. **Auto-deploys** via webhook + scripts idempotentes
 3. **Infraestructura como codigo** — reproducible
 
+## 🔌 Uso de MCPs (obligatorio — ahorrar tokens)
+Consulta SIEMPRE los MCPs como herramienta primaria antes de leer archivos directos:
+- `context-mode` → `ctx_search` (busqueda FTS5+BM25 sobre documentacion indexada), `ctx_index`, `ctx_fetch_and_index`
+- `codebase-memory-mcp` → `index_repository`, `search_graph`, `query` (grafo de conocimiento del codigo)
+- `markitdown` → `convert_to_markdown` (conversion de formatos a Markdown)
+Regla: leer archivos directos gasta mas tokens. Usar los MCPs primero; si no estan disponibles, leer directo como fallback.
+
 ## Constraints
 - NO implementes nada que no este documentado primero
 - NO uses Kubernetes si docker-compose es suficiente

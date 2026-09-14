@@ -156,6 +156,8 @@ flowchart TD
 | 6º | `pensador` + documentales | Crear el nuevo agente `analista_tecnico` (spec + `.agent.md`), ajustar specs de agentes para el pipeline | **Flujo del `analista_tecnico`** + **Integración en arquitectura** |
 | 7º | `gitflow` | Commits convencionales | — |
 
+> **⚠️ Mantenimiento de `scripts/validar-mcps.ps1`**: Este script **debe actualizarse cada vez que se agregue o quite una herramienta** del ecosistema. Al agregar/quitar un MCP: (1) actualizar el array `$mcps`, (2) actualizar el `ValidateSet` del parámetro `-MCP`, (3) actualizar `VersionEsperada`, (4) actualizar `dependencias-manifest.yml`, (5) actualizar `Documentacion/<AppName>/reglas-transversales-agentes.md`. Ver el encabezado del script para el checklist completo.
+
 ### Fase implementación
 
 | Orden | Agente | Acción |
@@ -179,3 +181,19 @@ flowchart TD
 | Retorna al Pensador al terminar | ✅ Sí |
 | Respeta estructura SSD | ✅ Sí |
 | Llama a otros agentes (no duplica) | ✅ Sí |
+
+---
+
+## 🧭 Reglas transversales (todos los agentes)
+
+> **Regla del usuario (2026-09-12)**: Todos los agentes del kit deben consultar los MCPs como herramienta primaria, no solo `analista_tecnico` y `plataformador`. Las reglas transversales se aplican **SIEMPRE** al crear o modificar agentes.
+
+**Todos los agentes** (pensador, arquitecto, documentador, security-auditor, api-developer, frontend-developer, devops, qa-senior, gitflow, solucionador, plataformador, upgrade_framework, analista_tecnico) deben:
+
+1. **Consultar los MCPs** como herramienta primaria antes de leer archivos directos (context-mode, codebase-memory-mcp, markitdown).
+2. **Seguir la estructura estándar** de agente (frontmatter, introducción, skills, enfoque, MCPs, idioma, constraints).
+3. **Sincronizar entre arneses** — `.github/agents/` y `.opencode/agents/` en paralelo.
+4. **Respetar la orquestación y delegación** — cada agente hace UNA cosa; los orquestadores hacen cumplir las reglas a los agentes debajo.
+5. **Persistir el comportamiento** — las decisiones transversales quedan en archivos.
+
+**Fuente de verdad**: `Documentacion/<AppName>/reglas-transversales-agentes.md`

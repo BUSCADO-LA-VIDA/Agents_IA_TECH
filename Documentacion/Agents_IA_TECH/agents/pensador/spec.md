@@ -18,6 +18,52 @@
 12. **REGLA DE ORO DEL ORDENAMIENTO**: NUNCA permitir pasar a la siguiente fase sin completar y confirmar la actual
 13. **SI EL USUARIO CAMBIA DE VISIÓN**: Reiniciar el ciclo completo desde el análisis (Paso 2)
 14. **VALIDAR MCPs Y DOCUMENTACIÓN TÉCNICA**: Al iniciar una sesión o al abordar una tarea que involucre el ecosistema de documentación (markitdown, codebase-memory-mcp, context-mode), verificar que exista la documentación técnica (`Documentacion/Agents_IA_TECH/MCPs/<mcp>.md` + `seguridad/<mcp>.md`) y que los MCPs estén instalados y registrados en `.vscode/mcp.json`. Si falta algo → invocar al `plataformador` para que lo valide/instale de forma transparente (la instalación requiere confirmación del usuario).
+15. **FLUJO DE CONTEXTO (ADR-0002)**: Al iniciar una tarea, **consultar `Documentacion/Agents_IA_TECH/`** (fuente de verdad) para saber en qué punto de la solución estamos. Leer al menos `00-indice.md` y `pendientes-implementacion.md`. Usar los MCPs (`context-mode`, `codebase-memory-mcp`, `markitdown`) como **optimización** de la búsqueda, **nunca** como única fuente. Si la documentación cambió → **actualizar memoria/índice** (re-indexar + actualizar `analisis-memoria.md`).
+
+## Flujo de contexto (ADR-0002)
+
+> **Fuente de verdad**: `Documentacion/Agents_IA_TECH/`. Los MCPs **optimizan**, NO reemplazan. Diagrama reutilizado del ADR-0002.
+
+**Archivos de entrada obligatorios al iniciar una tarea**:
+- `Documentacion/Agents_IA_TECH/00-indice.md` — estado general del proyecto (stack, estructura, ADRs, agentes, MCPs).
+- `Documentacion/Agents_IA_TECH/pendientes-implementacion.md` — qué hay que implementar y qué está completado.
+- `Documentacion/Agents_IA_TECH/memoria-proyecto.md` — capacidades instaladas (plataformador).
+- `Documentacion/Agents_IA_TECH/preferencias.md` — reglas del usuario.
+- `Documentacion/Agents_IA_TECH/idioma.md` — idioma de cada tipo de contenido.
+
+**Los MCPs optimizan, NO reemplazan**: `context-mode` (búsqueda FTS5+BM25), `codebase-memory-mcp` (grafo de conocimiento), `markitdown` (conversión de formatos). **Orden de consulta**: primero leer la documentación directa (fuente de verdad), luego usar los MCPs para búsquedas eficientes sobre lo ya leído.
+
+**Actualización de memoria/índice**: cuando la documentación cambia, re-indexar (con `context-mode` / `codebase-memory-mcp`) y actualizar `analisis-memoria.md`. Nunca consultar un índice/grafo sabiendo que está desactualizado.
+
+**Re-indexación forzada en la primera consulta (decisión del usuario, 2026-09-12)**: la re-indexación de los MCPs es **procesamiento local sin IA** (FTS5/grafo, determinista y barato). En la **primera consulta de cada sesión** se **fuerza la re-indexación** de `context-mode` y `codebase-memory-mcp` (y la actualización de `analisis-memoria.md`) **antes** de que la IA consulte por MCP. Esto garantiza índice/grafo **siempre fresco** y hace la búsqueda por MCP **más eficiente**.
+
+**MCPs no instalados (decisión del usuario, 2026-09-12)**: si al iniciar la primera consulta se detecta que un MCP no está instalado (no responde o no está en `.vscode/mcp.json`), se debe **instalarlo** (con confirmación del usuario) y **repetir el proceso de actualización de índices y grafos** antes de consultar. Flujo: **instalar → re-indexar → recién ahí consultar por MCP**.
+
+```mermaid
+flowchart TD
+    A[Agente inicia una tarea] --> B[Consultar Documentacion/Agents_IA_TECH/<br/>fuente de verdad]
+    B --> C[Leer 00-indice.md<br/>estado general]
+    B --> D[Leer pendientes-implementacion.md<br/>qué falta / qué está hecho]
+    B --> E[Leer memoria-proyecto.md<br/>capacidades instaladas]
+    B --> F[Leer preferencias.md + idioma.md<br/>reglas del usuario]
+
+    C --> G{¿Los MCPs<br/>están instalados?}
+    D --> G
+    E --> G
+    F --> G
+
+    G -->|No| G1[Instalar MCPs faltantes<br/>con confirmación del usuario]
+    G1 --> H
+
+    G -->|Sí| H[FORZAR re-indexación<br/>primera consulta - sin IA<br/>context-mode + codebase-memory-mcp<br/>actualizar analisis-memoria.md]
+
+    H --> I[Usar MCPs como optimización<br/>búsqueda eficiente sobre doc indexada]
+    I --> J[Ejecutar la tarea con contexto<br/>completo y actualizado]
+    J --> K{¿La tarea modificó<br/>la documentación?}
+    K -->|Sí| L[Actualizar memoria/índice<br/>re-indexar + actualizar analisis-memoria.md]
+    K -->|No| M[✅ Fin]
+    L --> M
+```
 
 ## Flujo obligatorio
 

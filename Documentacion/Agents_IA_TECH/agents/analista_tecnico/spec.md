@@ -95,6 +95,45 @@ flowchart TD
 9. **Paths restringidos**: solo escribir en `Documentacion/`, `.github/`, `README.md`.
 10. **Validación de MCPs**: validar al iniciar sesión que la documentación técnica y los MCPs asociados existan; si falta alguno, instalarlo o reportarlo de forma transparente.
 
+## Flujo de contexto (ADR-0002)
+
+> **Fuente de verdad**: `Documentacion/Agents_IA_TECH/`. Los MCPs **optimizan**, NO reemplazan. Diagrama reutilizado del ADR-0002.
+
+**Archivos de entrada obligatorios al iniciar una tarea**:
+- `Documentacion/Agents_IA_TECH/00-indice.md` — estado general del proyecto (stack, estructura, ADRs, agentes, MCPs).
+- `Documentacion/Agents_IA_TECH/pendientes-implementacion.md` — qué hay que implementar y qué está completado.
+- `Documentacion/Agents_IA_TECH/memoria-proyecto.md` — capacidades instaladas (plataformador).
+- `Documentacion/Agents_IA_TECH/preferencias.md` — reglas del usuario.
+- `Documentacion/Agents_IA_TECH/idioma.md` — idioma de cada tipo de contenido.
+
+**Los MCPs optimizan, NO reemplazan**: `context-mode` (búsqueda FTS5+BM25), `codebase-memory-mcp` (grafo de conocimiento), `markitdown` (conversión de formatos). **Orden de consulta**: primero leer la documentación directa (fuente de verdad), luego usar los MCPs para búsquedas eficientes sobre lo ya leído.
+
+**Actualización de memoria/índice**: cuando la documentación cambia, re-indexar (con `context-mode` / `codebase-memory-mcp`) y actualizar `analisis-memoria.md`. Nunca consultar un índice/grafo sabiendo que está desactualizado.
+
+```mermaid
+flowchart TD
+    A[Agente inicia una tarea] --> B[Consultar Documentacion/Agents_IA_TECH/<br/>fuente de verdad]
+    B --> C[Leer 00-indice.md<br/>estado general]
+    B --> D[Leer pendientes-implementacion.md<br/>qué falta / qué está hecho]
+    B --> E[Leer memoria-proyecto.md<br/>capacidades instaladas]
+    B --> F[Leer preferencias.md + idioma.md<br/>reglas del usuario]
+
+    C --> G{¿La documentación<br/>cambió desde el último índice?}
+    D --> G
+    E --> G
+    F --> G
+
+    G -->|Sí| H[Actualizar memoria/índice<br/>re-indexar context-mode + codebase-memory-mcp<br/>actualizar analisis-memoria.md]
+    H --> I[Usar MCPs como optimización<br/>búsqueda eficiente sobre doc indexada]
+    G -->|No| I
+
+    I --> J[Ejecutar la tarea con contexto<br/>completo y actualizado]
+    J --> K{¿La tarea modificó<br/>la documentación?}
+    K -->|Sí| L[Actualizar memoria/índice<br/>re-indexar + actualizar analisis-memoria.md]
+    K -->|No| M[✅ Fin]
+    L --> M
+```
+
 ## Dual-harness (Copilot + OpenCode) — OBLIGATORIO
 
 > **Regla del kit**: Todo agente del kit se define en **ambos harness** en paralelo. Al crear o modificar un agente, **siempre** se actualizan los dos espejos:

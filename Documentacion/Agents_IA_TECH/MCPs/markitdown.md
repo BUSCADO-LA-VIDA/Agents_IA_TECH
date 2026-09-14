@@ -74,11 +74,14 @@ Crear (o actualizar) el archivo `.vscode/mcp.json` en la raíz del proyecto para
 {
   "servers": {
     "markitdown": {
-      "command": "markitdown-mcp"
+      "command": "markitdown-mcp",
+      "type": "stdio"
     }
   }
 }
 ```
+
+> ⚠️ **`"type": "stdio"` es obligatorio** (decisión del usuario, 2026-09-12): especifica explícitamente el transporte del MCP. `stdio` es el transporte por defecto para MCPs locales que se lanzan como proceso hijo vía `command`. **Incluirlo siempre al configurar `markitdown` en cualquier proyecto.**
 
 > ⚠️ **Nota**: la configuración exacta del comando puede variar según cómo se instale el paquete (entry point). Verificar con `markitdown-mcp --help` tras la instalación. La configuración definitiva la realiza el `plataformador` en la fase de implementación.
 
@@ -182,6 +185,24 @@ flowchart LR
 - **100% offline**: no envía datos a ningún servicio externo durante la conversión.
 - **Entrada no confiable**: los documentos a convertir pueden contener contenido malicioso (ej: HTML con scripts). Tratar el contenido como **no confiable** (regla de prompt defense del kit).
 - **No ejecuta código**: `markitdown` solo convierte formato a texto; no ejecuta el contenido del documento.
+
+---
+
+## 10. Validación de instalación y configuración
+
+> **Script de validación**: `scripts/validar-mcps.ps1` (decisión del usuario, 2026-09-12).
+
+Verifica que `markitdown` y `markitdown-mcp` estén **instalados, configurados en `.vscode/mcp.json` con `"type": "stdio"` y ejecutándose** correctamente. **Ejecutarlo siempre después de instalar o configurar los MCPs** en un proyecto.
+
+```powershell
+# Validación completa (instalación + configuración + runtime)
+.\scripts\validar-mcps.ps1
+
+# Validar solo markitdown
+.\scripts\validar-mcps.ps1 -MCP markitdown
+```
+
+Detalle completo del script (qué valida, exit codes, notas técnicas): ver sección **9. Validación** en `Documentacion/Agents_IA_TECH/MCPs/context-mode.md`.
 
 ---
 

@@ -60,6 +60,11 @@
       "type": "local",
       "command": ["C:/Python314/Scripts/markitdown-mcp.exe"],
       "enabled": true
+    },
+    "tokenslayer": {
+      "type": "local",
+      "command": ["C:/Program Files/nodejs/node.exe", "C:/Proyectos/Agents_IA_TECH/proyect_ext/tokenslayer/mcp-server/build/index.js"],
+      "enabled": true
     }
   },
   "permission": {

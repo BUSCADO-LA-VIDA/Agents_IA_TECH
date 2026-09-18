@@ -77,6 +77,19 @@ dependencias_externas:
     componentes_a_copiar:
       - (MCP server instalado vía npm — se registra en .vscode/mcp.json + hooks .github/hooks/context-mode.json)
 
+  - nombre: tokenslayer-mcp-server
+    url: https://github.com/ajvikram/TokenSlayer
+    rama: main
+    version_actual: v1.5.0 (tag repo, commit 9a380c04) / server interno 1.3.0 (package.json + handshake MCP) — skew upstream documentado, no afecta funcionamiento (instalado 2026-09-18, build OK, handshake MCP OK)
+    ultimo_check: 2026-09-18
+    licencia: MIT  # ✅ Verificada (2026-09-18, fase documental tarea [TOKENSLAYER]). Guardrail 8 del ADR-0001 satisfecho.
+    tipo: MCP server standalone (carpeta mcp-server/ — NO viene en el .vsix; clonar + compilar)
+    rol_pipeline: Compactación de contexto — esqueletos AST + call graphs + patch estructural (analyze_files, analyze_workspace, analyze_dependency_chain, expand_node, apply_patch, get_stats, clear_stats). Complementa a context-mode (docs) y codebase-memory-mcp (grafo), no los reemplaza.
+    instalacion: git clone https://github.com/ajvikram/TokenSlayer.git + (cd mcp-server && npm install && npm run build)
+    requisitos: Node.js v24.14.0 + extensión VS Code ajvikram.tokenslayer v1.5.0 (opcional, ya instalada)
+    componentes_a_copiar:
+      - (MCP server compilado desde clon local — se registra en opencode.json + .vscode/mcp.json con "type": "stdio")
+
 # Aplicaciones del ecosistema (bootstrap -> Prepare-Apps -> src\AppXXX\)
 # ADR-0003 / spec plataforma-bootstrap-instalador-unico: apps como aplicaciones independientes.
 # owner en allowlist del bootstrap: BUSCADO-LA-VIDA, tomasecastro, github, microsoft, DeusData, mksglu, tomasgraph.
@@ -153,3 +166,6 @@ aplicaciones:
 # [2026-09-17] Registradas las 5 aplicaciones del ecosistema (dwxconnect, fibonacci-scanner, operation_mt5, Telegram, trading_bot) con estructura_objetivo src\AppXXX\ (ADR-0003 / spec plataforma-bootstrap-instalador-unico). Licencias pendientes de verificar (guardrail 8). `proyect_ext/spec-kit` queda en la raíz.
 # [2026-09-18] Agregado placeholder comentado `apps_manifiesto` (T-I3: 5 apps con url TBD y destino src/<app>, NO activo) como gancho documentado para cuando el usuario defina las URLs git. Sin cambios en dependencias activas.
 # [2026-09-18] Licencia de graphify verificada: MIT (fuente https://graphify.net/es/ "Security, Licensing & Trust"; deps NetworkX BSD + Tree-sitter MIT, sin telemetría). Guardrail 8 del ADR-0001 satisfecho para graphify.
+# [2026-09-18] Registrado tokenslayer-mcp-server (v1.5.0, MIT ✅) — MCP server standalone de https://github.com/ajvikram/TokenSlayer (carpeta mcp-server/, clonar + compilar con Node v24.14.0). Rol: compactación de contexto (esqueletos AST + call graphs + patch estructural). Fase documental tarea [TOKENSLAYER] (documentador).
+# [2026-09-18] Instalado tokenslayer-mcp-server v1.5.0 (commit 9a380c041209e5599ad63ffd897dc99c7936327e) en proyect_ext/tokenslayer — fase implementación tarea [TOKENSLAYER] (devops): npm install + npm audit (0 críticas; 1 low/2 moderate/3 high transitivas del SDK) + npm run build OK + handshake MCP OK (8 herramientas). Registrado en opencode.json + .vscode/mcp.json (clave `tokenslayer`, sin secrets).
+# [2026-09-18] BUG-3 QA (tarea [TOKENSLAYER]): aclarado skew de versiones en tokenslayer-mcp-server — tag repo v1.5.0 (commit 9a380c04) vs server interno 1.3.0 (package.json + handshake MCP); skew upstream documentado en MCPs/tokenslayer.md, no afecta funcionamiento.

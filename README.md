@@ -1,6 +1,6 @@
 # Agents_IA_TECH 🧠⚡
 
-> **Versión del documento:** 2026-09-18
+> **Versión del documento:** 2026-09-19 (repo privado solo-git: Credential Manager + sparse-checkout `--no-cone`, temporal en `proyect_ext`, sin herramientas extra)
 > **Kit transversal de agentes, skills y prompts para GitHub Copilot (VS Code) y OpenCode** — instalador/actualizador único, 11 agentes, 77 skills, 6 prompts.
 
 **Creado:** 2026-06-25
@@ -56,6 +56,7 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
 - **PowerShell 7+ obligatorio** (`pwsh ≥ 7`). No funciona en Windows PowerShell 5.1. Compruébalo con `$PSVersionTable.PSVersion`.
 - Recomendación (texto — ejecútala manualmente si aplica): `winget install --id Microsoft.PowerShell --source winget`.
 - `git` disponible en el PATH. `Node.js ≥ 22.5` para los MCPs npm (`context-mode`, `codebase-memory-mcp`). `Python + pip` para `markitdown`.
+- **Repo privado: autenticación obligatoria (solo `git`, sin herramientas extra).** Este kit es de uso privado; el repo maestro es privado. Sin auth, `raw.githubusercontent.com` devuelve **404** y `git clone` pide credenciales. Usa **Git Credential Manager** (incluido en Git para Windows): el primer `git clone` abre el login por navegador una vez y cachea las credenciales. Compruébalo con `git credential-manager --version` (si falta, reinstala Git para Windows con la opción Git Credential Manager).
 
 ### Pasos
 
@@ -63,11 +64,24 @@ En la **raíz de tu proyecto** (ej: `C:\Proyectos\Mi-Proyecto\`):
 
 ```powershell
 # 1. Descargar el instalador único + wrapper desde el repo maestro
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BUSCADO-LA-VIDA/Agents_IA_TECH/main/scripts/plataformador-bootstrap.ps1" -OutFile "plataformador-bootstrap-tmp.ps1"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BUSCADO-LA-VIDA/Agents_IA_TECH/main/sync-agents.ps1" -OutFile "sync-agents.ps1"
+# Vía A (recomendada, repo privado, solo git): sparse-checkout en temporal fuera de la raíz
+# (trae solo 2 archivos, sin clonar todo; la raíz queda limpia)
+# NOTA: --no-cone es obligatorio (los patrones son archivos, no directorios;
+# sin él falla con "is not a directory... rerun with --skip-checks")
+New-Item -ItemType Directory -Path "proyect_ext" -Force | Out-Null
+git clone --depth 1 --filter=blob:none --sparse https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH.git proyect_ext\agents-temp
+git -C proyect_ext\agents-temp sparse-checkout set --no-cone scripts/plataformador-bootstrap.ps1 sync-agents.ps1
 New-Item -ItemType Directory -Path "scripts" -Force | Out-Null
-Move-Item -Force "plataformador-bootstrap-tmp.ps1" "scripts\plataformador-bootstrap.ps1"
+Copy-Item "proyect_ext\agents-temp\scripts\plataformador-bootstrap.ps1" -Destination "scripts\plataformador-bootstrap.ps1" -Force
+Copy-Item "proyect_ext\agents-temp\sync-agents.ps1" -Destination "sync-agents.ps1" -Force
+Remove-Item proyect_ext\agents-temp -Recurse -Force
+```
 
+> Alternativa válida: usar `$env:TEMP` en vez de `proyect_ext\agents-temp` (ej. `$tmp = Join-Path $env:TEMP "agents-kit-temp"` y operar sobre `$tmp`). Fuera de la raíz en ambos casos; el script hace su trabajo y no queda rastro en el proyecto.
+
+> ⚠️ **Repo privado**: la descarga anónima con `Invoke-WebRequest` directo a `raw.githubusercontent.com` devuelve **404** (GitHub no revela repos privados sin auth). Usa la **Vía A** (el primer `git clone` abre el login por navegador vía Git Credential Manager y cachea). Vía B (misma máquina, sin red): copia local con `Copy-Item "<ruta-maestro>\scripts\plataformador-bootstrap.ps1" -Destination "scripts\"` y `Copy-Item "<ruta-maestro>\sync-agents.ps1" -Destination "."`. Último recurso (PAT manual, no recomendado): `Invoke-WebRequest -Headers @{Authorization="Bearer TU_PAT"} -Uri "<raw-url>" -OutFile ...` (el PAT necesita permiso `repo`; no lo pegues en docs ni scripts versionados).
+
+```powershell
 # 2. Previsualizar (recomendado)
 .\scripts\plataformador-bootstrap.ps1 -DryRun
 
@@ -108,6 +122,8 @@ Variantes:
 ---
 
 ## 🔄 Actualización
+
+> **Repo privado**: el sync hace `git clone` del maestro. Sin auth configurada (`gh auth login`), el clon pide credenciales o falla. Asegura la autenticación antes de sincronizar.
 
 ```powershell
 # Previsualizar primero (recomendado)

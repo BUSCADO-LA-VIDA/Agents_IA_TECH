@@ -14,3 +14,6 @@ Thumbs.db
 .DS_Store
 .vscode/
 .idea/
+
+# Clones externos (código de terceros, no propio — se regeneran desde scripts, no se versionan)
+proyect_ext/tokenslayer/

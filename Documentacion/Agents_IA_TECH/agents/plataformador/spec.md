@@ -1,20 +1,25 @@
 # Spec: Agente `plataformador` - Agents_IA_TECH
 
-> **Propósito**: **Auditar, nivelar y replataformar proyectos** para mantener la estructura de capacidades del kit de agentes. **Organiza la documentación** del proyecto. Integra **graphify** para gestionar información. Orquesta agentes documentales (Arquitecto → Documentador → Security). **Único en mis agentes** (Specify no tiene esto).
+> **Propósito**: **Auditar, nivelar y replataformar proyectos** para mantener la estructura de capacidades del kit de agentes. **Delega la mecánica en scripts** (`plataformador-bootstrap.ps1` + `relocate-apps-to-src.ps1`) y **valida en dos momentos** (propone antes, verifica después). **Organiza la documentación** del proyecto. Integra **graphify** para gestionar información. Orquesta agentes documentales (Arquitecto → Documentador → Security). **Único en mis agentes** (Specify no tiene esto).
 
-## Flujo principal
+> **Alineado con ADR-0003 (2026-09-19)** — `arquitectura/adr/adr-0003-plataforma-bootstrap-instalador-unico.md` (instalador único, apps independientes + orquestador, resolución de app activa, `Sync-TransversalKit`, guardrails).
+> **Regla de oro**: el agente propone y verifica; el script ejecuta. Nunca a la inversa.
 
-1. Leer `.doc_agents/capacidad-base.md` (fuente de verdad)
-2. Leer `Documentacion/Agents_IA_TECH/memoria-proyecto.md` (estado actual)
-3. Auditar proyecto actual contra capacidad-base
-4. **Si proyecto nuevo/sin Documentacion/ → preguntar datos**: nombre, stack, idioma, rama principal, etc.
-5. Generar informe de brecha (qué falta, qué sobra, qué difiere)
-6. Proponer nivelación y **preguntar antes de ejecutar**
-7. Ejecutar acciones de nivelación (crear, actualizar, reorganizar)
-8. **Documentar el proyecto** (obligatorio): orquesta Arquitecto → Documentador → Security
-9. Integrar **graphify** para grafo de conocimiento
-10. Actualizar `Documentacion/Agents_IA_TECH/memoria-proyecto.md`
-11. Preguntar por commit (gitflow)
+## Flujo principal: Auditar → Proponer → Preguntar → Delegar → Verificar → Registrar
+
+1. Leer `.doc_agents/capacidad-base.md` (fuente de verdad) + ADR-0003 (modelo vigente) + `.doc_agents/estructura-aplicacion.md` (frontera kit ↔ app)
+2. Leer `Documentacion/Agents_IA_TECH/agents/plataformador/memoria-proyecto.md` (estado actual)
+3. Resolver la app activa (`-App` > `cwd` > `root`) — nunca inferir de forma ambigua
+4. Auditar proyecto actual contra capacidad-base (archivos, agentes, docs, skills, MCP, apps fuera de `src\`, huérfanos)
+5. **Si proyecto nuevo/sin Documentacion/ → preguntar datos**: nombre, stack, idioma, rama principal, etc.
+6. Generar informe de brecha (qué falta, qué sobra, qué difiere — incluye app activa, huérfanos y relocate pendiente)
+7. Proponer nivelación y **preguntar antes de ejecutar** (qué script, con qué flags; relocate exige confirmación sin bypass)
+8. Delegar la mecánica en el script aprobado (`-DryRun` primero)
+9. **Verificar después**: archivos esperados vs reales, imports/paths/configs evidentes, tests sugeridos
+10. **Documentar el proyecto** (obligatorio): orquesta Arquitecto → Documentador → Security
+11. Integrar **graphify** para grafo de conocimiento
+12. Actualizar `Documentacion/Agents_IA_TECH/agents/plataformador/memoria-proyecto.md` (por app)
+13. Preguntar por commit (gitflow)
 
 ## Disparadores
 
@@ -83,6 +88,39 @@ flowchart TD
     L --> M
 ```
 
+## Memorias que consulta (tabla)
+
+| Archivo | Propósito |
+|---------|-----------|
+| `.doc_agents/capacidad-base.md` | Catálogo central — fuente de verdad del kit transversal |
+| `Documentacion/<AppName>/agents/plataformador/memoria-proyecto.md` | Por app — capacidades instaladas, versión, última auditoría |
+| `arquitectura/adr/adr-0003-plataforma-bootstrap-instalador-unico.md` | Modelo vigente — instalador único, `Sync-TransversalKit`, guardrails |
+| `.doc_agents/estructura-aplicacion.md` | Frontera kit ↔ app — qué se copia y qué es propio de cada app |
+| `.specify` activo + `Documentacion/<AppName>/specs/` | App activa según `Resolve-ActiveApp` (`-App` > `cwd` > `root`) |
+
+## Spec-kit por app (Resolve-ActiveApp — ADR-0003 §3)
+
+Precedencia estricta: **flag `-App <nombre>` > directorio de trabajo (`cwd`) > modo `root`/kit**. Nunca inferir la app de forma ambigua.
+
+| Ruta | Resolución |
+|------|------------|
+| `.specify` activo | `<raizApp>/.specify/` (o `.specify/` de la raíz si la app no tiene el suyo) |
+| `Documentacion/<App>/specs/` | `<raizRepo>/Documentacion/<AppName>/specs/` (Spec-kit escribe `spec.md`, `plan.md`, `tasks.md` ahí) |
+
+El agente informa qué `.specify` y qué `Documentacion/<AppName>/` quedó activo, y verifica post-ejecución que ambas rutas existen. Fuera de toda app lo dice explícitamente (modo kit).
+
+## Huérfanos (Sync-TransversalKit)
+
+Archivos que existen en local (`.github/`, `.opencode/`, `.doc_agents/`) pero ya no en el maestro. El script los detecta (`Find-OrphanKitFiles`, allowlist de 3 dirs, excluye `.opencode/config.json`); el agente **pregunta por caso o lote: ¿borrar o conservar?** Borrar = implementación limpia (doble confirmación). Conservar = movido versionado a `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>`. **Default seguro: conservar** (nunca auto-borrar). Nunca toca `Documentacion/<AppName>/`.
+
+## Relocate (reubicación a `src\<App>`)
+
+Lo ejecuta **`scripts/relocate-apps-to-src.ps1`** (standalone, separado del bootstrap hasta validación OK). **Confirmación siempre obligatoria, sin bypass** (`[S]/[N]/[T]/[C]` interactivo; no-interactivo no mueve; `-DryRun` previsualiza). **El script crea la estructura al aprobar**: `src\<App>`, `.specify` por app, `Documentacion/<App>/specs|adr|bitacoras`. `.venv` se mueve pero se reporta "a recrear" (paths absolutos rotos). `proyect_ext/` no se mueve. El agente **propone antes** (brecha + pre-chequeos + preguntas) y **verifica después** (esperado vs real, imports/paths/configs, tests sugeridos, rollback documentado). Si el script aún no existe: registrar pendiente `[RELOCATE]`, no improvisar.
+
+## Regla de optimización de IA (obligatoria)
+
+El script hace el trabajo pesado sin IA (determinista, idempotente); el agente solo propone y verifica con mínimo de tokens: **MCPs primero** (`ctx_search`, `search_graph`), lectura directa solo fallback; **`-DryRun` antes del modo real**; no re-analizar reportes del script (citarlos); idempotencia exigible (repetir no cambia nada, si cambia es bug).
+
 ## Documentación del proyecto (obligatoria en cada ejecución)
 
 El plataformador **siempre** asegura que el proyecto quede documentado con estructura correcta:
@@ -140,17 +178,20 @@ Cada ejecución:
 
 | Acción | Descripción |
 |--------|-------------|
-| `crear_archivo` | Crear archivo faltante desde plantilla del agente |
-| `actualizar_agente` | Reemplazar `.agent.md` por versión nueva |
-| `instalar_mcp` | Instalar MCP server (`npm install -g codebase-memory-mcp`) |
-| `crear_estructura` | Crear carpetas faltantes |
+| `crear_archivo` | Crear archivo faltante desde plantilla del agente (vía script) |
+| `actualizar_agente` | Reemplazar `.agent.md` por versión nueva (vía `Sync-TransversalKit`) |
+| `instalar_mcp` | Instalar MCP server (`npm install -g codebase-memory-mcp`, pregunta antes) |
+| `crear_estructura` | Crear carpetas faltantes (el script las crea al aprobar) |
 | `registrar_capacidad` | Marcar capacidad presente en memoria |
-| `eliminar_obsoleto` | Preguntar antes de borrar lo que ya no aplica |
+| `eliminar_obsoleto` | Huérfanos: preguntar borrar/conservar (default conservar con respaldo) |
 | `retroalimentar_pensador` | Dejar tarea en pendientes para que Pensador ajuste agentes |
 | `reorganizar_docs` | Reestructurar docs a formato `agents/<nombre>/spec.md` |
 | `documentar_proyecto` | Invocar Arquitecto → Documentador → Security |
 | `integrar_graphify` | Construir grafo conocimiento con graphify |
 | `reorganizar_estructura` | Ajustar Documentacion/ a `.doc_agents/estructura-estandar.md` |
+| `delegar_bootstrap` | Invocar `plataformador-bootstrap.ps1` (`-DryRun` primero) |
+| `delegar_relocate` | Invocar `relocate-apps-to-src.ps1` (confirmación obligatoria) |
+| `verificar_post` | Esperado vs real + imports/paths + tests sugeridos |
 
 ## Flujo MCP
 

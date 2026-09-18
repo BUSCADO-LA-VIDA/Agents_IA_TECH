@@ -4,8 +4,8 @@
 > La **fuente de verdad única** está en **`.doc_agents/capacidad-base.md`**.  
 > Este archivo se actualiza manualmente o via `plataformador` al nivelar.
 
-**Versión del kit**: 1.1.0  
-**Última sincronización con .doc_agents/**: 2026-08-30
+**Versión del kit**: 1.2.0  
+**Última sincronización con .doc_agents/**: 2026-09-19
 
 ---
 
@@ -130,9 +130,25 @@ NO toca (crea solo si no existe):
 
 ---
 
+## 8. Capacidades del plataformador (ADR-0003 — instalador único)
+
+> Copia de referencia — la fuente de verdad es `.doc_agents/capacidad-base.md` §8.
+
+| Capacidad | Estado | Descripción |
+|-----------|:------:|-------------|
+| `bootstrap` (instalador único) | ✅ Definida | `scripts/plataformador-bootstrap.ps1`: sync kit (`Sync-TransversalKit`) + MCPs + índices + Spec-kit + Graphify. Determinista e idempotente, `-DryRun` siempre disponible. `sync-agents.ps1` queda como wrapper. |
+| `speckit-por-app` | ✅ Definida | Resolución de app activa `Resolve-ActiveApp` (`-App` > `cwd` > `root`); `.specify` activo + `Documentacion/<AppName>/specs/` por app. Nunca inferencia ambigua. |
+| `huerfanos` | ✅ Definida | Detección en `Sync-TransversalKit` + pregunta borrar/conservar; default seguro conservar con respaldo `revisar_manualmente\yyyymmdd\`; nunca auto-borrar ni tocar `Documentacion/<AppName>/` |
+| `relocate` | 🟡 Pendiente de script | `scripts/relocate-apps-to-src.ps1` (standalone): reubicación a `src\<App>` con confirmación siempre obligatoria; el script crea la estructura al aprobar; `.venv` se reporta "a recrear". Tarea `[RELOCATE]` en curso. |
+| `verificacion-pre-post` | ✅ Definida | El agente propone antes (auditoría + brecha + preguntas) y verifica después (esperado vs real, imports/paths, tests sugeridos). |
+| `optimizacion-ia` | ✅ Definida | El script hace el trabajo pesado sin IA; el agente solo propone y verifica (MCPs primero, `-DryRun` previo, no re-analizar reportes). |
+
+---
+
 ## Historial de cambios
 
 | Fecha | Versión | Cambio |
 |-------|:-------:|--------|
 | 2026-07-25 | 1.0.0 | Creación inicial del catálogo |
 | 2026-08-30 | 1.1.0 | Reestructuración: separación kit transversal vs doc por app (`.doc_agents/`) |
+| 2026-09-19 | 1.2.0 | Alineación ADR-0003: §8 capacidades del plataformador (bootstrap, speckit-por-app, huérfanos, relocate, verificación pre/post, optimización IA) |

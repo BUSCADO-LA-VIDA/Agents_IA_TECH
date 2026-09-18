@@ -248,3 +248,11 @@ flowchart TD
 - `scripts/plataformador-bootstrap.ps1` — Script objetivo del instalador único.
 - `sync-agents.ps1` — Wrapper que delega en `Sync-TransversalKit`.
 - `dependencias-manifest.yml` — Manifest de herramientas externas (patrón "descargar desde git").
+
+---
+
+## Adenda 2026-09-19 — RNF-04 (tolerancia del bootstrap) vs script standalone opt-in confirmado (`[RELOCATE]`)
+
+**RNF-04 sigue vigente sin cambios**: `plataformador-bootstrap.ps1` (función `Prepare-Apps`) es **tolerante por defecto** — respeta la ubicación existente de cada app (raíz o `src\<App>`), solo informa y asegura `Documentacion/<App>/`; **nunca mueve código solo**.
+
+El nuevo script **`scripts/relocate-apps-to-src.ps1`** (RF-13, tarea `[RELOCATE]`) es el camino **opt-in con confirmación SIEMPRE obligatoria** para quien sí quiera nivelar hacia `src\<App>`: standalone (cero cambios al bootstrap en esta tarea), funciones `Move-AppToSrc` + `Confirm-AppRelocation`, flags `-AppDirs`/`-DryRun`/`-ProjectRoot` (sin bypass), S/N/T/C en interactivo y no-mueve en no interactivo, `.venv` reportado "a recrear", log + rollback manual, nunca `Documentacion/`. La eventual invocación desde el bootstrap es **decisión futura separada**, solo tras validación OK.

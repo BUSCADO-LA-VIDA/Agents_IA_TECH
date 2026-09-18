@@ -1,6 +1,6 @@
 # Agents_IA_TECH 🧠⚡
 
-> **Versión del documento:** 2026-09-19 (repo privado solo-git: Credential Manager + sparse-checkout `--no-cone`, temporal en `proyect_ext`, sin herramientas extra)
+> **Versión del documento:** 2026-09-19 (extensión 3 gaps auditoría Metatrader: RF-16 tokenslayer 4º MCP en `Ensure-OpenCodeMcp` + RF-17 plantilla `.opencode/config.json` con PLACEHOLDERS + RF-18 `Repair-DocStructure` docs sueltas a `Documentacion/<App>/`, troubleshooting `config.json`; reubicación opt-in confirmada: `relocate-apps-to-src.ps1` standalone + RF-13 + extensión RF-14 auto-desactivar/reactivar venv y pausar git con `Suspend-AppLocks`/`Restore-AppLocks` + extensión RF-15 limpieza de regenerables con `Find-RegenerableDirs`/`Clear-RegenerableDirs` y `.venv` que se elimina y recrea; repo privado solo-git: Credential Manager + sparse-checkout `--no-cone`, temporal en `proyect_ext`, sin herramientas extra)
 > **Kit transversal de agentes, skills y prompts para GitHub Copilot (VS Code) y OpenCode** — instalador/actualizador único, 11 agentes, 77 skills, 6 prompts.
 
 **Creado:** 2026-06-25
@@ -28,7 +28,7 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
    - `context-mode` (índice FTS5+BM25 de docs, ejecución sandbox)
    - `codebase-memory-mcp` (grafo de conocimiento del código)
    - `markitdown` / `markitdown-mcp` (conversión de documentos a Markdown)
-   - `tokenslayer-mcp-server` (esqueletos AST, call graphs, patch estructural)
+    - `tokenslayer-mcp-server` (esqueletos AST, call graphs, patch estructural; el bootstrap lo registra como 4º MCP vía `Ensure-OpenCodeMcp` con `type: local`, `command: [node, <repo>/proyect_ext/tokenslayer/mcp-server/build/index.js]`, `enabled: true` — fuente del binario: entrada `tokenslayer-mcp-server` en `dependencias-manifest.yml`; si el binario no existe → WARN + instrucciones de compilar, no falla)
    - Herramientas de apoyo vía `dependencias-manifest.yml`: `spec-kit` (github/spec-kit), `graphify` (tomasgraph/graphify). Ver `dependencias-manifest.yml` para URLs, versiones y licencias.
 3. **Índices**: crea/actualiza índices de `codebase-memory-mcp` + `context-mode` y verifica que los MCPs responden.
 4. **Estructura por app** (sin destruir lo existente): prepara `src/<App>/` (objetivo), `proyect_ext/` (herramientas de apoyo), `Documentacion/<AppName>/` por app (specs, ADRs — propia de cada app), resolución de app activa por `-App <nombre>` (precedencia máxima) o directorio de trabajo actual (si no hay coincidencia → modo `root`/kit).
@@ -153,8 +153,81 @@ Variantes:
 - **Huérfanos** (qué son): archivos que existen en tu `.github/` `.opencode/` `.doc_agents/` local pero ya no existen en el repo maestro (eliminados upstream). Al sincronizar, el script los detecta y **pregunta por cada caso (o en lote): ¿borrar o conservar?**
   - **Borrar**: elimina los huérfanos, implementación en limpio (sin respaldo).
   - **Conservar**: mueve cada huérfano a `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>` (fuera de los directorios de agentes, preservando la estructura de carpetas; si la carpeta del día existe, agrega sufijo de hora) e informa qué se movió y dónde quedó. Revísalo ahí y bórralo a mano solo si sobra.
-  - Alcance: solo no-propios o personalizados que causan conflicto (`omitir` = dejarlo en su lugar por ser propio). Nunca toca `Documentacion/<AppName>/`.
-  - **Default seguro: conservar** (jamás auto-borra). Flag `-OrphanAction Borrar|Conservar|Preguntar` para modo no interactivo. En `-DryRun` solo informa, no borra ni mueve.
+   - Alcance: solo no-propios o personalizados que causan conflicto (`omitir` = dejarlo en su lugar por ser propio). Nunca toca `Documentacion/<AppName>/`.
+    - **Default seguro: conservar** (jamás auto-borra). Flag `-OrphanAction Borrar|Conservar|Preguntar` para modo no interactivo. En `-DryRun` solo informa, no borra ni mueve.
+
+### `.opencode/config.json` — plantilla con PLACEHOLDERS (nunca secrets)
+
+> Gap de auditoría Metatrader cubierto por RF-17 (`Ensure-OpenCodeConfig`).
+
+- El bootstrap crea `.opencode/config.json` **SOLO si no existe**, desde una plantilla con **PLACEHOLDERS** (jamás secrets reales). **Si ya existe → no lo toca nunca** (ni con `-Force`).
+- El archivo sigue **gitignored** (ver `.gitignore`): no se commitea, no se sincroniza, no se pisa.
+- **Qué pones a mano**: tus API keys / credenciales locales (ej. las que referencian los providers de `opencode.json` vía `{env:NVIDIA_API_KEY}`, `{env:DEEPINFRA_API_KEY}` — se definen en tu entorno local, nunca en docs ni scripts versionados).
+- Si falta y el bootstrap no lo creó (plantilla ausente) → créalo a mano desde tu backup local y el bootstrap lo respetará en los siguientes syncs.
+- En `-DryRun` solo informa qué crearía, no escribe.
+
+---
+
+## 📦 Reubicación de apps a `src\` (opt-in con confirmación obligatoria)
+
+> El bootstrap **no mueve apps** (RNF-04: respeta raíz o `src\<App>`). Si quieres nivelar hacia `src\<App>`, usa el script standalone **`scripts/relocate-apps-to-src.ps1`** (tarea `[RELOCATE]`, RF-13). Cero cambios al bootstrap en esta tarea; la integración futura es decisión separada.
+
+### Cuándo usarla
+
+- Tus apps viven en la **raíz** (ej. `C:\Proyectos\Metatrader\dwxconnect`) y quieres llevarlas a la estructura objetivo `src\<App>` (ej. `src\dwxconnect`).
+- Vale para **cualquier proyecto**: la lista se pasa por `-AppDirs` (o manifest).
+
+### Comando
+
+```powershell
+# 1. Previsualizar primero (recomendado)
+.\scripts\relocate-apps-to-src.ps1 -AppDirs @("dwxconnect","trading_bot") -DryRun
+
+# 2. Mover (pregunta por app, siempre)
+.\scripts\relocate-apps-to-src.ps1 -AppDirs @("dwxconnect","trading_bot")
+```
+
+Flags: `-AppDirs @()` (qué mover), `-DryRun` (solo previsualiza), `-ProjectRoot` (raíz; default: padre de `scripts/`). **No existe flag que saltee la confirmación.**
+
+### Confirmación obligatoria (sin bypass)
+
+- **Interactivo**: pregunta por app — `[S]í mover / [N]o dejar / [T]odos los restantes / [C]ancelar todo`.
+- **No interactivo** (sin consola): **NO mueve**, solo informa qué movería.
+- **`-DryRun`**: solo previsualiza, cero escrituras.
+
+### `.venv` se elimina, no se mueve — hay que recrearlo (RF-15, plan 2026-09-19)
+
+Decisión explícita: el `.venv` **se ELIMINA por comando, no se mueve** (moverlo rompe sus paths absolutos internos y es lo más limpio). Se vuelve a crear después en la ruta nueva `src\<App>\`. La extensión RF-14 agrega recreación/reactivación asistida (ver abajo); la extensión RF-15 agrega la limpieza previa de regenerables (ver abajo).
+
+### 🧹 Limpieza de regenerables antes de mover (extensión RF-15, plan 2026-09-19)
+
+Funciones: **`Find-RegenerableDirs`** (escanea apps candidatas contra allowlist de nombres exactos + mide tamaños) + **`Clear-RegenerableDirs`** (elimina con confirmación global única, log de lo eliminado, sin respaldo por ser regenerables).
+- **Allowlist fija**: Python `__pycache__`, `.pytest_cache`, `*.egg-info`, `.mypy_cache`, `.ruff_cache`, `build`, `dist`; Node `node_modules`, `.next`, `dist`, `build`, `coverage`; general `.cache`; **más `.venv/`** (eliminar, no mover; recrear después en `src\<App>`).
+- **Orden**: pregunta global de limpieza ANTES de las confirmaciones S/N/T/C por app. Si dice No → mueve todo (comportamiento anterior).
+- **Tras mover**: informe con comandos de recreación (`python -m venv .venv` + `pip install -r requirements.txt`) en la ruta nueva `src\<App>\`.
+- **Nunca `Documentacion/`**; **`-DryRun` informa, no borra**.
+
+### ⚠️ Si tienes un `.venv` activado en la terminal
+
+El script detecta `$env:VIRTUAL_ENV` al inicio y avisa (también en `-DryRun`):
+- Si el venv activo está dentro de una app a mover → **`deactivate` previo obligatorio si activo** (o `conda deactivate`) antes del modo real y antes de la limpieza RF-15 (RF-14 `Suspend-AppLocks` ya lo cubre). Tras mover y RECREAR el venv, reactívalo en su ruta nueva: `src\<App>\.venv\Scripts\Activate.ps1`.
+- Si está fuera del proyecto → solo informativo, no bloquea.
+
+### Auto-desactivar/reactivar venv + pausar git (extensión RF-14, plan 2026-09-19)
+
+Funciones: **`Suspend-AppLocks`** (antes de mover) + **`Restore-AppLocks`** (tras mover).
+- **`Suspend-AppLocks`**: desactiva el venv en-sesión **con confirmación** + detiene `git.exe` puntuales con cwd verificado dentro de la app a mover, **con confirmación**; **nunca** el proceso `Code`.
+- **`Restore-AppLocks`**: recrea el venv **con confirmación** si fue movido + activa el nuevo `src\<App>\.venv`; si la app no se movió, reactiva el mismo. Git se redescubre solo, se informa.
+- **Cada acción pregunta** (desactivar, pausar, recrear, reactivar); **sin bypass**; **`-Force` no aplica** a estas acciones; **No a todo = avisos** (comportamiento actual, el movido sigue con locks activos bajo tu responsabilidad); **`-DryRun` informa, no muta**.
+- Mutar la sesión del llamante es **comportamiento esperado y documentado** (`deactivate`/`Activate.ps1` corren en la misma sesión del script).
+
+### Controles y rollback
+
+- **Pre-chequeos** por app: origen existe, destino libre (`src\<App>` no debe existir), tamaño informado, **git limpio recomendado** (commitea antes).
+- **Log** de cada movido (origen → destino + fecha).
+- **Rollback manual**: mover de vuelta `src\<App>` → raíz (ver log para origen/destino exactos).
+- **Post-movido**: revisa **imports/paths/configs** que apunten a la ruta vieja y corre los **tests**.
+- **Nunca toca `Documentacion/`**.
 
 ---
 

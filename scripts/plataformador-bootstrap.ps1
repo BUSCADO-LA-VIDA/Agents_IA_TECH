@@ -10,7 +10,7 @@
 #   - crear/actualizar índices de código (codebase-memory-mcp) y documentación (context-mode)
 #   - verificar que los índices y MCPs funcionan correctamente
 #   - preparar la estructura antes de mover archivos
-#   - reiniciar VS Code cuando el usuario lo pide
+#   - recargar la ventana de VS Code del proyecto cuando el usuario lo pide (solo esa ventana, sin tocar las demás)
 #
 # Uso:
 #   .\scripts\plataformador-bootstrap.ps1
@@ -292,7 +292,7 @@ function Ensure-OpenCodeMcp {
         }
 
         if (-not $DryRun) {
-            $existing.mcp = $mcpConfig
+            $existing | Add-Member -NotePropertyName "mcp" -NotePropertyValue $mcpConfig -Force
             Write-OK "Sección mcp agregada a opencode.json"
         } else {
             Write-Info "DryRun: agregar sección mcp a opencode.json"
@@ -303,7 +303,9 @@ function Ensure-OpenCodeMcp {
     $hasPlugin = $false
     foreach ($p in @($existing.plugin)) { if ($p -eq "context-mode") { $hasPlugin = $true } }
     if (-not $hasPlugin -and -not $DryRun) {
-        $existing.plugin = @(@($existing.plugin) + "context-mode")
+        $currentPlugins = @(@($existing.plugin) | Where-Object { $_ -ne $null -and $_ -ne "" })
+        if ("context-mode" -notin $currentPlugins) { $currentPlugins += "context-mode" }
+        $existing | Add-Member -NotePropertyName "plugin" -NotePropertyValue @($currentPlugins) -Force
         Write-OK "Plugin de context-mode agregado a opencode.json"
     } elseif (-not $hasPlugin) {
         Write-Info "DryRun: agregar plugin de context-mode a opencode.json"
@@ -774,47 +776,41 @@ function Show-VerificationCommands {
     Write-Host "===============================================================" -ForegroundColor Cyan
 }
 
-function Restart-VSCode {
+function Reload-ProjectWindow {
+    param([string]$RootPath = "")
+
     if ($NoRestart -or $DryRun) {
-        Write-Info "Se omite el reinicio de VS Code porque -NoRestart o -DryRun está activo."
+        Write-Info "Se omite recargar la ventana de VS Code porque -NoRestart o -DryRun está activo."
         return
     }
 
-    Write-Step "Reiniciando VS Code para cargar los cambios de MCP y configuración..."
-
-    $codeExe = $null
-    foreach ($candidate in @(
-        "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe",
-        "$env:ProgramFiles\Microsoft VS Code\Code.exe",
-        "$env:ProgramFiles(x86)\Microsoft VS Code\Code.exe",
-        "C:\Program Files\Microsoft VS Code\Code.exe",
-        "C:\Program Files (x86)\Microsoft VS Code\Code.exe"
-    )) {
-        if (Test-Path $candidate) {
-            $codeExe = $candidate
-            break
-        }
-    }
-
-    if ($codeExe) {
-        try {
-            Get-Process Code -ErrorAction SilentlyContinue | Stop-Process -Force
-            Start-Sleep -Seconds 2
-            Start-Process -FilePath $codeExe -ArgumentList "--reuse-window"
-            Write-OK "VS Code reiniciado desde: $codeExe"
-            return
-        } catch {
-            Write-Warn "No se pudo reiniciar VS Code por proceso activo; se intenta abrir una nueva ventana."
-        }
-    }
-
-    if (Get-Command code -ErrorAction SilentlyContinue) {
-        & code --reuse-window
-        Write-OK "VS Code reiniciado mediante el comando 'code'."
+    if ($env:TERM_PROGRAM -eq 'vscode') {
+        Write-Warn "El script corre dentro del terminal integrado de VS Code (TERM_PROGRAM=vscode); recargar ahora mataría este mismo terminal y rompería la ejecución."
+        Write-Warn "Recarga manual requerida en ESTA ventana al terminar: Ctrl+Shift+P -> Developer: Reload Window."
         return
     }
 
-Write-Warn "No se pudo localizar VS Code para reiniciarlo automáticamente."
+    Write-Info "Terminal externa detectada; la recarga automática es segura (la terminal externa sobrevive)."
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    Write-Step "Recargando la ventana de VS Code del proyecto para cargar los cambios de MCP y configuración..."
+    Write-Info "Solo se recarga la ventana de este proyecto: $RootPath. Las demás ventanas quedan intactas."
+
+    if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
+        Write-Warn "CLI 'code' no encontrada en PATH. Recarga manual en ESA ventana: abre la carpeta del proyecto y ejecuta Ctrl+Shift+P -> Developer: Reload Window."
+        return
+    }
+
+    & code --reuse-window "$RootPath"
+    Write-OK "Ventana del proyecto recargada: $RootPath (solo esa ventana; las demás quedan intactas)."
+    Write-Info "Si los MCPs no aparecen, haz Reload Window manual en ESA ventana (Ctrl+Shift+P -> Developer: Reload Window)."
 }
 
 # =============================================================================
@@ -1868,7 +1864,7 @@ Write-OK "Kit transversal sincronizado. Documentacion/<AppName>/ NO fue tocada (
 Write-OK "Los MCPs (VS Code + OpenCode), el entorno y los índices quedaron preparados."
 
 if (-not $NoRestart) {
-    Restart-VSCode
+    Reload-ProjectWindow -RootPath $resolvedRoot
 }
 
 Write-Host "" 
@@ -1876,9 +1872,9 @@ Write-Host "===============================================================" -Fo
 Write-Host " Bootstrap completado" -ForegroundColor Green
 Write-Host "===============================================================" -ForegroundColor Green
 Write-Host "Siguientes pasos recomendados:" -ForegroundColor White
-Write-Host "  1. Revisar `Documentacion/00-indice.md`" -ForegroundColor White
-Write-Host "  2. Validar `Documentacion/index-preflight.md`" -ForegroundColor White
+Write-Host "  1. Revisar Documentacion/00-indice.md" -ForegroundColor White
+Write-Host "  2. Validar Documentacion/index-preflight.md" -ForegroundColor White
 Write-Host "  3. Mover archivos solo después de revisar la estructura real" -ForegroundColor White
-Write-Host "  4. Reabrir VS Code si hizo falta recargar la configuración" -ForegroundColor White
+Write-Host "  4. Recargar la ventana de VS Code del proyecto si hizo falta aplicar la configuración" -ForegroundColor White
 Write-Host "  5. Reiniciar OpenCode para cargar la nueva configuración MCP" -ForegroundColor White
 Write-Host "  6. Usar comandos de verificación manual si necesitas confirmar" -ForegroundColor White

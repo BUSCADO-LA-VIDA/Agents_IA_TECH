@@ -76,10 +76,11 @@ Documentacion/
 <!-- Listar ADRs en Documentacion/Agents_IA_TECH/arquitectura/adr/ -->
 - `adr-0001-ecosistema-documentacion-sin-ia.md` — Ecosistema de documentación técnica sin IA de entrada (pipeline de 4 herramientas + agente `analista_tecnico` + archivo de memoria `analisis-memoria.md`). **Aceptado 2026-09-12**.
 - `adr-0002-flujos-kit.md` — Flujo de contexto (consultar `Documentacion/` + MCPs como optimización + actualización de memoria/índice) y flujo de actualización automática de herramientas externas. **Aceptado 2026-09-12**.
+- `adr-0003-plataforma-bootstrap-instalador-unico.md` — `plataformador-bootstrap.ps1` como instalador/actualizador único (Spec-kit + MCPs + Graphify); modelo apps independientes + orquestador; resolución de app activa (`-App` + `cwd`); fusión de `sync-agents.ps1` como `Sync-TransversalKit` (Opción A). **Aceptado 2026-09-17**.
 
 ## Features activas (specs)
 <!-- Listar specs en Documentacion/Agents_IA_TECH/specs/ -->
-- (ninguna aún)
+- `specs/plataforma-bootstrap-instalador-unico/` — **Feature**: `plataformador-bootstrap.ps1` como instalador/actualizador único (Spec-kit + MCPs + Graphify). Contiene `spec.md`, `plan.md`, `tasks.md`. Derivada del ADR-0003. Estado: en planificación.
 
 ## Agentes del kit
 
@@ -118,3 +119,5 @@ Documentacion/
 > **Regla MCP**: Los agentes validan al iniciar sesión si la documentación técnica y los MCPs asociados existen; si falta alguno, lo instalan o lo reportan de forma transparente.
 
 > **⚠️ Estado de activación (2026-09-12)**: Los MCPs están **instalados y configurados** en `.vscode/mcp.json`, pero **NO están disponibles como herramientas para los agentes** en la sesión actual (requieren reiniciar la sesión de Copilot para cargarse). Por eso los agentes leen archivos directos (gastando más tokens). Ver tarea `[MCP-ACTIVAR]` en `pendientes-implementacion.md` — plan aprobado para activarlos y usarlos como herramienta primaria.
+
+> **🔄 Plan de plataforma (2026-09-17)**: Plan aprobado para implementar Spec-kit + MCPs + Graphify en todos los proyectos, con `plataformador-bootstrap.ps1` como instalador/actualizador único (descarga apps desde git a `src\AppXXX\`, crea `.specify` + doc por app, resuelve rutas spec-kit por app activa, fusiona `sync-agents.ps1` — Opción A). Repo maestro: `https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH`. Ver tarea `[PLATAFORMA]` en `pendientes-implementacion.md`.

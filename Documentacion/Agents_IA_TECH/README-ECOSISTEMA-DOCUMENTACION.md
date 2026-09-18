@@ -197,3 +197,206 @@ flowchart TD
 5. **Persistir el comportamiento** — las decisiones transversales quedan en archivos.
 
 **Fuente de verdad**: `Documentacion/<AppName>/reglas-transversales-agentes.md`
+
+---
+
+## 🔌 Estado de los MCPs en OpenCode (2026-09-17) — **IMPLEMENTADO**
+
+> **Estado actual**: Los 3 MCPs están **configurados y activos en OpenCode** (sección `mcp` agregada a `opencode.json`). Los agentes de OpenCode **pueden invocarlos realmente** tras reiniciar OpenCode.
+
+### Estado actual (2026-09-17)
+
+| Aspecto | Estado |
+|---------|--------|
+| Binarios instalados | ✅ Sí (los 3) |
+| Configurado en VS Code (`.vscode/mcp.json`) | ✅ Sí |
+| Configurado en OpenCode (`opencode.json`) | ✅ **Implementado** |
+| Índice de `codebase-memory` para este proyecto | ✅ Sí (Agents_IA_TECH: 13.216 nodos, 64.097 edges, 39 MB) |
+| Índice de `codebase-memory` para Boleteria Cardenales | ⚠️ Parcial (worker crash en archivo específico, reintentar) |
+| Índice de `context-mode` (Agents_IA_TECH) | ✅ Indexado (Documentacion/ + Agents_IA_TECH/) |
+| Índice de `context-mode` (Boleteria Cardenales) | ✅ Indexado (85 archivos, 163 secciones) |
+| Agentes lo referencian en prompts | ✅ Sí |
+| Agentes pueden usarlo en OpenCode | ✅ **Sí (tras reiniciar OpenCode)** |
+
+### Binarios instalados
+
+| MCP | Ruta del binario |
+|-----|------------------|
+| `context-mode` | `C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd` |
+| `codebase-memory-mcp` | `C:/Users/tomas/.local/bin/codebase-memory-mcp.exe` (v0.9.0) |
+| `markitdown` | `C:/Python314/Scripts/markitdown-mcp.exe` |
+
+### Cómo activarlos en OpenCode (✅ YA HECHO)
+
+La sección `mcp` ya está agregada al `opencode.json` del proyecto (formato validado contra el schema de opencode):
+
+```json
+"mcp": {
+  "context-mode": {
+    "type": "local",
+    "command": ["C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd"],
+    "enabled": true
+  },
+  "codebase-memory-mcp": {
+    "type": "local",
+    "command": ["C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"],
+    "enabled": true
+  },
+  "markitdown": {
+    "type": "local",
+    "command": ["C:/Python314/Scripts/markitdown-mcp.exe"],
+    "enabled": true
+  }
+}
+```
+
+> **⚠️ Reinicio requerido**: OpenCode carga la configuración **una sola vez al iniciar**. Después de editar `opencode.json`, hay que **cerrar y reabrir OpenCode** para que los MCPs se carguen.
+
+### Binarios instalados
+
+| MCP | Ruta del binario |
+|-----|------------------|
+| `context-mode` | `C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd` |
+| `codebase-memory-mcp` | `C:/Users/tomas/.local/bin/codebase-memory-mcp.exe` (v0.9.0) |
+| `markitdown` | `C:/Python314/Scripts/markitdown-mcp.exe` |
+
+### Cómo activarlos en OpenCode
+
+Agregar la sección `mcp` al `opencode.json` del proyecto (formato validado contra el schema de opencode):
+
+```json
+"mcp": {
+  "context-mode": {
+    "type": "local",
+    "command": ["C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd"],
+    "enabled": true
+  },
+  "codebase-memory-mcp": {
+    "type": "local",
+    "command": ["C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"],
+    "enabled": true
+  },
+  "markitdown": {
+    "type": "local",
+    "command": ["C:/Python314/Scripts/markitdown-mcp.exe"],
+    "enabled": true
+  }
+}
+```
+
+> **⚠️ Reinicio requerido**: OpenCode carga la configuración **una sola vez al iniciar**. Después de editar `opencode.json`, hay que **cerrar y reabrir OpenCode** para que los MCPs se carguen.
+
+---
+
+## 📂 Dónde se guardan los índices
+
+| MCP | Ubicación del índice | Nota |
+|-----|----------------------|------|
+| `codebase-memory-mcp` | `C:\Users\tomas\.cache\codebase-memory-mcp\<nombre-proyecto>.db` | Un `.db` por proyecto. Ej: `C-Proyectos-Agents_IA_TECH.db` (39 MB, 13.216 nodos) |
+| `context-mode` | `C:\Users\tomas\AppData\Roaming\opencode\context-mode\content` | Base FTS5 por proyecto (archivos `.db` por source) |
+| `markitdown` | No guarda índices | Solo convierte formatos a Markdown |
+
+---
+
+## 🛠️ Comandos manuales (para replicar las funciones a mano)
+
+> **Regla práctica**: **Siempre hay que indexar el CÓDIGO** (no solo la documentación). El código es la fuente de verdad; la doc es complemento.
+
+### `codebase-memory-mcp` — grafo de conocimiento del código
+
+```powershell
+# Ver proyectos ya indexados
+codebase-memory-mcp cli list_projects
+
+# Indexar un proyecto (el código fuente)
+codebase-memory-mcp cli index_repository --path "C:/Proyectos/Boleteria Cardenales"
+
+# Estado del índice de un proyecto
+codebase-memory-mcp cli index_status --project "<nombre-de-list_projects>"
+
+# Buscar en el grafo
+codebase-memory-mcp cli search_graph '{"query":"<consulta>"}'
+
+# Ver arquitectura del proyecto
+codebase-memory-mcp cli get_architecture '{"project":"<nombre>"}'
+
+# Eliminar un proyecto del índice
+codebase-memory-mcp cli delete_project '{"project":"<nombre>"}'
+```
+
+### `context-mode` — indexación FTS5 + BM25 (consulta optimizada)
+
+```powershell
+# Indexar un directorio (código y/o documentación)
+context-mode index "C:/Proyectos/Boleteria Cardenales"
+
+# Indexar solo la documentación
+context-mode index "C:/Proyectos/Boleteria Cardenales/Documentacion"
+
+# Buscar en la base de conocimiento
+context-mode search "consulta..."
+
+# Diagnóstico del estado (storage, hooks, FTS5)
+context-mode doctor
+```
+
+### `markitdown` — convertir formatos a Markdown
+
+```powershell
+# Convertir un archivo (PDF, DOCX, PPTX, XLSX, HTML...) a Markdown
+markitdown "archivo.pdf" > "archivo.md"
+```
+
+---
+
+## 🤖 Script automatizado: `plataformador-bootstrap.ps1`
+
+El script `scripts/plataformador-bootstrap.ps1` ahora incluye **todo el flujo automatizado**:
+
+### Qué hace el script (pasos principales)
+
+1. **Estructura base**: Crea `Documentacion/`, `00-indice.md`, `pendientes-implementacion.md`, `memoria-proyecto.md`, etc.
+2. **VS Code**: Configura `.vscode/settings.json`, `.vscode/mcp.json`, `.github/hooks/context-mode.json`
+3. **OpenCode**: Agrega sección `mcp` a `opencode.json` (3 servidores: context-mode, codebase-memory-mcp, markitdown)
+4. **Indexación código**: Ejecuta `codebase-memory-mcp cli index_repository` para el proyecto
+5. **Indexación docs**: Ejecuta `context-mode index` sobre `Documentacion/` y `Documentacion/Agents_IA_TECH/`
+6. **Verificación**: Comprueba que todos los MCPs responden y los índices existen
+7. **Comandos manuales**: Muestra en consola los comandos de verificación para usar en terminal
+
+### Parámetros útiles
+
+| Parámetro | Uso |
+|-----------|-----|
+| `-SkipInstall` | Omite instalación de dependencias (npm, pip, MCPs) |
+| `-NoRestart` | No reinicia VS Code al final |
+| `-DryRun` | Simula sin hacer cambios |
+| `-Force` | Sobrescribe archivos existentes |
+| `-SkipIndexing` | Omite indexación de código y documentación |
+| `-VerifyOnly` | **Solo verifica** MCPs e índices (no modifica nada) |
+
+### Ejemplos de uso
+
+```powershell
+# Ejecución completa (instala, configura, indexa, verifica)
+.\scripts\plataformador-bootstrap.ps1
+
+# Solo verificar estado actual (rápido, sin cambios)
+.\scripts\plataformador-bootstrap.ps1 -VerifyOnly
+
+# Configurar sin reinstalar dependencias ni reiniciar VS Code
+.\scripts\plataformador-bootstrap.ps1 -SkipInstall -NoRestart
+
+# Solo configurar OpenCode y indexar, sin tocar VS Code
+.\scripts\plataformador-bootstrap.ps1 -SkipInstall -NoRestart -SkipIndexing
+```
+
+---
+
+## ✅ Checklist para activar un MCP en un proyecto nuevo
+
+1. **Agregar la sección `mcp`** al `opencode.json` del proyecto (ver arriba).
+2. **Indexar el código** con `codebase-memory-mcp cli index_repository` (siempre el código primero).
+3. **Indexar la documentación** con `context-mode index "Documentacion"`.
+4. **Reiniciar OpenCode** para que cargue los MCPs.
+5. **Verificar** que las herramientas (`ctx_search`, `search_graph`, `convert_to_markdown`) aparezcan disponibles.
+6. **Opcional**: Ejecutar `.\scripts\plataformador-bootstrap.ps1 -VerifyOnly` para confirmar todo.

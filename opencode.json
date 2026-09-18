@@ -1,61 +1,67 @@
 {
-  "$schema": "https://opencode.ai/config.json",  
-  "model": "deepseek-ai/DeepSeek-V4-Flash-0731",
-  "small_model": "deepseek-ai/DeepSeek-V4-Flash-0731",
-  "default_agent": "build",
+  "$schema": "https://opencode.ai/config.json",
+  "model": "groq-custom/llama-3.3-70b-versatile",
+  "small_model": "groq-custom/llama-3.1-8b-instant",
+"default_agent": "build",
+  "plugin": ["context-mode"],
   "instructions": ["AGENTS.md"],
   "provider": {
-    "nvidia": {
+    "nvidia-custom": {
       "name": "NVIDIA",
-      "api": "openai",
+      "npm": "@ai-sdk/openai-compatible",
       "options": {
         "apiKey": "{env:NVIDIA_API_KEY}",
         "baseURL": "https://integrate.api.nvidia.com/v1"
       },
       "models": {
         "z-ai/glm-5.2": {
-          "name": "GLM 5.2 (z-ai)",
+          "name": "GLM 5.2",
           "tool_call": true,
-          "attachment": true,
           "temperature": true,
           "limit": { "context": 128000, "output": 32000 }
         },
         "deepseek-ai/deepseek-v4-flash": {
-          "name": "DeepSeek V4 Flash (NVIDIA)",
+          "name": "DeepSeek V4 Flash",
           "tool_call": true,
           "temperature": true,
-          "limit": {
-            "context": 128000,
-            "output": 16000
-          }
+          "limit": { "context": 128000, "output": 16000 }
         }
       }
     },
-    "deepinfra": {
+    "deepinfra-custom": {
       "name": "DeepInfra",
-      "api": "openai",
+      "npm": "@ai-sdk/openai-compatible",
       "options": {
-        "apiKey": "{env:chat.lm.secret.53001bd5}",
-        "baseURL": "https://deepinfra.com"
+        "apiKey": "{env:DEEPINFRA_API_KEY}",
+        "baseURL": "https://api.deepinfra.com/v1/openai"
       },
       "models": {
         "deepseek-ai/DeepSeek-V4-Flash-0731": {
           "name": "DeepSeek V4 Flash 0731",
           "tool_call": true,
-          "attachment": true,
           "temperature": true,
-          "limit": {
-            "context": 128000,
-            "output": 16000
-          }
+          "limit": { "context": 128000, "output": 16000 }
         }
       }
     }
   },
-  "enabled_providers": [
-    "nvidia",
-    "deepinfra"
-  ],
+  "mcp": {
+    "context-mode": {
+      "type": "local",
+      "command": ["C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd"],
+      "enabled": true
+    },
+    "codebase-memory-mcp": {
+      "type": "local",
+      "command": ["C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"],
+      "enabled": true
+    },
+    "markitdown": {
+      "type": "local",
+      "command": ["C:/Python314/Scripts/markitdown-mcp.exe"],
+      "enabled": true
+    }
+  },
   "permission": {
     "edit": "allow",
     "bash": {

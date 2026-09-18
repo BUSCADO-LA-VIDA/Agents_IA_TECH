@@ -36,9 +36,10 @@ Documentacion/
     │   └── ...
     │
     ├── MCPs/                 ← 🔌 Guías de integración de MCPs
-    │   ├── context-mode.md   ←   Guía práctica MCP context-mode
-    │   ├── markitdown.md     ←   Guía práctica markitdown (+ markitdown-mcp)
-    │   └── codebase-memory-mcp.md ← Guía práctica MCP codebase-memory-mcp
+     │   ├── context-mode.md   ←   Guía práctica MCP context-mode
+     │   ├── markitdown.md     ←   Guía práctica markitdown (+ markitdown-mcp)
+     │   ├── codebase-memory-mcp.md ← Guía práctica MCP codebase-memory-mcp
+     │   └── tokenslayer.md    ←   Guía práctica MCP tokenslayer-mcp-server
     │
     ├── README-ECOSISTEMA-DOCUMENTACION.md ← 🧠 Plan ecosistema doc sin IA de entrada (aprobado)
     │
@@ -115,6 +116,7 @@ Documentacion/
 | `context-mode` | https://github.com/mksglu/context-mode | � Instalado (2026-09-12) | Optimiza ventana de contexto: indexación FTS5+BM25 de docs (`ctx_index`, `ctx_search`, `ctx_fetch_and_index`), ejecución sandbox (`ctx_execute`), continuidad de sesión, mantenimiento (`ctx_purge`, `ctx_stats`, `ctx_upgrade`, `ctx_doctor`). Instalado: `npm install -g context-mode` (v1.0.169). Registrado en `.vscode/mcp.json` + hooks `.github/hooks/context-mode.json`. Licencia **ELv2** (source-available, no MIT). Requiere Node >= 22.5. Guía: `MCPs/context-mode.md` |
 | `codebase-memory-mcp` | https://github.com/DeusData/codebase-memory-mcp | � Instalado (2026-09-12) | Grafo de conocimiento del código (`index_repository`, `query`, `semantic_search`). Paso 2 del pipeline del ecosistema. Instalado: `npm install -g codebase-memory-mcp` (v0.9.0). Registrado en `.vscode/mcp.json`. Licencia **MIT** ✅ (verificada 2026-09-12). Guía: `MCPs/codebase-memory-mcp.md` |
 | `markitdown` (+ `markitdown-mcp`) | https://github.com/microsoft/markitdown | 🟢 Instalado (2026-09-12) | Convierte cualquier formato (PDF, DOCX, PPTX, XLSX, HTML, etc.) a Markdown. 100% offline, sin IA. Paso 1 del pipeline del ecosistema. Instalado: `pip install 'markitdown[all]'` (v0.1.7) + `markitdown-mcp` 0.0.1a3 (requiere `mcp<2`). Registrado en `.vscode/mcp.json`. Licencia MIT. Guía: `MCPs/markitdown.md` |
+| `tokenslayer-mcp-server` | https://github.com/ajvikram/TokenSlayer | 🟡 Documentado (2026-09-18) — pendiente compilar + registrar | Compactación de contexto: esqueletos AST + call graphs + patch estructural (`analyze_files`, `analyze_workspace`, `analyze_dependency_chain`, `expand_node`, `apply_patch`, `get_stats`, `clear_stats`). MCP standalone en `mcp-server/` (clonar + `npm run build`, Node v24.14.0). Extensión VS Code `ajvikram.tokenslayer` v1.5.0 instalada. Licencia **MIT** ✅. Guía: `MCPs/tokenslayer.md` |
 
 > **Regla MCP**: Los agentes validan al iniciar sesión si la documentación técnica y los MCPs asociados existen; si falta alguno, lo instalan o lo reportan de forma transparente.
 

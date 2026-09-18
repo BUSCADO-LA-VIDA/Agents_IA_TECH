@@ -17,3 +17,6 @@ Thumbs.db
 
 # Clones externos (código de terceros, no propio — se regeneran desde scripts, no se versionan)
 proyect_ext/tokenslayer/
+
+# Respaldos de huérfanos por revisar (no versionar — pueden contener secrets)
+revisar_manualmente/

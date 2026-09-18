@@ -16,6 +16,7 @@
 | T-D1 | `arquitecto` | Crear ADR-0003 (modelo, resolución app activa, fusión `Sync-TransversalKit`, guardrails, diagrama, plan). | ✅ **COMPLETADA (2026-09-17)** |
 | T-D2 | `documentador` | Crear spec/plan/tasks del bootstrap + actualizar `00-indice.md`, `referencias.md`, `pendientes-implementacion.md`. | ✅ **COMPLETADA (2026-09-17)** |
 | T-D3 | `security-auditor` | Revisar descarga desde git (URLs, licencias, credenciales) y dejar recomendaciones en `Documentacion/Agents_IA_TECH/seguridad/`. | ✅ **COMPLETADA (2026-09-17)** — `seguridad/plataforma-bootstrap.md` |
+| T-D4 | `documentador` | Documentar manejo de huérfanos `[HUERFANOS]`: RF-12 + flujo de decisión en `spec.md`, tasks T-I7/T-I8/T-V6, sección Actualización en `README.md`. | ✅ **COMPLETADA (2026-09-18)** — RF-12 + criterio 8 + diagrama con paso de huérfanos en `spec.md`; tasks T-I7/T-I8/T-V6 creadas; `README.md` (Actualización + huérfanos) actualizado |
 
 ### Implementación
 
@@ -27,6 +28,8 @@
 | T-I4 | `devops` | Convertir `sync-agents.ps1` en wrapper que delega en `Sync-TransversalKit`. | ✅ **COMPLETADA (2026-09-18)** |
 | T-I5 | `devops` | Configurar MCPs en todos los harnesses (plugin context-mode en `opencode.json`, hooks `.github/hooks/`, `.vscode/mcp.json`). | ✅ **COMPLETADA (2026-09-18)** |
 | T-I6 | `qa-senior` | Escribir/ejecutar tests del script: idempotencia, `-DryRun`, clonado, actualización, estructura resultante, no-tocar-`Documentacion/<AppName>/`. | ✅ **COMPLETADA (2026-09-18)** — DryRun cero-escrituras verificado; reporte en `Documentacion/Agents_IA_TECH/testing/validacion-bootstrap-2026-09-18.md` |
+| T-I7 | `devops` | Implementar manejo de huérfanos en `Sync-TransversalKit`: `Find-OrphanKitFiles` (detección vs clon maestro shallow en `.github/` `.opencode/` `.doc_agents/`) + `Invoke-OrphanDecision` (pregunta borrar/conservar/omitir + flag `-OrphanAction Borrar\|Conservar\|Preguntar`, default seguro Conservar) + movido versionado a `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>` (sufijo hora si la fecha existe) + informe de qué se movió y dónde; nunca `Documentacion/<AppName>/`; en `-DryRun` solo informa. | ⏳ Pendiente |
+| T-I8 | `devops` | Agregar `revisar_manualmente/` a `.gitignore` (respaldo de huérfanos no versionado). NOTA: el `.gitignore` lo edita `devops`, esta task solo lo registra. | ⏳ Pendiente |
 
 ### Validación
 
@@ -37,6 +40,7 @@
 | T-V3 | `qa-senior` | Validar que al cargar VS Code los agentes, MCPs y Spec-kit funcionan sin re-ejecutar scripts. | ✅ **COMPLETADA verificación estática (2026-09-18)** — `opencode.json` (plugin+3 MCPs), hooks (Pre/Post/SessionStart) y `.vscode/mcp.json` (3 servidores) correctos |
 | T-V4 | `qa-senior` | Correr `npx ecc-agentshield scan` (seguridad `.github/`). | ✅ **COMPLETADA (2026-09-18)** — Grade A (98/100), 0 critical/high |
 | T-V5 | `gitflow` | Commits convencionales al final. | ⏳ Pendiente |
+| T-V6 | `qa-senior` | Tests de huérfanos en `-DryRun`: detección correcta vs maestro, nada se borra/mueve en DryRun, respaldo conserva estructura original, informe de movidos. | ⏳ Pendiente |
 
 ---
 

@@ -19,7 +19,7 @@
 #   .\scripts\plataformador-bootstrap.ps1 -DryRun
 #   .\scripts\plataformador-bootstrap.ps1 -SkipIndexing
 #   .\scripts\plataformador-bootstrap.ps1 -VerifyOnly
-#   .\scripts\plataformador-bootstrap.ps1 -SyncOnly [-DryRun] [-Force] [-RepoUrl <url>]  # delegación sync-agents
+#   .\scripts\plataformador-bootstrap.ps1 -SyncOnly [-DryRun] [-Force] [-RepoUrl <url>] [-OrphanAction Borrar|Conservar|Preguntar]  # delegación sync-agents
 #   .\scripts\plataformador-bootstrap.ps1 -App <app> [-DryRun]  # app activa explícita
 # Requisito: PowerShell 7+ (pwsh ≥ 7). No funciona en Windows PowerShell 5.1.
 #   Recomendación (solo texto, ejecutar manualmente si aplica):
@@ -38,7 +38,8 @@ param(
     [switch]$SyncOnly,
     [string]$App = "",
     [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
-    [string]$ManifestPath = ""
+    [string]$ManifestPath = "",
+    [string]$OrphanAction = "Preguntar"
 )
 
 $ErrorActionPreference = "Stop"
@@ -817,17 +818,23 @@ Write-Warn "No se pudo localizar VS Code para reiniciarlo automáticamente."
 }
 
 # =============================================================================
-# Sync-TransversalKit (T-I1 / RF-01, RF-02, RF-11: absorbe la lógica de sync-agents.ps1)
 # =============================================================================
-# Copia SOLO los transversales del repo maestro. NUNCA toca
-# Documentacion/<AppName>/ (frontera kit <-> app, guardrail 1).
-# Seguridad: excluye .opencode/config.json (posibles credenciales) y valida
-# la URL fail-closed (solo https://github.com/).
-# Usa las variables de ámbito del script: $DryRun (simula) y $Force (sobrescribe).
-function Sync-TransversalKit {
+# Find-OrphanKitFiles + Invoke-OrphanDecision (T-I7 / RF-12: manejo de huérfanos)
+# =============================================================================
+# RF-12: al sincronizar, detectar huérfanos (existen en .github/ .opencode/
+# .doc_agents/ local pero ya no existen en el clon maestro) y preguntar
+# ¿borrar o conservar? (conservar = mover a revisar_manualmente\yyyymmdd\ +
+# informar; default seguro = conservar; -DryRun solo informa).
+# Condiciones de seguridad (seguridad/huerfanos.md, no negociables):
+# default Conservar, abortar si el maestro está incompleto, revisar_manualmente/
+# en .gitignore, logs solo con metadatos (NUNCA contenido), containment-check +
+# nunca sobrescribir respaldo, detector acotado a la allowlist (3 dirs),
+# .opencode/config.json excluido, -DryRun no borra ni mueve nada.
+# Solo lectura: funciona igual en -DryRun (no escribe nada por diseño).
+function Find-OrphanKitFiles {
     param(
-        [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
-        [string]$RootPath = ""
+        [string]$RootPath = "",
+        [string]$TempDir = ""
     )
 
     if (-not $RootPath) {
@@ -836,6 +843,380 @@ function Sync-TransversalKit {
         } else {
             $RootPath = (Split-Path -Parent $PSScriptRoot)
         }
+    }
+    if (-not $TempDir) {
+        throw "Find-OrphanKitFiles: falta -TempDir (clon maestro). Se aborta la fase de huérfanos."
+    }
+    if (-not (Test-Path -LiteralPath $TempDir)) {
+        throw "Find-OrphanKitFiles: el clon maestro no existe ($TempDir). Se aborta la fase de huérfanos: jamás decidir huérfanos contra un clon fallido."
+    }
+
+    # Fail-closed: maestro incompleto => abortar (todo lo local parecería huérfano).
+    $allowDirs = @(".github", ".opencode", ".doc_agents")
+    foreach ($d in $allowDirs) {
+        if (-not (Test-Path -LiteralPath (Join-Path $TempDir $d))) {
+            throw "Find-OrphanKitFiles: clon maestro incompleto (falta '$d' en $TempDir). Se aborta la fase de huérfanos."
+        }
+    }
+
+    $orphans = @()
+    foreach ($d in $allowDirs) {
+        $localDir = Join-Path $RootPath $d
+        if (-not (Test-Path -LiteralPath $localDir)) { continue }
+        $files = Get-ChildItem -LiteralPath $localDir -Recurse -File -Force -ErrorAction SilentlyContinue
+        foreach ($f in $files) {
+            $rel = ([IO.Path]::GetRelativePath($RootPath, $f.FullName)) -replace '\\', '/'
+            # Seguridad: .opencode/config.json nunca se toca (posibles credenciales).
+            if ($rel -eq ".opencode/config.json") { continue }
+            # Defensa: rechaza rutas que escapan (fail-closed; no ocurre enumerando local).
+            if ($rel -match '(^|/)\.\.(/|$)') { continue }
+            $masterPath = Join-Path $TempDir ($rel -replace '/', [IO.Path]::DirectorySeparatorChar)
+            if (-not (Test-Path -LiteralPath $masterPath)) {
+                $orphans += $rel
+            }
+        }
+    }
+    return $orphans
+}
+
+# Muestra la lista de huérfanos agrupada por directorio (solo rutas relativas +
+# tamaño/fecha si es barato; NUNCA contenido de archivos en logs).
+function Show-OrphanList {
+    param(
+        [string[]]$Orphans = @(),
+        [string]$RootPath = ""
+    )
+
+    Write-Step "Huérfanos detectados ($($Orphans.Count)): existen local, no existen en el maestro."
+    $grouped = $Orphans | Group-Object { ($_ -split '/')[0] } | Sort-Object Name
+    foreach ($g in $grouped) {
+        Write-Host "  [$($g.Name)/] ($($g.Count))" -ForegroundColor Yellow
+        foreach ($rel in ($g.Group | Sort-Object)) {
+            $meta = ""
+            try {
+                $item = Get-Item -LiteralPath (Join-Path $RootPath ($rel -replace '/', [IO.Path]::DirectorySeparatorChar)) -ErrorAction Stop
+                $meta = " ($($item.Length) bytes, $($item.LastWriteTime.ToString('yyyy-MM-dd HH:mm')))"
+            } catch { $meta = "" }
+            Write-Host "    - $rel$meta" -ForegroundColor DarkGray
+        }
+    }
+}
+
+# Elimina huérfanos (limpio, sin respaldo). Containment-check fail-closed +
+# log de lo borrado (ruta relativa, tamaño, fecha, hash; NUNCA contenido).
+# Defensa: si el ámbito del script está en -DryRun, se niega a borrar.
+function Remove-OrphanFiles {
+    param(
+        [string[]]$Files = @(),
+        [string]$RootPath = ""
+    )
+
+    if (Get-Variable -Name DryRun -Scope Script -ErrorAction SilentlyContinue) {
+        if ([bool]$script:DryRun) {
+            Write-Warn "Remove-OrphanFiles: -DryRun activo, no se borra nada (fail-closed)."
+            return @()
+        }
+    }
+    $rootCanon = [IO.Path]::GetFullPath($RootPath)
+    $sep = [IO.Path]::DirectorySeparatorChar
+    $deleted = @()
+    foreach ($rel in $Files) {
+        if ($rel -match '(^|/)\.\.(/|$)') {
+            Write-Warn "  [RECHAZADO] $rel — ruta fuera de alcance (..), no se toca."
+            continue
+        }
+        $full = [IO.Path]::GetFullPath((Join-Path $RootPath ($rel -replace '/', $sep)))
+        if (-not $full.StartsWith($rootCanon + $sep, [StringComparison]::OrdinalIgnoreCase)) {
+            Write-Warn "  [RECHAZADO] $rel — containment-check: fuera del proyecto, no se toca."
+            continue
+        }
+        try {
+            $item = Get-Item -LiteralPath $full -ErrorAction Stop
+            $size = $item.Length
+            $date = $item.LastWriteTime.ToString('yyyy-MM-dd HH:mm')
+            $hash = ((Get-FileHash -LiteralPath $full -Algorithm SHA256 -ErrorAction Stop).Hash).Substring(0, 12)
+        } catch {
+            Write-Warn "  [OMITIDO] $rel — ya no existe o no se puede leer, no se toca."
+            continue
+        }
+        Remove-Item -LiteralPath $full -Force
+        $deleted += $rel
+        Write-Host "  [BORRADO] $rel ($size bytes, $date, sha256:$hash...)" -ForegroundColor Red
+    }
+    return $deleted
+}
+
+# Conserva huérfanos: mueve a revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>
+# preservando la estructura relativa. Containment-check fail-closed, nunca
+# sobrescribe un respaldo existente (sufijo incremental), no crea carpetas
+# vacías (crea bajo demanda al mover el primer archivo), no sigue symlinks
+# (mueve el enlace como tal). Advierte si revisar_manualmente/ no está en
+# .gitignore y recuerda que el respaldo puede contener secrets.
+function Move-OrphanFilesToBackup {
+    param(
+        [string[]]$Files = @(),
+        [string]$RootPath = ""
+    )
+
+    if (Get-Variable -Name DryRun -Scope Script -ErrorAction SilentlyContinue) {
+        if ([bool]$script:DryRun) {
+            Write-Warn "Move-OrphanFilesToBackup: -DryRun activo, no se mueve nada (fail-closed)."
+            return @{ Moved = @(); Destino = "" }
+        }
+    }
+    if (-not $Files -or $Files.Count -eq 0) { return @{ Moved = @(); Destino = "" } }
+
+    # Seguridad: revisar_manualmente/ debe estar en .gitignore (no versionar respaldos).
+    $gitignore = Join-Path $RootPath ".gitignore"
+    $gitText = ""
+    try { $gitText = Get-Content -LiteralPath $gitignore -Raw -ErrorAction Stop } catch { $gitText = "" }
+    if ($gitText -notmatch 'revisar_manualmente/') {
+        Write-Warn "revisar_manualmente/ NO está en .gitignore: no hacer commit de los respaldos (pueden contener secrets)."
+    }
+
+    # Carpeta del día; si existe => sufijo -HHmmss; si aún existe => contador.
+    $day = Get-Date -Format 'yyyyMMdd'
+    $backupRoot = Join-Path $RootPath "revisar_manualmente\$day"
+    if (Test-Path -LiteralPath $backupRoot) {
+        $backupRoot = Join-Path $RootPath ("revisar_manualmente\" + $day + "-" + (Get-Date -Format 'HHmmss'))
+    }
+    $n = 2
+    while (Test-Path -LiteralPath $backupRoot) {
+        $backupRoot = Join-Path $RootPath ("revisar_manualmente\" + $day + "-" + (Get-Date -Format 'HHmmss') + "_$n")
+        $n++
+    }
+    $rootCanon = [IO.Path]::GetFullPath($RootPath)
+    $backupCanon = [IO.Path]::GetFullPath($backupRoot)
+    $sep = [IO.Path]::DirectorySeparatorChar
+
+    $moved = @()
+    foreach ($rel in ($Files | Sort-Object)) {
+        if ($rel -match '(^|/)\.\.(/|$)') {
+            Write-Warn "  [RECHAZADO] $rel — ruta fuera de alcance (..), no se toca."
+            continue
+        }
+        $srcFull = [IO.Path]::GetFullPath((Join-Path $RootPath ($rel -replace '/', $sep)))
+        if (-not $srcFull.StartsWith($rootCanon + $sep, [StringComparison]::OrdinalIgnoreCase)) {
+            Write-Warn "  [RECHAZADO] $rel — containment-check: fuera del proyecto, no se toca."
+            continue
+        }
+        if (-not (Test-Path -LiteralPath $srcFull)) {
+            Write-Warn "  [OMITIDO] $rel — ya no existe, no se mueve."
+            continue
+        }
+        try {
+            $linkType = (Get-Item -LiteralPath $srcFull -ErrorAction Stop).LinkType
+            if ($linkType) { Write-Info "  $rel es enlace ($linkType): se mueve el enlace como tal, sin seguirlo." }
+        } catch { Write-Warn "  [OMITIDO] $rel — no se puede leer, no se mueve."; continue }
+
+        $dstFull = [IO.Path]::GetFullPath((Join-Path $backupRoot ($rel -replace '/', $sep)))
+        if (-not $dstFull.StartsWith($backupCanon + $sep, [StringComparison]::OrdinalIgnoreCase)) {
+            Write-Warn "  [RECHAZADO] $rel — containment-check: el destino escapa del respaldo, se aborta ese movido."
+            continue
+        }
+        # Nunca sobrescribir respaldo existente: sufijo incremental antes de la extensión.
+        if (Test-Path -LiteralPath $dstFull) {
+            $dstParent = Split-Path $dstFull -Parent
+            $dstBase = [IO.Path]::GetFileNameWithoutExtension($dstFull)
+            $dstExt = [IO.Path]::GetExtension($dstFull)
+            $i = 2
+            while (Test-Path -LiteralPath $dstFull) {
+                $dstFull = Join-Path $dstParent ("{0}_{1:d2}{2}" -f $dstBase, $i, $dstExt)
+                $i++
+            }
+            Write-Info "  Destino ocupado: se usa variante $dstFull"
+        }
+        $dstParent = Split-Path $dstFull -Parent
+        if (-not (Test-Path -LiteralPath $dstParent)) { New-Item -ItemType Directory -Path $dstParent -Force | Out-Null }
+        Move-Item -LiteralPath $srcFull -Destination $dstFull -Force
+        $moved += $rel
+        $dstRel = ([IO.Path]::GetRelativePath($RootPath, $dstFull)) -replace '\\', '/'
+        Write-Host "  [CONSERVADO] $rel -> $dstRel" -ForegroundColor Green
+    }
+    return @{ Moved = $moved; Destino = $backupRoot }
+}
+
+# Pregunta ¿borrar o conservar? por lote o por archivo ([B]orrar / [C]onservar /
+# [U]no por uno / [O]mitir = propio, dejar en su lugar). Default seguro Conservar
+# (jamás auto-borrar; sin respuesta o no interactivo => Conservar). Borrar exige
+# confirmación explícita en interactivo (doble confirmación en lote) o -Force en
+# no interactivo (si no, degrada a Conservar). En -DryRun solo informa (no borra
+# ni mueve). Al final informa qué se borró / qué se movió y dónde / qué se omitió.
+function Invoke-OrphanDecision {
+    param(
+        [string[]]$Orphans = @(),
+        [string]$RootPath = "",
+        [string]$OrphanAction = "Preguntar"
+    )
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+    $inDryRun = $false
+    if (Get-Variable -Name DryRun -Scope Script -ErrorAction SilentlyContinue) { $inDryRun = [bool]$script:DryRun }
+    $withForce = $false
+    if (Get-Variable -Name Force -Scope Script -ErrorAction SilentlyContinue) { $withForce = [bool]$script:Force }
+
+    $norm = @{ "borrar" = "Borrar"; "conservar" = "Conservar"; "preguntar" = "Preguntar" }
+    $key = "$OrphanAction".Trim().ToLowerInvariant()
+    if ($norm.ContainsKey($key)) { $action = $norm[$key] } else {
+        if ($OrphanAction) { Write-Warn "Invoke-OrphanDecision: -OrphanAction '$OrphanAction' no válido (Borrar|Conservar|Preguntar). Se usa 'Preguntar'." }
+        $action = "Preguntar"
+    }
+
+    if (-not $Orphans -or $Orphans.Count -eq 0) {
+        Write-OK "Sin huérfanos: todo lo local en .github/ .opencode/ .doc_agents/ existe en el maestro."
+        return
+    }
+
+    Show-OrphanList -Orphans $Orphans -RootPath $RootPath
+
+    if ($inDryRun) {
+        Write-Info "DryRun: con -OrphanAction $action se haría lo siguiente (sin borrar ni mover nada):"
+        switch ($action) {
+            "Borrar"    { Write-Info "DryRun: se ELIMINARÍAN $($Orphans.Count) huérfano(s) (en modo real no interactivo requiere -Force)." }
+            "Conservar" { Write-Info "DryRun: se MOVERÍAN $($Orphans.Count) huérfano(s) a revisar_manualmente\<yyyymmdd>\ preservando estructura." }
+            default     { Write-Info "DryRun: se PREGUNTARÍA [B]orrar todos / [C]onservar todos / [U]no por uno / [O]mitir (default seguro: Conservar)." }
+        }
+        Write-Info "DryRun: fase de huérfanos simulada. Documentacion/<AppName>/ nunca entra en alcance."
+        return
+    }
+
+    $interactive = $false
+    try { $interactive = [Environment]::UserInteractive -and (-not [Console]::IsInputRedirected) } catch { $interactive = $false }
+
+    $toDelete = @()
+    $toKeep = @()
+    $omitted = @()
+    $confirmedViaPrompt = $false
+    $effective = $action
+
+    if ($action -eq "Preguntar") {
+        if (-not $interactive) {
+            Write-Warn "Modo no interactivo sin -OrphanAction explícito: default seguro Conservar (respaldo en revisar_manualmente/)."
+            $effective = "Conservar"
+        } else {
+            $choice = ""
+            try { $choice = (Read-Host "Huérfanos: [B]orrar todos / [C]onservar todos / [U]no por uno / [O]mitir = propios, dejar en su lugar [default: C]").Trim().ToLowerInvariant() } catch { $choice = "" }
+            switch ($choice) {
+                "b" {
+                    $confirm = ""
+                    try { $confirm = (Read-Host "CONFIRMAR: ¿BORRAR $($Orphans.Count) huérfano(s) SIN respaldo? [S = sí / N = no] [default: N]").Trim().ToLowerInvariant() } catch { $confirm = "" }
+                    if ($confirm -eq "s") { $effective = "Borrar"; $confirmedViaPrompt = $true }
+                    else { Write-Warn "Borrado no confirmado: default seguro Conservar."; $effective = "Conservar" }
+                }
+                "u" { $effective = "__PerFile__" }
+                "o" { $effective = "__Omit__" }
+                default { $effective = "Conservar" }
+            }
+        }
+    }
+
+    if ($effective -eq "__PerFile__") {
+        foreach ($rel in ($Orphans | Sort-Object)) {
+            $ans = ""
+            try { $ans = (Read-Host "  $rel : [B]orrar / [C]onservar / [O]mitir [default: C]").Trim().ToLowerInvariant() } catch { $ans = "" }
+            switch ($ans) {
+                "b" { $toDelete += $rel }
+                "o" { $omitted += $rel }
+                default { $toKeep += $rel }
+            }
+        }
+        if ($toDelete.Count -gt 0) {
+            $confirm = ""
+            try { $confirm = (Read-Host "CONFIRMAR: ¿BORRAR $($toDelete.Count) huérfano(s) SIN respaldo? [S/N] [default: N]").Trim().ToLowerInvariant() } catch { $confirm = "" }
+            if ($confirm -eq "s") { $confirmedViaPrompt = $true }
+            else {
+                Write-Warn "Borrado no confirmado: esos archivos pasan a Conservar."
+                $toKeep += $toDelete
+                $toDelete = @()
+            }
+        }
+    } elseif ($effective -eq "__Omit__") {
+        $omitted = @($Orphans)
+        Write-Info "Se omiten $($omitted.Count) huérfano(s): se consideran propios y se dejan en su lugar."
+    } elseif ($effective -eq "Borrar") {
+        if ($confirmedViaPrompt) { $toDelete = @($Orphans) }
+        elseif ($interactive) {
+            $confirm = ""
+            try { $confirm = (Read-Host "CONFIRMAR: -OrphanAction Borrar eliminará $($Orphans.Count) huérfano(s) SIN respaldo. ¿Continuar? [S/N] [default: N]").Trim().ToLowerInvariant() } catch { $confirm = "" }
+            if ($confirm -eq "s") { $toDelete = @($Orphans) }
+            else { Write-Warn "Borrado no confirmado: default seguro Conservar."; $toKeep = @($Orphans) }
+        } elseif ($withForce) { $toDelete = @($Orphans) }
+        else {
+            Write-Warn "-OrphanAction Borrar en modo no interactivo exige -Force (fail-closed): se degrada a Conservar."
+            $toKeep = @($Orphans)
+        }
+    } else {
+        $toKeep = @($Orphans)
+    }
+
+    $deleted = @()
+    if ($toDelete.Count -gt 0) {
+        $deleted = @(Remove-OrphanFiles -Files $toDelete -RootPath $RootPath)
+    }
+    $backupResult = @{ Moved = @(); Destino = "" }
+    if ($toKeep.Count -gt 0) {
+        $backupResult = Move-OrphanFilesToBackup -Files $toKeep -RootPath $RootPath
+    }
+
+    # Informe final: qué se borró / qué se movió y dónde / qué se omitió.
+    Write-Host ""
+    if ($deleted.Count -gt 0) { Write-Warn "Borrados sin respaldo ($($deleted.Count)): $($deleted -join ', ')" }
+    if ($backupResult.Moved.Count -gt 0) {
+        $dstRel = ([IO.Path]::GetRelativePath($RootPath, $backupResult.Destino)) -replace '\\', '/'
+        Write-OK "Conservados en respaldo ($($backupResult.Moved.Count)): $dstRel"
+        foreach ($rel in ($backupResult.Moved | Sort-Object)) {
+            Write-Host "    - $rel" -ForegroundColor DarkGray
+        }
+        Write-Warn "NO hacer commit de revisar_manualmente/ (puede contener credenciales); si un huérfano tenía secrets, rótalos; no reintroducir al kit sin revisión manual."
+    }
+    if ($omitted.Count -gt 0) { Write-Info "Omitidos (propios, dejados en su lugar) ($($omitted.Count)): $($omitted -join ', ')" }
+    if ($deleted.Count -eq 0 -and $backupResult.Moved.Count -eq 0 -and $omitted.Count -eq 0) {
+        Write-OK "Fase de huérfanos completada sin cambios."
+    }
+}
+
+# Sync-TransversalKit (T-I1 / RF-01, RF-02, RF-11: absorbe la lógica de sync-agents.ps1)
+# =============================================================================
+# Copia SOLO los transversales del repo maestro. NUNCA toca
+# Documentacion/<AppName>/ (frontera kit <-> app, guardrail 1).
+# Seguridad: excluye .opencode/config.json (posibles credenciales) y valida
+# la URL fail-closed (solo https://github.com/).
+# T-I7 / RF-12: al final (dentro del try, con el clon aún disponible) detecta
+# huérfanos con Find-OrphanKitFiles + Invoke-OrphanDecision (flag -OrphanAction).
+# Usa las variables de ámbito del script: $DryRun (simula) y $Force (sobrescribe).
+function Sync-TransversalKit {
+    param(
+        [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
+        [string]$RootPath = "",
+        [string]$OrphanAction = ""
+    )
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    # T-I7 / RF-12: -OrphanAction (Borrar|Conservar|Preguntar). Si no se pasa,
+    # hereda del ámbito del script (flag CLI -OrphanAction); default: Preguntar.
+    if (-not $OrphanAction) {
+        if (Get-Variable -Name OrphanAction -Scope Script -ErrorAction SilentlyContinue) {
+            $OrphanAction = $script:OrphanAction
+        }
+    }
+    $orphanNorm = @{ "borrar" = "Borrar"; "conservar" = "Conservar"; "preguntar" = "Preguntar" }
+    $orphanKey = "$OrphanAction".Trim().ToLowerInvariant()
+    if ($orphanNorm.ContainsKey($orphanKey)) { $OrphanAction = $orphanNorm[$orphanKey] } else {
+        if ($OrphanAction) { Write-Warn "Sync-TransversalKit: -OrphanAction '$OrphanAction' no válido (Borrar|Conservar|Preguntar). Se usa 'Preguntar'." }
+        $OrphanAction = "Preguntar"
     }
 
     # Fail-closed: solo https://github.com/ (rechaza http://, git://, ssh, otras hosts).
@@ -868,6 +1249,7 @@ function Sync-TransversalKit {
         }
         Write-Info "DryRun: excluiría .opencode/config.json (posibles credenciales, nunca se copia)"
         Write-Info "DryRun: NUNCA tocaría Documentacion/<AppName>/ (frontera kit <-> app)"
+        Write-Info "DryRun: detectaría huérfanos (local en .github/ .opencode/ .doc_agents/ no existentes en el maestro) y aplicaría -OrphanAction $OrphanAction (Preguntar/Borrar/Conservar; default seguro Conservar; sin borrar ni mover nada)"
         return
     }
 
@@ -937,6 +1319,12 @@ function Sync-TransversalKit {
         if (Test-Path $kitConfig) {
             Write-Warn "Se excluye .opencode/config.json (posibles credenciales) de la sincronización."
         }
+
+        # T-I7 / RF-12: manejo de huérfanos (dentro del try: $tempDir sigue
+        # disponible; el finally lo limpia después). Find-OrphanKitFiles hace
+        # throw si el maestro está incompleto (fail-closed: nada se borra).
+        $orphans = @(Find-OrphanKitFiles -RootPath $RootPath -TempDir $tempDir)
+        Invoke-OrphanDecision -Orphans $orphans -RootPath $RootPath -OrphanAction $OrphanAction
 
         Write-OK "Kit transversal sincronizado (commit $commitHash). Documentacion/<AppName>/ NO fue tocada."
     }
@@ -1372,7 +1760,7 @@ if ($VerifyOnly) {
 
 if ($SyncOnly) {
     Write-Step "Modo sync únicamente (-SyncOnly): delegación de sync-agents.ps1"
-    Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot
+    Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
     Write-Host ""
     Write-Host "===============================================================" -ForegroundColor Green
     Write-Host " Sync de kit transversal completado" -ForegroundColor Green
@@ -1401,7 +1789,7 @@ if (-not $SkipInstall) {
 }
 
 Write-Step "3) Sincronizando kit transversal (Sync-TransversalKit)..."
-Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot
+Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
 
 Write-Step "4) Configurando MCPs para OpenCode..."
 Ensure-OpenCodeMcp $resolvedRoot

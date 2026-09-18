@@ -42,6 +42,7 @@ El script cubre en un solo flujo: **sync del kit transversal + configuración de
 | **RF-09** | **Integrar Graphify** | Instala/configura Graphify descargando desde git, con **validación de URL/licencia**. |
 | **RF-10** | **Validar flujo** | Verifica que los MCPs responden y que el flujo se respeta desde la carga de VS Code sin re-ejecutar scripts. |
 | **RF-11** | **`sync-agents.ps1` como wrapper** | `sync-agents.ps1` queda como wrapper que delega en `Sync-TransversalKit`, preservando compatibilidad. |
+| **RF-12** | **Manejo de huérfanos** | Al sincronizar, detectar **huérfanos** (existen en `.github/` `.opencode/` `.doc_agents/` local pero ya no existen en el clon maestro shallow) y **PREGUNTAR** al usuario por cada caso (o en lote): **¿borrar o conservar?** La implementación siempre queda limpia; la diferencia es si hay respaldo o no. **Borrar**: elimina los huérfanos. **Conservar**: mueve cada huérfano a `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>` (fuera de los directorios de agentes, preservando la estructura de carpetas donde estaba; si la carpeta del día existe → sufijo de hora) y luego **informa** al usuario qué se movió y dónde quedó. **Alcance**: solo archivos no propios o personalizados que causan conflicto (opción "omitir" = dejarlo en su lugar por ser propio). **Nunca** `Documentacion/<AppName>/`. **Default seguro** (sin flag ni respuesta): **conservar** (jamás auto-borrar). Flag `-OrphanAction Borrar\|Conservar\|Preguntar` para modo no interactivo. En `-DryRun`: solo informa, no borra ni mueve. |
 
 ---
 
@@ -75,6 +76,7 @@ El script cubre en un solo flujo: **sync del kit transversal + configuración de
 5. **Resolución de app activa**: con `-App trading_bot` usa el `.specify` y `Documentacion/trading_bot/specs/`; con `cwd` dentro de `dwxconnect` usa los de `dwxconnect`; sin coincidencia usa `root`.
 6. **`proyect_ext/spec-kit`**: permanece en la raíz; no se traslada a `src\`.
 7. **`sync-agents.ps1`**: al invocarlo directamente, delega en `Sync-TransversalKit` con el mismo resultado que el bootstrap en su parte de sync.
+8. **Huérfanos**: al sincronizar con huérfanos locales (existen en `.github/` `.opencode/` `.doc_agents/` pero no en el maestro), el script pregunta **¿borrar o conservar?**; con **Borrar** los elimina (limpio sin respaldo), con **Conservar** (default seguro) los mueve a `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>` preservando estructura e informa qué se movió y dónde; con `-DryRun` solo informa sin borrar ni mover; nunca toca `Documentacion/<AppName>/`.
 
 ---
 
@@ -89,7 +91,19 @@ flowchart TD
     B --> C[Sync-TransversalKit<br/>clonar repo maestro shallow<br/>copiar .github .opencode .doc_agents<br/>.specify base AGENTS.md opencode.json README]
     C --> C1{NUNCA tocar<br/>Documentacion/&lt;AppName&gt;/}<br/>✓ respeta frontera
 
-    C1 --> D[Configurar MCPs<br/>VS Code + OpenCode]
+    C1 --> C2[Detectar huérfanos<br/>existen local no en maestro<br/>.github .opencode .doc_agents]
+    C2 --> C3{¿Huérfanos?}
+    C3 -->|No| D[Configurar MCPs<br/>VS Code + OpenCode]
+    C3 -->|Sí| C4{¿-OrphanAction?<br/>Preguntar por defecto}
+    C4 -->|Preguntar| C5[Preguntar borrar / conservar<br/>default seguro Conservar<br/>omitir = propio en su lugar]
+    C4 -->|Borrar| C6[Eliminar huérfanos<br/>limpio sin respaldo]
+    C4 -->|Conservar| C7[Mover a revisar_manualmente/yyyymmdd/<br/>estructura original + informar]
+    C5 -->|Borrar| C6
+    C5 -->|Conservar / Omitir| C7
+    C5 -->|DryRun| C8[Solo informa<br/>no borra ni mueve]
+    C6 --> D
+    C7 --> D
+    C8 --> D
     D --> E[Crear/actualizar índices<br/>codebase-memory-mcp + context-mode]
 
     E --> F[Preparar estructura<br/>apps + proyect_ext + Documentacion/]

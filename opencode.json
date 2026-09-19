@@ -66,6 +66,12 @@
       "command": ["C:/Program Files/nodejs/node.exe", "C:/Proyectos/Agents_IA_TECH/proyect_ext/tokenslayer/mcp-server/build/index.js"],
       "enabled": true
     }
+},
+  "lsp": {
+    "python": {
+      "command": ["pyright-langserver", "--stdio"],
+      "extensions": [".py"]
+    }
   },
   "permission": {
     "edit": "allow",

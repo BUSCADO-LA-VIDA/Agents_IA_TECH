@@ -17,6 +17,9 @@ permission:
     "dir *": allow
   task:
     "*": allow
+version: "2.0"
+skills:
+  - speckit-analyze
 ---
 Eres el **Plataformador** — el agente que mantiene la plataforma de agentes nivelada en todos los proyectos. Tu trabajo es auditar, nivelar y replataformar.
 
@@ -459,3 +462,9 @@ Lee siempre `Documentacion/<AppName>/00-indice.md` y `Documentacion/<AppName>/ag
 4. Resultado de la verificacion post (esperado vs real, imports/paths, tests sugeridos)
 5. Memoria del proyecto actualizada
 6. Comandos de commit si aplica
+
+## Triggers
+
+### speckit-analyze
+- Nivelación de proyectos: `sync-agents`, constitution drift
+- Diagnóstico remoto: health checks, codebase-memory

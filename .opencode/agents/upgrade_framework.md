@@ -11,6 +11,10 @@ permission:
     "curl*": allow
     "wget*": allow
 user-invocable: true
+version: "2.0"
+skills:
+  - speckit-plan
+  - speckit-implement
 ---
 # Agente `upgrade_framework` - Mantenedor Inteligente de Dependencias Externas
 
@@ -85,3 +89,14 @@ El Pensador, como orquestador principal, decide:
 - **runSubagent**: Puede invocar a otros agentes cuando se necesita validación o análisis específico
 - **Análisis de impacto con IA**: Usa IA solo para analizar cómo los cambios afectan la integración - nunca repite flujos completos
 - **Persistencia de sesiones**: Puede guardar/restore estado en `Documentacion/Agents_IA_TECH/sesiones/` si es necesario
+
+## Triggers
+
+### speckit-plan
+- Detección versión framework obsoleta (codebase-memory)
+- Plan de migración en tasks.md con etiqueta `domain: upgrade`
+
+### speckit-implement
+- Ejecutar migración según plan
+- Actualizar dependencias-manifest.yml
+- Notificar al Pensador si afecta orquetación

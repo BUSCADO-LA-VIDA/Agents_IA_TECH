@@ -1,6 +1,6 @@
 # Agents_IA_TECH 🧠⚡
 
-> **Versión del documento:** 2026-09-19 (extensión 3 gaps auditoría Metatrader: RF-16 tokenslayer 4º MCP en `Ensure-OpenCodeMcp` + RF-17 plantilla `.opencode/config.json` con PLACEHOLDERS + RF-18 `Repair-DocStructure` docs sueltas a `Documentacion/<App>/`, troubleshooting `config.json`; reubicación opt-in confirmada: `relocate-apps-to-src.ps1` standalone + RF-13 + extensión RF-14 auto-desactivar/reactivar venv y pausar git con `Suspend-AppLocks`/`Restore-AppLocks` + extensión RF-15 limpieza de regenerables con `Find-RegenerableDirs`/`Clear-RegenerableDirs` y `.venv` que se elimina y recrea; repo privado solo-git: Credential Manager + sparse-checkout `--no-cone`, temporal en `proyect_ext`, sin herramientas extra)
+> **Versión del documento:** 2026-09-19 (instalación Graphify `[GRAPHIFY-INSTALL]`: RF-19 árbol MCP-preferido — upstream real `Graphify-Labs/graphify` PyPI `graphifyy`, MCP stdio `graphify.serve` con 7 herramientas, URL vieja del manifest 404 pendiente de `devops`; extensión 3 gaps auditoría Metatrader: RF-16 tokenslayer 4º MCP en `Ensure-OpenCodeMcp` + RF-17 plantilla `.opencode/config.json` con PLACEHOLDERS + RF-18 `Repair-DocStructure` docs sueltas a `Documentacion/<App>/`, troubleshooting `config.json`; reubicación opt-in confirmada: `relocate-apps-to-src.ps1` standalone + RF-13 + extensión RF-14 auto-desactivar/reactivar venv y pausar git con `Suspend-AppLocks`/`Restore-AppLocks` + extensión RF-15 limpieza de regenerables con `Find-RegenerableDirs`/`Clear-RegenerableDirs` y `.venv` que se elimina y recrea; repo privado solo-git: Credential Manager + sparse-checkout `--no-cone`, temporal en `proyect_ext`, sin herramientas extra)
 > **Kit transversal de agentes, skills y prompts para GitHub Copilot (VS Code) y OpenCode** — instalador/actualizador único, 11 agentes, 77 skills, 6 prompts.
 
 **Creado:** 2026-06-25
@@ -29,7 +29,7 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
    - `codebase-memory-mcp` (grafo de conocimiento del código)
    - `markitdown` / `markitdown-mcp` (conversión de documentos a Markdown)
     - `tokenslayer-mcp-server` (esqueletos AST, call graphs, patch estructural; el bootstrap lo registra como 4º MCP vía `Ensure-OpenCodeMcp` con `type: local`, `command: [node, <repo>/proyect_ext/tokenslayer/mcp-server/build/index.js]`, `enabled: true` — fuente del binario: entrada `tokenslayer-mcp-server` en `dependencias-manifest.yml`; si el binario no existe → WARN + instrucciones de compilar, no falla)
-   - Herramientas de apoyo vía `dependencias-manifest.yml`: `spec-kit` (github/spec-kit), `graphify` (tomasgraph/graphify). Ver `dependencias-manifest.yml` para URLs, versiones y licencias.
+    - Herramientas de apoyo vía `dependencias-manifest.yml`: `spec-kit` (github/spec-kit), `graphify` (ver sección Graphify abajo: upstream real `Graphify-Labs/graphify`; la URL vieja `tomasgraph/graphify` devuelve 404, pendiente de corrección en el manifest). Ver `dependencias-manifest.yml` para URLs, versiones y licencias.
 3. **Índices**: crea/actualiza índices de `codebase-memory-mcp` + `context-mode` y verifica que los MCPs responden.
 4. **Estructura por app** (sin destruir lo existente): prepara `src/<App>/` (objetivo), `proyect_ext/` (herramientas de apoyo), `Documentacion/<AppName>/` por app (specs, ADRs — propia de cada app), resolución de app activa por `-App <nombre>` (precedencia máxima) o directorio de trabajo actual (si no hay coincidencia → modo `root`/kit).
 
@@ -46,6 +46,15 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
 - **Hash + SKIP sin `-Force`**: si el archivo local es idéntico (hash) se marca SKIP; si difiere y hay personalización local, se conserva salvo que pases `-Force` (sobrescritura).
 - **`-DryRun` para previsualizar**: simula todo el flujo sin escribir ningún archivo.
 - **Huérfanos** (existen en `.github/` `.opencode/` `.doc_agents/` local pero ya no en el maestro): al sincronizar se **pregunta ¿borrar o conservar?** **Borrar** los elimina (limpio sin respaldo). **Conservar** los mueve a `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>` (fuera de los dirs de agentes, preservando estructura; si la fecha existe → sufijo hora) e informa qué se movió y dónde. Alcance: solo no-propios o personalizados en conflicto (`omitir` = propio, se deja en su lugar). Nunca `Documentacion/<AppName>/`. **Default seguro: conservar** (jamás auto-borrar). Flag `-OrphanAction Borrar|Conservar|Preguntar` para no interactivo. En `-DryRun` solo se informa.
+
+### Graphify — grafo de conocimiento del código (RF-19, `[GRAPHIFY-INSTALL]`)
+
+> Estado documental 2026-09-19 (investigación web, sin clones). Implementación pendiente de `devops` + revisión de `security-auditor`.
+
+- **Qué es**: constructor de grafos de conocimiento del código (AST con tree-sitter, local y sin vectores; se consulta con `query`/`path`/`explain` en vez de grep). Upstream real: `https://github.com/Graphify-Labs/graphify` (paquete PyPI `graphifyy`, MIT). ⚠️ La URL antigua del manifest (`tomasgraph/graphify`) devuelve **404** — pendiente de corrección por `devops` con decisión explícita del usuario (el owner real tampoco está en la allowlist del bootstrap, el fail-closed bloquearía la descarga).
+- **Cómo queda instalado — Rama A (preferida, viable: SÍ expone MCP)**: servidor MCP stdio embebido `python -m graphify.serve graphify-out/graph.json` (requiere extra `mcp`: `uv tool install "graphifyy[mcp]"`), registrado en `opencode.json` (`type: local`) + `.vscode/mcp.json` (`type: stdio`), como tokenslayer, tras construir el grafo (`graphify <path>` → `graphify-out/graph.json`). Herramientas: `query_graph`, `get_node`, `get_neighbors`, `shortest_path`, `list_prs`, `get_pr_impact`, `triage_prs`.
+- **Rama B (fallback adaptado)**: no hay `bin/graphify` ni `lib/` upstream (es paquete Python, no binario Go), así que no hay copia a `.opencode/bin/`; se instala como herramienta Python (`uv tool install graphifyy`, requiere Python 3.10+) y se usa el CLI, mismo patrón que `markitdown`.
+- **Cómo verificarlo**: `graphify --version` (CLI) y handshake MCP (`tools/list` responde las 7 herramientas). Si no se puede instalar → WARN, no falla. `-DryRun` solo informa. Versión fijada en `dependencias-manifest.yml`.
 
 ---
 

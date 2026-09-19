@@ -19,14 +19,17 @@ dependencias_externas:
       - src/speckit-checklist/ → .github/skills/speckit-checklist/
 
   - nombre: graphify
-    url: https://github.com/tomasgraph/graphify
+    url: https://github.com/Graphify-Labs/graphify
     rama: main
-    version_actual: v0.0.0
-    ultimo_check: 2026-09-05
-    licencia: MIT  # ✅ Verificada (2026-09-18, fuente https://graphify.net/es/ sección "Security, Licensing & Trust"). Dependencias: NetworkX (BSD), Tree-sitter (MIT) — sin conflictos. Sin telemetría. Guardrail 8 del ADR-0001 satisfecho.
+    version_actual: 0.9.48 (PyPI graphifyy — pin exacto; instalado 2026-09-18 vía `uv tool install "graphifyy[mcp]"` + `pip install "graphifyy[mcp]==0.9.48"`, ambos alineados)
+    ultimo_check: 2026-09-18
+    licencia: Apache-2.0/MIT dual  # ✅ Aceptada por el usuario (2026-09-19). PyPI License-Expression: Apache-2.0; README upstream dual Apache-2.0/MIT + LICENSE-MIT. Guardrail 8 del ADR-0001 satisfecho con nota.
+    tipo: Paquete Python (PyPI `graphifyy` — doble-y, oficialidad repo↔PyPI verificada 2026-09-18) + MCP server embebido (`python -m graphify.serve`, stdio; 10 herramientas incl. `triage_prs` verificado solo-lectura)
+    rol_pipeline: Grafo de conocimiento del código consultable (query_graph, get_node, get_neighbors, shortest_path, PRs) — Rama A MCP stdio preferida (RF-19); fallback Rama B CLI (`graphify --version`).
+    instalacion: uv tool install "graphifyy[mcp]==0.9.48" (aislado, preferido — por qué: evita contaminar el Python global y `pip install` ejecuta build hooks; ver seguridad/graphify.md R-1) o pip install "graphifyy[mcp]==0.9.48" (Python 3.10+). JAMÁS `pip install graphify` (una-y: typosquatting) ni `--transport http` en red (R-2).
+    nota_url_anterior: La URL anterior https://github.com/tomasgraph/graphify devuelve 404 (muerta/no pública, verificado 2026-09-19 fase documental `documentador`). Upstream real: Graphify-Labs/graphify (decisión del usuario 2026-09-19).
     componentes_a_copiar:
-      - bin/graphify → .opencode/bin/
-      - lib/ → .opencode/lib/graphify/
+      - (herramienta Python instalada vía uv/pip — no se copia código al kit; se registra en opencode.json + .vscode/mcp.json vía Configure-Graphify; sin git clone, no aplica la allowlist del bootstrap)
 
   - nombre: markitdown
     url: https://github.com/microsoft/markitdown
@@ -169,3 +172,4 @@ aplicaciones:
 # [2026-09-18] Registrado tokenslayer-mcp-server (v1.5.0, MIT ✅) — MCP server standalone de https://github.com/ajvikram/TokenSlayer (carpeta mcp-server/, clonar + compilar con Node v24.14.0). Rol: compactación de contexto (esqueletos AST + call graphs + patch estructural). Fase documental tarea [TOKENSLAYER] (documentador).
 # [2026-09-18] Instalado tokenslayer-mcp-server v1.5.0 (commit 9a380c041209e5599ad63ffd897dc99c7936327e) en proyect_ext/tokenslayer — fase implementación tarea [TOKENSLAYER] (devops): npm install + npm audit (0 críticas; 1 low/2 moderate/3 high transitivas del SDK) + npm run build OK + handshake MCP OK (8 herramientas). Registrado en opencode.json + .vscode/mcp.json (clave `tokenslayer`, sin secrets).
 # [2026-09-18] BUG-3 QA (tarea [TOKENSLAYER]): aclarado skew de versiones en tokenslayer-mcp-server — tag repo v1.5.0 (commit 9a380c04) vs server interno 1.3.0 (package.json + handshake MCP); skew upstream documentado en MCPs/tokenslayer.md, no afecta funcionamiento.
+# [2026-09-18] Corregida entrada graphify (tarea [GRAPHIFY-INSTALL], devops RF-19): URL muerta tomasgraph/graphify (404) → upstream real Graphify-Labs/graphify; tipo paquete Python PyPI `graphifyy` (doble-y, oficialidad repo↔PyPI verificada); pin exacto 0.9.48 (uv tool + pip alineados, extra [mcp]); licencia dual Apache-2.0/MIT aceptada por el usuario (guardrail 8 satisfecho con nota); handshake MCP stdio OK (10 herramientas, `triage_prs` solo-lectura verificado en código: solo `gh pr list/view/diff` + prompt LLM, cero POST/PATCH/PUT/DELETE); `Configure-Graphify` real en el bootstrap (Rama A MCP-preferida, stdio siempre, sin secrets).

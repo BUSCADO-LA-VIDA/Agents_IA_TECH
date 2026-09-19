@@ -37,6 +37,7 @@ param(
     [switch]$VerifyOnly,
     [switch]$SyncOnly,
     [string]$App = "",
+    [string[]]$Apps = @("dwxconnect", "fibonacci-scanner", "operation_mt5", "Telegram", "trading_bot"),
     [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
     [string]$ManifestPath = "",
     [string]$OrphanAction = "Preguntar"
@@ -299,6 +300,57 @@ function Ensure-OpenCodeMcp {
         }
     }
 
+    # RF-16: registrar tokenslayer como 4º MCP (fuente del binario: entrada
+    # tokenslayer-mcp-server en dependencias-manifest.yml).
+    # Controles (seguridad/kit-gaps.md §§1.2/5, no negociables): node vía
+    # Get-Command (si falta -> WARN + se omite tokenslayer, no falla);
+    # containment-check (la ruta registrada queda bajo
+    # <root>/proyect_ext/tokenslayer/, nada de .. ni rutas externas); sin
+    # binario build/index.js -> WARN con instrucciones de clonar+compilar y NO
+    # se registra la entrada (evita config rota); jamás auto-compila (npm
+    # install ejecuta código de terceros). Estilo existente intacto
+    # (Add-Member -Force, Write-*, $DryRun/$Force).
+    if ($null -ne $existing.mcp) {
+        if (($null -ne $existing.mcp.tokenslayer) -and (-not $Force)) {
+            Write-OK "opencode.json ya registra tokenslayer; se conserva (usa -Force para sobrescribir)."
+        } else {
+            $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+            if (-not $nodeCmd) {
+                Write-Warn "node no está en el PATH; se omite tokenslayer (instala Node.js y re-ejecuta para registrar el 4º MCP)."
+            } else {
+                $tokenslayerBase = Join-Path $RootPath "proyect_ext\tokenslayer"
+                $tokenslayerIndex = Join-Path $tokenslayerBase "mcp-server\build\index.js"
+                $sepTok = [IO.Path]::DirectorySeparatorChar
+                $baseCanonTok = [IO.Path]::GetFullPath($tokenslayerBase)
+                $indexCanonTok = [IO.Path]::GetFullPath($tokenslayerIndex)
+                if (-not $indexCanonTok.StartsWith($baseCanonTok + $sepTok, [StringComparison]::OrdinalIgnoreCase)) {
+                    Write-Warn "Ruta de tokenslayer fuera de containment ($tokenslayerIndex); no se registra (fail-closed)."
+                } elseif (-not (Test-Path -LiteralPath $tokenslayerIndex)) {
+                    Write-Warn "tokenslayer sin compilar: falta mcp-server/build/index.js bajo proyect_ext/tokenslayer/. Para registrar el 4º MCP: clona https://github.com/ajvikram/TokenSlayer (ver entrada tokenslayer-mcp-server en dependencias-manifest.yml) en proyect_ext/tokenslayer y compila con: cd proyect_ext/tokenslayer/mcp-server && npm install && npm run build. No se registra la entrada (evita config rota); el bootstrap continúa."
+                } elseif ($DryRun) {
+                    $relIndexTok = ([IO.Path]::GetRelativePath($RootPath, $indexCanonTok)) -replace '\\', '/'
+                    Write-Info "DryRun: registraría tokenslayer en opencode.json (type: local, command: [$($nodeCmd.Source), $relIndexTok], enabled: true)"
+                } else {
+                    $tokenslayerEntry = [ordered]@{
+                        type = "local"
+                        command = @($nodeCmd.Source, $indexCanonTok)
+                        enabled = $true
+                    }
+                    # $existing.mcp puede ser PSCustomObject (leído de JSON) o
+                    # OrderedDictionary (recién creado arriba): Add-Member sobre
+                    # un IDictionary NO se serializa (ConvertTo-Json solo
+                    # enumera entradas), así que en ese caso se agrega entrada.
+                    if ($existing.mcp -is [System.Collections.IDictionary]) {
+                        $existing.mcp["tokenslayer"] = $tokenslayerEntry
+                    } else {
+                        $existing.mcp | Add-Member -NotePropertyName "tokenslayer" -NotePropertyValue $tokenslayerEntry -Force
+                    }
+                    Write-OK "tokenslayer registrado como 4º MCP en opencode.json"
+                }
+            }
+        }
+    }
+
     # Plugin de context-mode (falta el array `plugin` según ctx_doctor)
     $hasPlugin = $false
     foreach ($p in @($existing.plugin)) { if ($p -eq "context-mode") { $hasPlugin = $true } }
@@ -313,6 +365,293 @@ function Ensure-OpenCodeMcp {
 
     if (-not $DryRun) {
         $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $opencodePath -Encoding UTF8
+    }
+}
+
+# =============================================================================
+# Ensure-OpenCodeConfig (RF-17 / criterio 13: plantilla .opencode/config.json)
+# =============================================================================
+# Crea .opencode/config.json SOLO si no existe, desde una plantilla con
+# PLACEHOLDERS inconfundibles (__PEGAR_AQUI_TU_...__, nunca valores reales ni
+# con formato válido). Si existe -> no lo toca NUNCA (ni para "actualizar la
+# plantilla": pisaría keys reales). Estructura de ejemplo derivada de las keys
+# que opencode.json referencia vía {env:...} (NVIDIA_API_KEY,
+# DEEPINFRA_API_KEY), SIN copiar valores reales.
+# Controles (seguridad/kit-gaps.md §§1.1/5, no negociables): aviso inline de no
+# commitear en la plantilla; verifica que está gitignored (avisa si no);
+# detección defensiva: si está trackeado por git -> WARN con git rm --cached +
+# rotar keys; -DryRun informa, no escribe. Estilo: hashtables para construir,
+# Add-Member -Force si hay que tocar PSObjects; NUNCA asignación directa de
+# props nuevas (bug conocido de este entorno).
+function Ensure-OpenCodeConfig {
+    param([string]$RootPath)
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    $configRel = ".opencode/config.json"
+    $configPath = Join-Path $RootPath ".opencode\config.json"
+
+    # ¿Trackeado por git? (solo lectura; si no hay git, se asume no trackeado)
+    $tracked = $false
+    try {
+        if (Get-Command git -ErrorAction SilentlyContinue) {
+            $lsOut = & git -C $RootPath ls-files -- $configRel 2>$null
+            if ($lsOut) { $tracked = $true }
+        }
+    } catch { $tracked = $false }
+
+    # ¿Gitignored? (texto de .gitignore + git check-ignore si hay git)
+    $ignored = $false
+    try {
+        $giPath = Join-Path $RootPath ".gitignore"
+        if (Test-Path -LiteralPath $giPath) {
+            $giText = Get-Content -LiteralPath $giPath -Raw -ErrorAction Stop
+            if ($giText -match '\.opencode/config\.json') { $ignored = $true }
+        }
+    } catch { $ignored = $false }
+    if (-not $ignored) {
+        try {
+            if (Get-Command git -ErrorAction SilentlyContinue) {
+                & git -C $RootPath check-ignore -q -- $configRel 2>$null
+                if ($LASTEXITCODE -eq 0) { $ignored = $true }
+            }
+        } catch { $ignored = $false }
+    }
+
+    if (Test-Path -LiteralPath $configPath) {
+        Write-OK "$configRel ya existe; no se toca nunca (conserva tus keys locales)."
+        if (-not $ignored) {
+            Write-Warn "$configRel NO está gitignored: no hacer commit (contiene posibles secrets). Revisa .gitignore."
+        }
+        if ($tracked) {
+            Write-Warn "$configRel está TRACKEADO por git (posibles secrets versionados): ejecuta git rm --cached $configRel y ROTA las keys (borrar no basta, quedan en el historial)."
+        }
+        return
+    }
+
+    if ($DryRun) {
+        Write-Info "DryRun: crearía $configRel desde plantilla con PLACEHOLDERS (sin secrets reales)."
+        if (-not $ignored) {
+            Write-Warn "DryRun: $configRel NO está gitignored; debe estarlo antes de rellenar la plantilla."
+        }
+        return
+    }
+
+    $configParent = Split-Path $configPath -Parent
+    if (-not (Test-Path -LiteralPath $configParent)) {
+        New-Item -ItemType Directory -Path $configParent -Force | Out-Null
+    }
+
+    $configTemplate = [ordered]@{
+        _AVISO = "Archivo LOCAL con credenciales. NO commitear (gitignored: .opencode/config.json). Si se versionó por error: git rm --cached .opencode/config.json + ROTAR las keys."
+        NVIDIA_API_KEY = "__PEGAR_AQUI_TU_NVIDIA_API_KEY__"
+        DEEPINFRA_API_KEY = "__PEGAR_AQUI_TU_DEEPINFRA_API_KEY__"
+        GITHUB_TOKEN = "__PEGAR_AQUI_TU_GITHUB_TOKEN_OPCIONAL__"
+    }
+    $configTemplate | ConvertTo-Json -Depth 10 | Set-Content -Path $configPath -Encoding UTF8
+    Write-OK "Plantilla creada: $configRel (rellena los __PEGAR_AQUI_TU_...__ a mano; nunca commitear con valores reales)."
+    if (-not $ignored) {
+        Write-Warn "$configRel NO está gitignored: no hacer commit (contiene posibles secrets). Revisa .gitignore."
+    }
+    if ($tracked) {
+        Write-Warn "$configRel está TRACKEADO por git (posibles secrets versionados): ejecuta git rm --cached $configRel y ROTA las keys (borrar no basta, quedan en el historial)."
+    }
+}
+
+# =============================================================================
+# Move-SingleDocFile (helper interno de RF-18: movido transaccional por archivo)
+# =============================================================================
+# Mueve UN .md de raíz a Documentacion/<App>/: si el destino existe -> no
+# sobrescribe (omite); si Move-Item falla por lock -> omite + informa ("cierra
+# el editor/indexador y reintenta") + continúa el llamante; tras mover verifica
+# (destino existe + origen ausente) y si falla intenta rollback concreto (mover
+# de vuelta) dejando el original en su sitio. Nunca borra. Devuelve "Moved",
+# "OmittedExists", "OmittedLock" u "OmittedVerify". Logs con rutas relativas.
+function Move-SingleDocFile {
+    param(
+        [string]$SourceFull = "",
+        [string]$DestFull = "",
+        [string]$DisplayName = "",
+        [string]$DestRel = ""
+    )
+
+    if (-not $DisplayName) { $DisplayName = Split-Path $SourceFull -Leaf }
+    if (-not $DestRel) { $DestRel = $DisplayName }
+
+    if (Test-Path -LiteralPath $DestFull) {
+        Write-Warn "  [OMITIDO] $DisplayName — ya existe en $DestRel, no se sobrescribe."
+        return "OmittedExists"
+    }
+    try {
+        Move-Item -LiteralPath $SourceFull -Destination $DestFull
+    } catch {
+        Write-Warn "  [OMITIDO] $DisplayName — no se pudo mover (posible lock: cierra el editor/indexador y reintenta). Detalle: $($_.Exception.Message)"
+        return "OmittedLock"
+    }
+    if ((Test-Path -LiteralPath $DestFull) -and (-not (Test-Path -LiteralPath $SourceFull))) {
+        Write-Host "  [MOVIDO] $DisplayName -> $DestRel" -ForegroundColor Green
+        return "Moved"
+    }
+    try {
+        if ((Test-Path -LiteralPath $DestFull) -and (-not (Test-Path -LiteralPath $SourceFull))) {
+            Move-Item -LiteralPath $DestFull -Destination $SourceFull
+        }
+    } catch { }
+    Write-Warn "  [OMITIDO] $DisplayName — verificación post-movido falló; se dejó en su sitio."
+    return "OmittedVerify"
+}
+
+# =============================================================================
+# Repair-DocStructure (RF-18 / criterio 14: reorganizar docs sueltas de raíz)
+# =============================================================================
+# Detecta .md sueltos en la RAÍZ (profundidad 0; nunca dentro de
+# Documentacion/ como fuente) con allowlist exacta de nombres + patrones
+# pendientes-*.md y preferencias*.md (00-indice.md,
+# pendientes-implementacion.md, pendientes-*.md, capacidad-base.md,
+# referencias.md, roadmap.md, idioma.md, preferencias*.md,
+# memoria-proyecto.md, soluciones-conocidas.md — NUNCA otros: README.md,
+# AGENTS.md, etc. jamás se cazan; nada de globs amplios ni recursivo).
+# Destino Documentacion/<App>/: -App (ámbito del script) > cwd (vía
+# Resolve-ActiveApp); si no se resuelve -> pregunta destino en interactivo o
+# lista sin mover. Confirmación por archivo S/N/T/C sin bypass (-Force NO
+# aplica aquí por diseño). Tracking vivo (>50KB o nombre pendientes-*) FUERA
+# del [T]: siempre S/N individual con advertencia específica (quién lo
+# consume, qué actualizar tras moverlo), default No. Orden seguro: rutinarias
+# primero; tracking vivo/grandes al final de uno en uno. Movido transaccional
+# por archivo (Move-SingleDocFile: verifica + rollback concreto; lock -> omitir
+# + informar + continuar). Nunca borra. -DryRun / no-interactivo: solo lista
+# (fail-closed). Logs con rutas relativas + tamaño; nunca contenido.
+function Repair-DocStructure {
+    param([string]$RootPath)
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    $allowExact = @("00-indice.md", "pendientes-implementacion.md", "capacidad-base.md", "referencias.md", "roadmap.md", "idioma.md", "memoria-proyecto.md", "soluciones-conocidas.md")
+
+    $candidates = @()
+    $rootFiles = Get-ChildItem -LiteralPath $RootPath -File -Filter "*.md" -ErrorAction SilentlyContinue
+    foreach ($f in $rootFiles) {
+        $docName = $f.Name
+        $isDoc = ($allowExact -contains $docName) -or ($docName -like "pendientes-*.md") -or ($docName -like "preferencias*.md")
+        if (-not $isDoc) { continue }
+        $isLive = ($f.Length -gt 51200) -or ($docName -like "pendientes-*.md")
+        $candidates += [pscustomobject]@{ Name = $docName; FullName = $f.FullName; Length = $f.Length; IsLive = [bool]$isLive }
+    }
+    if ($candidates.Count -eq 0) {
+        Write-OK "Sin docs sueltas en raíz (allowlist RF-18: 00-indice.md, pendientes-*.md, capacidad-base.md, referencias.md, roadmap.md, idioma.md, preferencias*.md, memoria-proyecto.md, soluciones-conocidas.md)."
+        return
+    }
+
+    # ¿Qué App? -App (ámbito del script) > cwd > preguntar/listar.
+    $destApp = ""
+    if (Get-Variable -Name App -Scope Script -ErrorAction SilentlyContinue) {
+        if ($script:App -and ($script:App -ne "root")) { $destApp = $script:App }
+    }
+    if (-not $destApp) {
+        $resolvedApp = Resolve-ActiveApp -AppName "" -RootPath $RootPath
+        if ($resolvedApp -ne "root") { $destApp = $resolvedApp }
+    }
+
+    $routine = @($candidates | Where-Object { -not $_.IsLive } | Sort-Object Name)
+    $live = @($candidates | Where-Object { $_.IsLive } | Sort-Object Name)
+    $destLabel = if ($destApp) { "Documentacion/$destApp/" } else { "(sin app resuelta: falta -App)" }
+    Write-Step "Docs sueltas en raíz ($($candidates.Count)): rutinarias $($routine.Count) + tracking vivo/grandes $($live.Count). Destino: $destLabel"
+    foreach ($c in ($routine + $live)) {
+        $kb = [math]::Round($c.Length / 1KB, 1)
+        $tag = if ($c.IsLive) { " [tracking vivo/grande: solo S/N individual]" } else { "" }
+        $dstShown = if ($destApp) { "Documentacion/$destApp/$($c.Name)" } else { "(sin destino)" }
+        Write-Host "  - $($c.Name) ($kb KB) -> $dstShown$tag" -ForegroundColor DarkGray
+    }
+
+    if ($DryRun) {
+        Write-Info "DryRun: Repair-DocStructure solo lista, no mueve nada."
+        return
+    }
+
+    $interactive = $false
+    try { $interactive = [Environment]::UserInteractive -and (-not [Console]::IsInputRedirected) } catch { $interactive = $false }
+    if (-not $interactive) {
+        Write-Warn "Modo no interactivo: solo se lista, no se mueve (fail-closed). Re-ejecuta en terminal interactiva con -App <nombre>."
+        return
+    }
+    if (-not $destApp) {
+        $askApp = ""
+        try { $askApp = (Read-Host "¿A qué app pertenecen estas docs? (nombre de app para Documentacion/<App>/; vacío = solo listar)").Trim() } catch { $askApp = "" }
+        if (-not $askApp) {
+            Write-Warn "Sin app destino: solo se lista, no se mueve."
+            return
+        }
+        $destApp = $askApp
+    }
+
+    $destDir = Join-Path $RootPath "Documentacion\$destApp"
+    $sepDoc = [IO.Path]::DirectorySeparatorChar
+    $rootCanonDoc = [IO.Path]::GetFullPath($RootPath)
+    $destCanonDoc = [IO.Path]::GetFullPath($destDir)
+    if (-not $destCanonDoc.StartsWith($rootCanonDoc + $sepDoc, [StringComparison]::OrdinalIgnoreCase)) {
+        Write-Warn "Destino fuera de containment ($destDir); no se mueve nada (fail-closed)."
+        return
+    }
+    if (-not (Test-Path -LiteralPath $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+    }
+
+    $moved = @()
+    $omitted = @()
+    $listed = @()
+    $applyAll = $false
+    $cancelled = $false
+
+    foreach ($c in $routine) {
+        if ($cancelled) { $listed += $c.Name; continue }
+        $doMove = $false
+        if ($applyAll) {
+            $doMove = $true
+        } else {
+            $ans = ""
+            try { $ans = (Read-Host "  $($c.Name) -> Documentacion/$destApp/ : [S]í mover / [N]o / [T]odos los restantes / [C]ancelar [default: N]").Trim().ToLowerInvariant() } catch { $ans = "" }
+            switch ($ans) {
+                "s" { $doMove = $true }
+                "t" { $applyAll = $true; $doMove = $true }
+                "c" { $cancelled = $true; $listed += $c.Name; continue }
+                default { $listed += $c.Name; continue }
+            }
+        }
+        if ($doMove) {
+            $r = Move-SingleDocFile -SourceFull $c.FullName -DestFull (Join-Path $destDir $c.Name) -DisplayName $c.Name -DestRel "Documentacion/$destApp/$($c.Name)"
+            if ($r -eq "Moved") { $moved += $c.Name } else { $omitted += $c.Name }
+        }
+    }
+
+    foreach ($c in $live) {
+        if ($cancelled) { $listed += $c.Name; continue }
+        $kbLive = [math]::Round($c.Length / 1KB, 1)
+        Write-Warn "  $($c.Name) ($kbLive KB) es tracking vivo/grande: lo leen los implementadores primero y specs que lo referencian; moverlo exige actualizar referencias y reindexar. Requiere OK explícito individual (fuera de [T])."
+        $ansLive = ""
+        try { $ansLive = (Read-Host "  Mover $($c.Name) -> Documentacion/$destApp/ ? [S]í / [N]o [default: N]").Trim().ToLowerInvariant() } catch { $ansLive = "" }
+        if ($ansLive -ne "s") { $listed += $c.Name; continue }
+        $rLive = Move-SingleDocFile -SourceFull $c.FullName -DestFull (Join-Path $destDir $c.Name) -DisplayName $c.Name -DestRel "Documentacion/$destApp/$($c.Name)"
+        if ($rLive -eq "Moved") { $moved += $c.Name } else { $omitted += $c.Name }
+    }
+
+    Write-Host ""
+    if ($moved.Count -gt 0) { Write-OK "Movidos ($($moved.Count)) a Documentacion/$destApp/: $($moved -join ', ')" }
+    if ($omitted.Count -gt 0) { Write-Warn "Omitidos por lock/destino ($($omitted.Count)): $($omitted -join ', ') — reintentar tras cerrar el editor/indexador." }
+    if ($listed.Count -gt 0) { Write-Info "Solo listados, sin mover ($($listed.Count)): $($listed -join ', ')" }
+    if (($moved.Count -eq 0) -and ($omitted.Count -eq 0) -and ($listed.Count -eq 0)) {
+        Write-OK "Repair-DocStructure completado sin cambios."
     }
 }
 
@@ -1483,6 +1822,78 @@ function Ensure-AppStructure {
 }
 
 # =============================================================================
+# Ensure-SrcAppStructure (RF-XX): estructura completa de src/<AppName>/ con .specify
+# =============================================================================
+# Crea src/<AppName>/ si no existe, copia .specify desde la base (<RootPath>/.specify)
+# y asegura Documentacion/<AppName>/ con Ensure-AppStructure.
+# Genérico: recibe lista de apps por parámetro (no hardcodeado).
+# Respeta -DryRun (solo informa), -Force (sobrescribe .specify si ya existe).
+# Nunca clona repos; solo prepara la estructura local.
+function Ensure-SrcAppStructure {
+    param(
+        [string[]]$Apps = @(),
+        [string]$RootPath = "",
+        [switch]$Force
+    )
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    $baseSpecify = Join-Path $RootPath ".specify"
+    if (-not (Test-Path $baseSpecify)) {
+        Write-Warn "No existe .specify base en $baseSpecify; no se puede copiar a las apps."
+        return
+    }
+
+    if ($Apps.Count -eq 0) {
+        Write-Warn "Ensure-SrcAppStructure sin lista de apps; se omite."
+        return
+    }
+
+    Write-Step "Asegurando estructura src/<App>/ con .specify para cada app..."
+    foreach ($app in $Apps) {
+        $srcAppDir = Join-Path $RootPath "src\$app"
+        $appSpecify = Join-Path $srcAppDir ".specify"
+
+        # 1) Crear directorio src/<app>/
+        if (-not (Test-Path $srcAppDir)) {
+            if ($DryRun) {
+                Write-Info "DryRun: crear directorio $srcAppDir"
+            } else {
+                Ensure-Directory $srcAppDir
+                Write-OK "Directorio creado: $srcAppDir"
+            }
+        }
+
+        # 2) Copiar .specify desde la base
+        $needsCopy = (-not (Test-Path $appSpecify)) -or $Force
+        if ($needsCopy) {
+            if ($DryRun) {
+                Write-Info "DryRun: copiar $baseSpecify -> $appSpecify"
+            } else {
+                Copy-Item -Path $baseSpecify -Destination $appSpecify -Recurse -Force
+                Write-OK ".specify copiado a: $appSpecify"
+            }
+        } else {
+            Write-Info ".specify ya existe en $appSpecify (usa -Force para sobrescribir)"
+        }
+
+        # 3) Asegurar Documentacion/<App>/
+        if ($DryRun) {
+            Write-Info "DryRun: asegurar Documentacion/$app/ con Ensure-AppStructure"
+        } else {
+            Ensure-AppStructure -AppName $app -RootPath $RootPath
+        }
+    }
+    Write-OK "Estructura src/<App>/ con .specify completada para: $($Apps -join ', ')"
+}
+
+# =============================================================================
 # Ensure-AppSpecify + Ensure-AppDocumentation (T-I2 / RF-06)
 # =============================================================================
 function Copy-SpecifyBase {
@@ -1687,14 +2098,25 @@ function Configure-SpecKit {
 }
 
 # =============================================================================
-# Configure-Graphify (T-I3 / RF-09): verificar presencia sin descargar (guardrail 8)
+# Configure-Graphify (RF-19 / criterio 15 — [GRAPHIFY-INSTALL]; refina RF-09)
 # =============================================================================
-# Verifica si graphify está disponible (.opencode/bin/graphify* o
-# .opencode/lib/graphify/). Existe -> Write-OK. No existe -> Write-Warn
-# indicando que su URL/licencia deben validarse antes de descargar (la licencia
-# de graphify está pendiente según dependencias-manifest.yml — NO se descarga
-# nada todavía). Respeta -DryRun. Nunca ejecuta binarios/scripts descargados
-# sin revisión manual previa.
+# Árbol de decisión MCP-preferido (spec plataforma-bootstrap-instalador-unico):
+# Rama A (preferida): si el CLI `graphify` está disponible (Get-Command) y el
+# módulo MCP embebido responde (`python -m graphify.serve --help` EXIT 0),
+# registra el MCP stdio en opencode.json (type: local,
+# command: [python, -m, graphify.serve, <root>/graphify-out/graph.json]) +
+# .vscode/mcp.json (type: stdio). Rama B (fallback): el CLI como herramienta
+# Python instalada (patrón markitdown); sin CLI -> WARN con instrucciones
+# (cita dependencias-manifest.yml), no falla, no registra.
+# Controles (seguridad/graphify.md, no negociables): stdio SIEMPRE (jamás
+# --transport http en config persistente); sin secrets en args/configs; el
+# grafo se construye excluyendo carpetas con secrets
+# (`graphify extract <path> --code-only`); si <root>/graphify-out/graph.json
+# aún no existe se registra igual (el servidor arranca sin grafo y cada
+# herramienta acepta project_path) pero se avisa cómo construirlo. -DryRun
+# informa, no escribe. Estilo: Write-*, Add-Member -Force para props nuevas
+# (bug conocido: la asignación directa falla en pwsh 7.6); IDictionary-aware
+# como Ensure-OpenCodeMcp (RF-16).
 function Configure-Graphify {
     param([string]$RootPath = "")
 
@@ -1706,28 +2128,116 @@ function Configure-Graphify {
         }
     }
 
-    Write-Step "Configurando Graphify..."
+    Write-Step "Configurando Graphify (RF-19, MCP-preferido)..."
 
-    $binDir = Join-Path $RootPath ".opencode\bin"
-    $libDir = Join-Path $RootPath ".opencode\lib\graphify"
-    $binHits = @()
-    if (Test-Path $binDir) {
-        $binHits = @(Get-ChildItem -Path $binDir -Filter "graphify*" -ErrorAction SilentlyContinue)
+    # --- Detección Rama A: CLI graphify (paquete PyPI graphifyy, doble-y) ---
+    $graphifyCmd = Get-Command graphify -ErrorAction SilentlyContinue
+    if (-not $graphifyCmd) {
+        Write-Warn 'Graphify no instalado (comando graphify no está en el PATH). Para la Rama A (MCP stdio): instala el paquete oficial graphifyy (doble-y, versión fijada en dependencias-manifest.yml, entrada graphify): uv tool install "graphifyy[mcp]" (aislado, preferido) o pip install "graphifyy[mcp]". El bootstrap continúa sin Graphify.'
+        if ($DryRun) {
+            Write-Info "DryRun: Configure-Graphify solo informa, no escribe nada."
+        }
+        return
     }
-    if (($binHits.Count -gt 0) -or (Test-Path $libDir)) {
-        if ($binHits.Count -gt 0) { Write-OK "Graphify disponible en: $binDir" }
-        if (Test-Path $libDir) { Write-OK "Graphify disponible en: $libDir" }
+    Write-OK "Graphify detectado: $($graphifyCmd.Source)"
+
+    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $pythonCmd) {
+        Write-Warn "python no está en el PATH (se requiere 3.10+); no se puede registrar 'python -m graphify.serve'. Se omite Graphify; el bootstrap continúa."
         return
     }
 
-    Write-Warn "Graphify no encontrado (.opencode/bin/graphify* ni .opencode/lib/graphify/); su URL/licencia deben validarse antes de descargar (licencia pendiente según dependencias-manifest.yml, guardrail 8). NO se descarga nada."
-    if ($DryRun) {
-        Write-Info "DryRun: Configure-Graphify solo informa, no escribe nada."
+    # Verificar que el comando stdio documentado existe (módulo + extra mcp).
+    # Containment: solo se registra este comando exacto, sin --transport http.
+    $serveOK = $false
+    try {
+        & $pythonCmd.Source -m graphify.serve --help 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) { $serveOK = $true }
+    } catch { $serveOK = $false }
+    if (-not $serveOK) {
+        Write-Warn 'El módulo MCP embebido no responde (python -m graphify.serve --help falló): falta el extra mcp — reinstala con uv tool install "graphifyy[mcp]" (o pip install "graphifyy[mcp]"). No se registra la entrada (evita config rota); el bootstrap continúa.'
+        return
     }
-    # TODO: cuando la licencia esté verificada y la URL en la allowlist
-    # (fail-closed: solo https://github.com/<owner en allowlist>/<repo>),
-    # descargar shallow y registrar la licencia en dependencias-manifest.yml:
-    #   git clone --depth 1 <url-validada> (Join-Path $RootPath "proyect_ext\graphify")
+    Write-OK "MCP embebido verificado: python -m graphify.serve (stdio por defecto)"
+
+    # --- Grafo local: <root>/graphify-out/graph.json (containment-check) ---
+    $graphBase = Join-Path $RootPath "graphify-out"
+    $graphPath = Join-Path $graphBase "graph.json"
+    $sepG = [IO.Path]::DirectorySeparatorChar
+    $baseCanonG = [IO.Path]::GetFullPath($graphBase)
+    $graphCanonG = [IO.Path]::GetFullPath($graphPath)
+    if (-not $graphCanonG.StartsWith($baseCanonG + $sepG, [StringComparison]::OrdinalIgnoreCase)) {
+        Write-Warn "Ruta del grafo fuera de containment ($graphPath); no se registra (fail-closed)."
+        return
+    }
+    if (Test-Path -LiteralPath $graphCanonG) {
+        Write-OK "Grafo local: $graphCanonG"
+    } else {
+        Write-Warn "Grafo aún no construido (falta graphify-out/graph.json bajo la raíz). Para construirlo sin indexar secrets (.env, *.pem, .opencode/config.json): graphify extract <path> --code-only. Se registra el MCP igual (el servidor arranca sin grafo y cada herramienta acepta project_path)."
+    }
+
+    # --- Registro en opencode.json (type: local, stdio, sin secrets) ---
+    $opencodePath = Join-Path $RootPath "opencode.json"
+    if (-not (Test-Path -LiteralPath $opencodePath)) {
+        Write-Warn "No existe opencode.json en $RootPath; se omite el registro de graphify en OpenCode."
+    } else {
+        $existing = Get-Content -Path $opencodePath -Raw | ConvertFrom-Json
+        if (($null -ne $existing.mcp) -and ($null -ne $existing.mcp.graphify) -and (-not $Force)) {
+            Write-OK "opencode.json ya registra graphify; se conserva (usa -Force para sobrescribir)."
+        } elseif ($DryRun) {
+            Write-Info "DryRun: registraría graphify en opencode.json (type: local, command: [$($pythonCmd.Source), -m, graphify.serve, <root>/graphify-out/graph.json], enabled: true)"
+        } else {
+            $graphifyEntry = [ordered]@{
+                type = "local"
+                command = @($pythonCmd.Source, "-m", "graphify.serve", $graphCanonG)
+                enabled = $true
+            }
+            if ($null -eq $existing.mcp) {
+                $existing | Add-Member -NotePropertyName "mcp" -NotePropertyValue ([ordered]@{}) -Force
+            }
+            # $existing.mcp puede ser PSCustomObject (leído de JSON) o
+            # OrderedDictionary (recién creado): Add-Member sobre un
+            # IDictionary NO se serializa, en ese caso se agrega entrada.
+            if ($existing.mcp -is [System.Collections.IDictionary]) {
+                $existing.mcp["graphify"] = $graphifyEntry
+            } else {
+                $existing.mcp | Add-Member -NotePropertyName "graphify" -NotePropertyValue $graphifyEntry -Force
+            }
+            $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $opencodePath -Encoding UTF8
+            Write-OK "graphify registrado como MCP stdio en opencode.json"
+        }
+    }
+
+    # --- Registro en .vscode/mcp.json (type: stdio) ---
+    $mcpPath = Join-Path $RootPath ".vscode\mcp.json"
+    $mcpDir = Split-Path $mcpPath -Parent
+    if (Test-Path -LiteralPath $mcpPath) {
+        $mcpExisting = Get-Content -Path $mcpPath -Raw | ConvertFrom-Json
+    } else {
+        $mcpExisting = [pscustomobject]@{}
+        if (-not $DryRun) { Ensure-Directory $mcpDir }
+    }
+    if (($null -ne $mcpExisting.servers) -and ($null -ne $mcpExisting.servers.graphify) -and (-not $Force)) {
+        Write-OK ".vscode/mcp.json ya registra graphify; se conserva (usa -Force para sobrescribir)."
+    } elseif ($DryRun) {
+        Write-Info "DryRun: registraría graphify en .vscode/mcp.json (type: stdio, command: [$($pythonCmd.Source)], args: [-m, graphify.serve, <root>/graphify-out/graph.json])"
+    } else {
+        $graphifyServer = [ordered]@{
+            command = $pythonCmd.Source
+            args = @("-m", "graphify.serve", $graphCanonG)
+            type = "stdio"
+        }
+        if ($null -eq $mcpExisting.servers) {
+            $mcpExisting | Add-Member -NotePropertyName "servers" -NotePropertyValue ([ordered]@{}) -Force
+        }
+        if ($mcpExisting.servers -is [System.Collections.IDictionary]) {
+            $mcpExisting.servers["graphify"] = $graphifyServer
+        } else {
+            $mcpExisting.servers | Add-Member -NotePropertyName "graphify" -NotePropertyValue $graphifyServer -Force
+        }
+        $mcpExisting | ConvertTo-Json -Depth 10 | Set-Content -Path $mcpPath -Encoding UTF8
+        Write-OK "graphify registrado como MCP stdio en .vscode/mcp.json"
+    }
 }
 
 # =============================================================================
@@ -1789,6 +2299,7 @@ Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $Orp
 
 Write-Step "4) Configurando MCPs para OpenCode..."
 Ensure-OpenCodeMcp $resolvedRoot
+Ensure-OpenCodeConfig -RootPath $resolvedRoot
 
 Write-Step "5) Resolviendo app activa (Resolve-ActiveApp)..."
 $activeApp = Resolve-ActiveApp -AppName $App -RootPath $resolvedRoot
@@ -1799,6 +2310,12 @@ $specKit = Configure-SpecKit -ActiveApp $activeApp -RootPath $resolvedRoot
 
 Write-Step "7) Preparando apps (Prepare-Apps)..."
 Prepare-Apps -RootPath $resolvedRoot
+
+Write-Step "7c) Asegurando estructura src/<App>/ con .specify (Ensure-SrcAppStructure)..."
+Ensure-SrcAppStructure -Apps $Apps -RootPath $resolvedRoot
+
+Write-Step "7b) Reorganizando docs sueltas (Repair-DocStructure)..."
+Repair-DocStructure -RootPath $resolvedRoot
 
 Write-Step "8) Configurando Graphify (Configure-Graphify)..."
 Configure-Graphify -RootPath $resolvedRoot

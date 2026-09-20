@@ -1,10 +1,15 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "_note": "Plantilla generica RF-S6: los __TOKENS__ se re-resuelven a rutas locales al ejecutar scripts/plataformador-bootstrap.ps1 (entradas con token arrancan degradadas con enabled=false + WARN). No commitear rutas absolutas.",
   "model": "groq-custom/llama-3.3-70b-versatile",
   "small_model": "groq-custom/llama-3.1-8b-instant",
-"default_agent": "build",
-  "plugin": ["context-mode"],
-  "instructions": ["AGENTS.md"],
+  "default_agent": "build",
+  "plugin": [
+    "context-mode"
+  ],
+  "instructions": [
+    "AGENTS.md"
+  ],
   "provider": {
     "nvidia-custom": {
       "name": "NVIDIA",
@@ -18,13 +23,19 @@
           "name": "GLM 5.2",
           "tool_call": true,
           "temperature": true,
-          "limit": { "context": 128000, "output": 32000 }
+          "limit": {
+            "context": 128000,
+            "output": 32000
+          }
         },
         "deepseek-ai/deepseek-v4-flash": {
           "name": "DeepSeek V4 Flash",
           "tool_call": true,
           "temperature": true,
-          "limit": { "context": 128000, "output": 16000 }
+          "limit": {
+            "context": 128000,
+            "output": 16000
+          }
         }
       }
     },
@@ -40,7 +51,10 @@
           "name": "DeepSeek V4 Flash 0731",
           "tool_call": true,
           "temperature": true,
-          "limit": { "context": 128000, "output": 16000 }
+          "limit": {
+            "context": 128000,
+            "output": 16000
+          }
         }
       }
     }
@@ -48,29 +62,53 @@
   "mcp": {
     "context-mode": {
       "type": "local",
-      "command": ["C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd"],
-      "enabled": true
+      "command": [
+        "__CONTEXT_MODE_CMD__"
+      ],
+      "enabled": false
     },
     "codebase-memory-mcp": {
       "type": "local",
-      "command": ["C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"],
-      "enabled": true
+      "command": [
+        "__CODEBASE_MEMORY_CMD__"
+      ],
+      "enabled": false
     },
     "markitdown": {
       "type": "local",
-      "command": ["C:/Python314/Scripts/markitdown-mcp.exe"],
-      "enabled": true
+      "command": [
+        "__MARKITDOWN_CMD__"
+      ],
+      "enabled": false
     },
     "tokenslayer": {
       "type": "local",
-      "command": ["C:/Program Files/nodejs/node.exe", "C:/Proyectos/Agents_IA_TECH/proyect_ext/tokenslayer/mcp-server/build/index.js"],
+      "command": [
+        "node",
+        "proyect_ext/tokenslayer/mcp-server/build/index.js"
+      ],
+      "enabled": true
+    },
+    "graphify": {
+      "type": "local",
+      "command": [
+        "python",
+        "-m",
+        "graphify.serve",
+        "graphify-out/graph.json"
+      ],
       "enabled": true
     }
-},
+  },
   "lsp": {
     "python": {
-      "command": ["pyright-langserver", "--stdio"],
-      "extensions": [".py"]
+      "command": [
+        "pyright-langserver",
+        "--stdio"
+      ],
+      "extensions": [
+        ".py"
+      ]
     }
   },
   "permission": {

@@ -24,7 +24,7 @@
   - (c) PASS — `DryRun: NUNCA tocaría Documentacion/<AppName>/ (frontera kit <-> app)`
   - (d) PASS — `App activa: root` (cwd = raíz, sin coincidencia; esperado)
   - (e) PASS — `.specify activo (kit/root)` + `Specs dir: .../Documentacion/Agents_IA_TECH/specs`
-  - (f) PASS — 5 WARN de apps ausentes (`dwxconnect`, `fibonacci-scanner`, `operation_mt5`, `Telegram`, `trading_bot`), sin clonar (RNF-06, esperado)
+  - (f) PASS — 5 WARN de apps ausentes (5 apps del proyecto), sin clonar (RNF-06, esperado)
   - (g) PASS — `proyect_ext/spec-kit queda en la raíz (no se mueve)`; existe en disco (`.devcontainer`, `.github`, `.specify`, `bundles`, `docs`, …)
   - (h) PASS — `Graphify disponible en: .../.opencode/lib/graphify`
 - `sync-agents.ps1 -DryRun` → EXIT 0, delega en `Sync-TransversalKit` (`-SyncOnly`), misma lista de 8 items, `git status` idéntico. Criterio 7 PASS.
@@ -33,16 +33,16 @@
 
 - El parámetro `-ProjectRoot` **sí existe** (línea 27 del script); se usó `-ProjectRoot C:\Proyectos\Metatrader` → EXIT 0.
 - Metatrader **no es repo git** (`fatal: not a git repository`), por lo que la verificación es por salida, no por diff:
-  - Las 5 apps **sí existen en raíz** (`dwxconnect`, `fibonacci-scanner`, `operation_mt5`, `Telegram`, `trading_bot`) → `se respeta su ubicación, RNF-04; no se mueve nada` + solo líneas `DryRun: aseguraría Documentacion/<app>/`.
+  - Las 5 apps **sí existen en raíz** (5 apps del proyecto) → `se respeta su ubicación, RNF-04; no se mueve nada` + solo líneas `DryRun: aseguraría Documentacion/<app>/`.
   - Sync declara `NUNCA tocaría Documentacion/<AppName>/`; ninguna línea de la salida escribe en `Documentacion/` real (todo `DryRun:`).
   - `proyect_ext/spec-kit queda en la raíz` OK; Graphify OK (`C:\Proyectos\Metatrader\.opencode\lib\graphify`).
-  - `Documentacion/` de Metatrader intacta (directorios listados sin cambios: `agents`, `Agents_IA_TECH`, `bitacoras`, `dwxconnect`, `ecosistema`, `fibo-scanner`, `operation_mt5`, `telegram`).
+  - `Documentacion/` de Metatrader intacta (directorios listados sin cambios: `agents`, `Agents_IA_TECH`, `bitacoras`, `ecosistema`, `fibo-scanner`, `telegram`).
 
 ## T-V2 (Spec-kit por app activa, estático) — PASS
 
 `Configure-SpecKit` (líneas 1246–1299), lógica correcta:
 - `root` → `SpecDir=<Root>/.specify`, `SpecsDir=<Root>/Documentacion/Agents_IA_TECH/specs`. Correcto (RF-08, criterio 5).
-- `-App trading_bot` → `AppDir=<Root>/src/trading_bot` (fallback `<Root>/trading_bot`, fallback raíz con WARN), `SpecDir=<AppDir>/.specify` (creado desde base solo si existe base; si no, WARN y sigue), `SpecsDir=<Root>/Documentacion/trading_bot/specs` (asegurado vía `Ensure-Directory`, que en DryRun no escribe). Correcto.
+- `-App <app>` → `AppDir=<Root>/src/<app>` (fallback `<Root>/<app>`, fallback raíz con WARN), `SpecDir=<AppDir>/.specify` (creado desde base solo si existe base; si no, WARN y sigue), `SpecsDir=<Root>/Documentacion/<app>/specs` (asegurado vía `Ensure-Directory`, que en DryRun no escribe). Correcto.
 - `cwd` dentro de app → resuelto antes por `Resolve-ActiveApp` (precedencia `-App` > `cwd` anclado a `src/<app>` o `<raíz>/<app>` > `root`), con segunda pasada por segmento exacto anti-falsos-positivos. Correcto.
 - Sin defectos lógicos. Modo real **no ejecutado** (fuera de alcance de esta validación; queda pendiente si se quiere verificar escritura real).
 

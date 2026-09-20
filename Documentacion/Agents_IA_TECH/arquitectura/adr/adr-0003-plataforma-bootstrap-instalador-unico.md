@@ -10,14 +10,14 @@
 
 ## Contexto y problema
 
-El usuario administra **múltiples proyectos y apps independientes** (`dwxconnect`, `fibonacci-scanner`, `operation_mt5`, `Telegram`, `trading_bot`), cada una con su propio `.specify` (constitución y config particular), su `Documentacion/<AppName>/` (specs, ADRs, agents — **propia de la app**), y que **comparten un kit transversal** (`.github/`, `.opencode/`, `.doc_agents/`, `AGENTS.md`, `opencode.json`, `README.md`, `sync-agents.ps1`).
+El usuario administra **múltiples proyectos y apps independientes** (`MiApp`, `AppFoo`, `AppBar`, `AppBaz`, `AppQux`), cada una con su propio `.specify` (constitución y config particular), su `Documentacion/<AppName>/` (specs, ADRs, agents — **propia de la app**), y que **comparten un kit transversal** (`.github/`, `.opencode/`, `.doc_agents/`, `AGENTS.md`, `opencode.json`, `README.md`, `sync-agents.ps1`).
 
 Hoy existen **dos scripts con responsabilidades superpuestas pero desconectadas**:
 
 - **`plataformador-bootstrap.ps1`** (854 líneas): valida/quita dependencias, configura MCPs (VS Code + OpenCode), crea/actualiza índices (`codebase-memory-mcp` + `context-mode`), verifica MCPs, prepara estructura y reinicia VS Code.
 - **`sync-agents.ps1`** (158 líneas): clona el repo maestro (shallow) y sincroniza SOLO el kit transversal, **nunca** `Documentacion/<AppName>/`.
 
-Además, hay que integrar **Spec-kit** (CLI `specify` v1.0.0 en `C:\Users\tomas\.local\bin\specify.exe`) y **Graphify**, que deben instalarse y configurarse por proyecto y por app.
+Además, hay que integrar **Spec-kit** (CLI `specify` v1.0.0 en `~/.local/bin/specify`) y **Graphify**, que deben instalarse y configurarse por proyecto y por app.
 
 **Problemas concretos que motivan este ADR:**
 
@@ -25,7 +25,7 @@ Además, hay que integrar **Spec-kit** (CLI `specify` v1.0.0 en `C:\Users\tomas\
 2. **Spec-kit no está integrado en el flujo de bootstrap**: no hay un mecanismo que determine qué `.specify` y qué `Documentacion/<AppName>/` debe usar Spec-kit según la app activa.
 3. **El kit transversal se copia entre proyectos pero la doc de app NO** — el bootstrap debe respetar esa frontera sin romperla.
 4. **Descarga desde git** (`dependencias-manifest.yml` ya define el patrón "descargar desde git" para spec-kit, graphify, markitdown) requiere validación de URLs/licencias para evitar dependencias rotas o inseguras.
-5. **La estructura difiere entre proyectos** (p. ej. `C:\Proyectos\Metatrader` tiene las apps en la raíz y `src\` vacía; el proyecto actual `Agents_IA_TECH` tiene la doc del kit en raíz) — el bootstrap debe ser **tolerante a esa variación** y nivelar hacia una estructura objetivo sin romper lo existente.
+5. **La estructura difiere entre proyectos** (p. ej. `<tu-proyecto>` tiene las apps en la raíz y `src\` vacía; el proyecto actual del kit tiene la doc del kit en raíz) — el bootstrap debe ser **tolerante a esa variación** y nivelar hacia una estructura objetivo sin romper lo existente.
 
 **Principio rector** (del plan aprobado):
 > *"El bootstrap es el instalador/actualizador único del ecosistema: un solo script, determinista e idempotente, que lleva cualquier proyecto a la estructura objetivo sin tocar la documentación propia de cada app."*
@@ -38,26 +38,26 @@ Adoptar **`plataformador-bootstrap.ps1` como instalador/actualizador único** de
 
 ### 1. Modelo de apps independientes + orquestador
 
-Cada app (`dwxconnect`, `fibonacci-scanner`, `operation_mt5`, `Telegram`, `trading_bot`) es una **aplicación independiente** con:
+Cada app (`MiApp`, `AppFoo`, `AppBar`, `AppBaz`, `AppQux`) es una **aplicación independiente** con:
 
 - Su propio `.specify` (constitución + configuración particular).
 - Su propia `Documentacion/<AppName>/` (specs, ADRs, agents — **propia, no se copia**).
 
-`trading_bot` **orquesta/consume** a las demás (lee sus datos, las invoca), pero sigue siendo una **app independiente** con su propio `.specify` y su propia doc. No es un "monolito padre": es un **orquestador entre pares**.
+`MiApp` **orquesta/consume** a las demás (lee sus datos, las invoca), pero sigue siendo una **app independiente** con su propio `.specify` y su propia doc. No es un "monolito padre": es un **orquestador entre pares**.
 
 ```
-                    ┌─────────────────────────────┐
-                    │  trading_bot  (orquestador)  │
-                    │  .specify + Documentacion/   │
-                    └──────┬──────┬──────┬─────────┘
-              consume/    │      │      │
-              invoca      ▼      ▼      ▼
-                   ┌───────┐ ┌─────────┐ ┌────────────┐
-                   │ dwxconnect │ operation_mt5 │ fibonacci-scanner │
-                   └───────┘ └─────────┘ └────────────┘
-                         ┌─────────┐
-                         │ Telegram │  (app independiente más)
-                         └─────────┘
+                     ┌─────────────────────────────┐
+                     │  MiApp  (orquestador)        │
+                     │  .specify + Documentacion/   │
+                     └──────┬──────┬──────┬─────────┘
+               consume/    │      │      │
+               invoca      ▼      ▼      ▼
+                    ┌───────┐ ┌─────────┐ ┌────────────┐
+                    │ AppFoo │ AppBar │ AppBaz │
+                    └───────┘ └─────────┘ └────────────┘
+                          ┌─────────┐
+                          │ AppQux │  (app independiente más)
+                          └─────────┘
 ```
 
 ### 2. Estructura objetivo
@@ -70,19 +70,19 @@ repo/
 ├── .specify/                ← config speckit base (copiado, personalizable)
 ├── AGENTS.md, opencode.json, README.md, sync-agents.ps1 (wrapper)  ← kit transversal
 │
-├── src/AppXXX/              ← APPs (dwxconnect, fibonacci-scanner, operation_mt5, Telegram, trading_bot)
+├── src/AppXXX/              ← APPs (MiApp, AppFoo, AppBar, AppBaz, AppQux)
 ├── proyect_ext/             ← herramientas de apoyo (spec-kit, graphify) — NO se mueve a src\
 │
 ├── Documentacion/           ← 🔒 INTERNA
-│   ├── <dwxconnect>/        ← doc técnica PROPIA de la app
-│   ├── <fibonacci-scanner>/ ← doc técnica PROPIA de la app
+│   ├── <MiApp>/        ← doc técnica PROPIA de la app
+│   ├── <AppFoo>/ ← doc técnica PROPIA de la app
 │   ├── ...                  ← una carpeta por app
 │   └── <Agents_IA_TECH>/    ← doc del kit (este repo)
 │
 └── dependencias-manifest.yml ← manifest de herramientas externas
 ```
 
-> **Nota de tolerancia**: `src\AppXXX\` es la **estructura objetivo**, pero el bootstrap **no fuerza** mover apps que ya viven en la raíz (p. ej. `C:\Proyectos\Metatrader`). Nivela de forma **idempotente**: respeta la ubicación existente, prepara estructura si falta, y nunca destruye código.
+> **Nota de tolerancia**: `src\AppXXX\` es la **estructura objetivo**, pero el bootstrap **no fuerza** mover apps que ya viven en la raíz (p. ej. `<tu-proyecto>`). Nivela de forma **idempotente**: respeta la ubicación existente, prepara estructura si falta, y nunca destruye código.
 
 ### 3. Mecanismo de resolución de rutas de Spec-kit por app activa
 
@@ -125,7 +125,7 @@ La lógica de sincronización del kit transversal se **absorbe** dentro de `plat
 
 - **Un solo punto de entrada**: `plataformador-bootstrap.ps1` cubre sync del kit + MCPs + índices + Spec-kit + Graphify. El usuario corre un solo script.
 - **Determinista e idempotente**: repetir la ejecución no rompe nada; los mismos pasos producen el mismo resultado.
-- **Apps aisladas y reutilizables**: cada app tiene su `.specify` y doc propia; `trading_bot` las consume como orquestador sin acoplarlas.
+- **Apps aisladas y reutilizables**: cada app tiene su `.specify` y doc propia; `MiApp` las consume como orquestador sin acoplarlas.
 - **Resolución de app activa clara**: el usuario elige con `-App` o por directorio; el bootstrap sabe qué `.specify` y qué `Documentacion/<AppName>/` usar.
 - **Frontera kit ↔ app respetada**: la sincronización nunca pisa la doc de app, preservando el principio de `estructura-aplicacion.md`.
 - **Nivelación tolerante**: apps en raíz o en `src\AppXXX\` se manejan sin destruir estructura existente.
@@ -226,14 +226,14 @@ flowchart TD
 |-------|--------|--------|
 | 4º | `plataformador` | Refactorizar `plataformador-bootstrap.ps1`: agregar `Sync-TransversalKit`, resolución de app activa (`-App` + `cwd`), integración de Spec-kit y Graphify, respetando todos los guardrails. |
 | 5º | `devops` | Convertir `sync-agents.ps1` en wrapper que delega en `Sync-TransversalKit`. |
-| 6º | `qa-senior` | Probar idempotencia, `-DryRun`, resolución de app activa y no-tocar-`Documentacion/<AppName>/` en un proyecto real (p. ej. `C:\Proyectos\Metatrader`). |
+| 6º | `qa-senior` | Probar idempotencia, `-DryRun`, resolución de app activa y no-tocar-`Documentacion/<AppName>/` en un proyecto real (p. ej. `<tu-proyecto>`). |
 | 7º | `gitflow` | Commits convencionales. |
 
 ### Fase validación
 
 | Orden | Acción |
 |-------|--------|
-| 8º | Ejecutar `.\plataformador-bootstrap.ps1 -DryRun` en `C:\Proyectos\Agents_IA_TECH` y `C:\Proyectos\Metatrader`; verificar que no toca `Documentacion/<AppName>/`. |
+| 8º | Ejecutar `.\plataformador-bootstrap.ps1 -DryRun` en `<repo-del-kit>` y `<tu-proyecto>`; verificar que no toca `Documentacion/<AppName>/`. |
 | 9º | Ejecutar sin `-DryRun`; verificar Spec-kit orientado a la app activa y Graphify configurado. |
 | 10º | Correr `npx ecc-agentshield scan` para validar seguridad de los cambios en `.github/`. |
 

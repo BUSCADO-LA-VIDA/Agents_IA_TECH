@@ -37,7 +37,7 @@ param(
     [switch]$VerifyOnly,
     [switch]$SyncOnly,
     [string]$App = "",
-    [string[]]$Apps = @("dwxconnect", "fibonacci-scanner", "operation_mt5", "Telegram", "trading_bot"),
+    [string[]]$Apps = @(),
     [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
     [string]$ManifestPath = "",
     [string]$OrphanAction = "Preguntar"
@@ -53,19 +53,43 @@ function Write-Fail  { param([string]$Message) Write-Host "[FAIL] $Message" -For
 
 # =============================================================================
 # Configuración del instalador/actualizador único (ADR-0003)
-# =============================================================================
-$KnownApps = @("dwxconnect", "fibonacci-scanner", "operation_mt5", "Telegram", "trading_bot")
+# [SOLUCION-GENERICA] RF-S3: sin lista fija de dominio. La lista de apps se
+# resuelve por proyecto: flag -Apps explícito > manifest del proyecto >
+# descubrimiento src/* > lista vacía + WARN (nunca hardcodeada).
+
+# Resuelve la lista de apps del proyecto (RF-S3/RF-S5):
+# 1) manifest del proyecto (sección `aplicaciones:` activa); 2) descubrimiento
+# de directorios bajo src/; 3) lista vacía + WARN si no hay nada.
+function Resolve-AppList {
+    param([string]$RootPath = "")
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+    $fromManifest = @(Read-DependenciasManifest -RootPath $RootPath | ForEach-Object { $_.Nombre })
+    if ($fromManifest.Count -gt 0) { return @($fromManifest) }
+    $srcDir = Join-Path $RootPath "src"
+    if (Test-Path -LiteralPath $srcDir) {
+        $found = @(Get-ChildItem -LiteralPath $srcDir -Directory -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+        if ($found.Count -gt 0) { return @($found) }
+    }
+    Write-Warn "Sin apps en manifest ni en src/; lista vacía (pasa -Apps explícito o define `aplicaciones:` en tu manifest local)."
+    return @()
+}
 
 # Allowlist de owners de confianza para validar URLs (fail-closed).
 # Solo se permite https://github.com/<owner-en-allowlist>/<repo>
+# [SOLUCION-GENERICA] RF-S1/RF-S5: owners personales del autor fuera del kit
+# genérico (cada proyecto añade los suyos en su copia local si aplica).
 $TrustedOwners = @(
     "BUSCADO-LA-VIDA",
-    "tomasecastro",
     "github",
     "microsoft",
     "DeusData",
-    "mksglu",
-    "tomasgraph"
+    "mksglu"
 )
 
 function Test-TrustedGithubUrl {
@@ -102,11 +126,16 @@ function Read-DependenciasManifest {
         return @()
     }
     $content = Get-Content -Path $manifestFile -Raw
+    # Solo la sección `aplicaciones:` (no `dependencias_externas`: herramientas
+    # como spec-kit/markitdown no son apps). Sin sección activa -> @().
+    $mSection = [regex]::Match($content, '(?ms)^aplicaciones:\s*\r?\n(.*)$')
+    if (-not $mSection.Success) { return @() }
+    $section = $mSection.Groups[1].Value
     $apps = @()
-    foreach ($m in [regex]::Matches($content, '(?ms)^  - nombre:\s*(\S+)\s*\r?\n    url:\s*(\S+)\s*\r?\n    rama:\s*(\S+)\s*\r?\n(?:.*?)\r?\n    licencia:\s*(.+?)\s*$')) {
-        if ($m.Groups[1].Value -in $KnownApps) {
-            $apps += @{ Nombre = $m.Groups[1].Value; Url = $m.Groups[2].Value; Rama = $m.Groups[3].Value; Licencia = $m.Groups[4].Value }
-        }
+    foreach ($m in [regex]::Matches($section, '(?ms)^  - nombre:\s*(\S+)\s*\r?\n    url:\s*(\S+)\s*\r?\n    rama:\s*(\S+)\s*\r?\n(?:.*?)\r?\n    licencia:\s*(.+?)\s*$')) {
+        # [SOLUCION-GENERICA] RF-S3/RF-S5: el manifest del PROYECTO manda;
+        # sin filtro por lista fija (el kit genérico no conoce apps concretas).
+        $apps += @{ Nombre = $m.Groups[1].Value; Url = $m.Groups[2].Value; Rama = $m.Groups[3].Value; Licencia = $m.Groups[4].Value }
     }
     return $apps
 }
@@ -257,6 +286,18 @@ function Ensure-McpJson {
     }
 }
 
+# [SOLUCION-GENERICA] RF-S6: re-resuelve un comando MCP a su ruta real en
+# runtime local (Get-Command). Si no resuelve -> $null + WARN degradado
+# (el caller deja el token con enabled=false y pide ejecutar el bootstrap).
+# Nunca amplía permission.bash ni commitea rutas reales.
+function Resolve-McpCommand {
+    param([string]$ToolName, [string]$Token)
+    $found = Get-Command $ToolName -ErrorAction SilentlyContinue
+    if ($found) { return $found.Source }
+    Write-Warn "MCP '$ToolName' sin resolver ($Token): ejecuta el bootstrap tras instalar la herramienta; se deja degradado (enabled=false)."
+    return $null
+}
+
 function Ensure-OpenCodeMcp {
     param([string]$RootPath)
 
@@ -274,29 +315,57 @@ function Ensure-OpenCodeMcp {
     if ($existing.mcp -and -not $Force) {
         Write-OK "opencode.json ya tiene sección mcp; se conserva (usa -Force para sobrescribir)."
     } else {
+        # [SOLUCION-GENERICA] RF-S6: plantilla con tokens + degradada con WARN.
+        # Sin rutas absolutas versionadas; enabled=false hasta re-resolver en
+        # runtime local (jamás commiteado). No amplía permission.bash.
         $mcpConfig = [ordered]@{
             "context-mode" = [ordered]@{
                 type = "local"
-                command = @("C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd")
-                enabled = $true
+                command = @("__CONTEXT_MODE_CMD__")
+                enabled = $false
             }
             "codebase-memory-mcp" = [ordered]@{
                 type = "local"
-                command = @("C:/Users/tomas/.local/bin/codebase-memory-mcp.exe")
-                enabled = $true
+                command = @("__CODEBASE_MEMORY_CMD__")
+                enabled = $false
             }
             "markitdown" = [ordered]@{
                 type = "local"
-                command = @("C:/Python314/Scripts/markitdown-mcp.exe")
-                enabled = $true
+                command = @("__MARKITDOWN_CMD__")
+                enabled = $false
             }
         }
+        Write-Warn "Plantilla MCP con tokens (ejecuta el bootstrap para re-resolver a rutas locales)."
 
         if (-not $DryRun) {
             $existing | Add-Member -NotePropertyName "mcp" -NotePropertyValue $mcpConfig -Force
             Write-OK "Sección mcp agregada a opencode.json"
         } else {
             Write-Info "DryRun: agregar sección mcp a opencode.json"
+        }
+    }
+
+    # [SOLUCION-GENERICA] RF-S6: re-resolución a rutas reales SOLO en runtime
+    # local (jamás commiteada). Por token: si Get-Command resuelve -> ruta
+    # real + enabled=true en memoria; si no -> WARN degradado + enabled=false.
+    if (-not $DryRun -and ($null -ne $existing.mcp)) {
+        $tokenMap = [ordered]@{
+            "context-mode"       = @{ Tool = "context-mode";       Token = "__CONTEXT_MODE_CMD__" }
+            "codebase-memory-mcp" = @{ Tool = "codebase-memory-mcp"; Token = "__CODEBASE_MEMORY_CMD__" }
+            "markitdown"         = @{ Tool = "markitdown";         Token = "__MARKITDOWN_CMD__" }
+        }
+        foreach ($name in @($tokenMap.Keys)) {
+            $entry = $existing.mcp.PSObject.Properties[$name]
+            if ($null -eq $entry) { continue }
+            $cmd0 = @($entry.Value.command)[0]
+            if ($cmd0 -eq $tokenMap[$name].Token) {
+                $real = Resolve-McpCommand -ToolName $tokenMap[$name].Tool -Token $cmd0
+                if ($real) {
+                    $entry.Value.command = @($real)
+                    $entry.Value.enabled = $true
+                    Write-OK "MCP '$name' re-resuelto a ruta local."
+                }
+            }
         }
     }
 
@@ -887,7 +956,13 @@ function Index-CodebaseMemory {
     }
 
     try {
-        $result = & "C:/Users/tomas/.local/bin/codebase-memory-mcp.exe" cli index_repository --path $RootPath 2>&1
+        # [SOLUCION-GENERICA] RF-S2/RF-S6: re-resolución en runtime (sin absolutas versionadas).
+        $cbmCmd = Get-Command "codebase-memory-mcp" -ErrorAction SilentlyContinue
+        if (-not $cbmCmd) {
+            Write-Warn "codebase-memory-mcp no resuelve en PATH; se omite indexación (instala la herramienta y re-ejecuta)."
+            return
+        }
+        $result = & $cbmCmd.Source cli index_repository --path $RootPath 2>&1
         if ($LASTEXITCODE -eq 0) {
             Write-OK "Código indexado correctamente en codebase-memory-mcp"
         } else {
@@ -927,7 +1002,13 @@ function Index-ContextMode {
     foreach ($p in $PathsToIndex) {
         if (Test-Path $p) {
             try {
-                $result = & "C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd" index $p 2>&1
+                # [SOLUCION-GENERICA] RF-S2/RF-S6: re-resolución en runtime.
+                $ctxCmd = Get-Command "context-mode" -ErrorAction SilentlyContinue
+                if (-not $ctxCmd) {
+                    Write-Warn "context-mode no resuelve en PATH; se omite indexación de $p (instala la herramienta y re-ejecuta)."
+                    continue
+                }
+                $result = & $ctxCmd.Source index $p 2>&1
                 if ($LASTEXITCODE -eq 0) {
                     Write-OK "Indexado en context-mode: $p"
                 } else {
@@ -952,7 +1033,9 @@ function Verify-McpAndIndexes {
     Write-Info "=== Verificación codebase-memory-mcp ==="
     if (Get-Command "codebase-memory-mcp" -ErrorAction SilentlyContinue) {
         try {
-            $projects = & "C:/Users/tomas/.local/bin/codebase-memory-mcp.exe" cli list_projects 2>&1
+            # [SOLUCION-GENERICA] RF-S2/RF-S6: re-resolución en runtime.
+            $cbmVerify = Get-Command "codebase-memory-mcp" -ErrorAction SilentlyContinue
+            $projects = & $cbmVerify.Source cli list_projects 2>&1
             Write-OK "codebase-memory-mcp responde correctamente"
             Write-Info "Proyectos indexados:"
             $projects | ForEach-Object { Write-Host "  $_" }
@@ -968,7 +1051,9 @@ function Verify-McpAndIndexes {
     Write-Info "=== Verificación context-mode ==="
     if (Get-Command "context-mode" -ErrorAction SilentlyContinue) {
         try {
-            $doctor = & "C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd" doctor 2>&1
+            # [SOLUCION-GENERICA] RF-S2/RF-S6: re-resolución en runtime.
+            $ctxDoctor = Get-Command "context-mode" -ErrorAction SilentlyContinue
+            $doctor = & $ctxDoctor.Source doctor 2>&1
             Write-OK "context-mode doctor ejecutado"
             $doctor | ForEach-Object { Write-Host "  $_" }
         }
@@ -1023,7 +1108,8 @@ function Verify-McpAndIndexes {
 
     # 6. Verificar índices de documentación
     Write-Info "=== Verificación índices de documentación (context-mode storage) ==="
-    $cmContent = "C:\Users\tomas\AppData\Roaming\opencode\context-mode\content"
+    # [SOLUCION-GENERICA] RF-S2: rutas derivadas del entorno (sin absolutas de usuario versionadas).
+    $cmContent = Join-Path $env:APPDATA "opencode\context-mode\content"
     if (Test-Path $cmContent) {
         $files = Get-ChildItem -Path $cmContent -Recurse -File -ErrorAction SilentlyContinue
         if ($files.Count -gt 0) {
@@ -1038,7 +1124,8 @@ function Verify-McpAndIndexes {
 
     # 7. Verificar base de datos codebase-memory
     Write-Info "=== Verificación base de datos codebase-memory-mcp ==="
-    $cmDbPath = "C:\Users\tomas\.cache\codebase-memory-mcp"
+    # [SOLUCION-GENERICA] RF-S2: rutas derivadas del entorno (sin absolutas de usuario versionadas).
+    $cmDbPath = Join-Path $env:USERPROFILE ".cache\codebase-memory-mcp"
     if (Test-Path $cmDbPath) {
         $dbs = Get-ChildItem -Path $cmDbPath -Filter "*.db" -ErrorAction SilentlyContinue
         if ($dbs.Count -gt 0) {
@@ -1583,6 +1670,8 @@ function Sync-TransversalKit {
             Write-Info "DryRun: copiaría $f -> $(Join-Path $RootPath $f)"
         }
         Write-Info "DryRun: excluiría .opencode/config.json (posibles credenciales, nunca se copia)"
+        Write-Info "DryRun: hash-guard .opencode/.gitignore: si el local existe y difiere del maestro se CONSERVA el local (fail-closed); solo -Force sobrescribe; nunca se pierde la línea 'config.json'"
+        Write-Info "DryRun: verificaría que .opencode/.gitignore existe tras el sync (si falta se restauraría desde el maestro) + detectaría .opencode/config.json trackeado (WARN con git rm --cached + rotar keys)"
         Write-Info "DryRun: NUNCA tocaría Documentacion/<AppName>/ (frontera kit <-> app)"
         Write-Info "DryRun: detectaría huérfanos (local en .github/ .opencode/ .doc_agents/ no existentes en el maestro) y aplicaría -OrphanAction $OrphanAction (Preguntar/Borrar/Conservar; default seguro Conservar; sin borrar ni mover nada)"
         return
@@ -1628,8 +1717,59 @@ function Sync-TransversalKit {
             if ($item.Type -eq "Dir") {
                 Write-Host "  [SYNC] $($item.Label)" -ForegroundColor Cyan
                 if ($item.Label -eq ".opencode/") {
+                    # [BLINDAJE-GIT] T-I2 hash-guard .opencode/.gitignore (RF-B2/B3, riesgo 4):
+                    # si el local existe y difiere del maestro -> conservar local + WARN, solo -Force sobrescribe.
+                    $masterGi = Join-Path $src ".gitignore"
+                    $localGi = Join-Path $dst ".gitignore"
+                    $giGuardHold = $false
+                    if ((Test-Path -LiteralPath $masterGi -PathType Leaf) -and (Test-Path -LiteralPath $localGi -PathType Leaf) -and (-not $Force)) {
+                        try {
+                            $mh = (Get-FileHash -LiteralPath $masterGi -Algorithm SHA256 -ErrorAction Stop).Hash
+                            $lh = (Get-FileHash -LiteralPath $localGi -Algorithm SHA256 -ErrorAction Stop).Hash
+                            if ($mh -ne $lh) {
+                                Write-Warn "  [GUARD] .opencode/.gitignore local difiere del maestro: se CONSERVA el local (fail-closed). Usa -Force para sobrescribir (único bypass consciente)."
+                                $giGuardHold = $true
+                            }
+                        } catch {
+                            Write-Warn "  [GUARD] No se pudo comparar .opencode/.gitignore (hash falló): se conserva el local por seguridad."
+                            $giGuardHold = $true
+                        }
+                    }
                     # Seguridad: nunca copiar .opencode/config.json (posibles credenciales).
-                    robocopy "$src" "$dst" /E /NDL /NFL /NJH /NJS /XF "config.json" >$null 2>&1
+                    if ($giGuardHold) {
+                        robocopy "$src" "$dst" /E /NDL /NFL /NJH /NJS /XF "config.json" ".gitignore" >$null 2>&1
+                    } else {
+                        robocopy "$src" "$dst" /E /NDL /NFL /NJH /NJS /XF "config.json" >$null 2>&1
+                    }
+                    # [BLINDAJE-GIT] T-I3(c): verificar que .opencode/.gitignore existe tras el sync; si falta -> WARN + crear desde el maestro.
+                    if (-not (Test-Path -LiteralPath $localGi -PathType Leaf)) {
+                        if (Test-Path -LiteralPath $masterGi -PathType Leaf) {
+                            Write-Warn "  [GUARD] .opencode/.gitignore ausente tras sync: se restaura desde el maestro."
+                            Copy-Item -LiteralPath $masterGi -Destination $localGi -Force
+                        } else {
+                            Write-Warn "  [GUARD] .opencode/.gitignore ausente en local y en maestro: protección de secrets degradada; no hacer commit de config.json."
+                        }
+                    } else {
+                        # Nunca perder la línea config.json (fail-closed informativo).
+                        try {
+                            $giTextAfter = Get-Content -LiteralPath $localGi -Raw -ErrorAction Stop
+                            if ($giTextAfter -notmatch '(?m)^config\.json\s*$') {
+                                Write-Warn "  [GUARD] .opencode/.gitignore local SIN línea 'config.json': protección de secrets degradada; revísalo antes de commitear."
+                            }
+                        } catch { }
+                    }
+                    # [BLINDAJE-GIT] Baseline lib/bin (riesgo 3, sin pin en manifest): si aparecen contenidos -> WARN supply-chain.
+                    foreach ($ab in @("lib", "bin")) {
+                        $abFull = Join-Path $dst $ab
+                        try {
+                            if (Test-Path -LiteralPath $abFull) {
+                                $abFiles = @(Get-ChildItem -LiteralPath $abFull -Recurse -File -Force -ErrorAction Stop)
+                                if ($abFiles.Count -gt 0) {
+                                    Write-Warn "  [GUARD] .opencode/$ab con $($abFiles.Count) archivo(s): tratar como NO confiable hasta pin+hash en manifest (supply-chain); no ejecutar sin verificar."
+                                }
+                            }
+                        } catch { }
+                    }
                 } else {
                     robocopy "$src" "$dst" /E /NDL /NFL /NJH /NJS >$null 2>&1
                 }
@@ -1654,6 +1794,17 @@ function Sync-TransversalKit {
         if (Test-Path $kitConfig) {
             Write-Warn "Se excluye .opencode/config.json (posibles credenciales) de la sincronización."
         }
+
+        # [BLINDAJE-GIT] T-I3 detección defensiva config.json trackeado (riesgo 1, AC-6):
+        # si git ls-files lo lista -> WARN con git rm --cached + rotar keys (solo lectura, también informa en DryRun-real).
+        try {
+            if (Get-Command git -ErrorAction SilentlyContinue) {
+                $trackedCfg = & git -C $RootPath ls-files -- ".opencode/config.json" 2>$null
+                if ($trackedCfg) {
+                    Write-Warn ".opencode/config.json está TRACKEADO por git (posibles secrets versionados): ejecuta git rm --cached .opencode/config.json y ROTA las keys (borrar no basta, quedan en el historial)."
+                }
+            }
+        } catch { }
 
         # T-I7 / RF-12: manejo de huérfanos (dentro del try: $tempDir sigue
         # disponible; el finally lo limpia después). Find-OrphanKitFiles hace
@@ -1688,10 +1839,14 @@ function Resolve-ActiveApp {
         }
     }
 
+    # [SOLUCION-GENERICA] RF-S3: lista resuelta del proyecto (flag/manifest/
+    # src/*); vacía + WARN si no hay nada (nunca hardcodeada).
+    $effectiveApps = @(Resolve-AppList -RootPath $RootPath)
+
     # 1) Flag -App (equivale a -AppName): precedencia máxima.
     if ($AppName) {
-        if (($AppName -ne "root") -and ($AppName -notin $KnownApps)) {
-            Write-Warn "App '$AppName' no está en la lista conocida ($($KnownApps -join ', ')); se usa igual por precedencia del flag."
+        if (($AppName -ne "root") -and ($AppName -notin $effectiveApps)) {
+            Write-Warn "App '$AppName' no está en la lista resuelta ($($effectiveApps -join ', ')); se usa igual por precedencia del flag."
         }
         Write-Info "App activa resuelta por flag -App: $AppName"
         return $AppName
@@ -1699,7 +1854,7 @@ function Resolve-ActiveApp {
 
     # 2) cwd dentro de una app conocida: src\<app>\ o \<app>\ en la raíz.
     $cwd = (Get-Location).Path
-    foreach ($known in $KnownApps) {
+    foreach ($known in $effectiveApps) {
         $inSrc = $cwd -like "*src\$known*"
         $inRoot = $cwd -like "*\$known*"
         $anchored = $false
@@ -1722,7 +1877,7 @@ function Resolve-ActiveApp {
         }
     }
     # Segunda pasada solo con segmento exacto (evita falsos positivos de $inRoot).
-    foreach ($known in $KnownApps) {
+    foreach ($known in $effectiveApps) {
         $segments = $cwd -split '[\\/]'
         if ($segments -contains $known) {
             # Verificar que el segmento corresponde a src\<app> o <raíz>\<app>.
@@ -1990,7 +2145,13 @@ function Prepare-Apps {
 
     Write-Step "Preparando apps (verificación sin mover ni clonar)..."
 
-    $apps = @("dwxconnect", "fibonacci-scanner", "operation_mt5", "Telegram", "trading_bot")
+    # [SOLUCION-GENERICA] RF-S3/RF-S5: lista resuelta del proyecto: -Apps
+    # explícito > manifest del proyecto > descubrimiento src/* > vacía + WARN.
+    $apps = @($Apps | Where-Object { $_ -ne "" })
+    if ($apps.Count -eq 0) { $apps = @(Resolve-AppList -RootPath $RootPath) }
+    if ($apps.Count -eq 0) {
+        Write-Warn "Sin apps que preparar (lista vacía; pasa -Apps o define el manifest local). Nada que instalar."
+    }
     foreach ($app in $apps) {
         $inSrc = Join-Path $RootPath "src\$app"
         $inRoot = Join-Path $RootPath "$app"
@@ -2312,7 +2473,10 @@ Write-Step "7) Preparando apps (Prepare-Apps)..."
 Prepare-Apps -RootPath $resolvedRoot
 
 Write-Step "7c) Asegurando estructura src/<App>/ con .specify (Ensure-SrcAppStructure)..."
-Ensure-SrcAppStructure -Apps $Apps -RootPath $resolvedRoot
+# [SOLUCION-GENERICA] RF-S3: -Apps explícito > manifest/src/* resueltos.
+$srcApps = @($Apps | Where-Object { $_ -ne "" })
+if ($srcApps.Count -eq 0) { $srcApps = @(Resolve-AppList -RootPath $resolvedRoot) }
+Ensure-SrcAppStructure -Apps $srcApps -RootPath $resolvedRoot
 
 Write-Step "7b) Reorganizando docs sueltas (Repair-DocStructure)..."
 Repair-DocStructure -RootPath $resolvedRoot

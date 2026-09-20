@@ -22,7 +22,7 @@ El script cubre en un solo flujo: **sync del kit transversal + configuración de
 
 1. **`sync-agents.ps1` → Opción A**: su lógica se absorbe dentro de `plataformador-bootstrap.ps1` como función `Sync-TransversalKit`; `sync-agents.ps1` queda como wrapper que delega.
 2. **Repo maestro**: `https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH`.
-3. **Apps como aplicaciones**: `dwxconnect`, `fibonacci-scanner`, `operation_mt5`, `Telegram`, `trading_bot`. **`proyect_ext/spec-kit` queda en la raíz** (es de apoyo, no se mueve a `src\`).
+3. **Apps como aplicaciones**: `MiApp`, `AppFoo`, `AppBar`, `AppBaz`, `AppQux`. **`proyect_ext/spec-kit` queda en la raíz** (es de apoyo, no se mueve a `src\`).
 4. **Resolución de app activa**: por **directorio de trabajo actual** + **flag `-App`** (precedencia: `-App` > `cwd`).
 
 ---
@@ -80,7 +80,7 @@ El script cubre en un solo flujo: **sync del kit transversal + configuración de
 2. **Idempotencia**: ejecutar el bootstrap dos veces seguidas produce el mismo estado sin errores ni cambios.
 3. **`-DryRun`**: no escribe ningún archivo; solo muestra qué haría.
 4. **Frontera respetada**: al sincronizar kit, **nada** dentro de `Documentacion/<AppName>/` se modifica.
-5. **Resolución de app activa**: con `-App trading_bot` usa el `.specify` y `Documentacion/trading_bot/specs/`; con `cwd` dentro de `dwxconnect` usa los de `dwxconnect`; sin coincidencia usa `root`.
+5. **Resolución de app activa**: con `-App MiApp` usa el `.specify` y `Documentacion/MiApp/specs/`; con `cwd` dentro de `AppFoo` usa los de `AppFoo`; sin coincidencia usa `root`.
 6. **`proyect_ext/spec-kit`**: permanece en la raíz; no se traslada a `src\`.
 7. **`sync-agents.ps1`**: al invocarlo directamente, delega en `Sync-TransversalKit` con el mismo resultado que el bootstrap en su parte de sync.
 8. **Huérfanos**: al sincronizar con huérfanos locales (existen en `.github/` `.opencode/` `.doc_agents/` pero no en el maestro), el script pregunta **¿borrar o conservar?**; con **Borrar** los elimina (limpio sin respaldo), con **Conservar** (default seguro) los mueve a `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>` preservando estructura e informa qué se movió y dónde; con `-DryRun` solo informa sin borrar ni mover; nunca toca `Documentacion/<AppName>/`.

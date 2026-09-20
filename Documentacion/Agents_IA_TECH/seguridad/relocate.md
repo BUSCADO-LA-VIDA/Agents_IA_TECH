@@ -11,7 +11,7 @@
 
 ### 1.1 Riesgo de mover el código equivocado (`-AppDirs` mal listado, typo)
 
-`-AppDirs` acepta "cualquier proyecto" por lista libre o manifest. Un typo (`Telegram` vs `telegram`, `trading_bot` vs `trading-bot`), una carpeta que ya no es una app (renombrada, vaciada, convertida en enlace) o un nombre que colisiona con otra carpeta de la raíz (`src`, `scripts`, `Documentacion`) desplaza código ajeno a `src\<App>`. El daño es máximo porque el movido es destructivo en origen (ya no está donde estaba) y el post-movido rompe imports/paths del proyecto entero.
+`-AppDirs` acepta "cualquier proyecto" por lista libre o manifest. Un typo (mayúsculas vs minúsculas, guion vs guion bajo en el nombre de una app), una carpeta que ya no es una app (renombrada, vaciada, convertida en enlace) o un nombre que colisiona con otra carpeta de la raíz (`src`, `scripts`, `Documentacion`) desplaza código ajeno a `src\<App>`. El daño es máximo porque el movido es destructivo en origen (ya no está donde estaba) y el post-movido rompe imports/paths del proyecto entero.
 
 **Puntos de validación necesarios:**
 - **Lista visible antes de actuar**: por cada app, mostrar origen canónico, destino canónico, tamaño y estado git, antes de pedir S/N/T/C.

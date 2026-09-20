@@ -22,8 +22,8 @@
 #   - nunca toca `Documentacion/` (ni siquiera la enumera como candidata)
 #
 # Uso:
-#   .\scripts\relocate-apps-to-src.ps1 -AppDirs @("trading_bot", "Telegram") -DryRun
-#   .\scripts\relocate-apps-to-src.ps1 -AppDirs @("trading_bot")            # modo real interactivo
+#   .\scripts\relocate-apps-to-src.ps1 -AppDirs @("MiApp", "AppFoo") -DryRun
+#   .\scripts\relocate-apps-to-src.ps1 -AppDirs @("MiApp")            # modo real interactivo
 #   .\scripts\relocate-apps-to-src.ps1 -AppDirs @("mi_app") -ProjectRoot "C:\otro\proyecto"
 #
 # Requisito: PowerShell 7+ (pwsh >= 7). No funciona en Windows PowerShell 5.1.
@@ -1221,14 +1221,19 @@ function Find-RegenerableDirs {
 }
 
 # =============================================================================
-# Clear-RegenerableDirs (RF-15, criterio 11): elimina cada target (solo
-# objetos de `Find-RegenerableDirs` ya filtrados por allowlist + gate git)
-# con log de ruta relativa + tamano liberado. Sin respaldo (regenerables).
-# Controles: containment-check (ruta canonica dentro de la app), idempotente
-# al reintentar ("ya limpio", no error), `.venv` ACTIVADO → se SALTA con
-# aviso (fail-closed: exige `deactivate` previo verificado, RF-14).
+# Clear-RegenerableDirs (RF-15, criterio 11 + RF-B1/RF-B4 [BLINDAJE-GIT] T-I1/T-I3):
+# elimina cada target (solo objetos de `Find-RegenerableDirs` ya filtrados por
+# allowlist + gate git) con log de ruta relativa + tamaño liberado. Sin respaldo
+# (regenerables). Controles: re-validación de allowlist exacta por target
+# (fail-closed aunque el llamante cuele algo fuera de lista) + containment-check
+# (ruta canónica dentro de la app) + ReparsePoint por target real (no se siguen
+# symlinks/junctions: se SALTAN, no se resuelven por string) + veto explícito de
+# `.git`/`.opencode`-raíz/`Documentacion` (RF-B4: prohibido Remove-Item -Recurse
+# sobre la raíz `.opencode`, solo subpaths de allowlist ya validados) +
+# idempotente al reintentar ("ya limpio", no error), `.venv` ACTIVADO → se SALTA
+# con aviso (fail-closed: exige `deactivate` previo verificado, RF-14).
 # En -DryRun informa sin borrar; sin consola no borra (fail-closed).
-# Usa el $DryRun del script (mismo patron que Move-AppToSrc).
+# Usa el $DryRun del script (mismo patrón que Move-AppToSrc).
 # Devuelve PSCustomObject: Removed, Skipped, FreedBytes, FreedMB.
 # =============================================================================
 function Clear-RegenerableDirs {
@@ -1262,6 +1267,46 @@ function Clear-RegenerableDirs {
             Write-Warn "'$rel': fuera de la app esperada; se SALTA (containment-check)."
             $skipped++
             continue
+        }
+
+        # [BLINDAJE-GIT] T-I3(b) veto explícito RF-B4: nunca .git / raíz .opencode / Documentacion.
+        $leafName = Split-Path -Leaf $fullCanon
+        if (($leafName -ieq ".git") -or ($leafName -ieq ".opencode") -or ($leafName -ieq "Documentacion")) {
+            Write-Warn "'$rel': objetivo prohibido ($leafName, RF-B4: veto .git/.opencode-raíz/Documentacion); se SALTA (fail-closed)."
+            $skipped++
+            continue
+        }
+        if ($rel -match '(?i)^\.opencode([/\\]|$)') {
+            Write-Warn "'$rel': prohibido Remove-Item -Recurse sobre la raíz .opencode (RF-B4, solo subpaths de allowlist); se SALTA."
+            $skipped++
+            continue
+        }
+
+        # [BLINDAJE-GIT] T-I3(a) re-validación de allowlist exacta por target (defensa en profundidad:
+        # aunque el llamante cuele algo fuera de lista, Clear no lo toca).
+        $allowExactClear = @(
+            "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
+            "build", "dist", "node_modules", ".next", "coverage", ".cache", ".venv"
+        )
+        $isEggClear = ($leafName -like "*.egg-info")
+        if ((-not ($allowExactClear -contains $leafName)) -and (-not $isEggClear)) {
+            Write-Warn "'$rel': fuera de allowlist exacta de regenerables; se SALTA (fail-closed, RF-B4)."
+            $skipped++
+            continue
+        }
+
+        # [BLINDAJE-GIT] T-I3(a) containment por target real: ReparsePoint (symlink/junction)
+        # no se sigue ni se borra el destino; se SALTA. GetFullPath es léxico y no lo detecta.
+        try {
+            $targetAttrs = (Get-Item -LiteralPath $fullCanon -Force -ErrorAction Stop).Attributes
+            if (($targetAttrs -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+                Write-Warn "'$rel': es symlink/junction (ReparsePoint por target); no se sigue, se SALTA (fail-closed)."
+                $skipped++
+                continue
+            }
+        } catch {
+            # Si ya no existe, el flujo posterior lo reporta como "ya limpio"; otro error de
+            # lectura no se enmascara: se informa abajo al intentar borrar. No se SALTA aquí.
         }
 
         $isVenv = [bool]$t.IsVenv
@@ -1485,7 +1530,7 @@ function Invoke-AppRelocation {
 
     if ($AppDirs.Count -eq 0) {
         Write-Warn "Sin apps: pasa -AppDirs con los nombres simples de las carpetas a reubicar. No se adivina nada."
-        Write-Info 'Ejemplo: .\scripts\relocate-apps-to-src.ps1 -AppDirs @("trading_bot", "Telegram") -DryRun'
+        Write-Info 'Ejemplo: .\scripts\relocate-apps-to-src.ps1 -AppDirs @("MiApp", "AppFoo") -DryRun'
         return
     }
 

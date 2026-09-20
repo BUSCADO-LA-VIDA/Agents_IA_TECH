@@ -93,72 +93,22 @@ dependencias_externas:
     componentes_a_copiar:
       - (MCP server compilado desde clon local — se registra en opencode.json + .vscode/mcp.json con "type": "stdio")
 
-# Aplicaciones del ecosistema (bootstrap -> Prepare-Apps -> src\AppXXX\)
-# ADR-0003 / spec plataforma-bootstrap-instalador-unico: apps como aplicaciones independientes.
-# owner en allowlist del bootstrap: BUSCADO-LA-VIDA, tomasecastro, github, microsoft, DeusData, mksglu, tomasgraph.
+# Aplicaciones del proyecto (bootstrap -> Prepare-Apps -> src/<App>/).
+# El kit genérico NO declara apps concretas activas (RF-S5): cada proyecto
+# define las suyas en SU copia local del manifest, con licencia verificada
+# (guardrail 8) y owner en la allowlist del bootstrap.
+# Formato por app: nombre, url, rama, licencia, estructura_objetivo, descripcion.
 # `proyect_ext/spec-kit` queda en la raíz (NO se mueve a src\).
-aplicaciones:
-  - nombre: dwxconnect
-    url: https://github.com/tomasecastro/dwxconnect
-    rama: main
-    version_actual: (se resuelve en primera descarga)
-    ultimo_check: 2026-09-17
-    licencia: 🔒 pendiente de verificar  # Guardrail 8 — verificar antes de integrar definitivamente
-    estructura_objetivo: src/dwxconnect/
-    descripcion: App de conexión/consulta con Dukascopy Connect.
-  - nombre: fibonacci-scanner
-    url: https://github.com/tomasecastro/fibonacci-scanner
-    rama: main
-    version_actual: (se resuelve en primera descarga)
-    ultimo_check: 2026-09-17
-    licencia: 🔒 pendiente de verificar
-    estructura_objetivo: src/fibonacci-scanner/
-    descripcion: Scanner de niveles de Fibonacci para trading.
-  - nombre: operation_mt5
-    url: https://github.com/tomasecastro/operation_mt5
-    rama: main
-    version_actual: (se resuelve en primera descarga)
-    ultimo_check: 2026-09-17
-    licencia: 🔒 pendiente de verificar
-    estructura_objetivo: src/operation_mt5/
-    descripcion: Operativa de trading sobre MetaTrader 5.
-  - nombre: Telegram
-    url: https://github.com/tomasecastro/Telegram
-    rama: main
-    version_actual: (se resuelve en primera descarga)
-    ultimo_check: 2026-09-17
-    licencia: 🔒 pendiente de verificar
-    estructura_objetivo: src/Telegram/
-    descripcion: App de integración con Telegram (bot/notificaciones).
-  - nombre: trading_bot
-    url: https://github.com/tomasecastro/trading_bot
-    rama: main
-    version_actual: (se resuelve en primera descarga)
-    ultimo_check: 2026-09-17
-    licencia: 🔒 pendiente de verificar
-    estructura_objetivo: src/trading_bot/
-    descripcion: Orquestador/consumidor de las demás apps.
-
-# apps_manifiesto: (placeholder documentado T-I3 — NO activo, todo comentado)
-# Cuando el usuario defina las URLs git de las apps, se activan aquí y pasan a
-# la sección `aplicaciones:` de arriba (con licencia verificada, guardrail 8).
-# Formato por app: nombre, url (TBD hasta definir), destino (src/<app>).
-# - apps_manifiesto:
-#     - nombre: dwxconnect
-#       url: TBD
-#       destino: src/dwxconnect
-#     - nombre: fibonacci-scanner
-#       url: TBD
-#       destino: src/fibonacci-scanner
-#     - nombre: operation_mt5
-#       url: TBD
-#       destino: src/operation_mt5
-#     - nombre: Telegram
-#       url: TBD
-#       destino: src/Telegram
-#     - nombre: trading_bot
-#       url: TBD
-#       destino: src/trading_bot
+# EJEMPLO por proyecto — NO activar en el kit:
+# aplicaciones:
+#   - nombre: MiApp
+#     url: https://github.com/<tu-owner>/MiApp
+#     rama: main
+#     version_actual: (se resuelve en primera descarga)
+#     ultimo_check: 2026-09-19
+#     licencia: pendiente de verificar  # Guardrail 8 — verificar antes de integrar
+#     estructura_objetivo: src/MiApp/
+#     descripcion: Ejemplo de app del proyecto (sustituir por las reales).
 
 # Historial de cambios del manifest
 # Formato: [YYYY-MM-DD] Descripción del cambio
@@ -166,7 +116,7 @@ aplicaciones:
 # [2026-09-05] Análisis de impacto completado. Clonado pendiente (requiere ejecución de git clone en proyect_ext/). Ver Documentacion/Agents_IA_TECH/agents/upgrade_framework/2026-09-05-integracion-dependencias.md
 # [2026-09-12] Registradas markitdown (0.1.7, MIT), markitdown-mcp (0.0.1a3, MIT) y codebase-memory-mcp (0.9.0, MIT) del ecosistema de documentación sin IA (ADR-0001, fase implementación paso 5º). graphify marcada con licencia pendiente de verificar (guardrail 8 del ADR-0001).
 # [2026-09-12] Registrado context-mode (v1.0.169, ELv2) del ecosistema de documentación sin IA (tarea [MCP]). Licencia ELv2 (source-available, no MIT) — guardrail 8 del ADR-0001 documentado.
-# [2026-09-17] Registradas las 5 aplicaciones del ecosistema (dwxconnect, fibonacci-scanner, operation_mt5, Telegram, trading_bot) con estructura_objetivo src\AppXXX\ (ADR-0003 / spec plataforma-bootstrap-instalador-unico). Licencias pendientes de verificar (guardrail 8). `proyect_ext/spec-kit` queda en la raíz.
+# [2026-09-17] Registradas las 5 aplicaciones del ecosistema (nombres de dominio en blocklist local .opencode/local-domain-blocklist.txt) con estructura_objetivo src\AppXXX\ (ADR-0003 / spec plataforma-bootstrap-instalador-unico). Licencias pendientes de verificar (guardrail 8). `proyect_ext/spec-kit` queda en la raíz.
 # [2026-09-18] Agregado placeholder comentado `apps_manifiesto` (T-I3: 5 apps con url TBD y destino src/<app>, NO activo) como gancho documentado para cuando el usuario defina las URLs git. Sin cambios en dependencias activas.
 # [2026-09-18] Licencia de graphify verificada: MIT (fuente https://graphify.net/es/ "Security, Licensing & Trust"; deps NetworkX BSD + Tree-sitter MIT, sin telemetría). Guardrail 8 del ADR-0001 satisfecho para graphify.
 # [2026-09-18] Registrado tokenslayer-mcp-server (v1.5.0, MIT ✅) — MCP server standalone de https://github.com/ajvikram/TokenSlayer (carpeta mcp-server/, clonar + compilar con Node v24.14.0). Rol: compactación de contexto (esqueletos AST + call graphs + patch estructural). Fase documental tarea [TOKENSLAYER] (documentador).

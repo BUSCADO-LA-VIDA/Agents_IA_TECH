@@ -40,7 +40,7 @@
 
 | ID | Agente | Tarea | Estado |
 |----|--------|-------|--------|
-| T-V1 | `qa-senior` | Ejecutar `-DryRun` en `C:\Proyectos\Agents_IA_TECH` y `C:\Proyectos\Metatrader`; verificar que no toca `Documentacion/<AppName>/`. | ✅ **COMPLETADA (2026-09-18)** — ambos DryRun EXIT 0, cero escrituras, frontera respetada |
+| T-V1 | `qa-senior` | Ejecutar `-DryRun` en `<repo-del-kit>` y `<tu-proyecto>`; verificar que no toca `Documentacion/<AppName>/`. | ✅ **COMPLETADA (2026-09-18)** — ambos DryRun EXIT 0, cero escrituras, frontera respetada |
 | T-V2 | `qa-senior` | Ejecutar sin `-DryRun`; verificar Spec-kit orientado a la app activa y Graphify configurado. | ✅ **COMPLETADA verificación estática (2026-09-18)** — lógica de `Configure-SpecKit` correcta; modo real NO ejecutado (pendiente si se requiere) |
 | T-V3 | `qa-senior` | Validar que al cargar VS Code los agentes, MCPs y Spec-kit funcionan sin re-ejecutar scripts. | ✅ **COMPLETADA verificación estática (2026-09-18)** — `opencode.json` (plugin+3 MCPs), hooks (Pre/Post/SessionStart) y `.vscode/mcp.json` (3 servidores) correctos |
 | T-V4 | `qa-senior` | Correr `npx ecc-agentshield scan` (seguridad `.github/`). | ✅ **COMPLETADA (2026-09-18)** — Grade A (98/100), 0 critical/high |
@@ -59,6 +59,6 @@
   - **Decisiones del usuario (2026-09-17)**:
     - `sync-agents.ps1` → Opción A: absorber lógica como `Sync-TransversalKit`; queda como wrapper.
     - Repo maestro: `https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH`.
-    - Apps como aplicaciones: `dwxconnect`, `fibonacci-scanner`, `operation_mt5`, `Telegram`, `trading_bot`. `proyect_ext/spec-kit` queda en la raíz.
+    - Apps como aplicaciones: `MiApp`, `AppFoo`, `AppBar`, `AppBaz`, `AppQux`. `proyect_ext/spec-kit` queda en la raíz.
     - Resolución de app activa: `-App` + `cwd`.
   - **Prioridad**: alta

@@ -1,0 +1,12 @@
+# Runtime local de OpenCode (regenerable, nunca versionar)
+node_modules
+package.json
+package-lock.json
+bun.lock
+# Secrets (pueden contener API keys — NUNCA commitear)
+config.json
+# Artefactos instalados (se regeneran vía bootstrap/pip, nunca versionar)
+lib/
+bin/
+# Blocklist local de dominio del proyecto (nunca versionar — contiene nombres de apps del usuario)
+local-domain-blocklist.txt

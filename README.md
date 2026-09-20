@@ -69,7 +69,7 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
 
 ### Pasos
 
-En la **raíz de tu proyecto** (ej: `C:\Proyectos\Mi-Proyecto\`):
+En la **raíz de tu proyecto** (ej: `<tu-proyecto>\`):
 
 ```powershell
 # 1. Descargar el instalador único + wrapper desde el repo maestro
@@ -102,7 +102,7 @@ Variantes:
 
 ```powershell
 # App activa explícita (si el proyecto tiene varias apps)
-.\scripts\plataformador-bootstrap.ps1 -App trading_bot
+.\scripts\plataformador-bootstrap.ps1 -App MiApp
 
 # Solo sincronizar el kit transversal (equivale a sync-agents)
 .\scripts\plataformador-bootstrap.ps1 -SyncOnly
@@ -183,17 +183,17 @@ Variantes:
 
 ### Cuándo usarla
 
-- Tus apps viven en la **raíz** (ej. `C:\Proyectos\Metatrader\dwxconnect`) y quieres llevarlas a la estructura objetivo `src\<App>` (ej. `src\dwxconnect`).
+- Tus apps viven en la **raíz** (ej. `<tu-proyecto>\MiApp`) y quieres llevarlas a la estructura objetivo `src\<App>` (ej. `src\MiApp`).
 - Vale para **cualquier proyecto**: la lista se pasa por `-AppDirs` (o manifest).
 
 ### Comando
 
 ```powershell
 # 1. Previsualizar primero (recomendado)
-.\scripts\relocate-apps-to-src.ps1 -AppDirs @("dwxconnect","trading_bot") -DryRun
+.\scripts\relocate-apps-to-src.ps1 -AppDirs @("MiApp","AppFoo") -DryRun
 
 # 2. Mover (pregunta por app, siempre)
-.\scripts\relocate-apps-to-src.ps1 -AppDirs @("dwxconnect","trading_bot")
+.\scripts\relocate-apps-to-src.ps1 -AppDirs @("MiApp","AppFoo")
 ```
 
 Flags: `-AppDirs @()` (qué mover), `-DryRun` (solo previsualiza), `-ProjectRoot` (raíz; default: padre de `scripts/`). **No existe flag que saltee la confirmación.**

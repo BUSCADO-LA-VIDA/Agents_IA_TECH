@@ -12,9 +12,10 @@ permission:
     "wget*": allow
 user-invocable: true
 version: "2.0"
-skills:
-  - speckit-plan
-  - speckit-implement
+permission:
+  skill:
+    "speckit-plan": allow
+    "speckit-implement": allow
 ---
 # Agente `upgrade_framework` - Mantenedor Inteligente de Dependencias Externas
 

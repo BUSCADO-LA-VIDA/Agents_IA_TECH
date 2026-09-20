@@ -1,5 +1,5 @@
 # 📋 Índice del Proyecto: Agents_IA_TECH
-*Última actualización: 2026-09-19*
+*Última actualización: 2026-09-20*
 
 > Este archivo es la **memoria del proyecto** para los agentes. Lo leen primero para entender el contexto sin escanear todo. Los agentes documentales lo mantienen actualizado automáticamente.
 
@@ -31,6 +31,7 @@ Documentacion/
     ├── memoria-proyecto.md   ← 🧠 Capacidades instaladas (plataformador)
     ├── analisis-memoria.md   ← 📝 Memoria del pipeline de documentación (analista_tecnico)
     ├── reglas-transversales-agentes.md ← 🧭 Gobernanza: reglas que se cumplen SIEMPRE al crear/modificar agentes
+    ├── modelo-skills-opencode.md ← 🧩 Modelo de skills: Copilot (`skills:`) vs OpenCode (`permission.skill` + tool `skill`)
     │
     ├── specs/                ← 📋 speckit ESCRIBE AQUÍ (spec/plan/tasks)
     │   └── ...
@@ -167,7 +168,7 @@ flowchart LR
 | `analista_tecnico` | `speckit-specify` + `speckit-analyze` | Transversal (investigación técnica, POCs) | Investigación previa a specify + POCs/evaluación de librerías (markitdown) |
 | `solucionador` | `speckit-analyze` + `speckit-implement` | Transversal (incidentes, hotfixes) | Incidentes → RCA (analyze); hotfixes fast-track (skip converge si crítico) |
 
-> Skills verificadas contra `.github/agents/*.agent.md` y `.opencode/agents/*.md` (2026-09-19). `pensador` nunca implementa código; solo orquesta y valida.
+> Skills verificadas contra `.github/agents/*.agent.md` y `.opencode/agents/*.md` (2026-09-20). **Nota de harness**: Copilot declara skills con el campo `skills:`; OpenCode **no usa ese campo** (error `Validation: Unsupported parameter(s): skills`) — usa `permission.skill` + el tool nativo `skill`, y las skills viven en `.opencode/skills/`. Detalle: `modelo-skills-opencode.md`. `pensador` nunca implementa código; solo orquesta y valida.
 
 ### Rutas por App
 

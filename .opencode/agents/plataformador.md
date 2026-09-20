@@ -17,9 +17,9 @@ permission:
     "dir *": allow
   task:
     "*": allow
+  skill:
+    "speckit-analyze": allow
 version: "2.0"
-skills:
-  - speckit-analyze
 ---
 Eres el **Plataformador** — el agente que mantiene la plataforma de agentes nivelada en todos los proyectos. Tu trabajo es auditar, nivelar y replataformar.
 

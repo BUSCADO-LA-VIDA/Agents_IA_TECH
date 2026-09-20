@@ -83,6 +83,15 @@ Si la enumeración de huérfanos no está acotada, puede clasificar como "huérf
 - El detector solo enumera dentro de `.github/`, `.opencode/`, `.doc_agents/`; cualquier path fuera → **excluido por diseño**.
 - `-DryRun` debe demostrarlo: solo informa, sin borrar ni mover, y el informe permite verificar que ningún path cae en `Documentacion/<AppName>/`.
 
+### 1.9 Riesgo de falso positivo por artefactos de la herramienta (`.opencode/node_modules/`)
+
+El detector compara local vs clon maestro shallow. Los **artefactos de la herramienta OpenCode** — `.opencode/node_modules/`, `.opencode/package.json`, `.opencode/package-lock.json`, `.opencode/bun.lock`, `.opencode/lib/`, `.opencode/bin/` — son **dependencias locales instaladas** que el maestro no tiene (están gitignored). Sin exclusión, todo `node_modules/` local se reporta como huérfano y el usuario recibe una lista masiva de falsos positivos que no son del kit.
+
+**Puntos de validación:**
+- El detector **excluye por diseño** los artefactos de la herramienta dentro de `.opencode/`: `node_modules/` (cualquier nivel), `package.json`, `package-lock.json`, `bun.lock`, `lib/`, `bin/`, `config.json`.
+- La exclusión está **acotada a `.opencode/`** — no excluye `.github/lib/`, `.doc_agents/lib/` ni contenido real del kit (`.opencode/agents/`, `.opencode/commands/`, `.opencode/skills/`).
+- El helper `Test-ToolArtifactPath` (en `Find-OrphanKitFiles`) implementa esta exclusión; verificado por `qa-senior` en `-DryRun`.
+
 ---
 
 ## 2. Tabla de riesgos → mitigación
@@ -97,6 +106,7 @@ Si la enumeración de huérfanos no está acotada, puede clasificar como "huérf
 | 6 | **Colisión del respaldo versionado** (mismo día/sufijo) → sobrescribe evidencia previa | 🟡 Medio | Sufijo **único** (hora/minutos/segundos o contador) + política **nunca sobrescribir** (variante `_HHmmss`, `_02`…); no crear carpetas vacías (idempotencia). |
 | 7 | **Fuga por log/informe** (contenido, rutas absolutas con usuario, secrets en CI) | 🟠 Alto | Informes y logs con **rutas relativas + metadatos** (hash, tamaño, fecha); nunca contenido ni secrets; sin `Get-Content` de huérfanos al informe. |
 | 8 | **Alcance fuera de allowlist** (detector toca `Documentacion/<AppName>/`, `src/`, `tests/`) → viola guardrail 1 / RNF-04 | 🟠 Alto | Detector solo en `.github/`, `.opencode/`, `.doc_agents/`; resto **excluido por diseño**; `-DryRun` solo informa y permite verificar que ningún path cae en `Documentacion/<AppName>/`. |
+| 9 | **Falso positivo por artefactos de la herramienta** (`.opencode/node_modules/`, `package.json`, `lib/`, `bin/`) → lista masiva de huérfanos que no son del kit | 🟡 Medio | Exclusión por diseño de artefactos de la herramienta dentro de `.opencode/` (`node_modules/`, `package*.json`, `bun.lock`, `lib/`, `bin/`, `config.json`) vía `Test-ToolArtifactPath`; acotada a `.opencode/`, sin tocar contenido real del kit. |
 
 ---
 
@@ -139,6 +149,7 @@ Si la enumeración de huérfanos no está acotada, puede clasificar como "huérf
 - [ ] **Log de lo borrado** (ruta, hash, fecha, tamaño) en toda ejecución con Borrar.
 - [ ] Si el clon maestro falló/vacío → **fase de huérfanos abortada**, nada se borra.
 - [ ] Detector acotado a `.github/`, `.opencode/`, `.doc_agents/`; excluye `Documentacion/<AppName>/`, `src/`, `tests/`, `.specify`.
+- [ ] Artefactos de la herramienta dentro de `.opencode/` excluidos por diseño (`node_modules/`, `package*.json`, `bun.lock`, `lib/`, `bin/`, `config.json`) — no aparecen como huérfanos.
 - [ ] Destino del respaldo = `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>` con **rutas relativas validadas** (sin absolutas ni `..`).
 - [ ] **Containment-check**: el destino canónico queda dentro de `revisar_manualmente\yyyymmdd\` (fail-closed).
 - [ ] Symlinks/junctions no se siguen al mover.

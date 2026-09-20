@@ -1253,6 +1253,26 @@ function Reload-ProjectWindow {
 # nunca sobrescribir respaldo, detector acotado a la allowlist (3 dirs),
 # .opencode/config.json excluido, -DryRun no borra ni mueve nada.
 # Solo lectura: funciona igual en -DryRun (no escribe nada por diseño).
+# Devuelve $true si $rel (ruta relativa con separadores '/') es un artefacto de la
+# herramienta OpenCode que .opencode/.gitignore define como "nunca versionar":
+# dependencias locales (node_modules, package*.json, bun.lock) y carpetas lib/ y bin/
+# dentro de .opencode/. Se usa para no reportar como huérfanos estos artefactos.
+function Test-ToolArtifactPath {
+    param([string]$Rel)
+
+    # 1) node_modules en cualquier nivel dentro de .opencode/.
+    if ($Rel -match '(^|/)node_modules(/|$)') { return $true }
+    # 2) Manifiestos de dependencias dentro de .opencode/ (fuera de node_modules,
+    #    ya cubiertos arriba).
+    if ($Rel -eq '.opencode/package.json' -or
+        $Rel -eq '.opencode/package-lock.json' -or
+        $Rel -eq '.opencode/bun.lock') { return $true }
+    # 3) Carpetas lib/ y bin/ SOLO dentro de .opencode/ (no .github/lib/ ni .doc_agents/lib/).
+    if ($Rel -match '^\.opencode/(lib|bin)(/|$)') { return $true }
+
+    return $false
+}
+
 function Find-OrphanKitFiles {
     param(
         [string]$RootPath = "",
@@ -1292,6 +1312,11 @@ function Find-OrphanKitFiles {
             if ($rel -eq ".opencode/config.json") { continue }
             # Defensa: rechaza rutas que escapan (fail-closed; no ocurre enumerando local).
             if ($rel -match '(^|/)\.\.(/|$)') { continue }
+            # Exclusión de artefactos de la herramienta OpenCode (definidos como "nunca
+            # versionar" en .opencode/.gitignore): dependencias locales que el maestro no
+            # tiene (gitignored) y que, si se reportan, contaminan la fase de huérfanos.
+            # NO aplica a contenido real del kit (.opencode/agents, .opencode/commands, etc.).
+            if (Test-ToolArtifactPath $rel) { continue }
             $masterPath = Join-Path $TempDir ($rel -replace '/', [IO.Path]::DirectorySeparatorChar)
             if (-not (Test-Path -LiteralPath $masterPath)) {
                 $orphans += $rel

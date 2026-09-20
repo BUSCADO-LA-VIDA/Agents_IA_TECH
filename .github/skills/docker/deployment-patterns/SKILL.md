@@ -1,6 +1,6 @@
 ---
 name: deployment-patterns
-description: "Use when: setting up deployment pipelines, CI/CD workflows, or automating releases. Enfocado en depliegues automáticos vía webhook + docker-compose."
+description: "Use when: setting up deployment pipelines, CI/CD workflows, or automating releases. Enfocado en despliegues automáticos vía webhook + docker-compose."
 user-invocable: true
 ---
 
@@ -9,13 +9,13 @@ user-invocable: true
 ## When to Activate
 
 - When setting up CI/CD pipelines
-- When configuring automatic deployments (Gitea webhooks, GitHub Actions)
+- When configuring automatic deployments (webhooks, GitHub Actions)
 - When designing release strategies
 - When deploying docker-compose stacks
 
 ## Core Concepts
 
-### Webhook Auto-Deploy Pattern (tu estilo)
+### Webhook Auto-Deploy Pattern
 
 ```yaml
 # docker-compose con servicio de deploy
@@ -39,7 +39,7 @@ services:
 # deploy.sh — auto-deploy via webhook
 set -euo pipefail
 
-cd /path/to/project
+cd "${PROJECT_ROOT:-.}"
 git pull origin main
 docker-compose build
 docker-compose up -d
@@ -61,4 +61,4 @@ docker image prune -f
 - Keep deploy scripts idempotent — running twice is safe
 - Use git tags for versioned releases
 - Always have a rollback plan (previous docker-compose config)
-- Notify on deploy success/failure (Discord, Telegram, email)
+- Notify on deploy success/failure (configurable notification channel: webhook, email, chat, etc.)

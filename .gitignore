@@ -20,3 +20,5 @@ proyect_ext/tokenslayer/
 
 # Respaldos de huérfanos por revisar (no versionar — pueden contener secrets)
 revisar_manualmente/
+.github/context-mode/
+

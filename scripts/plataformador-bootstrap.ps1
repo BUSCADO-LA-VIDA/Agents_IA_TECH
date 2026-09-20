@@ -1796,7 +1796,7 @@ function Sync-TransversalKit {
                         } catch { }
                     }
                 } else {
-                    robocopy "$src" "$dst" /E /NDL /NFL /NJH /NJS >$null 2>&1
+                    robocopy "$src" "$dst" /E /NDL /NFL /NJH /NJS /XD "context-mode" >$null 2>&1
                 }
             } else {
                 if ((Test-Path $dst) -and (-not $Force)) {
@@ -2584,3 +2584,4 @@ Write-Host "  3. Mover archivos solo después de revisar la estructura real" -Fo
 Write-Host "  4. Recargar la ventana de VS Code del proyecto si hizo falta aplicar la configuración" -ForegroundColor White
 Write-Host "  5. Reiniciar OpenCode para cargar la nueva configuración MCP" -ForegroundColor White
 Write-Host "  6. Usar comandos de verificación manual si necesitas confirmar" -ForegroundColor White
+

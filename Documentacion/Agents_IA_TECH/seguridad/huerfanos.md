@@ -107,6 +107,7 @@ El detector compara local vs clon maestro shallow. Los **artefactos de la herram
 | 7 | **Fuga por log/informe** (contenido, rutas absolutas con usuario, secrets en CI) | 🟠 Alto | Informes y logs con **rutas relativas + metadatos** (hash, tamaño, fecha); nunca contenido ni secrets; sin `Get-Content` de huérfanos al informe. |
 | 8 | **Alcance fuera de allowlist** (detector toca `Documentacion/<AppName>/`, `src/`, `tests/`) → viola guardrail 1 / RNF-04 | 🟠 Alto | Detector solo en `.github/`, `.opencode/`, `.doc_agents/`; resto **excluido por diseño**; `-DryRun` solo informa y permite verificar que ningún path cae en `Documentacion/<AppName>/`. |
 | 9 | **Falso positivo por artefactos de la herramienta** (`.opencode/node_modules/`, `package.json`, `lib/`, `bin/`) → lista masiva de huérfanos que no son del kit | 🟡 Medio | Exclusión por diseño de artefactos de la herramienta dentro de `.opencode/` (`node_modules/`, `package*.json`, `bun.lock`, `lib/`, `bin/`, `config.json`) vía `Test-ToolArtifactPath`; acotada a `.opencode/`, sin tocar contenido real del kit. |
+| 10 | **.github/context-mode/ propio de cada proyecto** → no se sincroniza, no aparece como huérfano; está en `.gitignore` y se conserva en local | 🟢 Bajo | El bootstrap excluye `.github/context-mode/` de la copia (`/XD "context-mode"`); `.gitignore` lo descarta; `Find-OrphanKitFiles` lo omite por allowlist; el usuario lo conserva o descarta en local sin afectar al kit. |
 
 ---
 
@@ -150,6 +151,7 @@ El detector compara local vs clon maestro shallow. Los **artefactos de la herram
 - [ ] Si el clon maestro falló/vacío → **fase de huérfanos abortada**, nada se borra.
 - [ ] Detector acotado a `.github/`, `.opencode/`, `.doc_agents/`; excluye `Documentacion/<AppName>/`, `src/`, `tests/`, `.specify`.
 - [ ] Artefactos de la herramienta dentro de `.opencode/` excluidos por diseño (`node_modules/`, `package*.json`, `bun.lock`, `lib/`, `bin/`, `config.json`) — no aparecen como huérfanos.
+- [ ] `.github/context-mode/` excluido por diseño — no es del kit transversal (es runtime local de cada proyecto).
 - [ ] Destino del respaldo = `revisar_manualmente\yyyymmdd\<ESTRUCTURA_ORIGINAL>` con **rutas relativas validadas** (sin absolutas ni `..`).
 - [ ] **Containment-check**: el destino canónico queda dentro de `revisar_manualmente\yyyymmdd\` (fail-closed).
 - [ ] Symlinks/junctions no se siguen al mover.

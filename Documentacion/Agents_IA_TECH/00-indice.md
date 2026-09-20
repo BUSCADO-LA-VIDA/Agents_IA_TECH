@@ -174,7 +174,7 @@ flowchart LR
 
 - **Código**: `src/<AppName>/` — solo código de la app (specs NUNCA van aquí).
 - **Specs/plans/tasks/ADRs**: `Documentacion/<AppName>/specs/` — `spec.md`, `plan.md`, `tasks.md`, `analyze.md`, `converge.md`, `adr/`, `00-indice.md`, `graphify.md`.
-- **Kit transversal** (sincronizado vía `sync-agents.ps1` / `Sync-TransversalKit`): `.github/`, `.opencode/`, `.doc_agents/`, `.specify/` (plantilla base), `opencode.json`, `AGENTS.md`.
+- **Kit transversal** (sincronizado vía `sync-agents.ps1` / `Sync-TransversalKit`): `.github/` (solo `agents/`, `prompts/`, `skills/`, `workflows/`, `copilot-instructions.md` y `progreso-skills.md` — **`context-mode/`` es propio de cada proyecto y queda excluido); `.opencode/` (solo `agents/`, `commands/`, `.gitignore`); `.doc_agents/`; `.specify/` (plantilla base); `opencode.json`; `AGENTS.md`.
 - **NUNCA toca el sync**: `Documentacion/<AppName>/` — propia de cada app, jamás se copia ni sobrescribe.
 
 ### Referencias SSD + Speckit

@@ -22,3 +22,7 @@ proyect_ext/tokenslayer/
 revisar_manualmente/
 .github/context-mode/
 
+
+# Grafos Graphify (artefactos regenerables — nunca versionar; mitiga subir .env/claves/datos no requeridos)
+graphify-out/
+

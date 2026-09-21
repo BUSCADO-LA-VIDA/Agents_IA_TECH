@@ -86,6 +86,8 @@ graphify update "C:\Proyectos\Agents_IA_TECH"
 graphify extract "C:\Proyectos\Agents_IA_TECH" --mode deep
 ```
 
+> ⚠️ **`graphify` solo tiene `--mode deep`** (no existe `--mode fast` — ese flag es de `codebase-memory-mcp`). Flags reales de `graphify extract`: `--code-only`, `--mode deep`, `--force`, `--no-cluster`, `--backend`, `--max-workers`, `--token-budget`, `--out`. Verificar siempre con `graphify --help`.
+
 **Consultas**:
 ```powershell
 graphify query "como funciona el pipeline speckit" --graph "C:\Proyectos\Agents_IA_TECH\graphify-out\graph.json"
@@ -114,7 +116,6 @@ context-mode index "C:\Proyectos\Agents_IA_TECH\Documentacion" --project "C:\Pro
 graphify extract "C:\Proyectos\Agents_IA_TECH" --code-only
 # o, si graphify-out/graph.json ya existe:
 graphify update "C:\Proyectos\Agents_IA_TECH"
-
 # 4. Verificación
 codebase-memory-mcp cli index_status --project "C-Proyectos-Agents_IA_TECH"
 context-mode search "speckit" --project "C:\Proyectos\Agents_IA_TECH" --limit 3
@@ -164,6 +165,8 @@ codebase-memory-mcp cli index_repository --repo-path "C:/Proyectos/Agents_IA_TEC
 - **Sin `graphify-out/graph.json`** → `graphify extract <path> --code-only` (primera vez).
 - **Con `graphify-out/graph.json`** → `graphify update <path>` (incremental, más rápido).
 - Si un refactor borró código y el grafo quedó con menos nodos → `graphify update <path> --force`.
+
+> ⚠️ **No confundir flags entre herramientas**: `--mode fast` es de `codebase-memory-mcp`; `graphify` solo acepta `--mode deep`. Si aparece `error: unknown --mode 'fast'. Available: deep`, estás usando el flag equivocado en graphify.
 
 ### context-mode: la búsqueda no encuentra nada
 

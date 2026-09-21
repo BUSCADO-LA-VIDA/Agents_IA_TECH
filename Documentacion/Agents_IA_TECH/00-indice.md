@@ -79,11 +79,13 @@ Documentacion/
 - `adr-0001-ecosistema-documentacion-sin-ia.md` — Ecosistema de documentación técnica sin IA de entrada (pipeline de 4 herramientas + agente `analista_tecnico` + archivo de memoria `analisis-memoria.md`). **Aceptado 2026-09-12**.
 - `adr-0002-flujos-kit.md` — Flujo de contexto (consultar `Documentacion/` + MCPs como optimización + actualización de memoria/índice) y flujo de actualización automática de herramientas externas. **Aceptado 2026-09-12**.
 - `adr-0003-plataforma-bootstrap-instalador-unico.md` — `plataformador-bootstrap.ps1` como instalador/actualizador único (Spec-kit + MCPs + Graphify); modelo apps independientes + orquestador; resolución de app activa (`-App` + `cwd`); fusión de `sync-agents.ps1` como `Sync-TransversalKit` (Opción A). **Aceptado 2026-09-17**.
+- `adr-0004-post-plataformado-speckit.md` — Flujo post-plataformado → speckit (3 escenarios A/B/C) + re-indexación automática + Constitution por proyecto + memoria auto/manual + Graphify por app. **Aceptado 2026-09-20**.
 
 ## Features activas (specs)
 <!-- Listar specs en Documentacion/Agents_IA_TECH/specs/ -->
 - `specs/plataforma-bootstrap-instalador-unico/` — **Feature**: `plataformador-bootstrap.ps1` como instalador/actualizador único (Spec-kit + MCPs + Graphify). Contiene `spec.md`, `plan.md`, `tasks.md`. Derivada del ADR-0003. Estado: en planificación.
 - `specs/metodologia-ssd-speckit/` — **Feature**: Integración uso diario transparente SSD + Speckit + Graphify + MCPs en flujo de todos los agentes. Constitution FIRST → Speckit pipeline (specify→plan→tasks→analyze→converge→implement) → Agentes complementan. Contiene `spec.md`, `plan.md`, `tasks.md`. Estado: fase documental completada (2026-09-19).
+- `specs/006-post-platforming-speckit/` — **Feature**: Flujo post-plataformado → speckit (3 escenarios A/B/C) + re-indexación automática + Constitution por proyecto + memoria auto/manual + Graphify por app + aviso re-indexación (RF-010) + gitignore graphify-out (RF-011). Contiene `spec.md`, `plan.md`, `research.md`, `data-model.md`, `analyze.md`, `converge.md`, `tasks.md`. Estado: **IMPLEMENTADA (2026-09-20)** — 31/31 tareas, pipeline completo (specify→plan→tasks→analyze→converge→implement). ADR-0004.
 
 ## Agentes del kit
 
@@ -176,6 +178,23 @@ flowchart LR
 - **Specs/plans/tasks/ADRs**: `Documentacion/<AppName>/specs/` — `spec.md`, `plan.md`, `tasks.md`, `analyze.md`, `converge.md`, `adr/`, `00-indice.md`, `graphify.md`.
 - **Kit transversal** (sincronizado vía `sync-agents.ps1` / `Sync-TransversalKit`): `.github/` (solo `agents/`, `prompts/`, `skills/`, `workflows/`, `copilot-instructions.md` y `progreso-skills.md` — **`context-mode/`` es propio de cada proyecto y queda excluido); `.opencode/` (solo `agents/`, `commands/`, `.gitignore`); `.doc_agents/`; `.specify/` (plantilla base); `opencode.json`; `AGENTS.md`.
 - **NUNCA toca el sync**: `Documentacion/<AppName>/` — propia de cada app, jamás se copia ni sobrescribe.
+
+### Memoria: actualización de índices + grafo (RF-08, ADR-0004)
+
+> **Qué actualiza**: `context-mode` (docs), `codebase-memory` (código), `graphify` (grafo por app).
+
+| Modo | Trigger | Acción |
+|------|---------|--------|
+| **Automática diaria** | Petición del usuario con índice stale (última actualización del día anterior o más vieja) | Actualizar automáticamente **antes de responder** |
+| **Manual** | Frase "actualizar memoria" (o similar) | Actualizar índices + grafo on-demand |
+| **Por aprobación** | Artefacto speckit aprobado (spec/plan/tasks) o tras implement | Re-indexar con **aviso visible** "Re-indexando..." (RF-010) |
+
+**Reglas**:
+- Re-indexar **solo con disparador válido** (no en cada cambio).
+- Comandos allowlist: `context-mode index`, `codebase-memory index_repository`, `graphify update` (o `extract --code-only` si no hay grafo).
+- Fail-closed: si falla, WARN en el cuadro resumen; no reintentar en bucle.
+- `graphify-out/` en `.gitignore` — nunca se sube a repositorios (RF-011).
+- Detalle completo: `specs/006-post-platforming-speckit/spec.md` (RF-05, RF-08, RF-010, RF-011) + ADR-0004.
 
 ### Referencias SSD + Speckit
 

@@ -34,9 +34,21 @@ El `analista_tecnico` es el agente que orquesta el pipeline de documentación t�
 | Herramienta | Tipo | Rol | ¿Usa IA? | Licencia |
 |-------------|------|-----|:--------:|----------|
 | **`markitdown`** (Microsoft) | Python + MCP | Paso 1: convierte PDF/DOCX/PPTX/XLSX/HTML a Markdown. 100% offline | ❌ No | MIT |
-| **`graphify`** | CLI (ya en kit) | Paso 2: grafo de conocimiento del proyecto (código + docs + PDFs) | ❌ No | (verificar) |
+| **`graphify`** | CLI (ya en kit) | Paso 2: grafo de conocimiento del proyecto (código + docs + PDFs). **Estructura-first**: `extract --code-only` (sin IA) → `update` (incremental) → `--mode deep` solo bajo demanda con backend LLM (ADR-0004) | ❌ No | MIT (verificada) |
 | **`codebase-memory-mcp`** | MCP | Paso 2: grafo de conocimiento del código | ❌ No | MIT |
 | **`context-mode`** | MCP | Paso 3: optimiza la ventana de contexto al consultar la doc | ❌ No | ELv2 |
+
+### Graphify estructura-first (ADR-0004, RF-07)
+
+El pipeline usa Graphify con **detección de estado** y scope por app:
+
+1. **Sin grafo** → `graphify extract <scope> --code-only` (estructura, sin IA, sin secrets)
+2. **Grafo existe + código cambiado** → `graphify update <scope>` (incremental, sin LLM)
+3. **Bajo demanda** → `graphify extract --mode deep` (semántica con LLM, solo si hay backend configurado; si no, WARN y continúa)
+
+- **Scope**: 1 grafo por app (`src/<App>/graphify-out/graph.json`); vista workspace on-demand vía `merge-graphs`.
+- **`graphify-out/` en `.gitignore`** — nunca se sube a repositorios (RF-011).
+- Re-indexación con **aviso visible** "Re-indexando..." (RF-010).
 
 ## 🔄 Flujo del `analista_tecnico`
 

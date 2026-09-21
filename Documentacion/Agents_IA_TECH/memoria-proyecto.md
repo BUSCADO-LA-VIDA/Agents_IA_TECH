@@ -91,3 +91,4 @@
 | 2026-07-25 | 1.0.0 | Auditoría inicial | Creación capacidades base |
 | 2026-08-30 | 1.1.0 | Reestructuración completa | Movido a Documentacion/Agents_IA_TECH/, análisis Specify vs Agentes, nueva estructura |
 | 2026-09-12 | 1.1.0 | Fase implementación ecosistema (paso 4º) | Instalado `markitdown` 0.1.7 + `markitdown-mcp` 0.0.1a3 (con `mcp<2` v1.30.0) y `codebase-memory-mcp` 0.9.0. Creado `.vscode/mcp.json` con markitdown + codebase-memory-mcp. `context-mode` pendiente (otra tarea `[MCP]`). |
+| 2026-09-20 | 1.1.0 | Spec `[POST-PLATAFORMADO]` (ADR-0004) | Documentado flujo post-plataformado → speckit (3 escenarios A/B/C) + re-indexación automática + memoria auto/manual + Graphify por app (estructura-first) + aviso re-indexación (RF-010) + `graphify-out/` en `.gitignore` (RF-011). Specs de agentes actualizadas (`pensador`, `analista_tecnico`). Pendiente implementación (T004-T031). |

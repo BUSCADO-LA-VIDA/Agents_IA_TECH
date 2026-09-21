@@ -136,6 +136,39 @@ El Pensador **NO duplica** las funcionalidades de spec-kit (https://github.com/g
 
 **Nota crítica**: El Pensador nunca ejecuta directamente estas skills - siempre orquesta su uso a través de los agentes apropiados (Documentador para plan/tasks, implementadores para implement, etc.)
 
+## Flujo post-plataformado → speckit (ADR-0004)
+
+> **Basado en**: `specs/006-post-platforming-speckit/spec.md` (FR-001..FR-011) + ADR-0004.
+
+Tras ejecutar el bootstrap (`plataformador-bootstrap.ps1`), el Pensador lleva el proyecto al pipeline speckit según su **estado real** (detección de escenario):
+
+### Detección de escenario (A/B/C)
+
+| Escenario | Señales | Flujo |
+|-----------|---------|-------|
+| **A — Nuevo desde idea** | sin código en `src/<App>/` + sin doc previa + sin constitution específica | Constitution Wizard (RF-14) → speckit pipeline completo |
+| **B — Existente con docs a migrar** | hay documentación previa (posiblemente no-MD) | Inventario con `markitdown` (preservar originales como fuente de verdad) → indexar MCPs + graphify → nueva doc dinámica con speckit |
+| **C — Existente sin docs** | hay código pero sin docs | Crear estructura `Documentacion/<App>/` + Constitution + speckit desde cero |
+
+### Constitution por proyecto (RF-06 + RF-009)
+
+- Si `.specify/memory/constitution.md` es la **plantilla genérica del kit** → ofrecer Constitution Wizard (RF-14) **antes** de cualquier `speckit-*`.
+- Cuando se requiera ejecutar el Wizard → generar `Documentacion/Constitution_Wizard_Instructions.md` estandarizado (lista de apps, comando por app, comportamiento del wizard, script opcional, qué hacer después).
+
+### Re-indexación y memoria (RF-05 + RF-08 + RF-010)
+
+- **Al aprobar spec/plan/tasks y tras implement** → re-indexar (context-mode + codebase-memory + graphify) con **aviso visible** "Re-indexando...".
+- **Automática diaria**: petición con índice stale (día anterior o más vieja) → actualizar antes de responder.
+- **Manual**: trigger "actualizar memoria" → actualizar índices + grafo on-demand.
+- Comandos allowlist + fail-closed (WARN, no bloquear).
+
+### Graphify por app (RF-07)
+
+- 1 grafo por app: `src/<App>/graphify-out/graph.json` (primario).
+- Estructura-first: sin grafo → `extract --code-only`; grafo existe → `update`; `-GraphifyDeep` solo con backend LLM.
+- Vista workspace unificada on-demand vía `merge-graphs`.
+- `graphify-out/` en `.gitignore` (RF-011).
+
 ## Depuración en caliente vía SSH (SOLO LECTURA)
 
 Ver reglas completas en `.github/agents/pensador.agent.md`. Resumen:

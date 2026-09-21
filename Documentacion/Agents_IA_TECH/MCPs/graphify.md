@@ -245,3 +245,30 @@ Detalle completo del script (qué valida, exit codes, notas técnicas): ver secc
 - ADR: `Documentacion/Agents_IA_TECH/arquitectura/adr/adr-0001-ecosistema-documentacion-sin-ia.md`
 - Tarea: `[GRAPHIFY]` en `Documentacion/Agents_IA_TECH/pendientes-implementacion.md`
 - Seguridad detallada: `Documentacion/Agents_IA_TECH/seguridad/graphify.md` (pendiente de creación por `security-auditor`)
+---
+
+## 12. Estrategia por app (ADR-0004)
+
+> **Decisión 2026-09-20**: 1 grafo por app como primario + vista workspace on-demand. Estructura-first (sin IA por defecto).
+
+### 12.1 Scope del grafo
+
+| Scope | Ruta | Cuándo |
+|-------|------|--------|
+| **Por app (primario)** | src/<App>/graphify-out/graph.json | Pipeline diario speckit per-app |
+| **Workspace unificado** | graphify-out/merged-graph.json | On-demand vía merge-graphs (análisis cross-app) |
+| **Proyecto kit** | raíz del repo | El kit es el código (Agents_IA_TECH) |
+
+### 12.2 Flujo estructura-first (detección de estado)
+
+1. **Sin grafo** → graphify extract <scope> --code-only (estructura, sin IA, sin secrets)
+2. **Grafo existe + código cambiado** → graphify update <scope> (incremental, sin LLM)
+3. **Flag -GraphifyDeep** → graphify extract --mode deep (semántica con LLM, solo si hay backend configurado; si no, WARN y continúa)
+
+### 12.3 Reglas
+
+- graphify-out/ está en .gitignore — **nunca** se sube a repositorios (mitiga subir .env/claves/datos no requeridos). Costo aceptado: la extracción inicial gasta más tiempo/tokens.
+- merge-graphs es **on-demand** (no persistente) — se construye solo cuando se necesita.
+- Communities por-app son significativas; sin ruido del kit (.github/, .opencode/ no son código de app).
+- Los 10 tools del MCP aceptan project_path (soporte nativo multi-grafo).
+- Re-indexación con **aviso visible** "Re-indexando..." (RF-010) para que el usuario sepa que corre.

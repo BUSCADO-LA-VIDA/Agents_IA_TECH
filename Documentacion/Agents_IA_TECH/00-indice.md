@@ -32,6 +32,7 @@ Documentacion/
     ├── analisis-memoria.md   ← 📝 Memoria del pipeline de documentación (analista_tecnico)
     ├── reglas-transversales-agentes.md ← 🧭 Gobernanza: reglas que se cumplen SIEMPRE al crear/modificar agentes
     ├── modelo-skills-opencode.md ← 🧩 Modelo de skills: Copilot (`skills:`) vs OpenCode (`permission.skill` + tool `skill`)
+    ├── mantenimiento-indices-mcp.md ← 🔧 Comandos para actualizar índices MCP + Graphify en ESTE repo (workaround --mode fast)
     │
     ├── specs/                ← 📋 speckit ESCRIBE AQUÍ (spec/plan/tasks)
     │   └── ...
@@ -195,6 +196,7 @@ flowchart LR
 - Fail-closed: si falla, WARN en el cuadro resumen; no reintentar en bucle.
 - `graphify-out/` en `.gitignore` — nunca se sube a repositorios (RF-011).
 - Detalle completo: `specs/006-post-platforming-speckit/spec.md` (RF-05, RF-08, RF-010, RF-011) + ADR-0004.
+- **Comandos exactos para este repo**: `mantenimiento-indices-mcp.md` (incluye el workaround `--mode fast` para el crash del indexador con `proyect_ext/spec-kit`).
 
 ### Referencias SSD + Speckit
 

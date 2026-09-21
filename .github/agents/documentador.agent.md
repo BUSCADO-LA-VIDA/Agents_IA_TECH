@@ -77,3 +77,10 @@ Buscá contexto en `Documentacion/` de forma **opcional**:
 - Entradas: spec.md, plan.md, tasks.md, ADRs, versión, fecha, estado
 - Sirve como tabla de contenidos y dashboard del proyecto
 
+## Re-indexación tras docs consolidadas (RF-05 + RF-010, ADR-0004)
+- Tras escribir docs consolidadas (converge), re-indexar con **aviso visible** "Re-indexando context-mode + graphify..." (RF-010) antes de iniciar:
+  - `context-mode index` (docs: `Documentacion/<app>/`)
+  - `graphify update <scope>` (grafo por app; o `extract --code-only` si no hay grafo)
+- Comandos allowlist + fail-closed: si falla, WARN; no reintentar en bucle.
+- `graphify-out/` en `.gitignore` — nunca se sube a repositorios (RF-011).
+

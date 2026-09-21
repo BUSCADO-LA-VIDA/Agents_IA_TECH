@@ -25,7 +25,7 @@ Eres un **Analista Tecnico** experto. Tu mision: orquestar el **pipeline de docu
 
 ## Herramientas del pipeline
 - `markitdown` (Python + MCP, MIT) — convierte PDF/DOCX/PPTX/XLSX/HTML a Markdown. 100% offline.
-- `graphify` (CLI, ya en kit) — grafo de conocimiento del proyecto.
+- `graphify` (CLI, ya en kit) — grafo de conocimiento del proyecto. **Estructura-first (ADR-0004)**: sin grafo → `extract --code-only` (sin IA, sin secrets); grafo existe → `update` (incremental, sin LLM); `--mode deep` solo bajo demanda con backend LLM. Scope: 1 grafo por app (`src/<App>/graphify-out/`); vista workspace on-demand vía `merge-graphs`; `graphify-out/` en `.gitignore` (RF-011).
 - `codebase-memory-mcp` (MCP, MIT) — grafo de conocimiento del codigo.
 - `context-mode` (MCP, ELv2) — optimiza la ventana de contexto al consultar la doc.
 

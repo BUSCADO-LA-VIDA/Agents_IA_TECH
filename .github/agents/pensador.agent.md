@@ -187,6 +187,40 @@ Constitution actual detectada. Recorrer sección por sección:
 
 ---
 
+## 🔄 Flujo post-plataformado → speckit (ADR-0004)
+
+> **Basado en**: `specs/006-post-platforming-speckit/spec.md` (FR-001..FR-011) + ADR-0004.
+
+Tras ejecutar el bootstrap (`plataformador-bootstrap.ps1`), llevas el proyecto al pipeline speckit según su **estado real** (detección de escenario):
+
+### Detección de escenario (A/B/C) -- RF-01
+
+| Escenario | Señales | Flujo |
+|-----------|---------|-------|
+| **A — Nuevo desde idea** | sin código en `src/<App>/` + sin doc previa + sin constitution específica | Constitution Wizard (RF-14) → speckit pipeline completo -- RF-02 |
+| **B — Existente con docs a migrar** | hay documentación previa (posiblemente no-MD) | Inventario con `markitdown` (preservar originales como fuente de verdad, NUNCA convertir) → indexar MCPs + graphify → nueva doc dinámica con speckit -- RF-03 |
+| **C — Existente sin docs** | hay código pero sin docs | Crear estructura `Documentacion/<App>/` + Constitution + speckit desde cero -- RF-04 |
+
+### Constitution por proyecto -- RF-06 + RF-009
+
+- Si `.specify/memory/constitution.md` es la **plantilla genérica del kit** → ofrecer Constitution Wizard (RF-14) **antes** de cualquier `speckit-*`.
+- Cuando se requiera ejecutar el Wizard → generar `Documentacion/Constitution_Wizard_Instructions.md` estandarizado: lista de apps objetivo, comando único por app (`speckit-constitution --app <ruta>`), comportamiento del wizard (creación vs revisar/actualizar), script opcional `run_all_constitution_wizards.ps1`, y qué hacer después (pipeline speckit + reglas transversales).
+
+### Re-indexación y memoria -- RF-05 + RF-08 + RF-010
+
+- **Al aprobar spec/plan/tasks y tras implement** → re-indexar con **aviso visible** "Re-indexando context-mode + codebase-memory + graphify..." (RF-010) antes de iniciar.
+- **Automática diaria** (RF-08): al recibir una petición, verificar fecha de última actualización de índices/grafo; si es del día anterior o más vieja → actualizar automáticamente **antes de responder**.
+- **Manual** (RF-08): trigger "actualizar memoria" (o similar) → actualizar índices + grafo on-demand.
+- Comandos allowlist: `context-mode index`, `codebase-memory index_repository`, `graphify update` (o `extract --code-only` si no hay grafo). Fail-closed: si falla, WARN en el cuadro resumen; no reintentar en bucle.
+
+### Graphify por app -- RF-07 + RF-011
+
+- 1 grafo por app: `src/<App>/graphify-out/graph.json` (primario); vista workspace unificada on-demand vía `merge-graphs`.
+- Estructura-first: sin grafo → `extract --code-only`; grafo existe → `update`; `-GraphifyDeep` solo con backend LLM disponible (si no, WARN y continúa).
+- `graphify-out/` en `.gitignore` — nunca se sube a repositorios (RF-011).
+
+---
+
 ## 🎯 Delegación Explícita — Matriz Fase → Agente(s)
 
 | Fase Pipeline | Agente(s) Delegado(s) | Responsabilidad | Artefactos |

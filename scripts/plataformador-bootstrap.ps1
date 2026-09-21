@@ -21,6 +21,7 @@
 #   .\scripts\plataformador-bootstrap.ps1 -VerifyOnly
 #   .\scripts\plataformador-bootstrap.ps1 -SyncOnly [-DryRun] [-Force] [-RepoUrl <url>] [-OrphanAction Borrar|Conservar|Preguntar]  # delegación sync-agents
 #   .\scripts\plataformador-bootstrap.ps1 -App <app> [-DryRun]  # app activa explícita
+#   .\scripts\plataformador-bootstrap.ps1 [-GraphifyDeep] [-GraphifyScope App|Workspace]  # Graphify deep (LLM) / scope del grafo
 # Requisito: PowerShell 7+ (pwsh ≥ 7). No funciona en Windows PowerShell 5.1.
 #   Recomendación (solo texto, ejecutar manualmente si aplica):
 #     winget install --id Microsoft.PowerShell --source winget
@@ -40,16 +41,51 @@ param(
     [string[]]$Apps = @(),
     [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
     [string]$ManifestPath = "",
-    [string]$OrphanAction = "Preguntar"
+    [string]$OrphanAction = "Preguntar",
+    # [BOOTSTRAP-FIXES] F6: -GraphifyDeep -> graphify extract --mode deep (LLM);
+    # -GraphifyScope App (default) = app activa / Workspace = raíz del proyecto.
+    [ValidateSet("App", "Workspace")]
+    [string]$GraphifyScope = "App",
+    [switch]$GraphifyDeep
 )
 
 $ErrorActionPreference = "Stop"
 
+# [BOOTSTRAP-FIXES] F5: acumulación de WARNs/ERRORs para el cuadro resumen final.
+$script:Warnings = [System.Collections.Generic.List[string]]::new()
+$script:Errors = [System.Collections.Generic.List[string]]::new()
+# [BOOTSTRAP-FIXES] F4: WARNs ya emitidos (dedup tokenslayer paso 1/paso 4).
+$script:EmittedWarns = [System.Collections.Generic.List[string]]::new()
+
 function Write-Info  { param([string]$Message) Write-Host "[INFO] $Message" -ForegroundColor Cyan }
 function Write-Step  { param([string]$Message) Write-Host "[STEP] $Message" -ForegroundColor Yellow }
 function Write-OK    { param([string]$Message) Write-Host "[OK]   $Message" -ForegroundColor Green }
-function Write-Warn  { param([string]$Message) Write-Host "[WARN] $Message" -ForegroundColor DarkYellow }
-function Write-Fail  { param([string]$Message) Write-Host "[FAIL] $Message" -ForegroundColor Red }
+# [BOOTSTRAP-FIXES] F5: Write-Warn/Write-Fail acumulan en $script:Warnings/$script:Errors.
+function Write-Warn  { param([string]$Message) Write-Host "[WARN] $Message" -ForegroundColor DarkYellow; $script:Warnings.Add($Message) | Out-Null }
+function Write-Fail  { param([string]$Message) Write-Host "[FAIL] $Message" -ForegroundColor Red; $script:Errors.Add($Message) | Out-Null }
+
+# [BOOTSTRAP-FIXES] F4: WARN deduplicado — si el mismo texto ya se mostró, no repite.
+function Write-WarnOnce {
+    param([string]$Message)
+    if ($script:EmittedWarns -contains $Message) { return }
+    $script:EmittedWarns.Add($Message) | Out-Null
+    Write-Warn $Message
+}
+
+# [BOOTSTRAP-FIXES] F5: cuadro resumen final (conteo + listas deduplicadas).
+function Show-ExecutionSummary {
+    $uniqueWarns = @($script:Warnings | Select-Object -Unique)
+    $uniqueErrors = @($script:Errors | Select-Object -Unique)
+    Write-Host ""
+    Write-Host "===============================================================" -ForegroundColor Yellow
+    Write-Host " RESUMEN DE LA EJECUCION" -ForegroundColor Yellow
+    Write-Host "===============================================================" -ForegroundColor Yellow
+    Write-Host " WARNs: $($uniqueWarns.Count)"
+    foreach ($w in $uniqueWarns) { Write-Host "   - $w" }
+    Write-Host " ERRORs: $($uniqueErrors.Count)"
+    foreach ($e in $uniqueErrors) { Write-Host "   - $e" }
+    Write-Host "===============================================================" -ForegroundColor Yellow
+}
 
 # =============================================================================
 # Configuración del instalador/actualizador único (ADR-0003)
@@ -73,7 +109,12 @@ function Resolve-AppList {
     if ($fromManifest.Count -gt 0) { return @($fromManifest) }
     $srcDir = Join-Path $RootPath "src"
     if (Test-Path -LiteralPath $srcDir) {
-        $found = @(Get-ChildItem -LiteralPath $srcDir -Directory -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+        # [BOOTSTRAP-FIXES] F2: directorios punto no son apps (.specify, .git,
+        # .venv, .idea): sin este filtro src/.specify se levanta como app y
+        # Prepare-Apps/Ensure-SrcAppStructure la tratan como tal.
+        $found = @(Get-ChildItem -LiteralPath $srcDir -Directory -ErrorAction SilentlyContinue |
+            Where-Object { -not $_.Name.StartsWith(".") } |
+            ForEach-Object { $_.Name })
         if ($found.Count -gt 0) { return @($found) }
     }
     Write-Warn "Sin apps en manifest ni en src/; lista vacía (pasa -Apps explícito o define `aplicaciones:` en tu manifest local)."
@@ -385,7 +426,9 @@ function Ensure-OpenCodeMcp {
         } else {
             $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
             if (-not $nodeCmd) {
-                Write-Warn "node no está en el PATH; se omite tokenslayer (instala Node.js y re-ejecuta para registrar el 4º MCP)."
+                # [BOOTSTRAP-FIXES] F4: Write-WarnOnce (Ensure-OpenCodeMcp corre en
+                # paso 1 y paso 4; sin dedup el WARN de tokenslayer sale duplicado).
+                Write-WarnOnce "node no está en el PATH; se omite tokenslayer (instala Node.js y re-ejecuta para registrar el 4º MCP)."
             } else {
                 $tokenslayerBase = Join-Path $RootPath "proyect_ext\tokenslayer"
                 $tokenslayerIndex = Join-Path $tokenslayerBase "mcp-server\build\index.js"
@@ -393,9 +436,11 @@ function Ensure-OpenCodeMcp {
                 $baseCanonTok = [IO.Path]::GetFullPath($tokenslayerBase)
                 $indexCanonTok = [IO.Path]::GetFullPath($tokenslayerIndex)
                 if (-not $indexCanonTok.StartsWith($baseCanonTok + $sepTok, [StringComparison]::OrdinalIgnoreCase)) {
-                    Write-Warn "Ruta de tokenslayer fuera de containment ($tokenslayerIndex); no se registra (fail-closed)."
+                    # [BOOTSTRAP-FIXES] F4: Write-WarnOnce (dedup paso 1/paso 4).
+                    Write-WarnOnce "Ruta de tokenslayer fuera de containment ($tokenslayerIndex); no se registra (fail-closed)."
                 } elseif (-not (Test-Path -LiteralPath $tokenslayerIndex)) {
-                    Write-Warn "tokenslayer sin compilar: falta mcp-server/build/index.js bajo proyect_ext/tokenslayer/. Para registrar el 4º MCP: clona https://github.com/ajvikram/TokenSlayer (ver entrada tokenslayer-mcp-server en dependencias-manifest.yml) en proyect_ext/tokenslayer y compila con: cd proyect_ext/tokenslayer/mcp-server && npm install && npm run build. No se registra la entrada (evita config rota); el bootstrap continúa."
+                    # [BOOTSTRAP-FIXES] F4: Write-WarnOnce (dedup paso 1/paso 4).
+                    Write-WarnOnce "tokenslayer sin compilar: falta mcp-server/build/index.js bajo proyect_ext/tokenslayer/. Para registrar el 4º MCP: clona https://github.com/ajvikram/TokenSlayer (ver entrada tokenslayer-mcp-server en dependencias-manifest.yml) en proyect_ext/tokenslayer y compila con: cd proyect_ext/tokenslayer/mcp-server && npm install && npm run build. No se registra la entrada (evita config rota); el bootstrap continúa."
                 } elseif ($DryRun) {
                     $relIndexTok = ([IO.Path]::GetRelativePath($RootPath, $indexCanonTok)) -replace '\\', '/'
                     Write-Info "DryRun: registraría tokenslayer en opencode.json (type: local, command: [$($nodeCmd.Source), $relIndexTok], enabled: true)"
@@ -963,10 +1008,29 @@ function Index-CodebaseMemory {
             return
         }
         $result = & $cbmCmd.Source cli index_repository --path $RootPath 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            Write-OK "Código indexado correctamente en codebase-memory-mcp"
+        $indexExit = $LASTEXITCODE
+        $indexErr = ($result | Out-String).Trim()
+        # [BOOTSTRAP-FIXES] F3: verificar que la DB del proyecto existe tras indexar
+        # (antes solo había un WARN genérico y silencioso). Fuente de verdad: CLI
+        # (list_projects); fallback: archivo .db del proyecto en el directorio de DBs.
+        $dbVerified = $false
+        try {
+            $projectsOut = (& $cbmCmd.Source cli list_projects 2>&1 | Out-String)
+            if ($projectsOut -match [regex]::Escape($RootPath) -or $projectsOut -match [regex]::Escape($safeName)) {
+                $dbVerified = $true
+            }
+        } catch { $dbVerified = $false }
+        if (-not $dbVerified) {
+            $cmDbDir = Join-Path $env:USERPROFILE ".cache\codebase-memory-mcp"
+            $dbFile = Get-ChildItem -Path $cmDbDir -Filter "*$safeName*.db" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($dbFile) { $dbVerified = $true }
+        }
+        if ($indexExit -eq 0 -and $dbVerified) {
+            Write-OK "Código indexado correctamente en codebase-memory-mcp (DB del proyecto verificada)"
+        } elseif ($indexExit -eq 0) {
+            Write-Warn "Indexación reportó éxito PERO la DB del proyecto ('$safeName' bajo $RootPath) NO aparece en codebase-memory-mcp. Error real: $indexErr"
         } else {
-            Write-Warn "Indexación de código completada con advertencias (ver salida arriba)"
+            Write-Warn "Indexación de código falló (exit $indexExit). Error real: $indexErr"
         }
     }
     catch {
@@ -1317,6 +1381,10 @@ function Find-OrphanKitFiles {
             # tiene (gitignored) y que, si se reportan, contaminan la fase de huérfanos.
             # NO aplica a contenido real del kit (.opencode/agents, .opencode/commands, etc.).
             if (Test-ToolArtifactPath $rel) { continue }
+            # [BOOTSTRAP-FIXES] F1: .github/context-mode/ es runtime local de cada
+            # proyecto (hooks/MCP de context-mode, NO es del kit): jamás reportar
+            # como huérfano (el maestro no lo tiene y contaminaría la fase).
+            if ($rel -match '(^|/)\.github/context-mode(/|$)') { continue }
             $masterPath = Join-Path $TempDir ($rel -replace '/', [IO.Path]::DirectorySeparatorChar)
             if (-not (Test-Path -LiteralPath $masterPath)) {
                 $orphans += $rel
@@ -2303,8 +2371,21 @@ function Configure-SpecKit {
 # informa, no escribe. Estilo: Write-*, Add-Member -Force para props nuevas
 # (bug conocido: la asignación directa falla en pwsh 7.6); IDictionary-aware
 # como Ensure-OpenCodeMcp (RF-16).
+# [BOOTSTRAP-FIXES] F6: Graphify estructura-first con detección de estado
+# (ADR-0004 RF-07): sin grafo -> extract --code-only; grafo existe -> update
+# (incremental, sin LLM); -GraphifyDeep -> extract --mode deep solo con backend
+# LLM (env OPENAI/ANTHROPIC/GEMINI/DEEPSEEK/KIMI_API_KEY); si no, WARN y sigue.
 function Configure-Graphify {
-    param([string]$RootPath = "")
+    param(
+        [string]$RootPath = "",
+        # [BOOTSTRAP-FIXES] F6: scope del grafo: App (default) = app activa
+        # (resultado de Resolve-ActiveApp) / Workspace = raíz del proyecto.
+        [ValidateSet("App", "Workspace")]
+        [string]$GraphifyScope = "App",
+        [string]$ActiveApp = "",
+        # [BOOTSTRAP-FIXES] F6: -GraphifyDeep -> extract --mode deep SOLO con backend LLM.
+        [switch]$GraphifyDeep
+    )
 
     if (-not $RootPath) {
         if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
@@ -2346,8 +2427,29 @@ function Configure-Graphify {
     }
     Write-OK "MCP embebido verificado: python -m graphify.serve (stdio por defecto)"
 
-    # --- Grafo local: <root>/graphify-out/graph.json (containment-check) ---
-    $graphBase = Join-Path $RootPath "graphify-out"
+    # --- [BOOTSTRAP-FIXES] F6: scope del grafo (ADR-0004 RF-07) ---
+    # App (default) = app activa (resultado de Resolve-ActiveApp, paso 5) en
+    # src/<App>/ (tolerancia RNF-04: <App>/ en raíz); Workspace = raíz del
+    # proyecto. En el proyecto kit (app activa "root") -> raíz.
+    $graphScopePath = $RootPath
+    if ($GraphifyScope -eq "App" -and $ActiveApp -and $ActiveApp -ne "root") {
+        $appDirG = Join-Path $RootPath "src\$ActiveApp"
+        if (-not (Test-Path -LiteralPath $appDirG)) {
+            $candidateRootG = Join-Path $RootPath $ActiveApp
+            if (Test-Path -LiteralPath $candidateRootG) { $appDirG = $candidateRootG }
+        }
+        if (Test-Path -LiteralPath $appDirG) {
+            $graphScopePath = $appDirG
+            Write-Info "Graphify scope: App -> $graphScopePath"
+        } else {
+            Write-Warn "Graphify scope App: app '$ActiveApp' no existe en src\ ni en raíz; se usa la raíz."
+        }
+    } else {
+        Write-Info "Graphify scope: $GraphifyScope -> $graphScopePath"
+    }
+
+    # --- Grafo local: <scope>/graphify-out/graph.json (containment-check) ---
+    $graphBase = Join-Path $graphScopePath "graphify-out"
     $graphPath = Join-Path $graphBase "graph.json"
     $sepG = [IO.Path]::DirectorySeparatorChar
     $baseCanonG = [IO.Path]::GetFullPath($graphBase)
@@ -2356,10 +2458,46 @@ function Configure-Graphify {
         Write-Warn "Ruta del grafo fuera de containment ($graphPath); no se registra (fail-closed)."
         return
     }
-    if (Test-Path -LiteralPath $graphCanonG) {
-        Write-OK "Grafo local: $graphCanonG"
+    # --- [BOOTSTRAP-FIXES] F6: Graphify estructura-first con detección de estado (ADR-0004 RF-07) ---
+    # 1) Sin grafo -> graphify extract <scope> --code-only (estructura, sin IA,
+    #    sin secrets: --code-only solo indexa código y respeta .gitignore).
+    # 2) Grafo existe -> graphify update <scope> (incremental, sin LLM).
+    # 3) -GraphifyDeep -> graphify extract --mode deep (semántica con LLM) SOLO
+    #    si hay backend LLM configurado; si no, WARN y se continúa.
+    $hasLlmBackend = ($env:OPENAI_API_KEY) -or ($env:ANTHROPIC_API_KEY) -or
+                     ($env:GEMINI_API_KEY) -or ($env:DEEPSEEK_API_KEY) -or ($env:KIMI_API_KEY)
+    if ($GraphifyDeep -and -not $hasLlmBackend) {
+        Write-Warn "-GraphifyDeep requiere backend LLM (env OPENAI_API_KEY/ANTHROPIC_API_KEY/GEMINI_API_KEY/DEEPSEEK_API_KEY/KIMI_API_KEY); no hay backend configurado: se usa --code-only (estructura, sin IA) y se continúa."
+    }
+    $graphifyCli = $graphifyCmd.Source
+    $graphifyArgs = @()
+    $graphAction = ""
+    if ($GraphifyDeep -and $hasLlmBackend) {
+        $graphAction = "extract --mode deep"
+        $graphifyArgs = @("extract", $graphScopePath, "--mode", "deep")
+    } elseif (-not (Test-Path -LiteralPath $graphCanonG)) {
+        $graphAction = "extract --code-only"
+        $graphifyArgs = @("extract", $graphScopePath, "--code-only")
     } else {
-        Write-Warn "Grafo aún no construido (falta graphify-out/graph.json bajo la raíz). Para construirlo sin indexar secrets (.env, *.pem, .opencode/config.json): graphify extract <path> --code-only. Se registra el MCP igual (el servidor arranca sin grafo y cada herramienta acepta project_path)."
+        $graphAction = "update"
+        $graphifyArgs = @("update", $graphScopePath)
+    }
+    Write-OK "Grafo local: $graphCanonG ($(if (Test-Path -LiteralPath $graphCanonG) { 'existe' } else { 'nuevo' }))"
+    if ($DryRun) {
+        Write-Info "DryRun: graphify $($graphifyArgs -join ' ') (grafo: $graphCanonG)"
+    } else {
+        # RF-010: aviso visible de re-indexación en ejecución.
+        Write-Info "Re-indexando Graphify ($graphAction)..."
+        try {
+            $gOut = & $graphifyCli @graphifyArgs 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-OK "Graphify $graphAction completado (grafo: $graphCanonG)"
+            } else {
+                Write-Warn "graphify $graphAction falló (exit $LASTEXITCODE): $(($gOut | Out-String).Trim())"
+            }
+        } catch {
+            Write-Warn "graphify $graphAction falló: $_"
+        }
     }
 
     # --- Registro en opencode.json (type: local, stdio, sin secrets) ---
@@ -2470,12 +2608,15 @@ Ensure-ContextHooks $resolvedRoot
 
 Write-Step "2) Validando dependencias externas y MCPs..."
 if (-not $SkipInstall) {
-    Ensure-Command -Name "npm" -InstallCommand "npm --version" -AllowMissing
-    Ensure-Command -Name "pip" -InstallCommand "python -m pip --version" -AllowMissing
-    Ensure-Command -Name "context-mode" -InstallCommand "npm install -g context-mode" -AllowMissing
-    Ensure-Command -Name "codebase-memory-mcp" -InstallCommand "npm install -g codebase-memory-mcp" -AllowMissing
-    Ensure-Command -Name "markitdown" -InstallCommand "python -m pip install 'markitdown[all]'" -AllowMissing
-    Ensure-Command -Name "markitdown-mcp" -InstallCommand "python -m pip install 'markitdown-mcp==0.0.1a3' 'mcp<2'" -AllowMissing
+    # [BOOTSTRAP-FIXES] F4: capturar el boolean de Ensure-Command ($null =) —
+    # sin captura, el `return $true` se escapaba y imprimía un `True` suelto
+    # tras cada "[OK] Comando disponible:".
+    $null = Ensure-Command -Name "npm" -InstallCommand "npm --version" -AllowMissing
+    $null = Ensure-Command -Name "pip" -InstallCommand "python -m pip --version" -AllowMissing
+    $null = Ensure-Command -Name "context-mode" -InstallCommand "npm install -g context-mode" -AllowMissing
+    $null = Ensure-Command -Name "codebase-memory-mcp" -InstallCommand "npm install -g codebase-memory-mcp" -AllowMissing
+    $null = Ensure-Command -Name "markitdown" -InstallCommand "python -m pip install 'markitdown[all]'" -AllowMissing
+    $null = Ensure-Command -Name "markitdown-mcp" -InstallCommand "python -m pip install 'markitdown-mcp==0.0.1a3' 'mcp<2'" -AllowMissing
 } else {
     Write-Info "Se omite la instalación de dependencias por -SkipInstall."
 }
@@ -2507,7 +2648,9 @@ Write-Step "7b) Reorganizando docs sueltas (Repair-DocStructure)..."
 Repair-DocStructure -RootPath $resolvedRoot
 
 Write-Step "8) Configurando Graphify (Configure-Graphify)..."
-Configure-Graphify -RootPath $resolvedRoot
+# [BOOTSTRAP-FIXES] F6: Graphify estructura-first con detección de estado
+# (ADR-0004 RF-07): scope por app + deep opcional.
+Configure-Graphify -RootPath $resolvedRoot -GraphifyScope $GraphifyScope -GraphifyDeep:$GraphifyDeep -ActiveApp $activeApp
 
 Write-Step "9) Indexando código y documentación..."
 $projectName = Split-Path $resolvedRoot -Leaf
@@ -2572,6 +2715,9 @@ Write-OK "Los MCPs (VS Code + OpenCode), el entorno y los índices quedaron prep
 if (-not $NoRestart) {
     Reload-ProjectWindow -RootPath $resolvedRoot
 }
+
+# [BOOTSTRAP-FIXES] F5: cuadro resumen de la ejecución (WARNs/ERRORs únicos).
+Show-ExecutionSummary
 
 Write-Host "" 
 Write-Host "===============================================================" -ForegroundColor Green

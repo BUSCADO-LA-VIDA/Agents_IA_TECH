@@ -1007,7 +1007,7 @@ function Index-CodebaseMemory {
             Write-Warn "codebase-memory-mcp no resuelve en PATH; se omite indexación (instala la herramienta y re-ejecuta)."
             return
         }
-        $result = & $cbmCmd.Source cli index_repository --path $RootPath 2>&1
+        $result = & $cbmCmd.Source cli index_repository --repo-path $RootPath 2>&1
         $indexExit = $LASTEXITCODE
         $indexErr = ($result | Out-String).Trim()
         # [BOOTSTRAP-FIXES] F3: verificar que la DB del proyecto existe tras indexar
@@ -1030,7 +1030,23 @@ function Index-CodebaseMemory {
         } elseif ($indexExit -eq 0) {
             Write-Warn "Indexación reportó éxito PERO la DB del proyecto ('$safeName' bajo $RootPath) NO aparece en codebase-memory-mcp. Error real: $indexErr"
         } else {
-            Write-Warn "Indexación de código falló (exit $indexExit). Error real: $indexErr"
+            # [BOOTSTRAP-FIXES] F8: si el modo default (full) crashea (exit_nonzero,
+            # worker_failed por archivos gigantes tipo proyect_ext), reintentar UNA
+            # vez con --mode fast (filtra directorios problematicos, sin
+            # similarity/semantic). Degradacion gracefully: WARN si fast tambien falla.
+            if ($indexErr -match 'exit_nonzero|worker_failed') {
+                Write-Warn "Indexacion con modo default crasheo (worker_failed). Reintentando con --mode fast..."
+                $resultFast = & $cbmCmd.Source cli index_repository --repo-path $RootPath --mode fast 2>&1
+                $fastExit = $LASTEXITCODE
+                $fastErr = ($resultFast | Out-String).Trim()
+                if ($fastExit -eq 0) {
+                    Write-OK "Codigo indexado con --mode fast (modo default crasheo; degradacion gracefully)"
+                } else {
+                    Write-Warn "Indexacion con --mode fast tambien fallo (exit $fastExit). Error real: $fastErr"
+                }
+            } else {
+                Write-Warn "Indexacion de codigo fallo (exit $indexExit). Error real: $indexErr"
+            }
         }
     }
     catch {

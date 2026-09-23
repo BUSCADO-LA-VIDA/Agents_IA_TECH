@@ -17,7 +17,7 @@ mi-repo/
 ├── .github/                 ← Kit transversal (copiado)
 ├── .opencode/               ← Kit transversal (copiado)
 ├── .doc_agents/             ← Kit transversal (copiado)
-├── .specify/                ← Config speckit base (copiado)
+├── <AppName>/.specify/      ← Config speckit de la app (constitution, specs) — [AGENT-SSD] ADR-0005
 │
 ├── <AppName>/               ← Raíz de la aplicación (ej. App-Frontend, App-Backend, Mobile-App)
 │   ├── Documentacion_Publica/        ← 📢 PÚBLICA (se publica)
@@ -92,7 +92,7 @@ mi-repo/
 | `.github/` | ✅ Sí | ❌ No |
 | `.opencode/` | ✅ Sí | ❌ No |
 | `.doc_agents/` | ✅ Sí | ❌ No |
-| `.specify/memory/constitution.md` | ✅ Sí (base) | ⚠️ Personalizable |
+| <AppName>/.specify/ (constitution, specs de la app) | ✅ Sí (base) | ⚠️ Personalizable — la escribe Agent-SSD (ADR-0005) |
 | `Documentacion_Publica/` (dentro de la app) | ❌ **NUNCA** | ✅ **Siempre** |
 | `Documentacion/<AppName>/` (raíz del repo) | ❌ **NUNCA** | ✅ **Siempre** |
 | `src/`, `tests/` | ❌ No | ✅ Sí |
@@ -103,14 +103,22 @@ mi-repo/
 
 ### Agentes documentales (`pensador`, `arquitecto`, `documentador`, `security-auditor`)
 - **Solo escriben en**: `Documentacion/<AppName>/` (documentación **interna**)
-- **Leen**: `.doc_agents/` (estructura base), `.specify/` (constitución), `Documentacion/<AppName>/` (contexto app)
-- **NUNCA tocan**: `src/`, `tests/`, otras apps
-- **`Documentacion_Publica/`**: la gestiona el equipo (o el `documentador` si el equipo lo pide explícitamente). Por defecto los agentes **no** escriben en la carpeta pública salvo indicación.
+- **Leen**: `.doc_agents/` (estructura base), `<AppName>/.specify/` (constitución), `Documentacion/<AppName>/` (contexto app)
+- **NUNCA tocan**: `src/` (incluye `<AppName>/.specify/` — esa la escribe `Agent-SSD`), `tests/`, otras apps
 
 ### Agentes implementadores (`api-developer`, `frontend-developer`, `devops`, `qa-senior`)
 - **Escriben en**: `src/`, `tests/` de SU app
 - **Leen**: `Documentacion/<AppName>/pendientes-implementacion.md` (tareas), specs en `Documentacion/<AppName>/specs/`
 - **NUNCA escriben en**: `Documentacion/` de otras apps
+
+### Agente `Agent-SSD` (orquestador del flujo SSD — ADR-0005)
+- **Rol**: Orquestador del flujo SSD + ejecutor de comandos Speckit + documentador de artefactos speckit. Como `implementador` mantiene el flujo de implementación, `Agent-SSD` mantiene el flujo SSD — si Speckit ejecuta comandos, él los ejecuta (no solapa funcionalidades).
+- **Skills**: speckit-specify, speckit-plan, speckit-tasks, speckit-analyze, speckit-converge, speckit-constitution (+ wizard interactivo).
+- **Escribe en**: `<AppName>/.specify/` (SOLO esa subcarpeta: constitution, specs), `Documentacion/<AppName>/specs/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md`.
+- **NUNCA toca**: código fuente (`src/<App>/` excepto `.specify/`), `tests/`, `Documentacion/<OtraApp>/`, docstrings inline.
+- **Ciclo con `pensador`**: el `pensador` delega → Agent-SSD ejecuta y documenta → reporta al `pensador` → el `pensador` valida y continúa el flujo cuando corresponde (validación del usuario entre fases). Agent-SSD NUNCA auto-continúa a la siguiente fase.
+- **Proyectos vivos**: crea/actualiza CUALQUIER documento speckit en cualquier momento del ciclo (constitution, spec, plan, tasks, analyze, converge).
+
 
 ### Agente `plataformador`
 - **Audita**: Estructura completa del repo (todas las apps + kit transversal)
@@ -144,7 +152,7 @@ mi-repo/
 ├── .github/                 ← Kit transversal (copiado)
 ├── .opencode/               ← Kit transversal (copiado)
 ├── .doc_agents/             ← Kit transversal (copiado)
-├── .specify/                ← Config speckit base (copiado)
+├── <AppName>/.specify/      ← Config speckit de la app (constitution, specs) — [AGENT-SSD] ADR-0005
 │
 ├── App-Frontend/            ← App 1
 │   ├── Documentacion_Publica/        ← 📢 PÚBLICA (se publica)
@@ -353,3 +361,4 @@ El kit de agentes (`.github/`, `.opencode/`, `.doc_agents/`) es **compartido y s
 
 Cada app es **independiente**, tiene su **idioma**, sus **preferencias**, sus **specs**, sus **ADRs**.  
 El kit de agentes (`.github/`, `.opencode/`, `.doc_agents/`) es **compartido y sincronizado** vía `sync-agents.ps1`.
+

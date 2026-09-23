@@ -96,6 +96,7 @@ Documentacion/
 | `arquitecto` | Decisiones de arquitectura, ADRs, patrones, guardrails, spec linking | 🟢 Activo |
 | `documentador` | Documentación de specs, flujos, ADRs, template system, spec versioning | 🟢 Activo |
 | `security-auditor` | Revisión de seguridad en diseños | 🟢 Activo |
+| `Agent-SSD` | Orquestador del flujo SSD + ejecutor de comandos Speckit (specify, plan, tasks, analyze, converge, constitution). Escribe en `src/<App>/.specify/` + `Documentacion/<AppName>/specs/`. Delegado por `pensador` (ADR-0005) | 🟢 Nuevo (2026-09-21) |
 | `api-developer` | Implementación backend/API | 🟢 Activo |
 | `frontend-developer` | Implementación frontend/UI | 🟢 Activo |
 | `devops` | Infraestructura, Docker, CI/CD | 🟢 Activo |

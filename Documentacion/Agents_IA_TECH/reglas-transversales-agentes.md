@@ -71,6 +71,7 @@ Todo agente debe seguir esta estructura mínima (en ambos arneses):
 - **Cada agente hace UNA cosa** y nada más.
 - **El Documentador solo escribe documentos, nunca código** — si el usuario pide "cambiar algo", se interpreta como cambio en `Documentacion/`.
 - **El implementador** solo escribe código, nunca documentación de especificaciones.
+- **`Agent-SSD` (ADR-0005)**: orquestador del flujo SSD + ejecutor de comandos Speckit. El `pensador` delega en él las fases documentales del pipeline (specify, plan, tasks, analyze, converge, constitution). Puede escribir en `src/<App>/.specify/` (SOLO esa subcarpeta) + `Documentacion/<AppName>/specs/` + kit transversal. NUNCA implementa código ni auto-continúa el pipeline — reporta al `pensador` y el `pensador` valida/continúa con el usuario.
 - **No mezcles responsabilidades** — si hace falta otro agente, invocalo explícitamente.
 - **Autodelegación**: cuando un agente termine su tarea, debe decir "Listo. El siguiente paso debería hacerlo [nombre del agente]."
 - **Los agentes orquestadores** (pensador, plataformador) deben hacer cumplir estas reglas a todos los agentes debajo de ellos.

@@ -1,3 +1,9 @@
+### [AGENT-SSD] ADR-0005 (2026-09-21) — Nuevo agente orquestador del flujo SSD
+- **Problema**: el flujo speckit se bloqueaba al escribir en src/<App>/.specify/ (restriccion de paths de los documentales). Los proyectos son vivos: la constitution se crea Y se actualiza en cualquier momento del ciclo.
+- **Decision**: crear Agent-SSD (tier Documental extendido) — orquestador del flujo SSD + ejecutor de comandos Speckit + documentador de artefactos speckit. Escribe en src/<App>/.specify/ (SOLO esa subcarpeta) + Documentacion/<AppName>/specs/ + kit transversal.
+- **Ciclo**: pensador delega -> Agent-SSD ejecuta y documenta -> reporta -> pensador valida y continua (validacion del usuario entre fases). NUNCA auto-continua.
+- **Archivos**: Agent-SSD.agent.md + Agent-SSD.md (nuevos), pensador (delegacion, ambos harnesses), AGENTS.md (5 tiers), reglas-transversales-agentes.md (Regla 4), estructura-aplicacion.md (.specify en src/<App>/.specify/), ADR-0005.
+
 # Pendientes de Implementación - Agents_IA_TECH
 
 > **Puente vivo entre documentación e implementación.**
@@ -112,6 +118,7 @@
   - **Basado en**: RF-05/RF-07/RF-08 de la spec `[POST-PLATAFORMADO]` (Tarea 2 — esta tarea depende de esa spec).
   - **Archivos esperados**: `.github/agents/*.agent.md`, `.opencode/agents/*.md`
   - **Prioridad**: media (depende de Tarea 2)
+
 
 
 

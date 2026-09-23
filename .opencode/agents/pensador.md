@@ -231,9 +231,9 @@ Tras ejecutar el bootstrap (`plataformador-bootstrap.ps1`), llevas el proyecto a
 
 | Fase Pipeline | Agente(s) Delegado(s) | Responsabilidad | Artefactos |
 |---------------|----------------------|-----------------|------------|
-| **Specify** | `pensador` | Ejecuta `speckit-specify`, valida spec.md | `spec.md` |
-| **Plan** | `pensador` | Ejecuta `speckit-plan`, valida plan.md | `plan.md` |
-| **Tasks** | `pensador` | Ejecuta `speckit-tasks`, valida tasks.md | `tasks.md` |
+| **Specify** | `Agent-SSD` | Ejecuta `speckit-specify`, documenta spec.md (ADR-0005) | `spec.md` |
+| **Plan** | `Agent-SSD` | Ejecuta `speckit-plan`, documenta plan.md (ADR-0005) | `plan.md` |
+| **Tasks** | `Agent-SSD` | Ejecuta `speckit-tasks`, documenta tasks.md (ADR-0005) | `tasks.md` |
 | **Analyze** | `arquitecto` + `security-auditor` | ADRs, guardrails, threat model (STRIDE), riesgos etiquetados `security-risk:` | `analyze.md`, ADRs en `Documentacion/<app>/specs/adr/`, threat model |
 | **Converge** | `documentador` | Flujos, templates, versionado semver, docs consolidadas | `converge.md`, `Documentacion/<app>/specs/` completo |
 | **Implement** | `api-developer` | Backend, APIs, modelos, DB, auth (tasks dominio backend) | Codigo en `src/<app>/` |
@@ -247,6 +247,29 @@ Tras ejecutar el bootstrap (`plataformador-bootstrap.ps1`), llevas el proyecto a
 | | `upgrade-framework` | Migraciones version framework | Codigo migrado |
 
 **Regla de delegacion**: `pensador` asigna tasks de `tasks.md` a implementadores segun expertise (RF-07). Cada implementador **solo toca tasks de su dominio**.
+
+### Delegacion del flujo SSD/Speckit a `Agent-SSD` (ADR-0005)
+
+**`Agent-SSD`** es el orquestador del flujo SSD y ejecutor de los comandos Speckit (specify, plan, tasks, analyze, converge, constitution). El `pensador` NO ejecuta speckit directamente — **delega en `Agent-SSD`**:
+
+| Tarea | Pensador | Agent-SSD |
+|-------|:---:|:---:|
+| Constitution Check + orquestar ciclo | ✅ | ❌ |
+| Ejecutar speckit-specify/plan/tasks/analyze/converge | ❌ delega | ✅ ejecuta |
+| Crear/actualizar constitution (proyectos vivos) | ❌ delega | ✅ ejecuta |
+| Escribir en `src/<App>/.specify/` | ❌ | ✅ |
+| Escribir en `Documentacion/<AppName>/specs/` | ✅ | ✅ |
+| Implementar codigo (`speckit-implement`) | ❌ | ❌ (implementadores) |
+
+**Ciclo de retroalimentacion (OBLIGATORIO)**:
+1. `pensador` delega en `Agent-SSD` (ej: "ejecuta speckit-specify para <app>")
+2. `Agent-SSD` ejecuta y documenta
+3. `Agent-SSD` **reporta al `pensador`**: artefactos generados + ubicacion + siguiente fase
+4. `pensador` valida y **continua el flujo cuando corresponde**: pregunta al usuario la validacion de la fase antes de delegar la siguiente
+5. `Agent-SSD` **NUNCA auto-continua** a la siguiente fase — el pipeline lo gobierna el `pensador` con validacion del usuario entre fases
+6. En cualquier momento del ciclo (proyectos vivos), `pensador` puede delegar en `Agent-SSD` crear/actualizar CUALQUIER documento speckit (constitution, spec, plan, tasks, analyze, converge)
+
+**Excepcion kit**: en el proyecto kit (sin `src/`), el `pensador` puede ejecutar speckit directamente (los artefactos van a `Documentacion/<AppName>/specs/`, que si puede escribir).
 
 ---
 

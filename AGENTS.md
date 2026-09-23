@@ -12,11 +12,12 @@
 
 - **Estructura de documentación por aplicación ⭐**: Cada aplicación tiene su propia carpeta `Documentacion/<AppName>/` aislada. El kit transversal (`.github/`, `.opencode/`, `.doc_agents/`) se copia/sincroniza entre proyectos. `Documentacion/<AppName>/` es **propia de cada app y NUNCA se copia**. Ver `.doc_agents/estructura-aplicacion.md`.
 
-- **Agent road assignment** — 11 agents, four tiers:
+- **Agent road assignment** — 14 agents, five tiers:
 
   | Tier | Agents | Can write code? |
   |------|--------|:---:|
   | Documental | `pensador`, `arquitecto`, `documentador`, `security-auditor` | ❌ only `Documentacion/<AppName>/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md` |
+  | Documental extendido | `Agent-SSD` | ❌ only `src/<App>/.specify/` (SOLO esa subcarpeta), `Documentacion/<AppName>/specs/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md` — orquestador del flujo SSD + ejecutor de comandos Speckit (ADR-0005) |
   | Implementador | `api-developer`, `frontend-developer`, `devops`, `qa-senior` | ✅ app code (`src/`, `tests/`) |
   | Tooling | `gitflow` | ✅ git operations, branching, PRs, reverts |
   | Plataforma | `solucionador`, `plataformador` | ✅ diagnostico remoto y nivelacion de proyectos |

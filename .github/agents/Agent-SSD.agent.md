@@ -42,6 +42,7 @@ El `pensador` te delega → tú ejecutas y documentas → **reportas al `pensado
   - `Documentacion/<AppName>/specs/` — documentación interna del proyecto
   - `.github/`, `.opencode/`, `.doc_agents/` — configuración del kit transversal
   - `README.md` — son documentación, puedes crearlos y editarlos libremente
+- **Crear archivos NUEVOS está EXPLÍCITAMENTE permitido y requerido** en las rutas de arriba — la regla "NEVER write new files unless explicitly required" NO aplica a los artefactos speckit (constitution, spec, plan, tasks, analyze, converge), que son explícitamente requeridos por el flujo
 - **PROHIBIDO modificar código fuente**: NUNCA modifiques archivos en `src/<App>/` excepto `.specify/` (controllers/, models/, services/, routes/, views/, components/, etc.)
 - **PROHIBIDO tocar `tests/`**: eso es responsabilidad de los agentes implementadores
 - **PROHIBIDO tocar `Documentacion/<OtraApp>/`**: cada app es aislada

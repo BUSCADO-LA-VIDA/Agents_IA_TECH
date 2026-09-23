@@ -1,9 +1,41 @@
 # ADR-0005: Agente `Agent-SSD` — orquestador del flujo SSD y ejecutor de comandos Speckit
 
-> **Estado**: Aceptado
+> **Estado**: Aceptado (v1.1 — fix permisos)
 > **Fecha**: 2026-09-21
 > **Decide**: Creación del agente `Agent-SSD` (tier Documental extendido)
 > **Relacionado**: ADR-0004 (post-plataformado → speckit), spec 006, reglas-transversales-agentes.md (Regla 4)
+
+---
+
+## 0. Fix v1.1 — permisos reales (bug en producción, trading_bot 2026-09-21)
+
+**Síntoma**: al intentar crear `src/dwxconnect/.specify/memory/constitution.md` en trading_bot, el write fue bloqueado por permisos.
+
+**Causa raíz**: el permission block del frontmatter (lo que OpenCode aplica realmente) NO incluía el permiso para `src/*/.specify/**` — la definición textual lo decía, pero el block tenía `"*": deny` sin el allow específico. Además `bash: "*": deny` impedía ejecutar `resolve-template.ps1` del wizard speckit-constitution.
+
+**Fix aplicado** (permission block corregido):
+
+```yaml
+permission:
+  edit:
+    "*": deny
+    "Documentacion/**": allow
+    ".github/**": allow
+    ".opencode/**": allow
+    ".doc_agents/**": allow
+    "src/*/.specify/**": allow      # constitution + specs de la app (ADR-0005)
+    "**README.md": allow
+  bash:
+    "*": deny
+    "*resolve-template*": allow     # wizard speckit-constitution
+    "*.specify/scripts/*": allow    # scripts del wizard speckit
+  task:
+    "*": allow                      # puede delegar/ejecutar tasks
+```
+
+**Aclaración adicional**: "Crear archivos NUEVOS está EXPLÍCITAMENTE permitido y requerido en las rutas permitidas — la regla 'NEVER write new files unless explicitly required' NO aplica a los artefactos speckit".
+
+**Lección**: la definición textual de permisos NO es suficiente — el permission block del frontmatter debe reflejar los mismos permisos (OpenCode aplica el block, no el texto).
 
 ---
 

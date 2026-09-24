@@ -6,6 +6,9 @@ secrets.*
 **/config.local.json
 .opencode/config.json
 
+# [007-MCP] rutas MCP locales (nunca versionar)
+.env.mcp
+
 # Local opencode runtime
 .opencode/node_modules/
 

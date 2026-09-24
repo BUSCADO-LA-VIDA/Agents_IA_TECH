@@ -1,4 +1,4 @@
-#!/usr/bin/env powershell
+﻿#!/usr/bin/env powershell
 #requires -Version 7.0
 # =============================================================================
 # plataformador-bootstrap.ps1
@@ -22,6 +22,7 @@
 #   .\scripts\plataformador-bootstrap.ps1 -SyncOnly [-DryRun] [-Force] [-RepoUrl <url>] [-OrphanAction Borrar|Conservar|Preguntar]  # delegación sync-agents
 #   .\scripts\plataformador-bootstrap.ps1 -App <app> [-DryRun]  # app activa explícita
 #   .\scripts\plataformador-bootstrap.ps1 [-GraphifyDeep] [-GraphifyScope App|Workspace]  # Graphify deep (LLM) / scope del grafo
+#   .\scripts\plataformador-bootstrap.ps1 -SkipSelfUpdate  # saltar auto-actualización desde el maestro
 # Requisito: PowerShell 7+ (pwsh ≥ 7). No funciona en Windows PowerShell 5.1.
 #   Recomendación (solo texto, ejecutar manualmente si aplica):
 #     winget install --id Microsoft.PowerShell --source winget
@@ -46,7 +47,16 @@ param(
     # -GraphifyScope App (default) = app activa / Workspace = raíz del proyecto.
     [ValidateSet("App", "Workspace")]
     [string]$GraphifyScope = "App",
-    [switch]$GraphifyDeep
+    [switch]$GraphifyDeep,
+    # [SELF-UPDATE] flag para saltar el mecanismo.
+    [switch]$SkipSelfUpdate,
+    # [007-MCP] RF-04/D3: instala/actualiza herramientas externas (fail-open,
+    # opt-in). Sin el flag no se intenta ninguna instalación.
+    [switch]$ForceUpgradeTools,
+    # [007-MCP] RF-06/D5: "modo kit seguro" — salta Sync-TransversalKit pero
+    # ejecuta el resto (resolución MCP, .env.mcp, índices). Permite activar los
+    # MCPs en el kit maestro sin que el sync lo sobrescriba a sí mismo.
+    [switch]$SkipSync
 )
 
 $ErrorActionPreference = "Stop"
@@ -84,6 +94,7 @@ function Show-ExecutionSummary {
     foreach ($w in $uniqueWarns) { Write-Host "   - $w" }
     Write-Host " ERRORs: $($uniqueErrors.Count)"
     foreach ($e in $uniqueErrors) { Write-Host "   - $e" }
+    Write-Host " Rutas MCP en .env.mcp - consulta ese archivo (gitignored)." -ForegroundColor DarkGray
     Write-Host "===============================================================" -ForegroundColor Yellow
 }
 
@@ -339,6 +350,84 @@ function Resolve-McpCommand {
     return $null
 }
 
+# [007-MCP] D2/RF-03: fuente de rutas MCP portable por proyecto (`.env.mcp`).
+# Crea <root>/.env.mcp si no existe (idempotente; con -Force re-escribe) con
+# CONTEXT_MODE_CMD/CODEBASE_MEMORY_CMD/MARKITDOWN_CMD resueltas en runtime local
+# vía Resolve-McpCommand. `.env.mcp` es la fuente de verdad legible/portable
+# (nunca versionada; se agrega a .gitignore); el mecanismo efectivo en OpenCode
+# es `environment`/ruta real (ver Ensure-OpenCodeMcp). Sin secretos: solo rutas.
+function Ensure-McpEnvFile {
+    param(
+        [string]$RootPath,
+        [switch]$Force
+    )
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    $envPath = Join-Path $RootPath ".env.mcp"
+
+    # Idempotencia (RF-02): si ya existe y no es -Force, se conserva.
+    if ((Test-Path -LiteralPath $envPath) -and (-not $Force)) {
+        Write-OK ".env.mcp ya existe; se conserva (usa -Force para re-escribir)."
+        # El guard de .gitignore se aplica siempre (por si el archivo existía sin regla).
+        Add-McpEnvGitignore -RootPath $RootPath
+        return
+    }
+
+    if ($DryRun) {
+        Write-Info "DryRun: crear $envPath con CONTEXT_MODE_CMD/CODEBASE_MEMORY_CMD/MARKITDOWN_CMD (rutas resueltas)."
+        Add-McpEnvGitignore -RootPath $RootPath
+        return
+    }
+
+    $tools = [ordered]@{
+        "CONTEXT_MODE_CMD"    = "context-mode"
+        "CODEBASE_MEMORY_CMD" = "codebase-memory-mcp"
+        "MARKITDOWN_CMD"      = "markitdown"
+    }
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.Add("# [007-MCP] Rutas MCP resueltas localmente (NO se versiona; gitignored).") | Out-Null
+    $lines.Add("# Fuente de verdad portable. OpenCode referencia {env:<NAME>} en opencode.json.") | Out-Null
+    foreach ($var in @($tools.Keys)) {
+        $real = Resolve-McpCommand -ToolName $tools[$var] -Token "__$($var)__"
+        if (-not $real) { $real = "" }
+        $lines.Add("$var=$real") | Out-Null
+    }
+    Set-Content -LiteralPath $envPath -Value $lines -Encoding UTF8
+    Write-OK ".env.mcp creado con las rutas MCP resueltas: $envPath"
+    Add-McpEnvGitignore -RootPath $RootPath
+}
+
+# [007-MCP] D2/T303: agrega `.env.mcp` a .gitignore con append idempotente
+# (guard anti-duplicado). Fail-open: si no hay .gitignore o falla, WARN y sigue.
+function Add-McpEnvGitignore {
+    param([string]$RootPath)
+    $giPath = Join-Path $RootPath ".gitignore"
+    try {
+        $hasEntry = $false
+        if (Test-Path -LiteralPath $giPath) {
+            $giText = Get-Content -LiteralPath $giPath -Raw -ErrorAction Stop
+            if ($giText -match '(?m)^\s*\.env\.mcp\s*$') { $hasEntry = $true }
+        }
+        if ($hasEntry) { return }
+        if ($DryRun) {
+            Write-Info "DryRun: agregar '.env.mcp' a .gitignore"
+            return
+        }
+        $entry = [Environment]::NewLine + "# [007-MCP] rutas MCP locales (nunca versionar)" + [Environment]::NewLine + ".env.mcp" + [Environment]::NewLine
+        Add-Content -LiteralPath $giPath -Value $entry -Encoding UTF8
+        Write-OK ".env.mcp agregado a .gitignore"
+    } catch {
+        Write-Warn "No se pudo actualizar .gitignore con '.env.mcp': $_"
+    }
+}
+
 function Ensure-OpenCodeMcp {
     param([string]$RootPath)
 
@@ -352,31 +441,34 @@ function Ensure-OpenCodeMcp {
 # Leer el JSON existente
     $existing = Get-Content -Path $opencodePath -Raw | ConvertFrom-Json
 
-    # Verificar si ya tiene la sección mcp
+    # [007-MCP] D1/RF-01: la sección `mcp` se crea si falta; si ya existe, NO se
+    # emite un early "se conserva" que salte la re-resolución (bug previo). La
+    # re-resolución de tokens corre SIEMPRE más abajo (fuera de este if/else).
     if ($existing.mcp -and -not $Force) {
-        Write-OK "opencode.json ya tiene sección mcp; se conserva (usa -Force para sobrescribir)."
+        Write-Info "opencode.json ya tiene sección mcp; se re-resuelven tokens a rutas locales (se conserva el resto)."
     } else {
-        # [SOLUCION-GENERICA] RF-S6: plantilla con tokens + degradada con WARN.
-        # Sin rutas absolutas versionadas; enabled=false hasta re-resolver en
-        # runtime local (jamás commiteado). No amplía permission.bash.
+        # [SOLUCION-GENERICA] RF-S6 + [007-MCP] D2: plantilla con tokens `{env:...}`
+        # + degradada con enabled=false. Sin rutas absolutas versionadas; la
+        # resolución runtime (Fase de re-resolución) la promueve a enabled=true.
+        # No amplía permission.bash.
         $mcpConfig = [ordered]@{
             "context-mode" = [ordered]@{
                 type = "local"
-                command = @("__CONTEXT_MODE_CMD__")
+                command = @("{env:CONTEXT_MODE_CMD}")
                 enabled = $false
             }
             "codebase-memory-mcp" = [ordered]@{
                 type = "local"
-                command = @("__CODEBASE_MEMORY_CMD__")
+                command = @("{env:CODEBASE_MEMORY_CMD}")
                 enabled = $false
             }
             "markitdown" = [ordered]@{
                 type = "local"
-                command = @("__MARKITDOWN_CMD__")
+                command = @("{env:MARKITDOWN_CMD}")
                 enabled = $false
             }
         }
-        Write-Warn "Plantilla MCP con tokens (ejecuta el bootstrap para re-resolver a rutas locales)."
+        Write-Warn "Plantilla MCP con {env:...} (ejecuta el bootstrap para resolver a rutas locales)."
 
         if (-not $DryRun) {
             $existing | Add-Member -NotePropertyName "mcp" -NotePropertyValue $mcpConfig -Force
@@ -386,26 +478,103 @@ function Ensure-OpenCodeMcp {
         }
     }
 
-    # [SOLUCION-GENERICA] RF-S6: re-resolución a rutas reales SOLO en runtime
-    # local (jamás commiteada). Por token: si Get-Command resuelve -> ruta
-    # real + enabled=true en memoria; si no -> WARN degradado + enabled=false.
-    if (-not $DryRun -and ($null -ne $existing.mcp)) {
-        $tokenMap = [ordered]@{
-            "context-mode"       = @{ Tool = "context-mode";       Token = "__CONTEXT_MODE_CMD__" }
-            "codebase-memory-mcp" = @{ Tool = "codebase-memory-mcp"; Token = "__CODEBASE_MEMORY_CMD__" }
-            "markitdown"         = @{ Tool = "markitdown";         Token = "__MARKITDOWN_CMD__" }
-        }
+    # [007-MCP] D1/RF-01/RF-02: re-resolución SIEMPRE (corre exista o no la
+    # sección mcp, con o sin -Force). Parche QUIRÚRGICO por entrada: solo toca
+    # `command` y `enabled`; preserva type/environment/cwd/timeout/permission/
+    # providers/model/region/plugin. Idempotente.
+    #   - token `__*_CMD__`  -> sustituye por ruta real + enabled=true
+    #   - `{env:<VAR>}`      -> resuelve de `.env.mcp`/entorno; A5: var vacía o
+    #                           ausente = NO resuelto -> ruta real + enabled=true
+    #   - ruta real válida    -> NO se toca (retrocompatibilidad)
+    $tokenMap = [ordered]@{
+        "context-mode"        = @{ Tool = "context-mode";        Var = "CONTEXT_MODE_CMD";    Token = "__CONTEXT_MODE_CMD__" }
+        "codebase-memory-mcp" = @{ Tool = "codebase-memory-mcp"; Var = "CODEBASE_MEMORY_CMD"; Token = "__CODEBASE_MEMORY_CMD__" }
+        "markitdown"          = @{ Tool = "markitdown";          Var = "MARKITDOWN_CMD";      Token = "__MARKITDOWN_CMD__" }
+    }
+    $mcpReasons = [ordered]@{}
+
+    # Lee una variable desde `.env.mcp` (fuente de verdad portable).
+    $readEnvMcp = {
+        param([string]$VarName)
+        $envFile = Join-Path $RootPath ".env.mcp"
+        if (-not (Test-Path -LiteralPath $envFile)) { return $null }
+        try {
+            foreach ($ln in (Get-Content -LiteralPath $envFile -ErrorAction Stop)) {
+                if ($ln -match "^\s*$([regex]::Escape($VarName))\s*=\s*(.*)$") {
+                    $val = $Matches[1].Trim()
+                    if ($val) { return $val }
+                }
+            }
+        } catch { }
+        return $null
+    }
+
+    if ($null -ne $existing.mcp) {
+        # [007-MCP] BUG-1: `$existing.mcp` puede ser PSCustomObject (leído de
+        # JSON) o OrderedDictionary/IDictionary (recién creado arriba). Sobre un
+        # IDictionary, `PSObject.Properties[$name]` devuelve $null (expone
+        # meta-propiedades Count/Keys/...), de modo que la re-resolución se
+        # saltaba TODAS las entradas en el path de creación fresca. Se accede
+        # por indexer cuando es diccionario (mismo patrón que tokenslayer L614).
+        $mcpIsDict = $existing.mcp -is [System.Collections.IDictionary]
         foreach ($name in @($tokenMap.Keys)) {
-            $entry = $existing.mcp.PSObject.Properties[$name]
+            if ($mcpIsDict) {
+                if (-not $existing.mcp.Contains($name)) { continue }
+                $entry = [pscustomobject]@{ Value = $existing.mcp[$name] }
+            } else {
+                $entry = $existing.mcp.PSObject.Properties[$name]
+            }
             if ($null -eq $entry) { continue }
             $cmd0 = @($entry.Value.command)[0]
+
+            $needsResolve = $false
             if ($cmd0 -eq $tokenMap[$name].Token) {
-                $real = Resolve-McpCommand -ToolName $tokenMap[$name].Tool -Token $cmd0
-                if ($real) {
+                $needsResolve = $true
+            } elseif ($cmd0 -and ($cmd0 -match '^\{env:([^}]+)\}$')) {
+                $envVar = $Matches[1]
+                $valProc = [Environment]::GetEnvironmentVariable($envVar)
+                $valFile = & $readEnvMcp $envVar
+                if ([string]::IsNullOrWhiteSpace($valProc) -and [string]::IsNullOrWhiteSpace($valFile)) {
+                    # A5: {env:...} con var vacía/ausente cuenta como NO resuelto.
+                    $needsResolve = $true
+                } else {
+                    # Var disponible -> se conserva {env:...} y se promueve a true.
+                    if (-not $entry.Value.enabled) {
+                        if (-not $DryRun) { $entry.Value.enabled = $true }
+                        $mcpReasons[$name] = "env resuelto ($envVar)"
+                    }
+                }
+            } elseif ([string]::IsNullOrWhiteSpace($cmd0)) {
+                $needsResolve = $true
+            }
+
+            if (-not $needsResolve) {
+                if (-not $mcpReasons.Contains($name)) {
+                    if ($entry.Value.enabled) { $mcpReasons[$name] = "ruta real valida (sin cambios)" }
+                    else { $mcpReasons[$name] = "deshabilitado (sin cambios)" }
+                }
+                continue
+            }
+
+            $real = Resolve-McpCommand -ToolName $tokenMap[$name].Tool -Token $tokenMap[$name].Token
+            if ($real) {
+                if ($DryRun) {
+                    $mcpReasons[$name] = "resolveria a ruta local ($real)"
+                    Write-Info "DryRun: MCP '$name' -> $real (enabled=true)"
+                } else {
                     $entry.Value.command = @($real)
                     $entry.Value.enabled = $true
+                    $mcpReasons[$name] = "ruta resuelta"
                     Write-OK "MCP '$name' re-resuelto a ruta local."
                 }
+            } else {
+                if (-not $DryRun) {
+                    if ($cmd0 -eq $tokenMap[$name].Token) {
+                        $entry.Value.command = @("{env:$($tokenMap[$name].Var)}")
+                    }
+                    $entry.Value.enabled = $false
+                }
+                $mcpReasons[$name] = "herramienta ausente ($($tokenMap[$name].Tool)); enabled=false"
             }
         }
     }
@@ -478,7 +647,51 @@ function Ensure-OpenCodeMcp {
     }
 
     if (-not $DryRun) {
-        $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $opencodePath -Encoding UTF8
+        # [007-MCP] CN-8/CN-9: serializar y VALIDAR el JSON antes de escribir
+        # (no corromper opencode.json). Fail-open: si el round-trip falla, se
+        # conserva el archivo original + WARN.
+        $jsonOut = $existing | ConvertTo-Json -Depth 10
+        $validJson = $true
+        try {
+            $null = $jsonOut | ConvertFrom-Json -ErrorAction Stop
+        } catch {
+            $validJson = $false
+            Write-Warn "El JSON resultante no es válido; se conserva opencode.json intacto (no se escribe). $_"
+        }
+        if ($validJson) {
+            Set-Content -Path $opencodePath -Value $jsonOut -Encoding UTF8
+        }
+    }
+
+    # [007-MCP] D7/RF-08/CN-11: reporte final del bloque mcp resultante + estado
+    # provisto por entrada. Solo rutas locales y nombres; SIN secretos.
+    $reportReasons = [ordered]@{}
+    if ($mcpReasons) { foreach ($k in @($mcpReasons.Keys)) { $reportReasons[$k] = $mcpReasons[$k] } }
+    Write-Host ""
+    Write-Host "  --- MCPs en opencode.json (estado por entrada) ---" -ForegroundColor Cyan
+    if ($null -ne $existing.mcp) {
+        # [007-MCP] BUG-2: enumerar según el tipo real de `mcp`. Sobre un
+        # OrderedDictionary, `PSObject.Properties` lista meta-propiedades
+        # (Count/Keys/Values/...) en vez de las entradas reales. Con -is
+        # [IDictionary] se itera por Keys (mismo patrón que BUG-1/L614).
+        if ($existing.mcp -is [System.Collections.IDictionary]) {
+            $mcpEntries = @($existing.mcp.Keys | ForEach-Object { [pscustomobject]@{ Name = $_; Value = $existing.mcp[$_] } })
+        } else {
+            $mcpEntries = @($existing.mcp.PSObject.Properties | ForEach-Object { [pscustomobject]@{ Name = $_.Name; Value = $_.Value } })
+        }
+        foreach ($prop in $mcpEntries) {
+            $nm = $prop.Name
+            $en = [bool]$prop.Value.enabled
+            $cmd0R = @($prop.Value.command)[0]
+            $reason = ""
+            if ($reportReasons.Contains($nm)) { $reason = $reportReasons[$nm] }
+            elseif ($en) { $reason = "resuelto" }
+            else { $reason = "deshabilitado" }
+            $color = if ($en) { "Green" } else { "DarkYellow" }
+            Write-Host ("    - {0}: enabled={1} ({2})" -f $nm, $en, $reason) -ForegroundColor $color
+        }
+    } else {
+        Write-Host "    (sin sección mcp)" -ForegroundColor DarkGray
     }
 }
 
@@ -1712,6 +1925,93 @@ function Invoke-OrphanDecision {
     }
 }
 
+# [SELF-UPDATE] ADR-0005 relacionado: el bootstrap se auto-actualiza desde el maestro
+# antes de ejecutarse (fail-open, -SkipSelfUpdate para saltar). El sync del paso 3
+# actualiza el kit transversal pero NO este script; aquí se corrige esa brecha.
+function Update-Self {
+    param(
+        [string]$RootPath = "",
+        [string]$RepoUrl = ""
+    )
+
+    if ($DryRun) {
+        Write-Info "DryRun: verificaría self-update contra $RepoUrl"
+        return
+    }
+
+    # [SECURITY] fail-open: no clonar ni re-ejecutar contenido de URLs no confiables.
+    if (-not (Test-TrustedGithubUrl $RepoUrl)) {
+        Write-Warn "[SECURITY] URL de maestro no permitida para self-update: $RepoUrl (solo https://github.com/<owner en allowlist>); se continúa con la versión local."
+        return
+    }
+
+    # Detección del kit maestro: si el repo local YA es el maestro, comparar contra
+    # sí mismo es inútil → saltar (auto-skip automático dentro de Agents_IA_TECH).
+    $localOrigin = ""
+    try {
+        $originOut = git -C $RootPath remote get-url origin 2>$null
+        if ($LASTEXITCODE -eq 0) { $localOrigin = @($originOut)[0] }
+    } catch { }
+    if ([string]::IsNullOrWhiteSpace($localOrigin)) {
+        Write-Warn "git no disponible o remote origin no encontrado; se salta el self-update (se continúa con la versión local)."
+        return
+    }
+    $normLocal = "$localOrigin".Trim().TrimEnd('/')
+    if ($normLocal.EndsWith('.git')) { $normLocal = $normLocal.Substring(0, $normLocal.Length - 4) }
+    $normMaster = "$RepoUrl".Trim().TrimEnd('/')
+    if ($normMaster.EndsWith('.git')) { $normMaster = $normMaster.Substring(0, $normMaster.Length - 4) }
+    if ($normLocal -eq $normMaster) {
+        Write-Info "Repo local es el kit maestro ($normLocal); self-update omitido."
+        return
+    }
+
+    # Clon shallow del maestro a temp (limpiar restos previos).
+    $tempDir = Join-Path $env:TEMP "agents-selfupdate-temp"
+    if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir }
+    try {
+        $cloneOk = $false
+        try {
+            git clone --depth 1 $RepoUrl $tempDir 2>$null | Out-Null
+            $cloneOk = ($LASTEXITCODE -eq 0)
+        } catch { $cloneOk = $false }
+        if (-not $cloneOk) {
+            Write-Warn "No se pudo clonar el maestro ($RepoUrl); sin red o maestro inaccesible; se continúa con la versión local."
+            return
+        }
+
+        # Comparar hash SHA256 del bootstrap local vs el del clon.
+        $localFile = Join-Path $RootPath "scripts\plataformador-bootstrap.ps1"
+        $remoteFile = Join-Path $tempDir "scripts\plataformador-bootstrap.ps1"
+        if (-not (Test-Path $remoteFile)) {
+            Write-Warn "El maestro no contiene scripts/plataformador-bootstrap.ps1; se continúa con la versión local."
+            return
+        }
+        $localHash = (Get-FileHash -Algorithm SHA256 $localFile).Hash
+        $remoteHash = (Get-FileHash -Algorithm SHA256 $remoteFile).Hash
+        if ($localHash -eq $remoteHash) {
+            Write-Info "Bootstrap ya está en la versión del maestro"
+            return
+        }
+
+        # Difieren: sobrescribir el local con la versión del clon y re-ejecutar.
+        Copy-Item -Force $remoteFile $localFile
+        $commitHash = ""
+        try {
+            $revOut = git -C $tempDir rev-parse --short HEAD 2>$null
+            if ($LASTEXITCODE -eq 0) { $commitHash = @($revOut)[0] }
+        } catch { }
+        Write-OK "Bootstrap actualizado desde el maestro (commit $commitHash). Re-ejecutando con los mismos argumentos..."
+        # $script:PSBoundParameters (no el de la función) preserva TODOS los argumentos originales.
+        & $PSCommandPath @script:PSBoundParameters
+        exit $LASTEXITCODE
+    }
+    finally {
+        # [007-MCP] D4/RF-05: limpieza en TODAS las rutas de salida (try/finally)
+        # para no dejar temp dirs huérfanos; el re-exec queda tras la limpieza.
+        if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue }
+    }
+}
+
 # Sync-TransversalKit (T-I1 / RF-01, RF-02, RF-11: absorbe la lógica de sync-agents.ps1)
 # =============================================================================
 # Copia SOLO los transversales del repo maestro. NUNCA toca
@@ -1894,6 +2194,31 @@ function Sync-TransversalKit {
                     continue
                 }
                 Write-Host "  [FILE] $($item.Label)" -ForegroundColor Cyan
+                # [007-MCP] A1/T604: guard del sync sobre opencode.json — preservar
+                # el bloque `mcp` resuelto localmente al copiar la plantilla del
+                # maestro (merge selectivo) para no degradar enabled:true -> tokens.
+                # Idempotente y fail-open: parseo roto -> conserva el local + WARN.
+                if ($item.Label -eq "opencode.json" -and (Test-Path -LiteralPath $dst)) {
+                    $merged = $false
+                    try {
+                        $srcJson = Get-Content -LiteralPath $src -Raw -ErrorAction Stop | ConvertFrom-Json
+                        $dstJson = Get-Content -LiteralPath $dst -Raw -ErrorAction Stop | ConvertFrom-Json
+                        if (($null -ne $dstJson.mcp) -and ($null -ne $srcJson)) {
+                            # Reinsertar el `mcp` local en la plantilla del maestro.
+                            if ($srcJson.PSObject.Properties["mcp"]) {
+                                $srcJson.PSObject.Properties.Remove("mcp")
+                            }
+                            $srcJson | Add-Member -NotePropertyName "mcp" -NotePropertyValue $dstJson.mcp -Force
+                            $srcJson | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $dst -Encoding UTF8
+                            Write-OK "  [GUARD] opencode.json: bloque mcp local PRESERVADO (merge con la plantilla del maestro)."
+                            $merged = $true
+                        }
+                    } catch {
+                        Write-Warn "  [GUARD] opencode.json: no se pudo mergear el bloque mcp local ($_); se conserva el local sin sobrescribir."
+                        $merged = $true
+                    }
+                    if ($merged) { continue }
+                }
                 Copy-Item $src -Destination $dst -Force
             }
         }
@@ -2592,6 +2917,11 @@ Write-Host "===============================================================" -Fo
 $resolvedRoot = (Resolve-Path $ProjectRoot).Path
 Write-Info "Ruta resuelta: $resolvedRoot"
 
+# [SELF-UPDATE] auto-actualización desde el maestro antes de ejecutar (fail-open)
+if (-not $SkipSelfUpdate) {
+    Update-Self -RootPath $resolvedRoot -RepoUrl $RepoUrl
+}
+
 Ensure-Directory (Join-Path $resolvedRoot ".vscode")
 Ensure-Directory (Join-Path $resolvedRoot ".github\hooks")
 Ensure-Directory (Join-Path $resolvedRoot "Documentacion")
@@ -2615,6 +2945,10 @@ if ($SyncOnly) {
 }
 
 Write-Step "1) Validando y preparando la estructura base..."
+# [007-MCP] A2/D2: `.env.mcp` (fuente de verdad portable) se crea ANTES del
+# primer Ensure-OpenCodeMcp para que la resolución de {env:...} sea determinista
+# e idempotente entre los pasos 1 y 4.
+Ensure-McpEnvFile -RootPath $resolvedRoot -Force:$false
 Ensure-ProjectDocumentation $resolvedRoot
 Ensure-MemoryIndex $resolvedRoot
 Ensure-VSCodeSettings $resolvedRoot
@@ -2637,8 +2971,61 @@ if (-not $SkipInstall) {
     Write-Info "Se omite la instalación de dependencias por -SkipInstall."
 }
 
-Write-Step "3) Sincronizando kit transversal (Sync-TransversalKit)..."
-Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
+# [007-MCP] D3/RF-04: -ForceUpgradeTools (opt-in). Reinstala/actualiza las
+# herramientas externas con nombres oficiales exactos, FAIL-OPEN (CN-4/CN-5):
+# fallo -> WARN + continuar; sin el flag no se intenta ninguna instalación.
+# No auto-compila terceros fuera del clon controlado de tokenslayer.
+if ($ForceUpgradeTools) {
+    Write-Step "2b) -ForceUpgradeTools: actualizando herramientas externas (fail-open)..."
+    $upgradeSteps = @(
+        @{ Name = "context-mode";        Cmd = "npm";    Args = @("install", "-g", "context-mode@latest") },
+        @{ Name = "codebase-memory-mcp"; Cmd = "npm";    Args = @("install", "-g", "codebase-memory-mcp@latest") },
+        @{ Name = "markitdown";          Cmd = "python"; Args = @("-m", "pip", "install", "--upgrade", "markitdown[all]") },
+        @{ Name = "graphifyy[mcp]";      Cmd = "uv";     Args = @("tool", "install", "graphifyy[mcp]", "--force") }
+    )
+    foreach ($up in $upgradeSteps) {
+        if (-not (Get-Command $up.Cmd -ErrorAction SilentlyContinue)) {
+            Write-Warn "  - $($up.Name): '$($up.Cmd)' no está en el PATH; upgrade omitido."
+            continue
+        }
+        try {
+            & $up.Cmd @($up.Args) 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) { Write-OK "  - $($up.Name): actualizado" }
+            else { Write-Warn "  - $($up.Name): upgrade falló (exit $LASTEXITCODE); se continúa." }
+        } catch {
+            Write-Warn "  - $($up.Name): upgrade falló: $_; se continúa."
+        }
+    }
+    # tokenslayer: solo BUILD del clon existente (nunca clona terceros).
+    $tsBuildDir = Join-Path $resolvedRoot "proyect_ext\tokenslayer\mcp-server"
+    if ((Get-Command "node" -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath (Join-Path $tsBuildDir "package.json"))) {
+        if ($DryRun) {
+            Write-Info "  - tokenslayer: DryRun (omitido build)"
+        } else {
+            try {
+                & npm --prefix $tsBuildDir install 2>&1 | Out-Null
+                $instOk = ($LASTEXITCODE -eq 0)
+                & npm --prefix $tsBuildDir run build 2>&1 | Out-Null
+                $buildOk = ($LASTEXITCODE -eq 0)
+                if ($instOk -and $buildOk) { Write-OK "  - tokenslayer: build completado" }
+                else { Write-Warn "  - tokenslayer: build falló (install=$instOk build=$buildOk); se continúa." }
+            } catch {
+                Write-Warn "  - tokenslayer: build falló: $_; se continúa."
+            }
+        }
+    } else {
+        Write-Warn "  - tokenslayer: clon ausente en proyect_ext/tokenslayer/mcp-server; build omitido."
+    }
+}
+
+if ($SkipSync) {
+    # [007-MCP] D5/RF-06: modo kit seguro — NO sincronizar el kit transversal
+    # (evita la auto-sobrescritura del maestro); el resto del flujo sigue.
+    Write-Step "3) Sync-TransversalKit OMITIDO (-SkipSync: modo kit seguro)."
+} else {
+    Write-Step "3) Sincronizando kit transversal (Sync-TransversalKit)..."
+    Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
+}
 
 Write-Step "4) Configurando MCPs para OpenCode..."
 Ensure-OpenCodeMcp $resolvedRoot

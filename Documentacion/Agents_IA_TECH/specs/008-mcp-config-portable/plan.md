@@ -407,3 +407,31 @@ Documentacion/Agents_IA_TECH/
 |-----------|------------|--------------------------------------|
 | Cobertura 80% (Quality Gate) | El repo no tiene runtime ni framework de tests (kit de configuración). | Añadir un framework de tests (Pester) al kit excede el alcance y las dependencias del proyecto; se sustituye por escenarios deterministas T-01…T-13 + `DryRun`. |
 | Ampliar `.env.mcp` en lugar de crear un inventario nuevo | Reutilizar la fuente de verdad existente (Ponytail ladder: reutilizar, no crear). | Crear un archivo de inventario separado añadiría una segunda fuente de rutas que habría que sincronizar con `.env.mcp`, violando el principio de fuente única (FR-004). |
+
+---
+
+## Estado actual post-implementación
+
+*Sincronizado desde README.md 2026-09-24*
+
+### MCPs conectados
+- `context-mode` → conectado
+- `codebase-memory-mcp` → conectado
+- `tokenslayer` → conectado
+- `graphify` → conectado
+
+### MCPs con limitación
+- `markitdown` → timeout / no responde en este entorno. Requiere revisión de ruta/binario.
+
+### Configuración
+- `opencode.json` portable, sin rutas absolutas hardcodeadas.
+- Inventario en `.env.mcp` sincronizado.
+- `opencode auth login` es la vía oficial para API keys. No hay placeholders en config versionada.
+
+### Guardrails cumplidos
+- No persistir rutas absolutas: `opencode.json` versionado usa `{env:...}` / rutas relativas.
+- Inventario central único: `.env.mcp` es fuente única de rutas.
+- Tokens en memoria segura: API keys gestionadas con `opencode auth login`.
+- No borrar a ciegas: `.opencode/config.json` con valores reales no se elimina automáticamente.
+- Mecanismo efectivo de resolución: uso de `environment` / ruta real en `command`.
+- Exclusión del sync: `.env.mcp` y `.opencode/config.json` excluidos de sync y control de versiones.

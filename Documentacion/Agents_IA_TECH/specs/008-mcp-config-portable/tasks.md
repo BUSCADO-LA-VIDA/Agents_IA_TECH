@@ -168,3 +168,26 @@
 ## Siguiente fase del pipeline
 - **Fase siguiente**: `speckit-analyze` / `analyze.md`
 - **Objetivo**: revisar consistencia entre spec, plan y tasks, con foco en guardrails de seguridad y decisiones arquitectónicas del bootstrap.
+
+---
+
+## Validación ejecutada
+
+*Sincronizado desde README.md 2026-09-24*
+
+### Pasos de validación
+1. Restaurar backup: `Copy-Item opencode.json.backup opencode.json`
+2. Ejecutar bootstrap: `pwsh scripts/plataformador-bootstrap.ps1`
+3. Verificar JSON válido: `Get-Content opencode.json | ConvertFrom-Json | Out-Null`
+4. Comprobar inventario: `Get-Content .env.mcp` + `git check-ignore .env.mcp`
+5. Validar MCPs habilitados: revisar bloque `mcp` en `opencode.json`, `enabled: true` solo con ruta resuelta
+6. Confirmar exclusión git: `git status --ignored | Select-String ".env.mcp"`
+7. Autenticar secrets: `opencode auth login`
+
+### Estado de validación
+- Restauración y bootstrap ejecutados.
+- `opencode.json` JSON válido sin escapes inválidos.
+- Inventario `.env.mcp` sincronizado y gitignored.
+- MCPs conectados: `context-mode`, `codebase-memory-mcp`, `tokenslayer`, `graphify`.
+- `markitdown` con limitación de timeout.
+- Secrets gestionados vía `opencode auth login`.

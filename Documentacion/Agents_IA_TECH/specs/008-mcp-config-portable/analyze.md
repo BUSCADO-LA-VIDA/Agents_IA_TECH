@@ -288,3 +288,42 @@ Se detectan **4 inconsistencias menores** (H1-H4) y **1 riesgo de seguridad pend
 - **Fase siguiente**: `speckit-converge` / `converge.md`
 - **Objetivo**: evaluar el estado del código actual contra spec/plan/tasks y anexar cualquier trabajo pendiente como nuevas tareas en `tasks.md` para que `speckit-implement` lo complete.
 - **Precondición**: aplicar los ajustes recomendados (sección 6), especialmente la validación de SEC-04 en Fase 0.
+
+---
+
+## Hallazgos de implementación
+
+*Sincronizado desde README.md 2026-09-24*
+
+### Problema original confirmado
+- Error JSON `InvalidEscapeCharacter` por rutas absolutas hardcodeadas.
+- `.opencode/config.json` con placeholders obsoletos y riesgo de fuga de secrets.
+- OpenCode NO auto-carga `.env.mcp` (ADR-0006).
+
+### Solución implementada
+- Restauración de `opencode.json` desde backup.
+- Bootstrap re-resuelve tokens desde `.env.mcp`.
+- Eliminación de `Ensure-OpenCodeConfig` → `Migrate-OpenCodeSecrets` con migración defensiva.
+- Inventario central `.env.mcp` ampliado y ciclo de vida de rutas.
+- Validación JSON sin escapes inválidos.
+
+### Estado actual
+- MCPs conectados: `context-mode`, `codebase-memory-mcp`, `tokenslayer`, `graphify`.
+- `markitdown` con limitación de timeout.
+- Config portable sin rutas absolutas.
+- Secrets en memoria segura vía `opencode auth login`.
+
+### Guardrails cumplidos
+- No persistir rutas absolutas.
+- Inventario central único.
+- Tokens en memoria segura.
+- No borrar a ciegas.
+- Mecanismo efectivo de resolución.
+- Exclusión del sync y control de versiones.
+
+### Referencias
+- spec.md, plan.md, tasks.md, analyze.md
+- ADR-0006 feature 007
+- `scripts/plataformador-bootstrap.ps1`
+- `Documentacion/Agents_IA_TECH/seguridad/kit-gaps.md`
+- `Documentacion/Agents_IA_TECH/seguridad/blindaje-git.md`

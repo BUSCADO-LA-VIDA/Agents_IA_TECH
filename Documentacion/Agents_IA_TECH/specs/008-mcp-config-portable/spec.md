@@ -164,3 +164,36 @@ Como usuario del kit, quiero que mis API keys (NVIDIA, DeepInfra, etc.) se gesti
 - El bootstrap (`scripts/plataformador-bootstrap.ps1`) es la fuente única que genera la config dinámica y portable de MCPs.
 - Un `.opencode/config.json` con valores reales (no placeholders) puede contener credenciales del usuario; el sistema no debe borrarlo a ciegas.
 - La eliminación de `.opencode/config.json` no rompe la resolución de `{env:NVIDIA_API_KEY}` / `{env:DEEPINFRA_API_KEY}` en `opencode.json`, porque esas variables se resuelven desde la memoria segura de opencode (o el entorno del proceso), no desde el archivo eliminado.
+
+---
+
+## Resumen de implementación
+
+*Sincronizado desde README.md 2026-09-24*
+
+### Problema original
+- Error JSON con `InvalidEscapeCharacter` en `opencode.json` por rutas absolutas hardcodeadas.
+- `.opencode/config.json` con placeholders `__PEGAR_AQUI_TU_NVIDIA_API_KEY__`, `__PEGAR_AQUI_TU_DEEPINFRA_API_KEY__`, `__GITHUB_TOKEN_OPCIONAL__` → mecanismo obsoleto y riesgoso.
+- OpenCode NO auto-carga `.env.mcp` (ADR-0006).
+- Falta de inventario central de rutas → divergencia entre arneses.
+
+### Solución implementada
+- Restauración de `opencode.json` desde backup y bootstrap que re-resuelve tokens desde `.env.mcp`.
+- Eliminación de `Ensure-OpenCodeConfig` y reemplazo por `Migrate-OpenCodeSecrets` con migración defensiva.
+- Inventario central `.env.mcp` ampliado con `CONTEXT_MODE_CMD`, `CODEBASE_MEMORY_CMD`, `MARKITDOWN_CMD`, `TOKENSLAYER_CMD`, `GRAPHIFY_CMD`.
+- Ciclo de vida: `Register-McpPath`, `Update-McpPath`, `Remove-McpPath`.
+- Validación JSON sin escapes inválidos.
+
+### Estado actual
+- MCPs conectados: `context-mode`, `codebase-memory-mcp`, `tokenslayer`, `graphify`.
+- `markitdown` con limitación: timeout / no responde.
+- `opencode.json` portable sin rutas absolutas.
+- Secrets gestionados con `opencode auth login`.
+
+### Guardrails cumplidos
+- No persistir rutas absolutas.
+- Inventario central único.
+- Tokens en memoria segura.
+- No borrar a ciegas.
+- Mecanismo efectivo de resolución.
+- Exclusión del sync.

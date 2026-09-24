@@ -6,6 +6,27 @@
 
 ---
 
+## 0. Política MCP: activos siempre (2026-09-23)
+
+**Decisión del usuario**: los MCPs están **activos siempre**, en OpenCode, GitHub Copilot y cualquier agente/arnés.
+
+| Aspecto | Detalle |
+|---------|---------|
+| **opencode.json** | Rutas MCP **globales del usuario** resueltas y commiteadas (instalaciones npm/pip/uv, idénticas en todos los proyectos). Los 5 MCPs `enabled: true`. Sin depender del bootstrap. |
+| **`.vscode/mcp.json`** (Copilot) | Comandos por nombre (`context-mode`, `codebase-memory-mcp`, `markitdown-mcp`) — VS Code los resuelve vía PATH. No necesita rutas absolutas. |
+| **Exportación** | El `sync-agents.ps1` copia `opencode.json` del maestro a todos los proyectos → misma configuración funcional en todos lados. |
+| **Backup** | `opencode.json.backup` (local, excluido de git vía `.git/info/exclude`). |
+| **Bootstrap** | Compatible: solo re-resuelve tokens `__TOKENS__` si existieran; las rutas reales las conserva intactas. |
+
+**Rutas globales commiteadas** (opencode.json):
+- `context-mode` → `C:\Users\tomas\AppData\Roaming\npm\context-mode.cmd`
+- `codebase-memory-mcp` → `C:\Users\tomas\.local\bin\codebase-memory-mcp.exe`
+- `markitdown` → `C:\Python314\Scripts\markitdown.exe`
+
+**Nota**: si cambias de máquina o las rutas cambian, re-resolver manualmente en `opencode.json` (o restaurar desde `opencode.json.backup` y re-ejecutar el bootstrap).
+
+---
+
 ## 1. Estado actual (referencia)
 
 | Índice | Herramienta | Estado | Ubicación |

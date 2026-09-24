@@ -1,6 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "_note": "Plantilla generica (feature 007): los comandos MCP usan {env:CONTEXT_MODE_CMD}/{env:CODEBASE_MEMORY_CMD}/{env:MARKITDOWN_CMD} y arrancan con enabled=false. Al ejecutar scripts/plataformador-bootstrap.ps1 se crea .env.mcp (por proyecto, gitignored) con las rutas locales resueltas y el runtime promueve las entradas a enabled=true. No commitear rutas absolutas.",
+  "region": "global",
+  "_note": "Plantilla generica RF-S6: los __TOKENS__ se re-resuelven a rutas locales al ejecutar scripts/plataformador-bootstrap.ps1 (entradas con token arrancan degradadas con enabled=false + WARN). No commitear rutas absolutas.",
   "model": "groq-custom/llama-3.3-70b-versatile",
   "small_model": "groq-custom/llama-3.1-8b-instant",
   "default_agent": "build",
@@ -63,21 +64,21 @@
     "context-mode": {
       "type": "local",
       "command": [
-        "{env:CONTEXT_MODE_CMD}"
+        "C:\\Users\\tomas\\AppData\\Roaming\\npm\\context-mode.ps1"
       ],
       "enabled": true
     },
     "codebase-memory-mcp": {
       "type": "local",
       "command": [
-        "{env:CODEBASE_MEMORY_CMD}"
+        "C:\\Users\\tomas\\.local\\bin\\codebase-memory-mcp.exe"
       ],
       "enabled": true
     },
     "markitdown": {
       "type": "local",
       "command": [
-        "{env:MARKITDOWN_CMD}"
+        "C:\\Python314\\Scripts\\markitdown.exe"
       ],
       "enabled": true
     },
@@ -87,7 +88,7 @@
         "node",
         "proyect_ext/tokenslayer/mcp-server/build/index.js"
       ],
-      "enabled": false
+      "enabled": true
     },
     "graphify": {
       "type": "local",
@@ -97,7 +98,7 @@
         "graphify.serve",
         "graphify-out/graph.json"
       ],
-      "enabled": false
+      "enabled": true
     }
   },
   "lsp": {

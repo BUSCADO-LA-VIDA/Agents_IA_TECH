@@ -1,7 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "region": "global",
-  "_note": "Rutas MCP globales del usuario (instalaciones npm/pip/uv, identicas en todos los proyectos). Los MCPs quedan activos siempre, sin depender del bootstrap. El bootstrap conserva estas rutas (solo re-resuelve tokens __TOKENS__ si existieran). Backup: opencode.json.backup (local).",
+  "_note": "Plantilla generica RF-S6: los __TOKENS__ se re-resuelven a rutas locales al ejecutar scripts/plataformador-bootstrap.ps1 (entradas con token arrancan degradadas con enabled=false + WARN). No commitear rutas absolutas.",
   "model": "groq-custom/llama-3.3-70b-versatile",
   "small_model": "groq-custom/llama-3.1-8b-instant",
   "default_agent": "build",
@@ -64,23 +63,23 @@
     "context-mode": {
       "type": "local",
       "command": [
-        "C:\\Users\\tomas\\AppData\\Roaming\\npm\\context-mode.cmd"
+        "__CONTEXT_MODE_CMD__"
       ],
-      "enabled": true
+      "enabled": false
     },
     "codebase-memory-mcp": {
       "type": "local",
       "command": [
-        "C:\\Users\\tomas\\.local\\bin\\codebase-memory-mcp.exe"
+        "__CODEBASE_MEMORY_CMD__"
       ],
-      "enabled": true
+      "enabled": false
     },
     "markitdown": {
       "type": "local",
       "command": [
-        "C:\\Python314\\Scripts\\markitdown.exe"
+        "__MARKITDOWN_CMD__"
       ],
-      "enabled": true
+      "enabled": false
     },
     "tokenslayer": {
       "type": "local",

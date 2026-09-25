@@ -2118,6 +2118,19 @@ function Invoke-UpgradeFramework {
 
     Write-Step "  [upgrade_framework] Sincronizando dependencias externas (proyect_ext/)..."
 
+    # [011-FIX] Copiar manifest maestro si no existe local (idempotente).
+    $kitRoot = (Split-Path -Parent $PSScriptRoot)
+    $masterManifest = Join-Path $kitRoot "dependencias-manifest.yml"
+    $localManifest = Join-Path $RootPath "dependencias-manifest.yml"
+    if (-not (Test-Path -LiteralPath $localManifest) -and (Test-Path -LiteralPath $masterManifest)) {
+        if ($DryRun) {
+            Write-Info "  [upgrade_framework] DryRun: copiaría manifest plantilla $masterManifest -> $localManifest"
+        } else {
+            Copy-Item -LiteralPath $masterManifest -Destination $localManifest -Force
+            Write-OK "  [upgrade_framework] Manifest plantilla copiado: $localManifest"
+        }
+    }
+
     # Resolver ruta del script upgrade_framework.ps1 (en la raíz del proyecto, copiado por Sync-TransversalKit).
     $upgradeScript = Join-Path $RootPath "upgrade_framework.ps1"
     if (-not (Test-Path -LiteralPath $upgradeScript)) {

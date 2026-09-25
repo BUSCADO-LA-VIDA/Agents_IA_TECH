@@ -408,8 +408,8 @@ function Ensure-McpEnvFile {
 function Update-McpEnvFile {
     param(
         [string]$RootPath,
-        [ordered]$McpReasons,
-        [ordered]$TokenMap,
+        [System.Collections.Specialized.OrderedDictionary]$McpReasons,
+        [System.Collections.Specialized.OrderedDictionary]$TokenMap,
         $ExistingMcp,
         [bool]$McpIsDict
     )

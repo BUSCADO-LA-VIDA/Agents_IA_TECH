@@ -3080,27 +3080,7 @@ if ($ForceUpgradeTools) {
             Write-Warn "  - $($up.Name): upgrade falló: $_; se continúa."
         }
     }
-    # tokenslayer: solo BUILD del clon existente (nunca clona terceros).
-    $tsBuildDir = Join-Path $resolvedRoot "proyect_ext\tokenslayer\mcp-server"
-    if ((Get-Command "node" -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath (Join-Path $tsBuildDir "package.json"))) {
-        if ($DryRun) {
-            Write-Info "  - tokenslayer: DryRun (omitido build)"
-        } else {
-            try {
-                & npm --prefix $tsBuildDir install 2>&1 | Out-Null
-                $instOk = ($LASTEXITCODE -eq 0)
-                & npm --prefix $tsBuildDir run build 2>&1 | Out-Null
-                $buildOk = ($LASTEXITCODE -eq 0)
-                if ($instOk -and $buildOk) { Write-OK "  - tokenslayer: build completado" }
-                else { Write-Warn "  - tokenslayer: build falló (install=$instOk build=$buildOk); se continúa." }
-            } catch {
-                Write-Warn "  - tokenslayer: build falló: $_; se continúa."
-            }
-        }
-    } else {
-        Write-Warn "  - tokenslayer: clon ausente en proyect_ext/tokenslayer/mcp-server; build omitido."
     }
-}
 
 if ($SkipSync) {
     # [007-MCP] D5/RF-06: modo kit seguro — NO sincronizar el kit transversal
@@ -3109,6 +3089,31 @@ if ($SkipSync) {
 } else {
     Write-Step "3) Sincronizando kit transversal (Sync-TransversalKit)..."
     Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
+    
+    # [007-MCP] D3/RF-04: -ForceUpgradeTools — build de tokenslayer DESPUÉS del sync
+    # (el sync clona proyect_ext/tokenslayer/; aquí compilamos si existe).
+    if ($ForceUpgradeTools) {
+        Write-Step "3b) -ForceUpgradeTools: compilando tokenslayer (fail-open)..."
+        $tsBuildDir = Join-Path $resolvedRoot "proyect_ext\tokenslayer\mcp-server"
+        if ((Get-Command "node" -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath (Join-Path $tsBuildDir "package.json"))) {
+            if ($DryRun) {
+                Write-Info "  - tokenslayer: DryRun (omitido build)"
+            } else {
+                try {
+                    & npm --prefix $tsBuildDir install 2>&1 | Out-Null
+                    $instOk = ($LASTEXITCODE -eq 0)
+                    & npm --prefix $tsBuildDir run build 2>&1 | Out-Null
+                    $buildOk = ($LASTEXITCODE -eq 0)
+                    if ($instOk -and $buildOk) { Write-OK "  - tokenslayer: build completado" }
+                    else { Write-Warn "  - tokenslayer: build falló (install=$instOk build=$buildOk); se continúa." }
+                } catch {
+                    Write-Warn "  - tokenslayer: build falló: $_; se continúa."
+                }
+            }
+        } else {
+            Write-Warn "  - tokenslayer: clon ausente en proyect_ext/tokenslayer/mcp-server; build omitido."
+        }
+    }
 }
 
 Write-Step "4) Configurando MCPs para OpenCode..."

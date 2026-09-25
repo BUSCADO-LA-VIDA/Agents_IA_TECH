@@ -2118,9 +2118,8 @@ function Invoke-UpgradeFramework {
 
     Write-Step "  [upgrade_framework] Sincronizando dependencias externas (proyect_ext/)..."
 
-    # Resolver ruta del script upgrade_framework.ps1 (en la raíz del kit maestro).
-    $kitRoot = (Split-Path -Parent $PSScriptRoot)
-    $upgradeScript = Join-Path $kitRoot "upgrade_framework.ps1"
+    # Resolver ruta del script upgrade_framework.ps1 (en la raíz del proyecto, copiado por Sync-TransversalKit).
+    $upgradeScript = Join-Path $RootPath "upgrade_framework.ps1"
     if (-not (Test-Path -LiteralPath $upgradeScript)) {
         Write-Warn "  [upgrade_framework] Script no encontrado en $upgradeScript; se omite (fail-open)."
         return
@@ -2213,7 +2212,8 @@ function Sync-TransversalKit {
         "AGENTS.md",
         "opencode.json",
         "README.md",
-        "sync-agents.ps1"
+        "sync-agents.ps1",
+        "upgrade_framework.ps1"
     )
 
     if ($DryRun) {
@@ -2256,15 +2256,8 @@ function Sync-TransversalKit {
             @{ Source = (Join-Path $tempDir "AGENTS.md");                  Target = (Join-Path $RootPath "AGENTS.md");                  Type = "File"; Label = "AGENTS.md" },
             @{ Source = (Join-Path $tempDir "opencode.json");              Target = (Join-Path $RootPath "opencode.json");              Type = "File"; Label = "opencode.json" },
             @{ Source = (Join-Path $tempDir "README.md");                  Target = (Join-Path $RootPath "README.md");                  Type = "File"; Label = "README.md" },
-            @{ Source = (Join-Path $tempDir "sync-agents.ps1");            Target = (Join-Path $RootPath "sync-agents.ps1");            Type = "File"; Label = "sync-agents.ps1" }
-        )
-
-        foreach ($item in $transversalItems) {
-            $src = $item.Source
-            $dst = $item.Target
-            if (-not (Test-Path $src)) {
-                Write-Host "  [SKIP] $($item.Label) — no existe en repo maestro" -ForegroundColor DarkGray
-                continue
+        @{ Source = (Join-Path $tempDir "sync-agents.ps1");            Target = (Join-Path $RootPath "sync-agents.ps1");            Type = "File"; Label = "sync-agents.ps1" },
+        @{ Source = (Join-Path $tempDir "upgrade_framework.ps1");      Target = (Join-Path $RootPath "upgrade_framework.ps1");      Type = "File"; Label = "upgrade_framework.ps1" }
             }
             $dstDir = if ($item.Type -eq "File") { Split-Path $dst -Parent } else { $dst }
             if (-not (Test-Path $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }

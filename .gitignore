@@ -29,3 +29,5 @@ revisar_manualmente/
 # Grafos Graphify (artefactos regenerables — nunca versionar; mitiga subir .env/claves/datos no requeridos)
 graphify-out/
 
+
+.bootstrap-state.json

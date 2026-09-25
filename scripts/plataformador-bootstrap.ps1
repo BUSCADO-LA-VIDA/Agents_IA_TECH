@@ -395,13 +395,87 @@ function Ensure-McpEnvFile {
     $lines.Add("# [007-MCP] Rutas MCP resueltas localmente (NO se versiona; gitignored).") | Out-Null
     $lines.Add("# Fuente de verdad portable. OpenCode referencia {env:<NAME>} en opencode.json.") | Out-Null
     foreach ($var in @($tools.Keys)) {
-        $real = Resolve-McpCommand -ToolName $tools[$var] -Token "__$($var)__"
-        if (-not $real) { $real = "" }
-        $lines.Add("$var=$real") | Out-Null
+        # Placeholders vacíos; la resolución real ocurre en Ensure-OpenCodeMcp
+        $lines.Add("$var=") | Out-Null
     }
     Set-Content -LiteralPath $envPath -Value $lines -Encoding UTF8
-    Write-OK ".env.mcp creado con las rutas MCP resueltas: $envPath"
+    Write-OK ".env.mcp creado con plantilla básica (valores vacíos; se resuelven en Ensure-OpenCodeMcp): $envPath"
     Add-McpEnvGitignore -RootPath $RootPath
+}
+
+# [007-MCP] D2: Actualiza .env.mcp con las rutas MCP resueltas.
+# Mantiene la plantilla básica + valores resueltos. Idempotente.
+function Update-McpEnvFile {
+    param(
+        [string]$RootPath,
+        [ordered]$McpReasons,
+        [ordered]$TokenMap,
+        $ExistingMcp,
+        [bool]$McpIsDict
+    )
+
+    $envPath = Join-Path $RootPath ".env.mcp"
+    if (-not (Test-Path -LiteralPath $envPath)) {
+        # Si no existe, lo crea Ensure-McpEnvFile en el paso 1
+        return
+    }
+
+    # Leer el contenido actual
+    $currentLines = @(Get-Content -LiteralPath $envPath -ErrorAction SilentlyContinue)
+    $updatedLines = [System.Collections.Generic.List[string]]::new()
+    $hasHeader = $false
+
+    foreach ($line in $currentLines) {
+        if ($line -match '^#') {
+            $updatedLines.Add($line) | Out-Null
+            $hasHeader = $true
+            continue
+        }
+        if ($line -match '^\s*(\w+)\s*=\s*(.*)$') {
+            $varName = $Matches[1]
+            $currentValue = $Matches[2].Trim()
+            # Si ya tiene valor y no es un placeholder vacío, conservarlo
+            # Si está vacío, intentar usar la ruta resuelta del MCP correspondiente
+            if (-not [string]::IsNullOrWhiteSpace($currentValue)) {
+                $updatedLines.Add("$varName=$currentValue") | Out-Null
+            } else {
+                # Buscar la ruta resuelta en el mcp actualizado
+                $resolvedPath = $null
+                foreach ($name in @($TokenMap.Keys)) {
+                    if ($TokenMap[$name].Var -eq $varName) {
+                        $entry = $null
+                        if ($McpIsDict -and $ExistingMcp.Contains($name)) {
+                            $entry = $ExistingMcp[$name]
+                        } elseif (-not $McpIsDict) {
+                            $entry = $ExistingMcp.PSObject.Properties[$name]
+                        }
+                        if ($entry -and $entry.Value.command) {
+                            $resolvedPath = @($entry.Value.command)[0]
+                        }
+                        break
+                    }
+                }
+                if ($resolvedPath) {
+                    $updatedLines.Add("$varName=$resolvedPath") | Out-Null
+                } else {
+                    $updatedLines.Add("$varName=") | Out-Null
+                }
+            }
+        } else {
+            $updatedLines.Add($line) | Out-Null
+        }
+    }
+
+    # Si no tenía header, agregar uno básico
+    if (-not $hasHeader) {
+        $headerLines = [System.Collections.Generic.List[string]]::new()
+        $headerLines.Add("# [007-MCP] Rutas MCP resueltas localmente (NO se versiona; gitignored).") | Out-Null
+        $headerLines.Add("# Fuente de verdad portable. OpenCode referencia {env:<NAME>} en opencode.json.") | Out-Null
+        $updatedLines = $headerLines + $updatedLines
+    }
+
+    Set-Content -LiteralPath $envPath -Value $updatedLines -Encoding UTF8
+    Write-OK ".env.mcp actualizado con rutas MCP resueltas: $envPath"
 }
 
 # [007-MCP] D2/T303: agrega `.env.mcp` a .gitignore con append idempotente
@@ -509,6 +583,12 @@ function Ensure-OpenCodeMcp {
         return $null
     }
 
+    # [007-MCP] Determinar si mcp es diccionario (para acceso correcto a propiedades)
+    $mcpIsDict = $false
+    if ($null -ne $existing.mcp) {
+        $mcpIsDict = $existing.mcp -is [System.Collections.IDictionary]
+    }
+
     if ($null -ne $existing.mcp) {
         # [007-MCP] BUG-1: `$existing.mcp` puede ser PSCustomObject (leído de
         # JSON) o OrderedDictionary/IDictionary (recién creado arriba). Sobre un
@@ -516,7 +596,6 @@ function Ensure-OpenCodeMcp {
         # meta-propiedades Count/Keys/...), de modo que la re-resolución se
         # saltaba TODAS las entradas en el path de creación fresca. Se accede
         # por indexer cuando es diccionario (mismo patrón que tokenslayer L614).
-        $mcpIsDict = $existing.mcp -is [System.Collections.IDictionary]
         foreach ($name in @($tokenMap.Keys)) {
             if ($mcpIsDict) {
                 if (-not $existing.mcp.Contains($name)) { continue }
@@ -661,6 +740,11 @@ function Ensure-OpenCodeMcp {
         if ($validJson) {
             Set-Content -Path $opencodePath -Value $jsonOut -Encoding UTF8
         }
+    }
+
+    # [007-MCP] D2: Actualizar .env.mcp con las rutas resueltas (fuente de verdad portable)
+    if (-not $DryRun) {
+        Update-McpEnvFile -RootPath $RootPath -McpReasons $mcpReasons -TokenMap $tokenMap -ExistingMcp $existing.mcp -McpIsDict $mcpIsDict
     }
 
     # [007-MCP] D7/RF-08/CN-11: reporte final del bloque mcp resultante + estado
@@ -2948,7 +3032,7 @@ Write-Step "1) Validando y preparando la estructura base..."
 # [007-MCP] A2/D2: `.env.mcp` (fuente de verdad portable) se crea ANTES del
 # primer Ensure-OpenCodeMcp para que la resolución de {env:...} sea determinista
 # e idempotente entre los pasos 1 y 4.
-Ensure-McpEnvFile -RootPath $resolvedRoot -Force:$false
+Ensure-McpEnvFile -RootPath $resolvedRoot -Force:$Force
 Ensure-ProjectDocumentation $resolvedRoot
 Ensure-MemoryIndex $resolvedRoot
 Ensure-VSCodeSettings $resolvedRoot
@@ -3134,3 +3218,11 @@ Write-Host "  4. Recargar la ventana de VS Code del proyecto si hizo falta aplic
 Write-Host "  5. Reiniciar OpenCode para cargar la nueva configuración MCP" -ForegroundColor White
 Write-Host "  6. Usar comandos de verificación manual si necesitas confirmar" -ForegroundColor White
 
+
+# Invocar actualización de MCPs
+$updateScript = Join-Path $PSScriptRoot "update-mcp.ps1"
+if (Test-Path -LiteralPath $updateScript) {
+    & $updateScript -Quick
+} else {
+    Write-Warn "No se encontró scripts/update-mcp.ps1; se omite la actualización automática."
+}

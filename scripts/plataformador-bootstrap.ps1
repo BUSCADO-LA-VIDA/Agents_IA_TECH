@@ -2096,6 +2096,68 @@ function Update-Self {
     }
 }
 
+# [011-BOOTSTRAP-UPGRADE] Invoca upgrade_framework para sincronizar dependencias
+# externas (proyect_ext/) desde dependencias-manifest.yml. Fail-open, gated por
+# -ForceUpgradeTools, respeta -DryRun. Idempotente.
+function Invoke-UpgradeFramework {
+    param(
+        [string]$RootPath = "",
+        [switch]$ForceUpgradeTools,
+        [switch]$DryRun
+    )
+
+    if (-not $RootPath) {
+        Write-Warn "Invoke-UpgradeFramework: RootPath vacío; se omite."
+        return
+    }
+
+    if (-not $ForceUpgradeTools) {
+        Write-Info "Invoke-UpgradeFramework: -ForceUpgradeTools no especificado; se omite sync de dependencias."
+        return
+    }
+
+    Write-Step "  [upgrade_framework] Sincronizando dependencias externas (proyect_ext/)..."
+
+    # Resolver ruta del script upgrade_framework.ps1 (en la raíz del kit maestro).
+    $kitRoot = (Split-Path -Parent $PSScriptRoot)
+    $upgradeScript = Join-Path $kitRoot "upgrade_framework.ps1"
+    if (-not (Test-Path -LiteralPath $upgradeScript)) {
+        Write-Warn "  [upgrade_framework] Script no encontrado en $upgradeScript; se omite (fail-open)."
+        return
+    }
+
+    # Construir argumentos para invocación.
+    $invokeArgs = @(
+        "-RootPath", $RootPath
+    )
+    if ($ForceUpgradeTools) { $invokeArgs += "-ForceUpgradeTools" }
+    if ($DryRun) { $invokeArgs += "-DryRun" }
+
+    # Invocación fail-open: try/catch, WARN + continue, exit code ignorado.
+    try {
+        Write-Info "  [upgrade_framework] Ejecutando: pwsh -NoProfile -File $upgradeScript $($invokeArgs -join ' ')"
+        if ($DryRun) {
+            Write-Info "  [upgrade_framework] DryRun: simula sync de dependencias (no escribe)."
+        } else {
+            $exitCode = 0
+            try {
+                pwsh -NoProfile -File $upgradeScript @invokeArgs 2>&1 | ForEach-Object { Write-Host "    $_" }
+                $exitCode = $LASTEXITCODE
+            } catch {
+                $exitCode = 1
+                Write-Warn "  [upgrade_framework] Excepción: $_"
+            }
+            if ($exitCode -ne 0) {
+                Write-Warn "  [upgrade_framework] Terminó con exit code $exitCode (fail-open: se continúa)."
+            } else {
+                Write-OK "  [upgrade_framework] Sincronización completada."
+            }
+        }
+    } catch {
+        Write-Warn "  [upgrade_framework] Error invocando script: $_ (fail-open: se continúa)."
+    }
+}
+
 # Sync-TransversalKit (T-I1 / RF-01, RF-02, RF-11: absorbe la lógica de sync-agents.ps1)
 # =============================================================================
 # Copia SOLO los transversales del repo maestro. NUNCA toca
@@ -3089,6 +3151,13 @@ if ($SkipSync) {
 } else {
     Write-Step "3) Sincronizando kit transversal (Sync-TransversalKit)..."
     Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
+    
+    # [011-BOOTSTRAP-UPGRADE] Invocar upgrade_framework para sincronizar dependencias
+    # externas (proyect_ext/) ANTES de compilar tokenslayer. Fail-open, gated por
+    # -ForceUpgradeTools, respeta -DryRun.
+    if ($ForceUpgradeTools) {
+        Invoke-UpgradeFramework -RootPath $resolvedRoot -ForceUpgradeTools -DryRun:$DryRun
+    }
     
     # [007-MCP] D3/RF-04: -ForceUpgradeTools — build de tokenslayer DESPUÉS del sync
     # (el sync clona proyect_ext/tokenslayer/; aquí compilamos si existe).

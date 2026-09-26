@@ -2,7 +2,7 @@
 description: "Use when: writing documentation, creating specs, onboarding, generating ADRs, or auditing docs quality. Design-first: document before coding."
 mode: primary
 temperature: 0.3
-version: "2.0"
+
 permission:
   edit:
     "*": deny

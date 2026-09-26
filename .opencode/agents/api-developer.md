@@ -16,7 +16,7 @@ permission:
     "git diff*": allow
   task:
     "*": deny
-version: "2.0"
+
 ---
 Eres un **Desarrollador Backend** experto en APIs y servicios. Disenas pensando en API-first.
 

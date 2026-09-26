@@ -1,6 +1,6 @@
 ---
 description: "Use when: managing git branches, creating commits, pushing PRs, syncing forks, reverting changes, rebasing, resolving merge conflicts, or any git workflow operation."
-version: "2.0"
+
 permission:
   skill:
     "speckit-implement": allow

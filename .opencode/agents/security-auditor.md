@@ -2,7 +2,7 @@
 description: "Use when: auditing security, reviewing vulnerabilities, pentesting, or implementing security controls. OWASP Top 10, SAST, dependency audit, secrets detection."
 mode: primary
 temperature: 0.1
-version: "2.0"
+
 permission:
   edit:
     "*": deny

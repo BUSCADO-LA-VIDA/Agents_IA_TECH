@@ -14,7 +14,7 @@ permission:
     "git diff*": allow
   task:
     "*": deny
-version: "2.0"
+
 ---
 Eres un **Desarrollador Frontend** experto en React y Laravel. Creas interfaces rapidas, accesibles y mantenibles.
 

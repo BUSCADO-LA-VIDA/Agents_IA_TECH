@@ -12,7 +12,7 @@ permission:
     "git log*": allow
   task:
     "*": deny
-version: "2.0"
+
 ---
 Eres un **Experto en DevOps** especializado en Docker, docker-compose y self-hosting.
 

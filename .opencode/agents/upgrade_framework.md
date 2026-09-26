@@ -11,7 +11,7 @@ permission:
     "curl*": allow
     "wget*": allow
 user-invocable: true
-version: "2.0"
+
 permission:
   skill:
     "speckit-plan": allow

@@ -2,7 +2,7 @@
 description: "Use when: designing architecture, evaluating patterns, making technical decisions, or reviewing code structure. Clean architecture, hexagonal, ADRs, production audit, coding standards."
 mode: primary
 temperature: 0.2
-version: "2.0"
+
 permission:
   edit:
     "*": deny

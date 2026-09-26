@@ -31,3 +31,9 @@ graphify-out/
 
 
 .bootstrap-state.json
+
+# Permitir versionar manifest
+!dependencias-manifest.yml
+
+# Manifest versionado
+!dependencias-manifest.yml

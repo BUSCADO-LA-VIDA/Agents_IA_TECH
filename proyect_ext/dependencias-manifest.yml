@@ -1,0 +1,14 @@
+dependencias_externas:
+  context-mode:
+    version_actual: '1.0.0'
+    upgrade: true
+  codebase-memory-mcp:
+    version_actual: '1.0.0'
+    upgrade: true
+  graphify:
+    version_actual: '1.0.0'
+    upgrade: true
+aplicaciones:
+  Agents_IA_TECH:
+    version_actual: '0.1.0'
+    upgrade: true

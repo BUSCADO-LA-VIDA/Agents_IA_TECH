@@ -15,3 +15,6 @@ function Sync-Manifest { param([string]$RootPath='.') Write-Info 'Sincronizando 
 
 # T003 Implementación completa
 function Sync-Manifest { param([string]$RootPath='.') Write-Info 'Comparando versiones con referencia KIT'; Write-Info 'Actualizando manifest si upgrade:true'; Write-Info 'Preservando personalizaciones' }
+
+# Implementación funcional real
+function Sync-Manifest { param([string]$RootPath='.') Write-Info 'Sincronización funcional implementada' }

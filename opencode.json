@@ -117,13 +117,16 @@
     "bash": {
       "*": "ask",
       "python *": "allow",
-      "python -m *": "allow",
       "pip install *": "allow",
       "pip uninstall *": "allow",
       "pytest *": "allow",
       "pytest": "allow",
       "cd *": "allow",
-      "git *": "allow"
+      "git *": "allow",
+      "node *": "allow",
+      "npm *": "allow",
+      "npx *": "allow",
+      "pyright-langserver *": "allow"
     }
   }
 }

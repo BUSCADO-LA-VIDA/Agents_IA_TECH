@@ -1782,6 +1782,11 @@ function Invoke-UpgradeFramework {
 # scripts/sync-kit.ps1 (script standalone migrado desde Sync-TransversalKit).
 # Fail-open: si sync-kit.ps1 no existe o falla, se avisa y se continúa.
 # =============================================================================
+# =============================================================================
+# Invoke-SyncKit (Spec 015): delega la sincronización del kit transversal en
+# scripts/sync-kit.ps1 (script standalone migrado desde Sync-TransversalKit).
+# Fail-open: si sync-kit.ps1 no existe o falla, se avisa y se continúa.
+# =============================================================================
 function Invoke-SyncKit {
     param(
         [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
@@ -1791,8 +1796,20 @@ function Invoke-SyncKit {
 
     $syncKitScript = Join-Path $PSScriptRoot "sync-kit.ps1"
     if (-not (Test-Path -LiteralPath $syncKitScript)) {
-        Write-Warn "sync-kit.ps1 no encontrado en $syncKitScript; se omite la sincronización (fail-open)."
-        return
+        # Arranque en frio: descargar sync-kit.ps1 desde el repo maestro
+        try {
+            $repoHost = $RepoUrl -replace 'https://github.com/', ''
+            $repoHost = $repoHost -replace '/.*$', ''
+            $rawUrl = "https://raw.githubusercontent.com/$repoHost/master/scripts/sync-kit.ps1"
+            Write-Info "sync-kit.ps1 no encontrado localmente, descargando desde $rawUrl..."
+            $tmp = Join-Path $env:TEMP "sync-kit.ps1.download"
+            Invoke-WebRequest -Uri $rawUrl -OutFile $tmp -UseBasicParsing -ErrorAction Stop
+            Copy-Item -LiteralPath $tmp -Destination $syncKitScript -Force
+            Write-OK "sync-kit.ps1 descargado a $syncKitScript"
+        } catch {
+            Write-Warn "sync-kit.ps1 no encontrado en $syncKitScript y no se pudo descargar: $_; se omite la sincronización (fail-open)."
+            return
+        }
     }
 
     $syncArgs = @("-RepoUrl", $RepoUrl, "-RootPath", $RootPath, "-OrphanAction", $OrphanAction)

@@ -3311,3 +3311,12 @@ if (Test-Path -LiteralPath $updateScript) {
 } else {
     Write-Warn "No se encontró scripts/update-mcp.ps1; se omite la actualización automática."
 }
+
+# 015 - Sync-Manifest placeholder
+function Sync-Manifest { param([string]$RootPath='.') Write-Info 'Sync-Manifest ejecutado' }
+
+# 015 Modular import
+Import-Module (Join-Path $PSScriptRoot 'modules\Manifest\ManifestManager.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'modules\Manifest\ManifestReference.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'modules\Manifest\ManifestHooks.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'modules\Utils\YamlHelper.psm1') -Force

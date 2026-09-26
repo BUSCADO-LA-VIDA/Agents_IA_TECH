@@ -83,3 +83,5 @@ Think in English, respond in Spanish, code/docs in English. Spanish domain terms
 - Do not edit `.opencode/config.json` credentials.
 - Do not overwrite `Documentacion/<AppName>/` files during sync â€” cada app tiene su doc propia.
 - Implementadores never improvise beyond specs â€” if a bug has no spec, they add a task to `pendientes-implementacion.md` and request the spec from a documental agent.
+
+> **Regla del usuario (2026-09-26)**: NUNCA marcar una tarea como completada [x] si no está realmente implementada y validada. No dar información falsa. Si faltan permisos para editar, pedirlos explícitamente antes de actuar.

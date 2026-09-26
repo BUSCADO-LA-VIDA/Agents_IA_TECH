@@ -51,7 +51,7 @@ Regla: leer archivos directos gasta mas tokens. Usar los MCPs primero; si no est
 
 ## 🔄 Pipeline Speckit Orquestado (orden estricto)
 
-El pipeline **NUNCA salta fases**. Cada fase produce su artefacto y requiere validacion del usuario antes de continuar.
+El pipeline **NUNCA salta fases**. Cada fase produce su artefacto. La validacion del usuario se pide SOLO en puntos de decision reales (cambio de fase con impacto, decisiones de arquitectura, o necesidad de permisos de escritura), NO en pasos mecanicos (verificar artefactos, leer contexto, ejecutar analisis, confirmar estado).
 
 | Fase | Comando Speckit | Artefacto de salida | Validacion usuario | Delegacion (matriz) |
 |------|-----------------|---------------------|-------------------|---------------------|
@@ -65,7 +65,7 @@ El pipeline **NUNCA salta fases**. Cada fase produce su artefacto y requiere val
 **Reglas del pipeline:**
 - NO saltes fases -- orden estricto: specify -> plan -> tasks -> analyze -> converge -> implement
 - SIEMPRE consulta MCPs/Graphify/codebase-memory **ANTES** de cada fase (ver seccion Contexto Previo)
-- SIEMPRE pregunta al usuario antes de pasar a la siguiente fase
+- Pregunta al usuario SOLO en puntos de decision reales: cambio de fase con impacto, decisiones de arquitectura, o necesidad de permisos de escritura. NO preguntes en pasos mecanicos (verificar artefactos, leer contexto, ejecutar analisis, confirmar estado) -- ejecutalos directamente
 - Si el usuario pide cambios -> **reinicia el ciclo desde Constitution Check**
 - `pensador` NUNCA implementa codigo; solo orquesta, valida y delega
 
@@ -265,8 +265,8 @@ Tras ejecutar el bootstrap (`plataformador-bootstrap.ps1`), llevas el proyecto a
 1. `pensador` delega en `Agent-SSD` (ej: "ejecuta speckit-specify para <app>")
 2. `Agent-SSD` ejecuta y documenta
 3. `Agent-SSD` **reporta al `pensador`**: artefactos generados + ubicacion + siguiente fase
-4. `pensador` valida y **continua el flujo cuando corresponde**: pregunta al usuario la validacion de la fase antes de delegar la siguiente
-5. `Agent-SSD` **NUNCA auto-continua** a la siguiente fase — el pipeline lo gobierna el `pensador` con validacion del usuario entre fases
+4. `pensador` valida y **continua el flujo cuando corresponde**: pregunta al usuario la validacion SOLO en puntos de decision reales (cambio de fase con impacto, decisiones de arquitectura, permisos de escritura). Los pasos mecanicos (verificar artefactos, confirmar estado, leer contexto) se ejecutan directamente sin preguntar
+5. `Agent-SSD` **NUNCA auto-continua** a la siguiente fase — el pipeline lo gobierna el `pensador`; la validacion del usuario se pide solo en puntos de decision reales
 6. En cualquier momento del ciclo (proyectos vivos), `pensador` puede delegar en `Agent-SSD` crear/actualizar CUALQUIER documento speckit (constitution, spec, plan, tasks, analyze, converge)
 
 **Excepcion kit**: en el proyecto kit (sin `src/`), el `pensador` puede ejecutar speckit directamente (los artefactos van a `Documentacion/<AppName>/specs/`, que si puede escribir).
@@ -422,7 +422,7 @@ Los agentes documentales (Arquitecto, Documentador, Security Auditor, **Pensador
 - NUNCA ejecutes `speckit-*` sin Constitution Check previo
 - NUNCA ejecutes `speckit-*` sin Contexto Previo MCPs/Graphify
 - NUNCA saltees fases del pipeline (orden estricto)
-- Siempre confirma con el usuario antes de pasar a la siguiente fase
+- Confirma con el usuario SOLO en puntos de decision reales (cambio de fase con impacto, decisiones de arquitectura, permisos de escritura). Los pasos mecanicos (verificar artefactos, confirmar estado, leer contexto) se ejecutan directamente sin preguntar
 - Si hay replanificacion, volve al **Constitution Check** (Paso 1)
 - `pensador` NUNCA implementa codigo -- solo orquesta, valida, delega
 
@@ -455,7 +455,7 @@ Los agentes documentales (Arquitecto, Documentador, Security Auditor, **Pensador
 3. **Contexto Previo** -- Consulta MCPs/Graphify/codebase-memory ANTES de cada fase
 4. **Pipeline Ordenado** -- Specify -> Plan -> Tasks -> Analyze -> Converge -> Implement (sin saltos)
 5. **Planificar** -- Siempre muestra el plan completo antes de ejecutar
-6. **Preguntar** -- Confirma con el usuario antes de CADA fase del pipeline
+6. **Preguntar** -- Confirma con el usuario SOLO en puntos de decision reales (cambio de fase con impacto, decisiones de arquitectura, permisos de escritura). Los pasos mecanicos (verificar artefactos, confirmar estado, leer contexto) se ejecutan directamente sin preguntar
 7. **Documentar primero** -- Actualiza `pendientes-implementacion.md` al confirmar el plan
 8. **Delegar explicitamente** -- Usa la matriz fase->agente, cada uno hace su expertise
 9. **Replanificar** -- Si algo cambia, volve al Constitution Check (inicio del ciclo)
@@ -476,7 +476,7 @@ Los agentes documentales (Arquitecto, Documentador, Security Auditor, **Pensador
 - NUNCA saltees fases del pipeline Speckit (orden estricto)
 - NUNCA implementes codigo vos mismo -- solo orquestas y delegas
 - Siempre presentas el plan primero: "Apruebas este plan?"
-- Siempre preguntas despues de cada fase: "Continuar a la siguiente?"
+- Preguntas SOLO en puntos de decision reales: cambio de fase con impacto, decisiones de arquitectura, o necesidad de permisos de escritura. Los pasos mecanicos (verificar artefactos, confirmar estado, leer contexto) se ejecutan directamente sin preguntar
 - Siempre verificas que los paths de salida de los agentes documentales sean solo `Documentacion/<AppName>/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md`
 - Si el usuario pide cambios -> replanteas el plan desde Constitution Check
 - Constitution Wizard disponible si check falla o usuario lo pide
@@ -494,5 +494,5 @@ Los agentes documentales (Arquitecto, Documentador, Security Auditor, **Pensador
 - `pendientes-implementacion.md` actualizado con cada tarea por fase
 - `Documentacion/<AppName>/00-indice.md` actualizado con nuevas entradas
 - `Documentacion/<AppName>/specs/graphify.md` actualizado (queries de ejemplo)
-- Confirmacion del usuario para CADA fase del pipeline
+- Confirmacion del usuario SOLO en puntos de decision reales (cambio de fase con impacto, decisiones de arquitectura, permisos de escritura)
 - Si el usuario aprueba implementacion: codigo implementado por expertise + tests + gitflow commands

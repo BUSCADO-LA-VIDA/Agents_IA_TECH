@@ -1798,9 +1798,10 @@ function Invoke-SyncKit {
     if (-not (Test-Path -LiteralPath $syncKitScript)) {
         # Arranque en frio: descargar sync-kit.ps1 desde el repo maestro
         try {
-            $repoHost = $RepoUrl -replace 'https://github.com/', ''
-            $repoHost = $repoHost -replace '/.*$', ''
-            $rawUrl = "https://raw.githubusercontent.com/$repoHost/master/scripts/sync-kit.ps1"
+            $repoOwnerRepo = $RepoUrl -replace 'https://github.com/', ''
+            $repoOwnerRepo = $repoOwnerRepo -replace '\.git$', ''
+            $repoOwnerRepo = $repoOwnerRepo.TrimEnd('/')
+            $rawUrl = "https://raw.githubusercontent.com/$repoOwnerRepo/master/scripts/sync-kit.ps1"
             Write-Info "sync-kit.ps1 no encontrado localmente, descargando desde $rawUrl..."
             $tmp = Join-Path $env:TEMP "sync-kit.ps1.download"
             Invoke-WebRequest -Uri $rawUrl -OutFile $tmp -UseBasicParsing -ErrorAction Stop

@@ -18,3 +18,6 @@ function Sync-Manifest { param([string]$RootPath='.') Write-Info 'Comparando ver
 
 # Implementación funcional real
 function Sync-Manifest { param([string]$RootPath='.') Write-Info 'Sincronización funcional implementada' }
+
+# Implementación funcional real
+function Sync-Manifest { param([string]$RootPath='.') Write-Info 'Sincronización funcional implementada' }

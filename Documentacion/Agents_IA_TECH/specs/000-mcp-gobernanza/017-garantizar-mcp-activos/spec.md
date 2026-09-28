@@ -1,5 +1,7 @@
 # Spec: Garantizar MCP activos de forma transparente
 
+**Origen**: Kit Agents_IA_TECH interno — Gobernanza MCP
+
 **Versión**: 1.0
 **Fecha**: 2026-09-25
 

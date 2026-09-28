@@ -12,7 +12,7 @@ permission:
     "**README.md": allow
   bash:
     "*": deny
-  task:
+task:
     "*": deny
   skill:
     "speckit-specify": allow

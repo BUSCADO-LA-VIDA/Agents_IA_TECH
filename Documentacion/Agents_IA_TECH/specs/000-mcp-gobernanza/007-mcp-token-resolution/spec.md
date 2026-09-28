@@ -1,5 +1,7 @@
 # Feature Specification: [MCP-TOKEN-RESOLUTION] — Resolución de tokens MCP + .env por proyecto + upgrade de herramientas + self-update + activación en el kit maestro
 
+**Origen**: Kit Agents_IA_TECH interno — Plataforma bootstrap / MCP governance
+
 **Feature Branch**: `007-mcp-token-resolution`
 
 **Created**: 2026-09-24

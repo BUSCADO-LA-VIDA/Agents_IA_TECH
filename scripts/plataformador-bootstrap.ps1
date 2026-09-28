@@ -679,7 +679,7 @@ function Ensure-OpenCodeMcp {
                 # paso 1 y paso 4; sin dedup el WARN de tokenslayer sale duplicado).
                 Write-WarnOnce "node no está en el PATH; se omite tokenslayer (instala Node.js y re-ejecuta para registrar el 4º MCP)."
             } else {
-                $nodeCmd.Source = $nodeCmd.Source -replace '\\','/'
+                $nodeCmdSource = $nodeCmd.Source -replace '\\','/'
                 $tokenslayerBase = Join-Path $RootPath "proyect_ext\tokenslayer"
                 $tokenslayerIndex = Join-Path $tokenslayerBase "mcp-server\build\index.js"
                 $sepTok = [IO.Path]::DirectorySeparatorChar
@@ -693,12 +693,12 @@ function Ensure-OpenCodeMcp {
                     Write-WarnOnce "tokenslayer sin compilar: falta mcp-server/build/index.js bajo proyect_ext/tokenslayer/. Para registrar el 4º MCP: clona https://github.com/ajvikram/TokenSlayer (ver entrada tokenslayer-mcp-server en dependencias-manifest.yml) en proyect_ext/tokenslayer y compila con: cd proyect_ext/tokenslayer/mcp-server && npm install && npm run build. No se registra la entrada (evita config rota); el bootstrap continúa."
                 } elseif ($DryRun) {
                     $relIndexTok = ([IO.Path]::GetRelativePath($RootPath, $indexCanonTok)) -replace '\\', '/'
-                    Write-Info "DryRun: registraría tokenslayer en opencode.json (type: local, command: [$($nodeCmd.Source), $relIndexTok], enabled: true)"
+                    Write-Info "DryRun: registraría tokenslayer en opencode.json (type: local, command: [$($nodeCmdSource), $relIndexTok], enabled: true)"
                 } else {
                     $indexCanonTokNorm = $indexCanonTok -replace '\\','/'
                     $tokenslayerEntry = [ordered]@{
                         type = "local"
-                        command = @($nodeCmd.Source, $indexCanonTokNorm)
+                        command = @($nodeCmdSource, $indexCanonTokNorm)
                         enabled = $true
                     }
                     # $existing.mcp puede ser PSCustomObject (leído de JSON) o
@@ -2331,13 +2331,13 @@ function Configure-Graphify {
         Write-Warn "python no está en el PATH (se requiere 3.10+); no se puede registrar 'python -m graphify.serve'. Se omite Graphify; el bootstrap continúa."
         return
     }
-    $pythonCmd.Source = $pythonCmd.Source -replace '\\','/'
+    $pythonCmdSource = $pythonCmd.Source -replace '\\','/'
 
     # Verificar que el comando stdio documentado existe (módulo + extra mcp).
     # Containment: solo se registra este comando exacto, sin --transport http.
     $serveOK = $false
     try {
-        & $pythonCmd.Source -m graphify.serve --help 2>$null | Out-Null
+        & $pythonCmdSource -m graphify.serve --help 2>$null | Out-Null
         if ($LASTEXITCODE -eq 0) { $serveOK = $true }
     } catch { $serveOK = $false }
     if (-not $serveOK) {
@@ -2429,11 +2429,11 @@ function Configure-Graphify {
         if (($null -ne $existing.mcp) -and ($null -ne $existing.mcp.graphify) -and (-not $Force)) {
             Write-OK "opencode.json ya registra graphify; se conserva (usa -Force para sobrescribir)."
         } elseif ($DryRun) {
-            Write-Info "DryRun: registraría graphify en opencode.json (type: local, command: [$($pythonCmd.Source), -m, graphify.serve, <root>/graphify-out/graph.json], enabled: true)"
+            Write-Info "DryRun: registraría graphify en opencode.json (type: local, command: [$($pythonCmdSource), -m, graphify.serve, <root>/graphify-out/graph.json], enabled: true)"
         } else {
             $graphifyEntry = [ordered]@{
                 type = "local"
-                command = @($pythonCmd.Source, "-m", "graphify.serve", $graphCanonG)
+                command = @($pythonCmdSource, "-m", "graphify.serve", $graphCanonG)
                 enabled = $true
             }
             if ($null -eq $existing.mcp) {
@@ -2464,10 +2464,10 @@ function Configure-Graphify {
     if (($null -ne $mcpExisting.servers) -and ($null -ne $mcpExisting.servers.graphify) -and (-not $Force)) {
         Write-OK ".vscode/mcp.json ya registra graphify; se conserva (usa -Force para sobrescribir)."
     } elseif ($DryRun) {
-        Write-Info "DryRun: registraría graphify en .vscode/mcp.json (type: stdio, command: [$($pythonCmd.Source)], args: [-m, graphify.serve, <root>/graphify-out/graph.json])"
+        Write-Info "DryRun: registraría graphify en .vscode/mcp.json (type: stdio, command: [$($pythonCmdSource)], args: [-m, graphify.serve, <root>/graphify-out/graph.json])"
     } else {
         $graphifyServer = [ordered]@{
-            command = $pythonCmd.Source
+            command = $pythonCmdSource
             args = @("-m", "graphify.serve", $graphCanonG)
             type = "stdio"
         }

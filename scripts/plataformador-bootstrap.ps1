@@ -628,9 +628,17 @@ function Ensure-OpenCodeMcp {
             }
 
             if (-not $needsResolve) {
-                if (-not $mcpReasons.Contains($name)) {
-                    if ($entry.Value.enabled) { $mcpReasons[$name] = "ruta real valida (sin cambios)" }
-                    else { $mcpReasons[$name] = "deshabilitado (sin cambios)" }
+                if ($entry.Value.enabled) {
+                    # Normalizar rutas existentes con backslashes a forward slashes para evitar InvalidEscapeCharacter en JSON
+                    $cmd0Norm = $cmd0 -replace '\\','/'
+                    if ($cmd0Norm -ne $cmd0) {
+                        if (-not $DryRun) { $entry.Value.command = @($cmd0Norm) }
+                        $mcpReasons[$name] = "ruta normalizada a forward slashes"
+                    } else {
+                        if (-not $mcpReasons.Contains($name)) { $mcpReasons[$name] = "ruta real valida (sin cambios)" }
+                    }
+                } else {
+                    if (-not $mcpReasons.Contains($name)) { $mcpReasons[$name] = "deshabilitado (sin cambios)" }
                 }
                 continue
             }

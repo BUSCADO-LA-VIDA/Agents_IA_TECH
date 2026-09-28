@@ -637,11 +637,12 @@ function Ensure-OpenCodeMcp {
 
             $real = Resolve-McpCommand -ToolName $tokenMap[$name].Tool -Token $tokenMap[$name].Token
             if ($real) {
+                $realNorm = $real -replace '\\','/'
                 if ($DryRun) {
-                    $mcpReasons[$name] = "resolveria a ruta local ($real)"
-                    Write-Info "DryRun: MCP '$name' -> $real (enabled=true)"
+                    $mcpReasons[$name] = "resolveria a ruta local ($realNorm)"
+                    Write-Info "DryRun: MCP '$name' -> $realNorm (enabled=true)"
                 } else {
-                    $entry.Value.command = @($real)
+                    $entry.Value.command = @($realNorm)
                     $entry.Value.enabled = $true
                     $mcpReasons[$name] = "ruta resuelta"
                     Write-OK "MCP '$name' re-resuelto a ruta local."
@@ -678,6 +679,7 @@ function Ensure-OpenCodeMcp {
                 # paso 1 y paso 4; sin dedup el WARN de tokenslayer sale duplicado).
                 Write-WarnOnce "node no está en el PATH; se omite tokenslayer (instala Node.js y re-ejecuta para registrar el 4º MCP)."
             } else {
+                $nodeCmd.Source = $nodeCmd.Source -replace '\\','/'
                 $tokenslayerBase = Join-Path $RootPath "proyect_ext\tokenslayer"
                 $tokenslayerIndex = Join-Path $tokenslayerBase "mcp-server\build\index.js"
                 $sepTok = [IO.Path]::DirectorySeparatorChar
@@ -693,9 +695,10 @@ function Ensure-OpenCodeMcp {
                     $relIndexTok = ([IO.Path]::GetRelativePath($RootPath, $indexCanonTok)) -replace '\\', '/'
                     Write-Info "DryRun: registraría tokenslayer en opencode.json (type: local, command: [$($nodeCmd.Source), $relIndexTok], enabled: true)"
                 } else {
+                    $indexCanonTokNorm = $indexCanonTok -replace '\\','/'
                     $tokenslayerEntry = [ordered]@{
                         type = "local"
-                        command = @($nodeCmd.Source, $indexCanonTok)
+                        command = @($nodeCmd.Source, $indexCanonTokNorm)
                         enabled = $true
                     }
                     # $existing.mcp puede ser PSCustomObject (leído de JSON) o
@@ -2328,6 +2331,7 @@ function Configure-Graphify {
         Write-Warn "python no está en el PATH (se requiere 3.10+); no se puede registrar 'python -m graphify.serve'. Se omite Graphify; el bootstrap continúa."
         return
     }
+    $pythonCmd.Source = $pythonCmd.Source -replace '\\','/'
 
     # Verificar que el comando stdio documentado existe (módulo + extra mcp).
     # Containment: solo se registra este comando exacto, sin --transport http.
@@ -2373,6 +2377,7 @@ function Configure-Graphify {
         Write-Warn "Ruta del grafo fuera de containment ($graphPath); no se registra (fail-closed)."
         return
     }
+    $graphCanonG = $graphCanonG -replace '\\','/'
     # --- [BOOTSTRAP-FIXES] F6: Graphify estructura-first con detección de estado (ADR-0004 RF-07) ---
     # 1) Sin grafo -> graphify extract <scope> --code-only (estructura, sin IA,
     #    sin secrets: --code-only solo indexa código y respeta .gitignore).

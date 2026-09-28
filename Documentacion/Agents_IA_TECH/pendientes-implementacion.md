@@ -30,6 +30,12 @@
 
 ## ⏳ Tareas pendientes
 
+- [x] `[MCP-PATH-NORMALIZE]` **Normalizar rutas MCP a forward slashes y corregir InvalidEscapeCharacter**
+  - **Qué implementar**: Actualizar `scripts/plataformador-bootstrap.ps1` para normalizar rutas MCP a `/` antes de escribir `opencode.json`. Evita `InvalidEscapeCharacter` y hace el JSON portable.
+  - **Basado en**: `Documentacion/Agents_IA_TECH/specs/009-mcp-path-normalization/spec.md`
+  - **Archivos esperados**: `scripts/plataformador-bootstrap.ps1` (normalización de rutas), `Documentacion/Agents_IA_TECH/specs/009-mcp-path-normalization/spec.md`
+  - **Prioridad**: alta
+
 - [ ] `[BOOTSTRAP-UPGRADE-FRAMEWORK]` **Feature 011: Bootstrap invoca upgrade_framework para sync de dependencias externas (fail-open, no hardcoded URLs)**
   - **Qué implementar** (10 tareas T001-T031 en `tasks.md` + 25 tareas security-risk T040-T064): (1) **Fase A** — CLI entrypoint `upgrade_framework.ps1` con parámetros `-RootPath` (mandatory), `-ForceUpgradeTools`, `-DryRun` + unit tests; (2) **Fase B** — Bootstrap integra invocación: helper `Invoke-UpgradeFramework`, llamada en Step 3 antes de tokenslayer build, wrapper fail-open try/catch + WARN + continue, propagación `-DryRun`; (3) **Fase C** — Copia manifest template `dependencias-manifest.yml` desde kit maestro a project root en primera ejecución (idempotente, respeta `-DryRun`); (4) **Fase D** — Tests integración E2E: clean consumer project (`trading_bot`) + `-ForceUpgradeTools` → manifest + `proyect_ext/` + tokenslayer build + 4th MCP; re-run idempotency; fail-open network failure simulation. (5) **Seguridad** — 11 CRITICAL + 9 HIGH + 4 MEDIUM + 1 LOW mitigaciones del threat model STRIDE.
   - **Basado en**: `Documentacion/Agents_IA_TECH/specs/011-bootstrap-invokes-upgrade-framework/spec.md` (RF-01..RF-10, RNF-01..RNF-06, AC-01..AC-06) + `plan.md` (Phases A-D, D1-D4, VC-01..VC-10) + `tasks.md` (T001-T031 + T040-T064) + `analyze.md` + `threat-model.md` + `converge.md` + `arquitectura/adr/adr-0007-bootstrap-delegates-upgrade-framework.md`.
@@ -155,6 +161,18 @@ esearch.md (D-1 grafo por app, D-2 memoria auto/manual, D-3 estructura-first, D-
   - **Basado en**: RF-05/RF-07/RF-08 de la spec `[POST-PLATAFORMADO]` (Tarea 2 — esta tarea depende de esa spec).
   - **Archivos esperados**: `.github/agents/*.agent.md`, `.opencode/agents/*.md`
   - **Prioridad**: media (depende de Tarea 2)
+
+- [ ] `[POST-PLATAFORMADO-CONSTITUTION]` **Generar `run_all_constitution_wizards.ps1` + `Constitution_Wizard_Instructions.md` estandarizado**
+  - **Qué implementar**: `run_all_constitution_wizards.ps1` que recorra `src/<App>/` y ejecute `speckit-constitution --app <ruta>` por cada app. `Documentacion/Constitution_Wizard_Instructions.md` estandarizado con lista de apps objetivo, comando único por app, comportamiento del wizard (creación vs revisar/actualizar), script opcional y qué hacer después (pipeline speckit + reglas transversales). No ejecutar ahora, solo dejar como tarea pendiente para futuro.
+  - **Basado en**: `Documentacion/Agents_IA_TECH/specs/006-post-platforming-speckit/spec.md` RF-009 + ADR-0004.
+  - **Archivos esperados**: `scripts/run_all_constitution_wizards.ps1`, `Documentacion/Constitution_Wizard_Instructions.md`
+  - **Prioridad**: media
+
+- [ ] `[BOOTSTRAP-MCP-NORMALIZE]` **Normalizar rutas MCP a forward slashes y corregir InvalidEscapeCharacter en opencode.json**
+  - **Qué implementar**: Modificar `scripts/plataformador-bootstrap.ps1` para que `Resolve-McpCommand` y `Update-McpEnvFile` normalicen rutas a forward slashes `/`, ignoren variables de entorno del sistema al resolver `{env:...}` y garanticen que `.env.mcp` se rellene con rutas reales. Evitar `InvalidEscapeCharacter` en `opencode.json` al usar rutas Windows con backslashes. Incluir test de regresión con rutas con espacios y backslashes.
+  - **Basado en**: Specs `007-mcp-token-resolution` y `008-mcp-config-portable`, incidente `trading_bot` 2026-09-28 con `InvalidEscapeCharacter` y `.env.mcp` vacío.
+  - **Archivos esperados**: `scripts/plataformador-bootstrap.ps1` (MODIFY), `scripts/normalize-mcp.ps1` (template), `Documentacion/Agents_IA_TECH/specs/007-mcp-token-resolution/`
+  - **Prioridad**: alta
 
 
 

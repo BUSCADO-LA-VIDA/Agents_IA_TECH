@@ -1,6 +1,6 @@
 # Índice de ADRs — Agents_IA_TECH
 
-> **Última actualización**: 2026-09-25  
+> **Última actualización**: 2026-10-03  
 > **Mantenido por**: `arquitecto` (fase Analyze de cada spec)
 
 ---
@@ -16,6 +16,7 @@
 | **ADR-0005** | Agent-SSD | Aceptado | 2026-09-24 | — |
 | **ADR-0006** | MCP token resolution + `.env.mcp` + upgrade tools + self-update + activación kit maestro | Aceptado | 2026-09-24 | `007-mcp-token-resolution` |
 | **ADR-0007** | **Bootstrap delega sincronización de dependencias externas en upgrade_framework** | **Aceptado** | **2026-09-25** | **`011-bootstrap-invokes-upgrade-framework`** |
+| **ADR-0008** | **Constitution v2.0.0 — tiers, fail-open y contenido completo + corrección de 3 errores factuales** | **Aceptado** | **2026-10-03** | ** constitution v2.0.0** |
 
 ---
 
@@ -49,6 +50,7 @@
 | 005 | agent-ssd | ADR-0005 |
 | 007 | mcp-token-resolution | ADR-0006 |
 | **011** | **bootstrap-invokes-upgrade-framework** | **ADR-0007** |
+| **constitution** | **v2.0.0 — artículos VII/VIII/IX + corrección de 3 errores factuales** | **ADR-0008** |
 
 ---
 

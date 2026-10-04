@@ -2335,24 +2335,40 @@ function Configure-Graphify {
     Write-OK "Graphify detectado: $($graphifyCmd.Source)"
 
     $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
-    if (-not $pythonCmd) {
-        Write-Warn "python no está en el PATH (se requiere 3.10+); no se puede registrar 'python -m graphify.serve'. Se omite Graphify; el bootstrap continúa."
+    $uvCmd = Get-Command uv -ErrorAction SilentlyContinue
+    if (-not $pythonCmd -and -not $uvCmd) {
+        Write-Warn "python no está en el PATH (se requiere 3.10+) y uv no está disponible; no se puede registrar 'python -m graphify.serve'. Se omite Graphify; el bootstrap continúa."
         return
     }
-    $pythonCmdSource = $pythonCmd.Source -replace '\\','/'
+    if ($uvCmd) {
+        # Intentar usar uv tool para graphify
+        $pythonCmdSource = $uvCmd.Source -replace '\\','/'
+        $useUv = $true
+    } else {
+        $pythonCmdSource = $pythonCmd.Source -replace '\\','/'
+        $useUv = $false
+    }
 
     # Verificar que el comando stdio documentado existe (módulo + extra mcp).
     # Containment: solo se registra este comando exacto, sin --transport http.
     $serveOK = $false
     try {
-        & $pythonCmdSource -m graphify.serve --help 2>$null | Out-Null
+        if ($useUv) {
+            & $pythonCmdSource tool run --from graphifyy python -m graphify.serve --help 2>$null | Out-Null
+        } else {
+            & $pythonCmdSource -m graphify.serve --help 2>$null | Out-Null
+        }
         if ($LASTEXITCODE -eq 0) { $serveOK = $true }
     } catch { $serveOK = $false }
     if (-not $serveOK) {
         Write-Warn 'El módulo MCP embebido no responde (python -m graphify.serve --help falló): falta el extra mcp — reinstala con uv tool install "graphifyy[mcp]" (o pip install "graphifyy[mcp]"). No se registra la entrada (evita config rota); el bootstrap continúa.'
         return
     }
-    Write-OK "MCP embebido verificado: python -m graphify.serve (stdio por defecto)"
+    if ($useUv) {
+        Write-OK "MCP embebido verificado: uv tool run --from graphifyy python -m graphify.serve (stdio por defecto)"
+    } else {
+        Write-OK "MCP embebido verificado: python -m graphify.serve (stdio por defecto)"
+    }
 
     # --- [BOOTSTRAP-FIXES] F6: scope del grafo (ADR-0004 RF-07) ---
     # App (default) = app activa (resultado de Resolve-ActiveApp, paso 5) en
@@ -2439,9 +2455,14 @@ function Configure-Graphify {
         } elseif ($DryRun) {
             Write-Info "DryRun: registraría graphify en opencode.json (type: local, command: [$($pythonCmdSource), -m, graphify.serve, <root>/graphify-out/graph.json], enabled: true)"
         } else {
+            if ($useUv) {
+                $graphifyCmd = @($pythonCmdSource, "tool", "run", "--from", "graphifyy", "python", "-m", "graphify.serve", $graphCanonG)
+            } else {
+                $graphifyCmd = @($pythonCmdSource, "-m", "graphify.serve", $graphCanonG)
+            }
             $graphifyEntry = [ordered]@{
                 type = "local"
-                command = @($pythonCmdSource, "-m", "graphify.serve", $graphCanonG)
+                command = $graphifyCmd
                 enabled = $true
             }
             if ($null -eq $existing.mcp) {
@@ -2474,10 +2495,18 @@ function Configure-Graphify {
     } elseif ($DryRun) {
         Write-Info "DryRun: registraría graphify en .vscode/mcp.json (type: stdio, command: [$($pythonCmdSource)], args: [-m, graphify.serve, <root>/graphify-out/graph.json])"
     } else {
-        $graphifyServer = [ordered]@{
-            command = $pythonCmdSource
-            args = @("-m", "graphify.serve", $graphCanonG)
-            type = "stdio"
+        if ($useUv) {
+            $graphifyServer = [ordered]@{
+                command = $pythonCmdSource
+                args = @("tool","run","--from","graphifyy","python","-m","graphify.serve",$graphCanonG)
+                type = "stdio"
+            }
+        } else {
+            $graphifyServer = [ordered]@{
+                command = $pythonCmdSource
+                args = @("-m", "graphify.serve", $graphCanonG)
+                type = "stdio"
+            }
         }
         if ($null -eq $mcpExisting.servers) {
             $mcpExisting | Add-Member -NotePropertyName "servers" -NotePropertyValue ([ordered]@{}) -Force

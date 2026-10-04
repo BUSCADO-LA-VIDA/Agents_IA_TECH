@@ -48,6 +48,23 @@
     - **LOW (1)**: T064 (allowlist rotation)
   - **Orden**: Fase A (T001→T002) → Fase B (T010→T011→T012→T013) || Fase C (T020→T021) → Fase D (T030→T031) → Security (T040-T064).
   - **Estado**: ✅ **FASE DOCUMENTAL + CONVERGE COMPLETADA** — converge.md generado, quickstart.md actualizado, memoria-proyecto.md actualizado, 00-indice.md actualizado, ADR-0007 accepted, threat model completed, cross-artifact validation PASS. Listo para fase implementación.
+  - **Implementación parcial verificada 2026-10-03**:
+    - ✅ T045 containment realpath: `Test-RawPathUnsafe`, `Resolve-RealDirectoryPath`, `Test-ProyectExtContainment` presentes
+    - ✅ T047 sanitize build output: `Format-SanitizedText` implementado en `Invoke-CommandCaptureSafe`
+    - ✅ T048 fail-open mandatory: try/catch en `Sync-ExternalDependencies` con WARN y continue
+    - ✅ T053 no submodules: `--no-recurse-submodules` en `git clone`
+    - ✅ T055 shallow clone: `--depth=1` en `git clone`
+    - ✅ T040 allowlist URLs + signatures: allowlist Test-TrustedGithubUrl existente + verificación de firma de commit agregada en Sync-GitRepository
+    - ✅ T041 signed manifest: Test-ManifestSignature con SHA256 del manifest sin línea signature, verificación fail-closed en Read-DependenciasManifest
+    - ✅ T042 mandatory checksums: parser incluye checksum opcional, verificación de rev-parse HEAD vs checksum declarado en Sync-GitRepository, fail-closed
+    - ✅ T043 sandbox build: Invoke-SandboxBuild aislado con copia a temp y ejecución limitada para tokenslayer-mcp-server, fail-open
+    - ✅ T044 --ignore-scripts: npm install ejecuta con --ignore-scripts en sandbox build y en Sync-GitRepository
+    - ✅ T046 no secrets in manifest: escaneo de patrones password/secret/token/api_key en Read-DependenciasManifest, fail-closed
+    - ✅ T049 least privilege: Invoke-CommandLeastPrivilege limpia env vars sensibles antes de ejecutar comandos
+    - ✅ T050 containment hardening: Test-ProyectExtContainment con resolución de reparse points y fail-closed ya presente, reforzado con verificación adicional de realpath
+    - ⏳ Pendientes CRITICAL: Ninguno
+    - ⏳ Pendientes HIGH: T051, T052, T054, T056, T057, T058, T059
+    - ⏳ Pendientes MEDIUM/LOW: T060-T064
   - **Prioridad**: alta
 
 - [ ] `[MCP-TOKEN-RESOLUTION]` **Feature 007: Resolución de tokens MCP + `.env.mcp` por proyecto + upgrade + self-update + activación en kit maestro + guard del sync**
@@ -174,9 +191,38 @@ esearch.md (D-1 grafo por app, D-2 memoria auto/manual, D-3 estructura-first, D-
   - **Archivos esperados**: `scripts/plataformador-bootstrap.ps1` (MODIFY), `scripts/normalize-mcp.ps1` (template), `Documentacion/Agents_IA_TECH/specs/007-mcp-token-resolution/`
   - **Prioridad**: alta
 
+- [ ] `[CONSTITUTION-WIZARD]` **Constitution Wizard como cuestionario interactivo (el agente pregunta, el usuario responde, se arma la constitution) + corregir 3 errores factuales**
+  - **Qué implementar** (decisión del usuario 2026-10-03): el Wizard NO debe ser una plantilla que se rellena sola. Debe ser un **cuestionario interactivo** donde el `pensador` pregunta al usuario bloque por bloque y **arma la constitution con las respuestas**. El usuario marca esta tarea como **prioridad baja y explícitamente NO bloqueante**: los `speckit-*` pueden ejecutarse con la v1.0.0 actual.
+  - **Veredicto sobre la constitution actual (análisis 2026-10-03)**: `.specify/memory/constitution.md` (117 líneas) está **estructuralmente completa y válida** — sigue el formato de `.specify/templates/constitution-template.md` (Core Principles → Additional Constraints → Development Workflow → Governance → Version/Ratified/LastAmended), cero placeholders, v1.0.0 ratificada 2026-08-25. Como documento de gobernanza **no le falta estructura**.
+  - **Desvío real (no es un defecto del documento)**: no adoptó el esquema de **9 artículos + Art.VI** que exige el Constitution Check de los agentes del kit (Library-First, CLI Interface, Test-First, Simplicity, Security, project_ext, Anti-Abstraction, Integration-First). Los 6 principios que tiene son otros: Modular Agent Design, Orchestrator Pattern, Specification-Driven Development, Copilot/Opencode Compatibility, Observability and Monitoring, Gestión de Dependencias Externas. Solo **Art.VI.project_ext coincide en contenido** ✅. El esquema de 9 proviene de los *ejemplos* de `.specify/templates/constitution-template.md` (líneas 7, 13, 18, 23, 27), que son ilustrativos, no un estándar del proyecto → el "FAIL" del check fue una lectura demasiado estricta de ejemplos de plantilla.
+  - **3 errores factuales verificados** (a corregir sí o sí, independientes del esquema):
+    1. `Additional Constraints → Technology Stack Requirements`: exige **TypeScript + Node.js 18+** → el kit es `.md` + `.ps1`, sin runtime TS. Contradice `AGENTS.md` explícitamente.
+    2. `Development Workflow → Agent Lifecycle` paso 1: apunta a `Documentacion/funcionalidades/` → **no existe**; la ruta real es `Documentacion/<AppName>/`.
+    3. Art.VI (manifest de ejemplo): URL `https://github.com/tomasgraph/graphify` **muerta (404, verificado 2026-09-19)** y destino `bin/graphify → .opencode/bin/` obsoleto → upstream real `Graphify-Labs/graphify`, instalado vía MCP con PyPI `graphifyy==0.9.48`.
+  - **2 quality gates inaplicables**: `Minimum 80% test coverage across all agents` (no hay framework de tests; solo `tests/upgrade_framework.Tests.ps1` con Pester) y paso 2 "Generate skeleton via `/speckit-specify`" (ADR-0005 cambió el flujo: `pensador` delega en `Agent-SSD` y NUNCA implementa).
+  - **1 hueco de gobernanza**: la **restricción de paths por tier** (los 5 tiers: documental / documental extendido / implementador / tooling / plataforma) —la regla más aplicada del repo— **NO está en la constitution**. Debería ser principio propio o sección de `Additional Constraints`.
+  - **Deriva de gobernanza**: v1.0.0 **sin amendments desde 2026-08-25**, pero desde entonces se escribieron ADR-0004, ADR-0005 (crea el tier `Agent-SSD`) y ADR-0007 → la constitution no refleja el estado real del kit.
+  - **Cuestionario a implementar** (12 bloques, el `pensador` pregunta → el usuario responde → se arma `constitution.md`): (1) tipo de proyecto + harnesses; (2) objetivo; (3) arquitectura objetivo; (4) stack real; (5) metodología SSD+Speckit+TDD; (6) base de datos; (7) despliegue; (8) estructura de carpetas; (9) cuáles de los 9 artículos aplican + cuáles son propios del kit; (10) guardrails (naming, seguridad, observabilidad, performance); (11) reglas de derivación/validez; (12) validación final antes de escribir.
+  - **Basado en**: `.specify/memory/constitution.md` (v1.0.0) + `.specify/templates/constitution-template.md` (ejemplos de los 9 artículos) + `AGENTS.md` (tiers) + ADR-0005 (Agent-SSD) + `Documentacion/Agents_IA_TECH/specs/solucion-generica/spec.md` RF-S2 (cero rutas absolutas) + decisión del usuario (2026-10-03).
+  - **Archivos esperados**: `.specify/memory/constitution.md` (MODIFY → v2.0.0), `Documentacion/Agents_IA_TECH/arquitectura/adr/adr-0008-constitution-v2.md` (nuevo), `Documentacion/Agents_IA_TECH/arquitectura/adr/00-index.md` (MODIFY).
+  - **Prioridad**: **baja** — NO bloqueante. Desvío del esquema de 9 artículos registrado como decisión consciente del usuario.
 
 
 
 
 
 
+
+
+## Bug: Graphify MCP detection con uv tool
+
+**Síntoma**: Al desplegar en nuevo proyecto, bootstrap reporta:
+`[WARN] El módulo MCP embebido no responde (python -m graphify.serve --help falló): falta el extra mcp`
+
+**Causa**: `plataformador-bootstrap.ps1` verifica `python -m graphify.serve` con python del sistema, pero `graphifyy[mcp]` instalado vía `uv tool install` está aislado. El comando correcto es `uv tool run --from graphifyy python -m graphify.serve`.
+
+**Acción**:
+- Actualizado `scripts/plataformador-bootstrap.ps1` para detectar `uv` y usar `uv tool run --from graphifyy python -m graphify.serve --help`
+- Verificar registro MCP con comando uv
+
+**Estado**: En progreso

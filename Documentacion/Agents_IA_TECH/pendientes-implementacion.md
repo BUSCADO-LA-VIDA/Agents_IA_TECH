@@ -22,7 +22,7 @@
 | 013-T004 | 013 | Crear scripts/ecc-sync.ps1 | Scripts de sincronización ECC | `devops` | Finalizada | `devops` |
 | 013-T005 | 013 | Definir namespace `ecc-` y reglas de no-duplicación | Namespace y reglas | `arquitecto` | Finalizada | `arquitecto` |
 | 013-T006 | 013 | Revisar y validar namespace | Validación final | `pensador` | Finalizada | `pensador` |
-| 013-T007 | 013 | Integrar scripts ECC en el pipeline CI/CD | Pasar scripts ecc-sync.ps1 al pipeline de CI/CD | `devops` | En progreso | `devops` |
+| 013-T007 | 013 | Integrar scripts ECC en el pipeline CI/CD | Pasar scripts ecc-sync.ps1 al pipeline de CI/CD | `devops` | Finalizada | `devops` |
 
 ## En progreso
 

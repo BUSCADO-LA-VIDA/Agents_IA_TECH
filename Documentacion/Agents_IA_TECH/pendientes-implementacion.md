@@ -5,7 +5,7 @@
 - **Fase actual:** implement
 - **Specs con tareas:** 8
 - **Total de tareas inventariadas:** 118
-- **Próxima tarea:** 013-T007 Integrar scripts ECC en el pipeline CI/CD
+- **Próxima tarea:** 013-T008 Cerrar spec 013 y archivar documentación
 
 ## Sin asignar
 
@@ -23,6 +23,7 @@
 | 013-T005 | 013 | Definir namespace `ecc-` y reglas de no-duplicación | Namespace y reglas | `arquitecto` | Finalizada | `arquitecto` |
 | 013-T006 | 013 | Revisar y validar namespace | Validación final | `pensador` | Finalizada | `pensador` |
 | 013-T007 | 013 | Integrar scripts ECC en el pipeline CI/CD | Pasar scripts ecc-sync.ps1 al pipeline de CI/CD | `devops` | Finalizada | `devops` |
+| 013-T008 | 013 | Cerrar spec 013 y archivar documentación | Cierre final y archivado de documentos | `pensador` | Finalizada | `pensador` |
 
 ## En progreso
 

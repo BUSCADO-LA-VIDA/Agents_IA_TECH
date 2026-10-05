@@ -18,7 +18,7 @@
 | ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a |
 |----|------|-------|-------------|-------------|--------|------------|
 | 013-T002 | 013 | Clonar ECC en proyect_ext/ECC | Clonar repositorio ECC externo | `plataformador` | Finalizada | `plataformador` |
-| 013-T003 | 013 | Crear matriz de comparación ECC ↔ Agents_IA_TECH | Matriz de correspondencia | `analista-tecnico` | Pendiente | `analista-tecnico` |
+| 013-T003 | 013 | Crear matriz de comparación ECC ↔ Agents_IA_TECH | Matriz de correspondencia | `analista-tecnico` | En progreso | `analista-tecnico` |
 | 013-T004 | 013 | Crear scripts/ecc-sync.ps1 | Scripts de sincronización ECC | `devops` | Pendiente | `devops` |
 | 013-T005 | 013 | Definir namespace `ecc-` y reglas de no-duplicación | Namespace y reglas | `arquitecto` | Finalizada | `arquitecto` |
 | 013-T006 | 013 | Revisar y validar namespace | Validación final | `pensador` | Finalizada | `pensador` |

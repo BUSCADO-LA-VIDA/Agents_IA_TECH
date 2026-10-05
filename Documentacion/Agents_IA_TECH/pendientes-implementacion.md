@@ -5,7 +5,7 @@
 - **Fase actual:** implement
 - **Specs con tareas:** 8
 - **Total de tareas inventariadas:** 118
-- **Próxima tarea:** Spec 013 completado – pasar a spec 014 o siguiente fase
+- **Próxima tarea:** Spec 015 – Flujo transversal de integración de MCP – pendiente de documentación y actualización de agents
 
 ## Sin asignar
 
@@ -24,6 +24,7 @@
 | 013-T006 | 013 | Revisar y validar namespace | Validación final | `pensador` | Finalizada | `pensador` |
 | 013-T007 | 013 | Integrar scripts ECC en el pipeline CI/CD | Pasar scripts ecc-sync.ps1 al pipeline de CI/CD | `devops` | Finalizada | `devops` |
 | 013-T008 | 013 | Cerrar spec 013 y archivar documentación | Cierre final y archivado de documentos | `pensador` | Finalizada | `pensador` |
+| 015-T001 | 015 | Definir flujo transversal de integración de MCP | Aplicar etapas E‑01 a E‑08, actualizar agents y scripts | `pensador` | Pendiente | `pensador` |
 
 ## En progreso
 

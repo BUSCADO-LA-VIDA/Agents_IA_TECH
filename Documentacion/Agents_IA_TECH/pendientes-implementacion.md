@@ -11,7 +11,7 @@
 
 | ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a |
 |----|------|-------|-------------|-------------|--------|------------|
-| 013-T001 | 013 | Crear rama feature/ecc-integration | Rama git | `gitflow` | Sin asignar |  |
+| 013-T001 | 013 | Crear rama feature/ecc-integration | Rama git | `pensador` | Pendiente | `pensador` |
 
 ## Pendiente
 

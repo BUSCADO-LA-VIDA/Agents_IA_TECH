@@ -5,7 +5,7 @@
 - **Fase actual:** implement
 - **Specs con tareas:** 8
 - **Total de tareas inventariadas:** 118
-- **Próxima tarea:** 013-T008 Cerrar spec 013 y archivar documentación
+- **Próxima tarea:** Spec 013 completado – pasar a spec 014 o siguiente fase
 
 ## Sin asignar
 

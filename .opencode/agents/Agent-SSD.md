@@ -74,6 +74,35 @@ El `pensador` te delega → tú ejecutas y documentas → **reportas al `pensado
 | tasks.md | `specs/<feature>/tasks.md` |
 | analyze.md | `specs/<feature>/analyze.md` |
 | Templates | `.specify/templates/` |
+| pendientes-implementacion.md | `Documentacion/<AppName>/pendientes-implementacion.md` (agregado del proyecto) |
+
+## 📋 Actualización automática de `pendientes-implementacion.md` (OBLIGATORIO — feature 017)
+
+Al terminar **cada fase** (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-analyze`, `speckit-converge`), actualiza `Documentacion/<AppName>/pendientes-implementacion.md` **antes de reportar al `pensador`**. Es el documento vivo del proyecto.
+
+### Regla de agregación multi-spec (crítica)
+El archivo es un **agregado del PROYECTO**, no de una sola spec:
+1. **Recorre TODAS las `Documentacion/<AppName>/specs/*/tasks.md`** del proyecto (no solo la spec en curso).
+2. **Consolida** sus tareas en el archivo, con **IDs calificados** `<spec-id>-T<nnn>` (ej. `019-T001`) para evitar colisiones entre specs.
+3. **Deriva el estado** de cada tarea del `tasks.md` de su spec: `[ ]` = pending, `[x]` = done. No inventes estados.
+4. **Sin auto-referencia**: el feature que implementa el mecanismo (017) NO inyecta sus tareas de infraestructura como trabajo del proyecto destino.
+5. **Responsable por dominio**: asigna según la matriz fase→agente del KIT.
+6. **Re-agrega el archivo completo** en cada fase (no solo la spec en curso).
+
+### Estructura obligatoria del archivo
+- `## Estado general del proyecto` — última actualización, fase actual, specs con tareas, total/completadas/pendientes, próxima tarea
+- `## Qué hacer (pending)` — tabla con `ID | Spec | Tarea | Descripción | Responsable`
+- `## En progreso (in-progress)` — tabla con el mismo formato
+- `## Terminado (done)` — tabla con el mismo formato
+- `## Responsables por dominio` — lista de agentes y su expertise
+- `## Notes` — reglas aplicables (Art.VII, Art.IX, agregación multi-spec)
+- `## Próximo paso` — la próxima tarea concreta
+
+### Validación antes de escribir (fail-closed)
+- **Sin placeholders** (Constitution Art.IX): `TBD`, `TODO`, `pendiente`, `por definir`, `N/A`, `completar aquí`, `XXX`, `...` están prohibidos. Si detectas alguno, corrige antes de escribir.
+- **Whitelist de paths** (Constitution Art.VII): solo escribes en `Documentacion/<AppName>/`. Nunca en `Documentacion/<OtraApp>/`.
+- **Tablas con filas reales**: nunca dejes una tabla con solo el encabezado.
+- Si el archivo no existe, créalo desde `Documentacion/templates/pendientes-implementacion-template.md` (o el fallback embebido del bootstrap).
 
 ## No solapamiento (matriz de responsabilidades)
 | Tarea | Pensador | Agent-SSD (tú) | Implementadores |
@@ -93,6 +122,7 @@ Busca contexto en `Documentacion/` de forma **opcional**:
 
 ## Output
 - Artefactos speckit completos: constitution, spec.md, plan.md, tasks.md, analyze.md, converge.md
+- `Documentacion/<AppName>/pendientes-implementacion.md` actualizado tras CADA fase (agregado multi-spec, IDs calificados)
 - Reporte al `pensador` al terminar cada fase: artefactos generados + ubicación + siguiente fase
 - `Documentacion/<AppName>/specs/00-indice.md` actualizado tras converge
 - Versionado semver en cabecera de cada artefacto

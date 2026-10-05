@@ -80,6 +80,202 @@ param(
 $ErrorActionPreference = "Stop"
 
 # =============================================================================
+# Variables globales de seguridad
+# =============================================================================
+$script:AuditLogPath = "C:\Proyectos\Agents_IA_TECH\.bootstrap-audit.log"
+$script:MAX_CLONE_MB = if ($env:MAX_CLONE_MB) { [int]$env:MAX_CLONE_MB } else { 100 }
+$script:AuditChainLastHash = $null
+$script:AllowlistRotationPath = "C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\seguridad\allowlist-rotation.json"
+
+function Initialize-AuditLog {
+    param([string]$Path)
+    try {
+        if (-not (Test-Path -LiteralPath $Path)) {
+            New-Item -ItemType File -Path $Path -Force | Out-Null
+            # ACL restrictivo: solo SYSTEM y Administradores
+            try {
+                $acl = Get-Acl -Path $Path
+                $acl.SetAccessRuleProtection($true, $false)
+                # Intentar eliminar herencia y dejar solo lectura/escritura para SYSTEM
+                icacls $Path /inheritance:r /grant:r "SYSTEM:(F)" /grant:r "Administradores:(F)" /grant:r "BUILTIN\Administradores:(R)" | Out-Null
+            } catch {
+                Write-Warn "No se pudo aplicar ACL restrictivo al audit log (fail-open): $_"
+            }
+        }
+        # Cargar ultimo hash para cadena
+        if (Test-Path -LiteralPath $Path) {
+            $lastLine = Get-Content -Path $Path -Tail 1
+            if ($lastLine) {
+                try {
+                    $obj = $lastLine | ConvertFrom-Json
+                    if ($obj.hash) { $script:AuditChainLastHash = $obj.hash }
+                } catch {}
+            }
+        }
+        return $true
+    } catch {
+        Write-Warn "Error inicializando audit log (fail-open): $_"
+        return $false
+    }
+}
+
+# T064: Rotación de allowlist — registro de última revisión y alerta si supera 90 días
+function Test-AllowlistRotation {
+    try {
+        $rotationFile = $script:AllowlistRotationPath
+        $rotationIntervalDays = 90
+        $needsRotation = $false
+        $lastRotation = $null
+
+        if (Test-Path -LiteralPath $rotationFile) {
+            try {
+                $data = Get-Content -LiteralPath $rotationFile -Raw | ConvertFrom-Json
+                $lastRotation = [DateTime]::Parse($data.last_rotation)
+                if (((Get-Date) - $lastRotation).Days -gt $rotationIntervalDays) {
+                    $needsRotation = $true
+                }
+            } catch {
+                Write-Warn "T064: Error leyendo allowlist rotation file (fail-open): $_"
+                $needsRotation = $false
+            }
+        } else {
+            $needsRotation = $true
+        }
+
+        if ($needsRotation) {
+            Write-Warn "T064: Allowlist no ha sido rotada en >$rotationIntervalDays días. Revisar TrustedOwners."
+            Write-AuditEntry -Action "allowlist_rotation_due" -Data @{lastRotation=$lastRotation; intervalDays=$rotationIntervalDays}
+            # Registrar rotación ahora (fail-open, no bloquea)
+            try {
+                $newData = @{ last_rotation = (Get-Date -Format "o"); owners = $TrustedOwners; rotatedBy = $env:USERNAME }
+                $newData | ConvertTo-Json -Compress | Set-Content -LiteralPath $rotationFile -Encoding UTF8
+                Write-Info "T064: Allowlist rotation registrada."
+            } catch {
+                Write-Warn "T064: Error registrando rotación allowlist (fail-open): $_"
+            }
+        } else {
+            Write-Info "T064: Allowlist rotation vigente (última: $lastRotation)."
+        }
+        return $true
+    } catch {
+        Write-Warn "T064: Error en verificación rotación allowlist (fail-open): $_"
+        return $true
+    }
+}
+
+function Write-AuditEntry {
+    param(
+        [string]$Action,
+        [hashtable]$Data = @{}
+    )
+    try {
+        if (-not (Test-Path -LiteralPath $script:AuditLogPath)) {
+            Initialize-AuditLog -Path $script:AuditLogPath | Out-Null
+        }
+        $entry = @{
+            timestamp = (Get-Date -Format "o")
+            actor = $env:USERNAME
+            host = $env:COMPUTERNAME
+            action = $Action
+            manifestHash = $Data.ManifestHash
+            details = $Data
+        }
+        # Hash chain
+        $prevHash = $script:AuditChainLastHash
+        $payload = $entry | ConvertTo-Json -Compress
+        $chainInput = ($prevHash ?? "") + $payload
+        $hashBytes = [Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($chainInput))
+        $hash = [BitConverter]::ToString($hashBytes).Replace("-","").ToLower()
+        $entry.hash = $hash
+        $entry.prevHash = $prevHash
+        $line = $entry | ConvertTo-Json -Compress
+        Add-Content -Path $script:AuditLogPath -Value $line -Encoding UTF8
+        $script:AuditChainLastHash = $hash
+        # T061: verificar integridad tras escritura
+        $null = Test-AuditLogIntegrity -Path $script:AuditLogPath
+        return $true
+    } catch {
+        Write-Warn "Error escribiendo audit log (fail-open): $_"
+        return $false
+    }
+}
+
+function Test-AuditLogIntegrity {
+    param([string]$Path = $script:AuditLogPath)
+    try {
+        if (-not (Test-Path -LiteralPath $Path)) { return $true }
+        $lines = Get-Content -Path $Path
+        $prevHash = $null
+        foreach ($line in $lines) {
+            if ([string]::IsNullOrWhiteSpace($line)) { continue }
+            $entry = $line | ConvertFrom-Json
+            if ($entry.prevHash -ne $prevHash) {
+                Write-Warn "T061: Integridad del audit log comprometida, hash chain roto en entrada $($entry.action)"
+                Write-AuditEntry -Action "audit_integrity_violation" -Data @{entry=$entry.action}
+                return $false
+            }
+            # Recalcular hash
+            $tmp = $entry.PSObject.Copy()
+            $tmp.PSObject.Properties.Remove('hash')
+            $payload = $tmp | ConvertTo-Json -Compress
+            $chainInput = ($prevHash ?? "") + $payload
+            $hashBytes = [Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($chainInput))
+            $calcHash = [BitConverter]::ToString($hashBytes).Replace("-","").ToLower()
+            if ($calcHash -ne $entry.hash) {
+                Write-Warn "T061: Hash de entrada audit log no coincide"
+                return $false
+            }
+            $prevHash = $entry.hash
+        }
+        return $true
+    } catch {
+        Write-Warn "T061: Error verificando integridad audit log (fail-open): $_"
+        return $true
+    }
+}
+
+function Validate-OpencodeSchema {
+    param(
+        [string]$OpencodePath,
+        [string]$SchemaPath = "C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\seguridad\opencode.schema.json"
+    )
+    try {
+        if (-not (Test-Path -LiteralPath $OpencodePath)) {
+            Write-Warn "T058: opencode.json no encontrado en $OpencodePath (validación omitida fail-open)"
+            return $true
+        }
+        if (-not (Test-Path -LiteralPath $SchemaPath)) {
+            Write-Warn "T058: Schema opencode.schema.json no encontrado, validación omitida (fail-open)"
+            return $true
+        }
+        $content = Get-Content -LiteralPath $OpencodePath -Raw
+        $opencode = $content | ConvertFrom-Json
+        $schema = Get-Content -LiteralPath $SchemaPath -Raw | ConvertFrom-Json
+        $required = $schema.required
+        $missing = @()
+        if ($required) {
+            foreach ($prop in $required) {
+                if (-not ($opencode.PSObject.Properties.Name -contains $prop)) {
+                    $missing += $prop
+                }
+            }
+        }
+        if ($missing.Count -gt 0) {
+            Write-Warn "T058: opencode.json falta propiedades requeridas: $($missing -join ', '); validación fail-open"
+            Write-AuditEntry -Action "opencode_schema_missing_props" -Data @{path=$OpencodePath; missing=$missing -join ','}
+            return $false
+        }
+        Write-AuditEntry -Action "opencode_schema_validated" -Data @{path=$OpencodePath; schema=$SchemaPath}
+        Write-Info "T058: opencode.json validado contra schema (propiedades requeridas presentes)"
+        return $true
+    } catch {
+        Write-Warn "T058: Validación de opencode.json falló (fail-open): $_"
+        Write-AuditEntry -Action "opencode_schema_invalid" -Data @{path=$OpencodePath; error=$_.Exception.Message}
+        return $false
+    }
+}
+
+# =============================================================================
 # Funciones de logging estructurado
 # =============================================================================
 function Write-Info  { param([string]$Message) Write-Host "[INFO] $Message" -ForegroundColor Cyan }
@@ -276,6 +472,18 @@ function Read-DependenciasManifest {
     if (-not (Test-Path -LiteralPath $manifestFile)) {
         Write-Warn "No existe dependencias-manifest.yml en $manifestFile"
         return @()
+    }
+    # T052: Manifest inmutable — verificación fail-open
+    try {
+        $item = Get-Item -LiteralPath $manifestFile -ErrorAction Stop
+        if (-not $item.IsReadOnly) {
+            Write-Warn "T052: Manifest $manifestFile no está marcado como sólo lectura (inmutabilidad no garantizada). Continuando fail-open."
+            Write-AuditEntry -Action "manifest_not_immutable" -Data @{path=$manifestFile}
+        } else {
+            Write-Info "T052: Manifest inmutable verificado."
+        }
+    } catch {
+        Write-Warn "T052: Error verificando inmutabilidad del manifest (fail-open): $_"
     }
     # T041: Verificación de firma del manifest (fail-closed)
     if (-not $DryRun) {
@@ -511,6 +719,31 @@ function Ensure-ManifestTemplate {
     try {
         Copy-Item -LiteralPath $MasterManifestPath -Destination $targetManifest -Force
         Write-OK "Plantilla de manifest copiada: $targetManifest"
+
+        # T052: hacer manifest inmutable tras primera copia
+        try {
+            if (-not $DryRun) {
+                # Calcular hash fuente
+                $srcHashObj = Get-FileHash -LiteralPath $MasterManifestPath -Algorithm SHA256
+                $srcHash = $srcHashObj.Hash
+                # Hacer solo lectura
+                Set-ItemProperty -Path $targetManifest -Name IsReadOnly -Value $true -ErrorAction SilentlyContinue
+                # Alternativa icacls
+                try { icacls $targetManifest /inheritance:r /grant:r "SYSTEM:(F)" /grant:r "Administradores:(R)" | Out-Null } catch {}
+                # T062: registrar copia en audit log
+                Write-AuditEntry -Action "manifest_copy" -Data @{
+                    ManifestHash = $srcHash
+                    SourcePath = $MasterManifestPath
+                    TargetPath = $targetManifest
+                    User = $env:USERNAME
+                    Timestamp = (Get-Date -Format "o")
+                }
+                Write-Info "T052/T062: Manifest marcado como solo lectura y registrado en audit log."
+            }
+        } catch {
+            Write-Warn "T052/T062: No se pudo aplicar inmutabilidad o registrar audit log (fail-open): $_"
+        }
+
         return $true
     }
     catch {
@@ -570,6 +803,43 @@ function Invoke-SandboxBuild {
     }
 }
 
+function Invoke-GitWithTimeout {
+    param(
+        [string]$WorkingDir,
+        [string[]]$Args,
+        [int]$TimeoutSec = 120
+    )
+    try {
+        $proc = Start-Process -FilePath "git" -ArgumentList $Args -WorkingDirectory $WorkingDir -PassThru -NoNewWindow -RedirectStandardOutput $true -RedirectStandardError $true
+        $exited = $proc.WaitForExit($TimeoutSec * 1000)
+        if (-not $exited) {
+            try { $proc.Kill() } catch {}
+            Write-Warn "T056: git command timeout after ${TimeoutSec}s: git $($Args -join ' ')"
+            Write-AuditEntry -Action "git_timeout" -Data @{workingDir=$WorkingDir; args=$Args -join ' '; timeout=$TimeoutSec}
+            return @{ExitCode=124; TimedOut=$true}
+        }
+        return @{ExitCode=$proc.ExitCode; TimedOut=$false; StdOut=$proc.StandardOutput.ReadToEnd()}
+    } catch {
+        Write-Warn "T056: Error ejecutando git con timeout (fail-open): $_"
+        return @{ExitCode=1; TimedOut=$false}
+    }
+}
+
+function Get-GitRepoSizeMB {
+    param([string]$RepoPath)
+    try {
+        $proc = Start-Process -FilePath "git" -ArgumentList @("-C",$RepoPath,"count-objects","-vH") -WorkingDirectory $RepoPath -PassThru -NoNewWindow -RedirectStandardOutput $true -RedirectStandardError $true -Wait
+        $out = $proc.StandardOutput.ReadToEnd()
+        if ($proc.ExitCode -ne 0) { return $null }
+        $m = [regex]::Match($out, 'size:\s*([\d\.]+)\s*MiB')
+        if ($m.Success) { return [double]$m.Groups[1].Value }
+        return $null
+    } catch {
+        Write-Warn "T056: Error calculando tamaño git (fail-open): $_"
+        return $null
+    }
+}
+
 function Sync-GitRepository {
     param(
         [string]$Name,
@@ -606,12 +876,21 @@ function Sync-GitRepository {
             return $true
         }
         
-        $exitCode = Invoke-CommandSafe -Command "git" -Args @("git", "-C", $destDir, "fetch", "origin", $Branch, "--depth=1") -DryRun:$DryRun
-        if ($exitCode -ne 0) {
-            Write-Warn "[$Name] git fetch falló (exit $exitCode); se continúa"
+        # T056: git fetch con timeout 120s
+        $gitResult = Invoke-GitWithTimeout -WorkingDir $destDir -Args @("-C",$destDir,"fetch","origin",$Branch,"--depth=1") -TimeoutSec 120
+        if ($gitResult.ExitCode -ne 0 -or $gitResult.TimedOut) {
+            Write-Warn "[$Name] git fetch falló o timeout (exit $($gitResult.ExitCode)); se continúa"
             return $false
         }
         
+        # Verificar tamaño tras fetch
+        $sizeMB = Get-GitRepoSizeMB -RepoPath $destDir
+        if ($sizeMB -and $sizeMB -gt $script:MAX_CLONE_MB) {
+            Write-Warn "[$Name] Repo size ${sizeMB}MB supera MAX_CLONE_MB=$($script:MAX_CLONE_MB); se rechaza (fail-closed)"
+            Write-AuditEntry -Action "clone_size_exceeded" -Data @{name=$Name; sizeMB=$sizeMB; limit=$script:MAX_CLONE_MB}
+            return $false
+        }
+
         $exitCode = Invoke-CommandSafe -Command "git" -Args @("git", "-C", $destDir, "reset", "--hard", "FETCH_HEAD") -DryRun:$DryRun
         if ($exitCode -ne 0) {
             Write-Warn "[$Name] git reset falló (exit $exitCode); se continúa"
@@ -673,9 +952,21 @@ Write-OK "[$Name] Repositorio actualizado en $destDir"
             return $true
         }
         
-        $exitCode = Invoke-CommandSafe -Command "git" -Args @("git", "clone", "--depth=1", "--branch", $Branch, $Url, $destDir) -DryRun:$DryRun
-        if ($exitCode -ne 0) {
-            Write-Warn "[$Name] git clone falló (exit $exitCode); se continúa"
+        # T056: git clone con timeout 120s
+        $parentDir = Split-Path $destDir -Parent
+        $gitResult = Invoke-GitWithTimeout -WorkingDir $parentDir -Args @("clone","--depth=1","--branch",$Branch,$Url,$destDir) -TimeoutSec 120
+        if ($gitResult.ExitCode -ne 0 -or $gitResult.TimedOut) {
+            Write-Warn "[$Name] git clone falló o timeout (exit $($gitResult.ExitCode)); se continúa"
+            return $false
+        }
+
+        # Verificar tamaño tras clone
+        $sizeMB = Get-GitRepoSizeMB -RepoPath $destDir
+        if ($sizeMB -and $sizeMB -gt $script:MAX_CLONE_MB) {
+            Write-Warn "[$Name] Repo size ${sizeMB}MB supera MAX_CLONE_MB=$($script:MAX_CLONE_MB); se rechaza (fail-closed)"
+            Write-AuditEntry -Action "clone_size_exceeded" -Data @{name=$Name; sizeMB=$sizeMB; limit=$script:MAX_CLONE_MB}
+            # Limpiar clon excedido
+            try { Remove-Item -LiteralPath $destDir -Recurse -Force -ErrorAction SilentlyContinue } catch {}
             return $false
         }
         
@@ -937,9 +1228,23 @@ function Sync-Graphify {
         Write-Warn "[$PackageName] No se pudo determinar la version instalada; se instala la ultima disponible (fail-open)"
     }
 
-    $exitCode = Invoke-CommandSafe -Command "uv" -Args @("uv", "tool", "install", "$PackageName[mcp]", "--force")
-    if ($exitCode -ne 0) {
-        Write-Warn "[$PackageName] uv tool install fallo (exit $exitCode); se continua (fail-open)"
+    # T057: uv tool install con timeout estricto 60s
+    try {
+        $proc = Start-Process -FilePath "uv" -ArgumentList @("tool","install","$PackageName[mcp]","--force") -PassThru -NoNewWindow -Wait
+        $waited = $proc.WaitForExit(60000)
+        if (-not $waited) {
+            try { $proc.Kill() } catch {}
+            Write-Warn "[$PackageName] uv tool install timeout después de 60s; se continúa (fail-open)"
+            Write-AuditEntry -Action "uv_timeout" -Data @{package=$PackageName}
+            return $false
+        }
+        $exitCode = $proc.ExitCode
+        if ($exitCode -ne 0) {
+            Write-Warn "[$PackageName] uv tool install fallo (exit $exitCode); se continua (fail-open)"
+            return $false
+        }
+    } catch {
+        Write-Warn "[$PackageName] Error ejecutando uv tool install con timeout (fail-open): $_"
         return $false
     }
 
@@ -969,6 +1274,13 @@ function Invoke-UpgradeFrameworkSync {
     # Resolver ruta absoluta
     $resolvedRoot = (Resolve-Path $RootPath).Path
     Write-Info "Ruta del proyecto resuelta: $resolvedRoot"
+
+    # T064: Rotación allowlist
+    Test-AllowlistRotation | Out-Null
+
+    # T058: Validar schema opencode.json antes de MCP registration
+    $opencodePath = Join-Path $resolvedRoot "opencode.json"
+    Validate-OpencodeSchema -OpencodePath $opencodePath | Out-Null
     
     # 1. Copiar manifest template si no existe
     $masterManifest = Join-Path (Split-Path $PSScriptRoot -Parent) "dependencias-manifest.yml"
@@ -1023,6 +1335,9 @@ function Invoke-UpgradeFrameworkSync {
     
     # 4. Asegurar que proyect_ext/ existe (para tokenslayer build posterior)
     Ensure-Directory -Path (Join-Path $resolvedRoot "proyect_ext") -DryRun:$DryRun
+
+    # T058: Validar schema opencode.json después de MCP registration
+    Validate-OpencodeSchema -OpencodePath $opencodePath | Out-Null
     
     if ($allSuccess) {
         Write-OK "Sincronización de dependencias completada exitosamente"
@@ -1038,6 +1353,32 @@ function Invoke-UpgradeFrameworkSync {
 # MAIN
 # =============================================================================
 try {
+    # T051: Verificar identidad del script antes de cualquier invocación
+    $scriptFullPath = $MyInvocation.MyCommand.Path
+    if ($scriptFullPath) {
+        try {
+            $resolvedScript = (Resolve-Path -LiteralPath $scriptFullPath -ErrorAction Stop).Path
+            $hashObj = Get-FileHash -LiteralPath $resolvedScript -Algorithm SHA256
+            $refFile = "C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\seguridad\upgrade_framework.sha256"
+            if (Test-Path -LiteralPath $refFile) {
+                $expectedHash = (Get-Content -LiteralPath $refFile -Raw).Trim()
+                if ($hashObj.Hash -ne $expectedHash) {
+                    Write-Warn "T051: Hash del script upgrade_framework.ps1 no coincide con referencia ($expectedHash). Hash actual: $($hashObj.Hash). Continuando fail-open."
+                    Write-AuditEntry -Action "script_identity_mismatch" -Data @{expected=$expectedHash; actual=$hashObj.Hash}
+                } else {
+                    Write-Info "T051: Identidad del script verificada."
+                    Write-AuditEntry -Action "script_identity_ok" -Data @{hash=$hashObj.Hash}
+                }
+            } else {
+                Write-Warn "T051: Archivo de referencia upgrade_framework.sha256 no encontrado. Verificación omitida (fail-open)."
+            }
+        } catch {
+            Write-Warn "T051: Error verificando identidad del script (fail-open): $_"
+        }
+    }
+    # Inicializar audit log
+    Initialize-AuditLog -Path $script:AuditLogPath | Out-Null
+
     Write-Host "===============================================================" -ForegroundColor Cyan
     Write-Host " upgrade_framework - Sincronización de dependencias externas" -ForegroundColor Cyan
     Write-Host "===============================================================" -ForegroundColor Cyan

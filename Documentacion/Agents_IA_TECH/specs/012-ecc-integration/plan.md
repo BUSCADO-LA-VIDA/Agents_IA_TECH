@@ -1,5 +1,10 @@
 # Plan: Integración selectiva de ECC
 
+**Version:** 1.0.0  
+**Status:** Frozen  
+**Date:** 2026-10-05  
+**Spec ID:** 012-ecc-integration  
+
 ## Fases
 1. **Análisis comparativo**
    - Inventariar estructura ECC

@@ -1,5 +1,12 @@
 # Converge — Spec #011: Bootstrap Invokes upgrade_framework for External Dependency Sync
 
+**Security Closure Update**
+**Version:** 1.1.0  
+**Status:** Security tasks T040-T064 — Evidence review 2026-10-05  
+**Date:** 2026-10-05  
+**Spec ID:** 011  
+**Phase:** Converge - Security Closure
+
 **Version:** 1.0.0  
 **Status:** Consolidated  
 **Date:** 2026-09-25  
@@ -318,11 +325,64 @@ uv tool list | Select-String graphify
 
 ---
 
-## 7. Version History
+## 7. Security Closure — T040-T064
+
+**Fecha de revisión:** 2026-10-05  
+**Agente documentador:** `documentador`  
+**Evidencia base:** `C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\seguridad\qa-evidence-011-T059-dryrun.md`
+
+### Resumen de evidencia disponible
+
+| Tarea | Riesgo | Estado documentado en `tasks.md` | Evidencia QA existente |
+|-------|--------|-----------------------------------|------------------------|
+| T040 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T041 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T042 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T043 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T044 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T045 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T046 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T047 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T048 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T049 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T050 | CRITICAL | [ ] Pendiente | Sin evidencia |
+| T051 | HIGH | [ ] Pendiente | Sin evidencia |
+| T052 | HIGH | [ ] Pendiente | Sin evidencia |
+| T053 | HIGH | [ ] Pendiente | Sin evidencia |
+| T054 | HIGH | [ ] Pendiente | Sin evidencia |
+| T055 | HIGH | [ ] Pendiente | Sin evidencia |
+| T056 | HIGH | [ ] Pendiente | Sin evidencia |
+| T057 | HIGH | [ ] Pendiente | Sin evidencia |
+| T058 | HIGH | [ ] Pendiente | Sin evidencia |
+| **T059** | **HIGH** | **[ ] Pendiente en tasks.md** | **APROBADO — QA evidence 011-T059-dryrun.md (2026-10-04)** |
+| T060 | MEDIUM | [ ] Pendiente | Sin evidencia |
+| T061 | MEDIUM | [ ] Pendiente | Sin evidencia |
+| T062 | MEDIUM | [ ] Pendiente | Sin evidencia |
+| T063 | MEDIUM | [ ] Pendiente | Sin evidencia |
+| T064 | LOW | [ ] Pendiente | Sin evidencia |
+
+**Hallazgo:**  
+El único artefacto de evidencia QA disponible para el rango T040-T064 es `qa-evidence-011-T059-dryrun.md`, que certifica **APROBADO** para T059 — Validar DryRun con zero side effects:
+- Entorno aislado, hash SHA256 de manifest antes/después idéntico `58EE674FF502E006D73AE165A3BF95F59C0D4FA6756320319637EE6998887B62`
+- `proyect_ext` no creado
+- Salida `DryRun completado - no se realizaron cambios`
+- Audit log con trazabilidad `DryRun:` registrada
+
+**No se encontró evidencia verificable** para T040-T058 ni T060-T064. En `tasks.md` todas las tareas de seguridad permanecen marcadas como `[ ]` Pendiente. Por tanto, **no es posible declarar el cierre completo del conjunto T040-T064** con la información actual.
+
+### Recomendación
+- Actualizar `tasks.md` marcando T059 como `[x]` con referencia al evidence file.
+- Requerir evidencias QA individuales para T040-T058 y T060-T064 antes de cerrar seguridad de la spec.
+- Mantener el estado de seguridad de la spec como **Parcialmente validado — T059 aprobado, resto pendiente**.
+
+---
+
+## 8. Version History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | 2026-09-25 | `documentador` | Initial converge — consolidated spec, plan, tasks, analyze, threat-model, ADR-0007 |
+| 1.1.0 | 2026-10-05 | `documentador` | Security Closure review — T040-T064 audit; T059 APROBADO con qa-evidence-011-T059-dryrun.md; resto sin evidencia; actualización 00-indice.md |
 
 ---
 

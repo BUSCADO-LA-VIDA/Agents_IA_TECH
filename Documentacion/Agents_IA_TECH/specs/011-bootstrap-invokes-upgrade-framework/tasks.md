@@ -13,37 +13,37 @@
 > **IMPORTANTE**: Los siguientes riesgos fueron identificados en el **Threat Model STRIDE** (`threat-model.md`). Cada tarea de mitigación debe incluir la etiqueta `security-risk:` correspondiente para priorización automática en `speckit-analyze`.
 
 ### CRITICAL
-- [ ] **T040** Implementar allowlist de URLs confiables (Test-TrustedGithubUrl) + verificación de firma (cosign/checksums) para todos los clones (security-risk:CRITICAL)
-- [ ] **T041** Firmar manifest template y verificar integridad antes de leer (security-risk:CRITICAL)
-- [ ] **T042** Verificación obligatoria de firma/checksum en artefacts clonados antes de build (security-risk:CRITICAL)
-- [ ] **T043** Sandbox/container para build de tokenslayer (aislar npm scripts) (security-risk:CRITICAL)
-- [ ] **T044** Deshabilitar scripts npm arbitrarios en build (--ignore-scripts) o usar build aislado (security-risk:CRITICAL)
-- [ ] **T045** Validación estricta de containment en upgrade_framework (realpath, sin symlinks, sin ..) (security-risk:CRITICAL)
-- [ ] **T046** Eliminar secrets de manifest — usar env vars / secret managers, nunca en YAML (security-risk:CRITICAL)
-- [ ] **T047** Sanitizar output de build — filtrar secrets de stdout/stderr (security-risk:CRITICAL)
-- [ ] **T048** Fail-open obligatorio en TODA llamada externa (try/catch + WARN + continue, exit code 0) (security-risk:CRITICAL)
-- [ ] **T049** Principio de menor privilegio — upgrade_framework con token/scopes mínimos, sin env vars sensibles heredados (security-risk:CRITICAL)
-- [ ] **T050** Containment hardening — chroot/container/validación realpath para proyect_ext/ (security-risk:CRITICAL)
+- [x] **T040** Implementar allowlist de URLs confiables (Test-TrustedGithubUrl) + verificación de firma (cosign/checksums) para todos los clones (security-risk:CRITICAL)
+- [x] **T041** Firmar manifest template y verificar integridad antes de leer (security-risk:CRITICAL)
+- [x] **T042** Verificación obligatoria de firma/checksum en artefacts clonados antes de build (security-risk:CRITICAL)
+- [x] **T043** Sandbox/container para build de tokenslayer (aislar npm scripts) (security-risk:CRITICAL)
+- [x] **T044** Deshabilitar scripts npm arbitrarios en build (--ignore-scripts) o usar build aislado (security-risk:CRITICAL)
+- [x] **T045** Validación estricta de containment en upgrade_framework (realpath, sin symlinks, sin ..) (security-risk:CRITICAL)
+- [x] **T046** Eliminar secrets de manifest — usar env vars / secret managers, nunca en YAML (security-risk:CRITICAL)
+- [x] **T047** Sanitizar output de build — filtrar secrets de stdout/stderr (security-risk:CRITICAL)
+- [x] **T048** Fail-open obligatorio en TODA llamada externa (try/catch + WARN + continue, exit code 0) (security-risk:CRITICAL)
+- [x] **T049** Principio de menor privilegio — upgrade_framework con token/scopes mínimos, sin env vars sensibles heredados (security-risk:CRITICAL)
+- [x] **T050** Containment hardening — chroot/container/validación realpath para proyect_ext/ (security-risk:CRITICAL)
 
 ### HIGH
-- [ ] **T051** Verificar identidad de upgrade_framework (hash del script, firma, ruta absoluta) antes de invocar (security-risk:HIGH)
-- [ ] **T052** Manifest inmutable tras primera copia (chmod 444, o versionado git) (security-risk:HIGH)
-- [ ] **T053** Deshabilitar submodules en git clone (--no-recurse-submodules) (security-risk:HIGH)
-- [ ] **T054** Sanitizar env vars antes de pasar a upgrade_framework (solo vars necesarias) (security-risk:HIGH)
-- [ ] **T055** Shallow clone (--depth=1) para evitar historia .git completa (security-risk:HIGH)
-- [ ] **T056** Límites de tamaño/tipo en clones (max depth, max size, timeout) (security-risk:HIGH)
-- [ ] **T057** Timeout estricto en uv tool install (ej. 60s) + kill en exceso (security-risk:HIGH)
-- [ ] **T058** Validar schema de opencode.json antes/después de MCP registration (security-risk:HIGH)
-- [ ] **T059** Validar DryRun — zero side effects (auditoría de fs writes en DryRun) (security-risk:HIGH)
+- [x] **T051** Verificar identidad de upgrade_framework (hash del script, firma, ruta absoluta) antes de invocar (security-risk:HIGH)
+- [x] **T052** Manifest inmutable tras primera copia (chmod 444, o versionado git) (security-risk:HIGH)
+- [x] **T053** Deshabilitar submodules en git clone (--no-recurse-submodules) (security-risk:HIGH)
+- [x] **T054** Sanitizar env vars antes de pasar a upgrade_framework (solo vars necesarias) (security-risk:HIGH)
+- [x] **T055** Shallow clone (--depth=1) para evitar historia .git completa (security-risk:HIGH)
+- [x] **T056** Límites de tamaño/tipo en clones (max depth, max size, timeout) (security-risk:HIGH)
+- [x] **T057** Timeout estricto en uv tool install (ej. 60s) + kill en exceso (security-risk:HIGH)
+- [x] **T058** Validar schema de opencode.json antes/después de MCP registration (security-risk:HIGH)
+- [x] **T059** Validar DryRun — zero side effects (auditoría de fs writes en DryRun) (security-risk:HIGH)
 
 ### MEDIUM
-- [ ] **T060** Log inmutable de auditoría (append-only, hash chain, o syslog remoto) para cada sync (security-risk:MEDIUM)
-- [ ] **T061** Integridad de logs (hash, firma, write-once) (security-risk:MEDIUM)
-- [ ] **T062** Registro de manifest copy (timestamp, source hash, user) en audit log (security-risk:MEDIUM)
-- [ ] **T063** Lock file / mutex para proyect_ext/ durante sync (security-risk:MEDIUM)
+- [x] **T060** Log inmutable de auditoría (append-only, hash chain, o syslog remoto) para cada sync (security-risk:MEDIUM)
+- [x] **T061** Integridad de logs (hash, firma, write-once) (security-risk:MEDIUM)
+- [x] **T062** Registro de manifest copy (timestamp, source hash, user) en audit log (security-risk:MEDIUM)
+- [x] **T063** Lock file / mutex para proyect_ext/ durante sync (security-risk:MEDIUM)
 
 ### LOW
-- [ ] **T064** Mejora continua: Rotación periódica de allowlist URLs, revisión de dependencias (security-risk:LOW)
+- [x] **T064** Mejora continua: Rotación periódica de allowlist URLs, revisión de dependencias (security-risk:LOW)
 
 ---
 

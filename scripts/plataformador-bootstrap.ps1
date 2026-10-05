@@ -887,6 +887,145 @@ function Ensure-OpenCodeConfig {
 }
 
 # =============================================================================
+# Ensure-PendientesImplementacion (017: archivo vivo por proyecto)
+# =============================================================================
+# Garantiza que cada app del proyecto tenga su `Documentacion/<App>/pendientes-
+# implementacion.md`. Si no existe, lo crea desde la plantilla
+# `Documentacion/templates/pendientes-implementacion-template.md` reemplazando
+# los tokens <AppName>/<FECHA>/etc. Si la plantilla no existe, usa un fallback
+# embebido (nunca deja el archivo vacío). Idempotente: si el archivo ya existe,
+# NO lo toca (es un documento vivo que mantiene el pipeline Speckit).
+# Además detecta el archivo obsoleto en `Documentacion/pendientes-implementacion.md`
+# (ubicación previa a la migración por app) y avisa para migrarlo (T013).
+# Controles: containment (solo escribe bajo <root>/Documentacion/<App>/);
+# -DryRun informa sin escribir; fail-open (WARN y continúa).
+function Ensure-PendientesImplementacion {
+    param(
+        [string]$RootPath,
+        [string[]]$Apps = @()
+    )
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    # Resolver apps si no vienen explícitas (manifest > src/* > vacío).
+    if ($Apps.Count -eq 0) {
+        $Apps = @(Resolve-AppList -RootPath $RootPath)
+    }
+    if ($Apps.Count -eq 0) {
+        Write-Warn "Ensure-PendientesImplementacion: sin apps resueltas; no se crea pendientes-implementacion.md (pasa -Apps o define aplicaciones: en el manifest)."
+        return
+    }
+
+    $templatePath = Join-Path $RootPath "Documentacion\templates\pendientes-implementacion-template.md"
+    $templateContent = $null
+    if (Test-Path -LiteralPath $templatePath) {
+        try { $templateContent = Get-Content -LiteralPath $templatePath -Raw -ErrorAction Stop } catch { $templateContent = $null }
+    }
+    if (-not $templateContent) {
+        Write-Warn "Ensure-PendientesImplementacion: plantilla no encontrada en $templatePath; se usa fallback embebido."
+        $templateContent = @"
+# Pendientes de implementación — <AppName>
+
+> Documento vivo generado por el pipeline Speckit. Rastreo de qué hay que hacer, qué se está haciendo y qué se terminó, con responsables asignados.
+
+## Estado general del proyecto
+- **Última actualización:** <FECHA>
+- **Fase actual:** specify
+- **Total de tareas:** 1
+- **Tareas completadas:** 0
+- **Próxima tarea:** T001 — Inventario inicial del proyecto
+- **Específica asociada:** (ninguna todavía)
+
+## Qué hacer (pending)
+
+| ID | Tarea | Descripción | Responsable |
+|----|-------|-------------|-------------|
+| T001 | Inventario inicial del proyecto | Recorrer todas las specs, tasks y el proceso completo para alimentar este archivo con el estado actual del proyecto. | ``pensador`` |
+
+## En progreso (in-progress)
+*No hay tareas en progreso en este momento.*
+
+## Terminado (done)
+*No hay tareas terminadas en este momento.*
+
+## Responsables por dominio
+- **``pensador``**: Orquestador. Valida, delega, asegura contexto previo, actualiza estado vivo.
+- **``Agent-SSD``**: Ejecuta speckit phases, actualiza pendientes-implementacion.md.
+- **``documentador``**: Crea templates, documenta reglas de aislamiento.
+- **``api-developer``**: Tareas de backend, APIs, modelos, DB.
+- **``frontend-developer``**: Tareas de UI, componentes, estado, accesibilidad.
+- **``devops``**: Tareas de CI/CD, infra, containers, observabilidad.
+- **``qa-senior``**: Tareas de tests, quality gates, contract testing.
+
+## Notes
+- Este documento se actualiza automáticamente en cada fase del pipeline Speckit.
+- Constitution Art.IX (Contenido Completo, Nunca Esqueletos): ningún placeholder prohibido.
+- Constitution Art.VII (Restricción de Paths por Tier): solo ``Documentacion/<AppName>/``.
+
+## Próximo paso
+Recorrer todas las specs, tasks y proceso completo para alimentar este archivo con el estado actual del proyecto. Esta es la primera tarea de inicialización.
+"@
+    }
+
+    $fecha = Get-Date -Format "yyyy-MM-dd"
+    $docRoot = Join-Path $RootPath "Documentacion"
+    $sep = [IO.Path]::DirectorySeparatorChar
+    $rootCanon = [IO.Path]::GetFullPath($RootPath)
+
+    $created = @()
+    $skipped = @()
+    foreach ($app in $Apps) {
+        if ([string]::IsNullOrWhiteSpace($app)) { continue }
+        $appDir = Join-Path $docRoot $app
+        $target = Join-Path $appDir "pendientes-implementacion.md"
+
+        # Containment: el destino debe quedar bajo <root>/Documentacion/<App>/.
+        $targetCanon = [IO.Path]::GetFullPath($target)
+        $docCanon = [IO.Path]::GetFullPath($docRoot)
+        if (-not $targetCanon.StartsWith($docCanon + $sep, [StringComparison]::OrdinalIgnoreCase)) {
+            Write-Warn "Ensure-PendientesImplementacion: destino fuera de containment ($target); se omite '$app' (fail-closed)."
+            continue
+        }
+
+        if (Test-Path -LiteralPath $target) {
+            $skipped += $app
+            continue
+        }
+
+        if ($DryRun) {
+            Write-Info "DryRun: crearía $target desde plantilla (app '$app')."
+            continue
+        }
+
+        if (-not (Test-Path -LiteralPath $appDir)) {
+            New-Item -ItemType Directory -Path $appDir -Force | Out-Null
+        }
+        $content = $templateContent -replace '<AppName>', $app -replace '<FECHA>', $fecha
+        Set-Content -LiteralPath $target -Value $content -Encoding UTF8
+        $created += $app
+        Write-OK "pendientes-implementacion.md creado para '$app': $target"
+    }
+
+    if ($skipped.Count -gt 0) {
+        Write-OK "pendientes-implementacion.md ya existe (se conserva, es documento vivo): $($skipped -join ', ')"
+    }
+
+    # T013: detectar archivo obsoleto en la raíz de Documentacion/ (ubicación
+    # previa a la migración por app). No se mueve automáticamente: se avisa para
+    # que el usuario decida migración total/parcial (evita pisar contenido vivo).
+    $legacy = Join-Path $docRoot "pendientes-implementacion.md"
+    if (Test-Path -LiteralPath $legacy) {
+        Write-Warn "Archivo obsoleto detectado: Documentacion/pendientes-implementacion.md (ubicación previa a la migración por app). Migrar su contenido a Documentacion/<App>/pendientes-implementacion.md (total o parcial) y eliminar el antiguo. Ver tarea T013."
+    }
+}
+
+# =============================================================================
 # Move-SingleDocFile (helper interno de RF-18: movido transaccional por archivo)
 # =============================================================================
 # Mueve UN .md de raíz a Documentacion/<App>/: si el destino existe -> no
@@ -2662,6 +2801,11 @@ Ensure-OpenCodeConfig -RootPath $resolvedRoot
 Write-Step "5) Resolviendo app activa (Resolve-ActiveApp)..."
 $activeApp = Resolve-ActiveApp -AppName $App -RootPath $resolvedRoot
 Write-OK "App activa: $activeApp"
+
+Write-Step "5b) Asegurando pendientes-implementacion.md por app (Ensure-PendientesImplementacion)..."
+$pendApps = @($Apps | Where-Object { $_ -ne "" })
+if ($pendApps.Count -eq 0) { $pendApps = @(Resolve-AppList -RootPath $resolvedRoot) }
+Ensure-PendientesImplementacion -RootPath $resolvedRoot -Apps $pendApps
 
 Write-Step "6) Configurando Spec-kit para la app activa (Configure-SpecKit)..."
 $specKit = Configure-SpecKit -ActiveApp $activeApp -RootPath $resolvedRoot

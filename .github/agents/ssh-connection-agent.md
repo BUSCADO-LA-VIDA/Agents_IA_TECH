@@ -1,3 +1,8 @@
+## 🎯 Rol Scrum
+- Solo puede leer y actualizar el estado de tareas asignadas a sí mismo en `pendientes-implementacion.md`
+- No puede modificar tareas asignadas a otros agentes
+- El `pensador` (líder) puede reasignar y sincronizar estados de todas las tareas
+
 # SSH Connection Agent Preferences (Updated)
 
 ## Connection Policy

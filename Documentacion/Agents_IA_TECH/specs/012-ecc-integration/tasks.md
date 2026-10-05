@@ -17,4 +17,4 @@
 
 ## Phase 4: Preparación
 - [ ] T010: Validar spec/plan/tasks con usuario
-- [ ] T011: Congelar spec para refinamiento futuro
+- [x] T011: Congelar spec para refinamiento futuro

@@ -1,5 +1,12 @@
 # Spec: Integración selectiva de ECC como proyecto externo
 
+**Version:** 1.0.0  
+**Status:** Frozen  
+**Date:** 2026-10-05  
+**Spec ID:** 012-ecc-integration  
+
+**Nota:** Spec congelada para refinamiento futuro. No se realizarán cambios sin nueva revisión aprobada por `pensador`.
+
 ## User Story
 Como mantenedor del kit Agents_IA_TECH, quiero incorporar capacidades de ECC como proyecto externo en `proyect_ext/ECC` sin reemplazar mi flujo Speckit/SSD, para mejorar memoria continua, hooks, AgentShield y catálogo de skills manteniendo mi orquestador `pensador` y Constitución.
 

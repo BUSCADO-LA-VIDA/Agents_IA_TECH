@@ -17,7 +17,7 @@
 
 | ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a |
 |----|------|-------|-------------|-------------|--------|------------|
-| 013-T002 | 013 | Clonar ECC en proyect_ext/ECC | Clonar | `plataformador` | Pendiente | `plataformador` |
+| 013-T002 | 013 | Clonar ECC en proyect_ext/ECC | Clonar repositorio ECC externo | `plataformador` | Finalizada | `plataformador` |
 
 ## En progreso
 

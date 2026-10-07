@@ -70,6 +70,11 @@
 > Regla del usuario (2026-09-12) - Gobernanza de agentes:
 > Todo agente del kit debe cumplir las reglas transversales. Se aplican SIEMPRE al crear o modificar agentes.
 
+> Regla del usuario (2026-10-07) - Ciclo de vida de specs:
+> - `Completar/Cerrar` = terminar el flujo SSD+Speckit sin saltar pasos; la spec queda lista para producción y permanece ACTIVA en `specs/`. El estado `Cerrado` en `pendientes-implementacion.md` significa flujo completo/operativo, nunca eliminada.
+> - `Archivar` (`specs/archived/`) = SOLO cuando el usuario indique explícitamente que algo se retira del flujo/proceso (reemplazo, cancelación, deprecación).
+> - Ningún T008 puede ordenar archivado salvo retiro explícito aprobado. Glosario canónico: `Documentacion/Agents_IA_TECH/specs/015-mcp-integration-flow/spec.md`.
+
 ### Reglas transversales de los agentes (gobernanza)
 
 - Consultar los MCPs como herramienta primaria (Regla 1): `context-mode` (`ctx_search`), `codebase-memory-mcp` (`search_graph`), `markitdown` (`convert_to_markdown`).

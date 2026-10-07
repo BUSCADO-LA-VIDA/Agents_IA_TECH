@@ -17,6 +17,8 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 - 009-mcp-update-lifecycle: Script independiente de actualización de MCPs con auto-actualización diaria
 - 010-secret-leak-remediation: Remediación de fuga de API key en historial Git y hardening de gitleaks
 - **011-bootstrap-invokes-upgrade-framework: Bootstrap delega sync dependencias externas en upgrade_framework (fail-open, no hardcoded URLs)**
+- **015‑MCP‑Integration‑Flow** – Flujo transversal de integración de MCP alineado con Spec 015. *Ubicación*: `specs/015-mcp-integration-flow/` (ACTIVA, operativa). *Estado*: Completado — flujo SSD completado, spec lista para producción y ACTIVA en `specs/`. `Cerrar` = completar flujo, NO archivar; `Archivar` (`specs/archived/`) solo al retirar del flujo.
+- **013‑MCP‑Integration‑Flow** – Integración del módulo ECC alineada con Spec 015. *Ubicación*: `specs/013-mcp-integration-flow/` (ACTIVA, operativa). *Estado*: Completado — T001–T008 ejecutadas, spec lista para producción y ACTIVA en `specs/`. `Cerrar` = completar flujo, NO archivar.
 - **017-pendientes-implementacion-por-app: Archivo vivo por proyecto con estado de tareas y responsables** — ✅ **Completado (T001-T016)**. Mecanismo implementado: `Ensure-PendientesImplementacion` en `scripts/plataformador-bootstrap.ps1` (crea el archivo desde plantilla si no existe + detecta obsoleto); sección obligatoria de actualización post-fase en `Agent-SSD` (`.github/` + `.opencode/`); plantilla en `Documentacion/templates/pendientes-implementacion-template.md`. **Regla de agregación multi-spec**: el archivo es un agregado del PROYECTO (consolida TODAS las `specs/*/tasks.md`), con IDs calificados `<spec-id>-T<nnn>` y sin auto-referencia del feature que implementa el mecanismo. Validado Art.VII/Art.IX (PASS).
 
 ## Especificaciones en proceso
@@ -121,3 +123,10 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - Fase D: T030→T031 (Integration tests)
 - Security: T040-T058, T060-T064 pendientes de evidencia QA; T059 validado
 - Acción inmediata: generar evidencias QA para T040-T058 y T060-T064 antes de cerrar seguridad 011
+
+## Especificación 016 - Enforcement of SSD+Speckit Flow via Agents
+- **Estado**: Completada/Cerrada — flujo SSD completo, lista para producción, permanece ACTIVA en `specs/` (archivar solo al retirar del flujo)
+- **Ubicaci�n**: specs/016-ssd-enforcement/ 
+- **Objetivo**: Forzar flujo SSD+Speckit mediante reglas obligatorias en agents y gatekeeper en pensador.
+- **Artefactos**: spec.md, plan.md, tasks.md
+

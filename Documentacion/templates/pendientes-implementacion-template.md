@@ -8,6 +8,8 @@
 
 > **Whitelist de paths (Constitution Art.VII):** Este archivo solo puede escribirse en `Documentacion/<AppName>/`. Ningún agente documental puede tocar `Documentacion/<OtraApp>/`.
 
+> **Ciclo de vida de specs (vinculante):** `Completar/Cerrar` = terminar el flujo SSD+Speckit sin saltar pasos; la spec queda lista para producción y permanece ACTIVA en `specs/`. El estado `Cerrado` significa flujo completo/operativo, nunca eliminada. `Archivar` (`specs/archived/`) = SOLO cuando el usuario indique explícitamente que algo se retira del flujo/proceso.
+
 ## Estado general del proyecto
 - **Última actualización:** <FECHA>
 - **Fase actual:** specify

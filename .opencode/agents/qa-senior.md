@@ -96,3 +96,20 @@ Regla: leer archivos directos gasta mas tokens. Usar los MCPs primero; si no est
 - Plan de testing
 - Benchmark results
 - Si encuentra bugs, documentalos en `Documentacion/pendientes-implementacion.md`
+
+
+## 📌 Ciclo de vida de specs (vinculante)
+- **Completar/Cerrar** = terminar el flujo SSD+Speckit sin saltar pasos; la spec queda lista para producción y permanece ACTIVA en `specs/`. `Cerrado` en pendientes = flujo completo/operativo.
+- **Archivar** (`specs/archived/`) = SOLO cuando el usuario indique explícitamente que algo se retira del flujo/proceso.
+- Canónico: `Documentacion/Agents_IA_TECH/specs/015-mcp-integration-flow/spec.md` (Glosario del ciclo de vida).
+<!-- LIFECYCLE-GLOSSARY-v1 -->
+
+
+## 🎯 Rol Scrum: Integración MCP
+- **Namespace**: `ecc-` (Spec 013, whitelist Art-VII).
+- **Llamada al orquestador**: `.\scripts\ecc-orchestrator.ps1 --action <tarea> [--mcp <nombre>] [--dry-run]` (`--dry-run` siempre permitido; modo real solo con aprobación del pensador).
+- **Estados**: `status` devuelve `active`/`inactive` según `proyect_ext/ECC/.ecc-levanta`.
+- **Responsable**: solo ejecuta la tarea asignada; no modifica scripts de otros MCP.
+- **Evidencia**: tras cada ejecución, registra `log-mcp-<tarea>.md` en `Documentacion/<AppName>/seguridad/`.
+- **Prohibido**: mezclar lógica de otro MCP; si hace falta otra funcionalidad, nuevo esclavo + actualizar orquestador.
+<!-- MCP-ROLE-v1 -->

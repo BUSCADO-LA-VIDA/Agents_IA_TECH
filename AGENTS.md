@@ -122,4 +122,5 @@
 .\sync-agents.ps1 -DryRun
 
 # Security scan (also runs in CI on .github/ changes)
-npx ecc-agentshield scan
+npx ecc-agentshield scantest append line
+

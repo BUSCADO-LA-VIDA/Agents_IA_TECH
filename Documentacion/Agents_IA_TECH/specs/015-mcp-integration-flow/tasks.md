@@ -70,3 +70,10 @@
   # Actualizar pendientes-implementacion.md (marcar 015-T008 como [x] Completada/operativa)
   ```
 - **Estado**: `[x] Completado — la spec 015 está ACTIVA en `specs/`, verificada por lectura directa y presencia en `00-indice.md` (línea 20). Nada se movió a `archived/`. El estado `Cerrado` en `pendientes-implementacion.md` refleja flujo completo/operativo.`
+
+## T009 – Implementar sincronización de scripts y protocolo de AGENTS.md
+- **Descripción**: Sincronizar archivos transversales del kit (.github/, .opencode/, .doc_agents/, .specify/, scripts/, AGENTS.md, opencode.json) desde el repositorio maestro usando plataformador-bootstrap.ps1 -SyncOnly o sync-kit.ps1. El archivo AGENTS.md raíz mantiene las reglas generales del kit. La personalización por proyecto debe gestionarse en Documentacion/<AppName>/ (ver sección de Personalización por Proyecto en AGENTS.md). Los scripts del kit se actualizan respetando la whitelist Art-VII y sin sobrescribir configuraciones locales del proyecto.
+- **Comando**: `plataformador-bootstrap.ps1 -SyncOnly` o `sync-kit.ps1`
+- **Responsable**: pensador (órchestrator) o documentador (según expertise)
+- **Estado**: [ ] (pending)
+- **Aprobación del plan**: No

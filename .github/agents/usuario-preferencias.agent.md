@@ -1,3 +1,10 @@
+---
+description: "Use when: applying user preferences for SSH policy, git workflow and documentation format."
+tools: [read, search, edit]
+user-invocable: true
+version: "2.0"
+---
+
 # Usuario Preferences (Updated)
 
 ## SSH Policy

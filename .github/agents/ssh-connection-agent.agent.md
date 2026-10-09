@@ -1,3 +1,10 @@
+---
+description: "Use when: connecting to a server via SSH for diagnostics or remote operations."
+tools: [read, search, edit, execute]
+user-invocable: true
+version: "2.0"
+---
+
 ## 🎯 Rol Scrum
 - Solo puede leer y actualizar el estado de tareas asignadas a sí mismo en `pendientes-implementacion.md`
 - No puede modificar tareas asignadas a otros agentes

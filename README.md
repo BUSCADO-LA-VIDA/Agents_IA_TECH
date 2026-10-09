@@ -124,19 +124,17 @@ Remove-Item proyect_ext\agents-temp -Recurse -Force
 .\scripts\plataformador-bootstrap.ps1
 ```
 
-Variantes:
+Variantes (interfaz simplificada, Spec 002 — sin parámetros / `-DryRun` / `-Force`):
 
 ```powershell
-# App activa explícita (si el proyecto tiene varias apps)
-.\scripts\plataformador-bootstrap.ps1 -App MiApp
-
-# Solo sincronizar el kit transversal (equivale a sync-agents)
-.\scripts\plataformador-bootstrap.ps1 -SyncOnly
+# Solo sincronizar el kit transversal (motor directo)
 .\sync-agents.ps1
 
-# Forzar sobrescritura de transversales personalizados
+# Forzar sobrescritura de transversales personalizados (+ upgrade de herramientas)
 .\scripts\plataformador-bootstrap.ps1 -Force
 ```
+
+> La app activa se resuelve automáticamente (cwd dentro de `src/<App>/` o definición `aplicaciones:` en `dependencias-manifest.yml`). Sin parámetros no se sobrescriben archivos que difieren (se conservan y avisa); solo `-Force` los reemplaza.
 
 ### Verificación
 
@@ -167,15 +165,14 @@ Variantes:
 # Actualizar el kit transversal
 .\sync-agents.ps1
 
-# Equivalente directo contra el bootstrap
-.\scripts\plataformador-bootstrap.ps1 -SyncOnly
-
 # Si quieres forzar la sobrescritura de personalizaciones locales
 .\sync-agents.ps1 -Force
 
-# Huérfanos sin pregunta (no interactivo): Borrar | Conservar | Preguntar (default)
-.\sync-agents.ps1 -OrphanAction Conservar
+# Sincronizar desde tu checkout local del kit (rama + cambios sin pushear incluidos)
+pwsh scripts/sync-kit.ps1 -KitPath C:\Proyectos\Agents_IA_TECH -RootPath . -Force
 ```
+
+> Huérfanos (archivos locales que ya no están en el maestro): en interactivo pregunta; en no interactivo se conservan en `revisar_manualmente/` por seguridad.
 
 ### Qué cambia y qué se conserva
 

@@ -148,12 +148,11 @@ graphify god-nodes --top 5 --graph "C:\Proyectos\Agents_IA_TECH\graphify-out\gra
 ## 6. Diagnóstico (sin modificar nada)
 
 ```powershell
-# Solo verificar MCPs e índices (NO toca archivos)
-.\scripts\plataformador-bootstrap.ps1 -VerifyOnly
-
 # Ver qué haría el bootstrap sin ejecutar (NO toca archivos)
 .\scripts\plataformador-bootstrap.ps1 -DryRun
 ```
+
+> La verificación de MCPs e índices es el paso 10 de toda ejecución normal (sin parámetros). Ya no existe modo solo-verificación: el flujo completo siempre verifica al final.
 
 ---
 

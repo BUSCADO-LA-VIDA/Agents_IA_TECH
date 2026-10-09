@@ -11,15 +11,33 @@
 **Success Criteria**:
 1. Cada proyecto tiene `Documentacion/<AppName>/pendientes-implementacion.md` con contenido completo (no esqueleto, no placeholders)
 2. El archivo contiene secciones: `Qué hacer`, `En progreso`, `Terminado`, `Responsables`
-3. Cada tarea tiene: ID calificado (`<spec-id>-T<nnn>`), descripción, estado (`pending|in-progress|done`), responsable asignado
-4. El pipeline Speckit actualiza automáticamente este archivo en cada fase (specify → plan → tasks → analyze → converge → implement)
+3. Cada tarea tiene: ID calificado (`<spec-id>-T<nnn>`), descripci�n, estado (`pending|in-progress|done`), responsable asignado
+4. El pipeline Speckit actualiza autom�ticamente este archivo en cada fase (specify  plan  tasks  analyze  converge )
 5. El archivo respeta la whitelist de paths del tier documental (solo escribe en `Documentacion/<AppName>/`)
-6. No hay placeholders: `TBD`, `TODO`, `pendiente`, `por definir`, `N/A`, `completar aquí`, `XXX`, `...` están prohibidos
+6. No hay placeholders: `TBD`, `TODO`, `pendiente`, `por definir`, `N/A`, `completar aqu�`, `XXX`, `...` est�n prohibidos
 7. Las tablas tienen filas reales y las listas tienen items concretos
 8. **El archivo es un agregado del PROYECTO**: consolida las tareas de TODAS las `specs/*/tasks.md`, no de una sola spec
 9. **IDs calificados**: `<spec-id>-T<nnn>` (ej. `019-T001`) para evitar colisiones entre specs (bug detectado: dos `T001`, dos `T008`, dos `T010` sin prefijo)
 10. **Sin auto-referencia**: el feature que implementa el mecanismo (017) NO inyecta sus tareas de infraestructura en el archivo del proyecto destino
 11. **Estado derivado**: el estado de cada tarea se deriva del `tasks.md` de su spec (`[ ]` = pending, `[x]` = done), no se inventa
+12. **Estados de la especificación**:
+    - **ACTIVO**: Spec en trabajo activo. Todas sus tareas críticas tienen check `[x]`. Es la base del pipeline actual.
+    - **EN PROCESO**: Spec siendo trabajada actualmente. Tiene tasks `[ ]` (pending) o `[x]` parciales.
+    - **ARCHIVADO**: Spec retirada del flujo activo. Se mueve a `specs/archived/` y ya no es la base de trabajo.
+    - **Transiciones permitidas**:
+      - ACTIVO → EN PROCESO: Cuando surge nuevo requerimiento o bug.
+      - EN PROCESO → ACTIVO: Cuando se completan las tasks pendientes.
+      - ACTIVO → ARCHIVADO: Cuando el spec ha cumplido su ciclo y se decide retirarlo.
+      - ARCHIVADO → ACTIVO: Cuando se detecta nuevo requerimiento sobre la funcionalidad histórica (preferible crear nueva spec).
+    - **Regla de oro**: Para nueva funcionalidad evolutiva, **SIEMPRE crear spec nueva** (018, 019...), no reactivar la anterior. Esto asegura historial claro de cambios.
+13. **Historial de evolución**:
+    - El archivo `00-indice.md` y `pendientes-implementacion.md` deben registrar cambios significativos entre versiones de specs relacionadas.
+    - Registrar cuándo y por qué se creó cada spec, qué funcionalidad añadió, y por qué se archivó la anterior.
+    - Formato: Tabla resumida al final del `00-indice.md` o en sección específica de historial.
+
+**Artefactos generados**:
+- `Documentacion/<AppName>/pendientes-implementacion.md` — por proyecto
+- `Documentacion/<AppName>/specs/017-pendientes-implementacion-por-app/` — specs, plan, tasks, analyze, converge
 
 **Artefactos generados**:
 - `Documentacion/<AppName>/pendientes-implementacion.md` — por proyecto

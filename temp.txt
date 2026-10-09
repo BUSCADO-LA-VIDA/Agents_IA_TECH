@@ -1,4 +1,4 @@
-# Tasks 017 — Pendientes de implementación por proyecto
+﻿# Tasks 017 — Pendientes de implementación por proyecto
 
 **Generado por**: `speckit-tasks`  
 **Basado en**: `spec.md` + `plan.md` del feature 017  
@@ -60,7 +60,7 @@
 - **Hecho cuándo**: El archivo incluye una sección "Próxima tarea" con el ID y descripción de la próxima tarea a ejecutar, actualizada automáticamente después de cada fase.
 - **Dependencias**: T002. La lógica de update automática debe estar implementada antes de agregar esta sección.
 
-### T009 — Hacer el archivo `pendientes-implementacion.md` "vivo" viviente
+### T010 — Hacer el archivo `pendientes-implementacion.md` "vivo" viviente
 - **Descripción**: Asegurar que el archivo `Documentacion/<AppName>/pendientes-implementacion.md` se considera un documento "vivo" que debe poder mantener el `pensador` para saber: qué hay que hacer, qué se está haciendo y qué se terminó, y si el flujo de cada tarea está hecho, y quién lo debe hacer. Facilita la asignación de responsabilidades según capacidades y permisos de cada agente sin preguntar al usuario tanto.
 - **Responsable**: `pensador` (órchestrator, concepto y diseño)
 - **Hecho cuándo**: El archivo cumple su propósito de ser el recordatorio vivo del plan completo, estado de ejecución y responsables. El usuario ya no necesita preguntir "qué sigue" o "quién lo hace" — el archivo lo muestra.
@@ -103,49 +103,11 @@
   3. **IDs calificados**: `<spec-id>-T<nnn>` (ej. `019-T001`) para evitar colisiones entre specs (el bug detectado: dos `T001`, dos `T008`, dos `T010` sin prefijo).
   4. **Sin auto-referencia**: el feature que implementa el mecanismo (017) NO inyecta sus propias tareas de infraestructura en el archivo del proyecto destino.
   5. **Estado derivado**: el estado de cada tarea (pending/in-progress/done) se deriva del `tasks.md` de su spec (`[ ]` = pending, `[x]` = done), no se inventa.
-  6. **Responsable por dominio**: se asigna segúm la matriz fase→agente del KIT.
+  6. **Responsable por dominio**: se asigna según la matriz fase→agente del KIT.
   7. **Re-agregación en cada fase**: al cerrar cualquier fase Speckit de cualquier spec, se re-agrega el archivo completo.
 - **Responsable**: `pensador` (diseño de la regla) + `documentador` (aplicación en template)
 - **Hecho cuándo**: El archivo `pendientes-implementacion.md` lista las tareas de TODAS las specs del proyecto con IDs calificados, sin colisiones, sin auto-referencia del feature 017, y el estado derivado de cada `tasks.md`.
 - **Dependencias**: T012, T014. La plantilla y la automatización deben existir antes de aplicar la regla de agregación.
-
-## T017 – Estado de especificación y ciclo de vida
-- **Descripción**: Define los tres estados posibles que puede tener una spec en el ciclo de vida SSD:
-  1. **ACTIVO**: Spec en trabajo activo. Todas sus tareas críticas tienen check `[x]`. Es la base del pipeline actual.
-  2. **EN PROCESO**: Spec siendo trabajada actualmente. Tiene tasks `[ ]` (pending) o `[x]` parciales.
-  3. **ARCHIVADO**: Spec retirada del flujo activo. Se mueve a `specs/archived/` y ya no es la base de trabajo.
-- **Transiciones permitidas**:
-  - ACTIVO → EN PROCESO: Cuando surge nuevo requerimiento o bug.
-  - EN PROCESO → ACTIVO: Cuando se completan las tasks pendientes.
-  - ACTIVO → ARCHIVADO: Cuando el spec ha cumplido su ciclo y se decide retirarlo.
-  - ARCHIVADO → ACTIVO: Cuando se detecta nuevo requerimiento sobre la funcionalidad histórica (preferible crear nueva spec).
-- **Regla de oro**: Para nueva funcionalidad evolutiva, **SIEMPRE crear spec nueva** (018, 019...), no reactivar la anterior. Esto asegura historial claro de cambios.
-- **Dependencias**: T001, T016. La definición de estados y la regla de creación de nuevas specs debe existir antes de cerrar ciclos.
-
-## T018 – Migración de specs completadas a archived
-- **Descripción**: Al finalizar una spec (all tasks `[x]`), moverla de `specs/` a `specs/archived/`. Registrar en `pendientes-implementacion.md` la migración y actualizar `00-indice.md`.
-- **Procedimiento**:
-  1. Verificar que todas las tasks de la spec tienen estado `[x]` (completadas).
-  2. Mover el archivo `specs/NNN-descripcion.md` a `specs/archived/NNN-descripcion.md`.
-  3. Registrar en `pendientes-implementacion.md` la migración: "Spec 017 migrada a archivado por completamiento".
-  4. El `00-indice.md` debe actualizarse para reflejar el movimiento.
-- **Dependencias**: T017. La definición de estados debe existir antes de la migración.
-
-## T019 – Creación de nueva spec para funcionalidad evolutiva
-- **Descripción**: Cuando la funcionalidad de una spec activa evoluciona o se añaden features nuevos, **NO reactivar la spec anterior**, sino crear una spec nueva con número incremental.
-- **Procedimiento**:
-  1. Identificar que la spec actual (ej. 017) cubre la funcionalidad base, pero se necesitan features nuevos.
-  2. Crear spec nueva (ej. 018) con su propio `spec.md`, `plan.md`, `tasks.md`.
-  3. Las tasks de la nueva spec llevarán IDs calificados: `018-T001`, `018-T002`, etc.
-  4. El `pendientes-implementacion.md` del proyecto consolidará tasks de TODAS las specs (017, 018, etc.) con IDs calificados.
-  5. La spec 017 pasa a estado ARCHIVADO automáticamente (o se mueve manualmente).
-- **Dependencias**: T018, T012. La regla de agregación multi-spec y la plantilla deben existir.
-
-## T020 – Documentación de historial de evolución de specs
-- **Descripción**: Registrar en `00-indice.md` y `pendientes-implementacion.md` los cambios significativos entre versiones de specs relacionadas.
-- **Contenido**: Registrar cuándo y por qué se creó cada spec, qué funcionalidad añadió, y por qué se archivó la anterior.
-- **Formato**: Tabla resumida al final del `00-indice.md` o en sección específica de historial.
-- **Dependencias**: T019. La creación de nuevas specs debe existir antes de registrar el historial.
 
 ## Resumen de responsables
 - **pensador**: Orquestador, valida, delega, asegura contexto previo, valida placeholders, actualiza estado vivo
@@ -155,3 +117,4 @@
 - **api-developer**: (no aplica directamente, pero responsable de tasks de backend si es necesario)
 - **frontend-developer**: (no aplica directamente, pero responsable de tasks de frontend si es necesario)
 - **devops**: (no aplica directamente, pero responsable de tasks de infra si es necesario)
+

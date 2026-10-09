@@ -23,16 +23,21 @@
 - **T013**: Documentar integración en `quickstart.md`
 
 ### Fase 4: Sincronización del kit transversal
-- **T014**: Sincronizar `.github/` desde repositorio maestro
-- **T015**: Sincronizar `.opencode/` desde repositorio maestro
-- **T016**: Sincronizar `.doc_agents/` desde repositorio maestro
-- **T017**: Sincronizar `scripts/` desde repositorio maestro
-- **T018**: Sincronizar `.specify/memory/constitution.md` desde repositorio maestro
-- **T019**: Sincronizar `AGENTS.md` desde repositorio maestro
-- **T020**: Sincronizar `opencode.json` desde repositorio maestro
-- **T021**: Sincronizar `README.md` desde repositorio maestro
-- **T022**: Sincronizar `sync-agents.ps1` desde repositorio maestro
-- **T022**: Sincronizar `upgrade_framework.ps1` desde repositorio maestro
+- **T014**: Sincronizar `.github/` desde la fuente del kit (maestro GitHub o checkout local con `-KitPath`)
+- **T015**: Sincronizar `.opencode/` desde la fuente del kit
+- **T016**: Sincronizar `.doc_agents/` desde la fuente del kit
+- **T017**: Sincronizar `scripts/` desde la fuente del kit (incluye archivos nuevos de rama no pusheada, ej. `ecc-orchestrator.ps1`)
+- **T018**: Sincronizar `.specify/memory/constitution.md` desde la fuente del kit
+- **T019**: Sincronizar `AGENTS.md` desde la fuente del kit
+- **T020**: Sincronizar `opencode.json` desde la fuente del kit
+- **T021**: Sincronizar `README.md` desde la fuente del kit
+- **T022**: Sincronizar `sync-agents.ps1` desde la fuente del kit
+- **T022**: Sincronizar `upgrade_framework.ps1` desde la fuente del kit
+
+### Fase 6: Interfaz simplificada + fuente local (002-SIMPLE, ver tasks.md T036-T037)
+- Simplificar `plataformador-bootstrap.ps1` a sin parámetros / `-DryRun` / `-Force`, con modo kit seguro automático y `-Force` incluyendo upgrade de herramientas
+- Agregar `-KitPath` a `sync-kit.ps1` (fuente local fail-closed) y reorientar `sync-agents.ps1` al motor directo
+- Actualizar docs vivas (README, quickstart, mantenimiento, ecosistema) a la nueva interfaz
 
 ### Fase 5: Validación y Convergence
 - **T022**: Validar idempotency y reporting

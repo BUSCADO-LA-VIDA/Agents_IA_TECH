@@ -5,10 +5,22 @@
 - **Dependencias**: Ninguna.
 
 ## T027 – Actualizar kit (plataformador-bootstrap)
-- **Descripción**: Ejecutar `.\\scripts\\plataformador-bootstrap.ps1 -Force` para actualizar el kit completo, o `.\\scripts\\sync-kit.ps1 -Force` para solo transversales.
+- **Descripción**: Ejecutar `.\\scripts\\plataformador-bootstrap.ps1 -Force` para actualizar el kit completo, o `.\\scripts\\sync-kit.ps1 -Force` para solo transversales. Interfaz simplificada (FR-014): sin parámetros (todo), `-DryRun` (demo), `-Force` (sobrescribe + upgrade de herramientas).
 - **Comando**: `.\\scripts\\plataformador-bootstrap.ps1 -Force`
 - **Estado**: `[ ]` Pendiente
 - **Dependencias**: T026. El respaldo git debe realizarse antes.
+
+## T036 – Simplificar interfaz del bootstrap (002-SIMPLE)
+- **Descripción**: Reducir `scripts/plataformador-bootstrap.ps1` a sin parámetros / `-DryRun` / `-Force` con defaults fijos y seguros. Eliminar ramas `-VerifyOnly`/`-SyncOnly` y flags `-SkipInstall`, `-NoRestart`, `-SkipIndexing`, `-App`/`-Apps`, `-RepoUrl`, `-ManifestPath`, `-OrphanAction`, `-GraphifyScope`/`-GraphifyDeep`, `-SkipSelfUpdate`, `-SkipSync`. Modo kit seguro AUTOMÁTICO (detecta checkout maestro por origin y omite el sync, antes `-SkipSync`). `-Force` incluye upgrade de herramientas externas (antes `-ForceUpgradeTools`). Reorientar `sync-agents.ps1` a invocar `scripts/sync-kit.ps1` directo (el bootstrap ya no expone `-SyncOnly`). Actualizar docs vivas (README, quickstart, mantenimiento, ecosistema).
+- **Comando**: Verificación con `[System.Management.Automation.Language.Parser]::ParseFile` (0 errores) + `.\\scripts\\plataformador-bootstrap.ps1 -DryRun` (13 pasos, 0 errores) + `.\\sync-agents.ps1 -DryRun` (delega al motor).
+- **Estado**: `[x]` Completado (2026-10-08: parser 0 errores; DryRun completo en el KIT con paso 3 auto-omitido por checkout maestro y 0 errores; sync-agents -DryRun delega al motor correctamente).
+- **Dependencias**: Ninguna.
+
+## T037 – Fuente local del kit para el sync (002-KITPATH)
+- **Descripción**: Agregar `-KitPath <ruta-kit-local>` a `scripts/sync-kit.ps1` para sincronizar desde un checkout local (rama + cambios sin pushear) en vez de clonar GitHub. Fail-closed: solo directorios locales con marcadores (`scripts/`, `.github/`, `.opencode/`, `.doc_agents/`, `AGENTS.md`); jamás URLs ni el propio destino; el directorio temporal solo se borra si es clon propio. Solo `-Force` controla sobrescritura (igual que en modo GitHub).
+- **Comando**: `pwsh scripts/sync-kit.ps1 -KitPath C:\\Proyectos\\Agents_IA_TECH -RootPath <proyecto> -Force`
+- **Estado**: `[x]` Completado (2026-10-08: DryRun + sync real con `-Force` en proyecto consumidor; `scripts/ecc-orchestrator.ps1` entregado; los 10 scripts con hash idéntico al KIT; `.github/agents/pensador.agent.md` y `AGENTS.md` con hash idéntico; `Documentacion/<AppName>/` intacta; 0 errores).
+- **Dependencias**: T036.
 
 ## T028 – Restaurar cambios del proyecto
 - **Descripción**: Ejecutar `git stash pop` para restaurar los cambios locales, o `git checkout <commit-anterior>` para volver al estado previo.

@@ -33,23 +33,25 @@ cat opencode.json | jq '.mcp[] | {name: .name, enabled: .enabled}'
 
 ---
 
-## 3. Flags Principales del Bootstrap
+## 3. Interfaz del Bootstrap (simplificada, Spec 002)
 
-| Flag | Descripción | Default |
-|------|-------------|---------|
-| `-ForceUpgradeTools` | **Sincroniza dependencias externas + compila tokenslayer + registra 4to MCP** (ver sección 4) | `false` |
-| `-DryRun` | Simula ejecución sin escribir archivos ni llamadas de red | `false` |
-| `-SkipSync` | Omite sincronización del kit transversal (modo seguro para consumidores) | `false` |
+| Forma | Descripción |
+|------|-------------|
+| (sin parámetros) | Todo el flujo (13 pasos). No sobrescribe archivos que difieren; no toca herramientas externas |
+| `-DryRun` | Demo/prueba: simula ejecución sin escribir archivos |
+| `-Force` | Todo + **sobrescribe archivos que difieren + sincroniza dependencias externas + compila tokenslayer + registra 4to MCP** (ver sección 4) |
+
+> El modo kit seguro es automático: dentro del checkout maestro se omite el sync (antes `-SkipSync`). La app activa se resuelve automáticamente (cwd o `aplicaciones:` en `dependencias-manifest.yml`). Upgrade de dependencias directo (sin bootstrap): `pwsh upgrade_framework.ps1 -RootPath <proyecto> -ForceUpgradeTools`.
 
 ---
 
-## 4. `-ForceUpgradeTools`: Sync Externo + Tokenslayer + 4to MCP
+## 4. `-Force`: Sync Externo + Tokenslayer + 4to MCP
 
 ### Qué hace
 
 Cuando ejecutas:
 ```powershell
-.\scripts\plataformador-bootstrap.ps1 -ForceUpgradeTools
+.\scripts\plataformador-bootstrap.ps1 -Force
 ```
 
 El bootstrap realiza **automáticamente** en una sola pasada:
@@ -82,7 +84,7 @@ El bootstrap realiza **automáticamente** en una sola pasada:
 # - proyect_ext/
 # - opencode.json con tokenslayer
 
-.\scripts\plataformador-bootstrap.ps1 -ForceUpgradeTools
+.\scripts\plataformador-bootstrap.ps1 -Force
 
 # Salida esperada:
 # INFO: Sync-TransversalKit completed
@@ -102,7 +104,7 @@ El bootstrap realiza **automáticamente** en una sola pasada:
 
 ```powershell
 # Segunda ejecución en el mismo proyecto
-.\scripts\plataformador-bootstrap.ps1 -ForceUpgradeTools
+.\scripts\plataformador-bootstrap.ps1 -Force
 
 # Comportamiento:
 # - Manifest NO se sobrescribe (usuario pudo personalizarlo)
@@ -136,7 +138,7 @@ uv tool list | Select-String graphify
 
 ```powershell
 # Ver qué PASARÍA sin ejecutar nada
-.\scripts\plataformador-bootstrap.ps1 -ForceUpgradeTools -DryRun
+.\scripts\plataformador-bootstrap.ps1 -Force -DryRun
 
 # Comportamiento:
 # - Solo logs informativos ("DryRun: would invoke upgrade_framework...")
@@ -150,12 +152,9 @@ uv tool list | Select-String graphify
 
 ```mermaid
 flowchart TD
-    A[Clonar kit / Copiar a proyecto] --> B{¿Proyecto nuevo?}
-    B -->|Sí| C[Bootstrap básico\n.\scripts\plataformador-bootstrap.ps1]
-    B -->|No| D[Bootstrap con -SkipSync\n.\scripts\plataformador-bootstrap.ps1 -SkipSync]
-    C --> E{¿Necesitas tools externas?}
-    D --> E
-    E -->|Sí (tokenslayer, spec-kit, graphify)| F[Bootstrap con -ForceUpgradeTools\n.\scripts\plataformador-bootstrap.ps1 -ForceUpgradeTools]
+    A[Clonar kit / Copiar a proyecto] --> B[Bootstrap\n.\scripts\plataformador-bootstrap.ps1]
+    B --> E{¿Necesitas tools externas o forzar archivos?}
+    E -->|Sí (tokenslayer, spec-kit, graphify, sobrescribir)| F[Bootstrap con -Force\n.\scripts\plataformador-bootstrap.ps1 -Force]
     E -->|No| G[Listo - Solo kit + MCPs base]
     F --> H[Verificar: tokenslayer.build + 4to MCP + graphify]
     G --> H

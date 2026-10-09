@@ -12,17 +12,13 @@
 #   - preparar la estructura antes de mover archivos
 #   - recargar la ventana de VS Code del proyecto cuando el usuario lo pide (solo esa ventana, sin tocar las demás)
 #
-# Uso:
-#   .\scripts\plataformador-bootstrap.ps1
-#   .\scripts\plataformador-bootstrap.ps1 -SkipInstall
-#   .\scripts\plataformador-bootstrap.ps1 -NoRestart
-#   .\scripts\plataformador-bootstrap.ps1 -DryRun
-#   .\scripts\plataformador-bootstrap.ps1 -SkipIndexing
-#   .\scripts\plataformador-bootstrap.ps1 -VerifyOnly
-#   .\scripts\plataformador-bootstrap.ps1 -SyncOnly [-DryRun] [-Force] [-RepoUrl <url>] [-OrphanAction Borrar|Conservar|Preguntar]  # delegación sync-agents
-#   .\scripts\plataformador-bootstrap.ps1 -App <app> [-DryRun]  # app activa explícita
-#   .\scripts\plataformador-bootstrap.ps1 [-GraphifyDeep] [-GraphifyScope App|Workspace]  # Graphify deep (LLM) / scope del grafo
-#   .\scripts\plataformador-bootstrap.ps1 -SkipSelfUpdate  # saltar auto-actualización desde el maestro
+# Uso (interfaz simplificada, Spec 002 — solo 3 formas):
+#   .\scripts\plataformador-bootstrap.ps1           # todo el flujo (13 pasos): estructura, MCPs, sync kit, Spec-kit, apps, Graphify, indices, verificacion
+#   .\scripts\plataformador-bootstrap.ps1 -DryRun   # demo/prueba: informa sin escribir nada
+#   .\scripts\plataformador-bootstrap.ps1 -Force    # todo + sobrescribe archivos que difieren + incluye upgrade de herramientas externas
+# Nota: sin parametros NO se sobrescriben archivos que difieren (se conservan; avisa que uses -Force).
+#   El upgrade de dependencias externas tambien corre directo: pwsh upgrade_framework.ps1 -RootPath <proyecto> -ForceUpgradeTools
+#   Sync solo-transversales directo (motor): pwsh scripts/sync-kit.ps1 -RootPath <proyecto> [-Force] [-DryRun]
 # Requisito: PowerShell 7+ (pwsh ≥ 7). No funciona en Windows PowerShell 5.1.
 #   Recomendación (solo texto, ejecutar manualmente si aplica):
 #     winget install --id Microsoft.PowerShell --source winget
@@ -30,34 +26,30 @@
 
 [CmdletBinding()]
 param(
-    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot),
-    [switch]$SkipInstall,
-    [switch]$NoRestart,
     [switch]$DryRun,
-    [switch]$Force,
-    [switch]$SkipIndexing,
-    [switch]$VerifyOnly,
-    [switch]$SyncOnly,
-    [string]$App = "",
-    [string[]]$Apps = @(),
-    [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
-    [string]$ManifestPath = "",
-    [string]$OrphanAction = "Preguntar",
-    # [BOOTSTRAP-FIXES] F6: -GraphifyDeep -> graphify extract --mode deep (LLM);
-    # -GraphifyScope App (default) = app activa / Workspace = raíz del proyecto.
-    [ValidateSet("App", "Workspace")]
-    [string]$GraphifyScope = "App",
-    [switch]$GraphifyDeep,
-    # [SELF-UPDATE] flag para saltar el mecanismo.
-    [switch]$SkipSelfUpdate,
-    # [007-MCP] RF-04/D3: instala/actualiza herramientas externas (fail-open,
-    # opt-in). Sin el flag no se intenta ninguna instalación.
-    [switch]$ForceUpgradeTools,
-    # [007-MCP] RF-06/D5: "modo kit seguro" — salta Sync-TransversalKit pero
-    # ejecuta el resto (resolución MCP, .env.mcp, índices). Permite activar los
-    # MCPs en el kit maestro sin que el sync lo sobrescriba a sí mismo.
-    [switch]$SkipSync
+    # -Force: sobrescribe archivos que difieren + incluye upgrade de
+    # herramientas externas (npm/pip/uv + build tokenslayer). Sin -Force los
+    # archivos que difieren se conservan (avisa) y no se tocan herramientas.
+    [switch]$Force
 )
+
+# [002-SIMPLE] Interfaz simplificada (Spec 002): el bootstrap solo acepta
+# -DryRun / -Force / sin parametros. Todo lo demas va con defaults fijos y
+# seguros (sin banderas): el flujo completo siempre corre los 13 pasos.
+$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
+$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH"
+$OrphanAction = "Preguntar"   # en no-interactivo degrada a Conservar (seguro)
+$App = ""
+$Apps = @()
+$ManifestPath = ""
+$GraphifyScope = "App"
+$GraphifyDeep = $false
+$SkipInstall = $false
+$SkipIndexing = $false
+$NoRestart = $false
+$SkipSelfUpdate = $false
+# -Force incluye el upgrade de herramientas externas (antes -ForceUpgradeTools).
+$ForceUpgradeTools = [bool]$Force
 
 $ErrorActionPreference = "Stop"
 
@@ -101,7 +93,7 @@ function Show-ExecutionSummary {
 # =============================================================================
 # Configuración del instalador/actualizador único (ADR-0003)
 # [SOLUCION-GENERICA] RF-S3: sin lista fija de dominio. La lista de apps se
-# resuelve por proyecto: flag -Apps explícito > manifest del proyecto >
+# resuelve por proyecto (automático, sin flags): manifest del proyecto >
 # descubrimiento src/* > lista vacía + WARN (nunca hardcodeada).
 
 # Resuelve la lista de apps del proyecto (RF-S3/RF-S5):
@@ -128,7 +120,7 @@ function Resolve-AppList {
             ForEach-Object { $_.Name })
         if ($found.Count -gt 0) { return @($found) }
     }
-    Write-Warn "Sin apps en manifest ni en src/; lista vacía (pasa -Apps explícito o define `aplicaciones:` en tu manifest local)."
+    Write-Warn "Sin apps en manifest ni en src/; lista vacía (define `aplicaciones:` en tu manifest local)."
     return @()
 }
 
@@ -274,11 +266,6 @@ function Ensure-Command {
     if ($cmd) {
         Write-OK "Comando disponible: $Name -> $($cmd.Source)"
         return $true
-    }
-
-    if ($SkipInstall) {
-        Write-Warn "Se omite instalación de '$Name' porque -SkipInstall está activo."
-        return $false
     }
 
     if ($DryRun) {
@@ -918,7 +905,7 @@ function Ensure-PendientesImplementacion {
         $Apps = @(Resolve-AppList -RootPath $RootPath)
     }
     if ($Apps.Count -eq 0) {
-        Write-Warn "Ensure-PendientesImplementacion: sin apps resueltas; no se crea pendientes-implementacion.md (pasa -Apps o define aplicaciones: en el manifest)."
+        Write-Warn "Ensure-PendientesImplementacion: sin apps resueltas; no se crea pendientes-implementacion.md (define aplicaciones: en el manifest)."
         return
     }
 
@@ -1078,8 +1065,8 @@ function Move-SingleDocFile {
 # referencias.md, roadmap.md, idioma.md, preferencias*.md,
 # memoria-proyecto.md, soluciones-conocidas.md — NUNCA otros: README.md,
 # AGENTS.md, etc. jamás se cazan; nada de globs amplios ni recursivo).
-# Destino Documentacion/<App>/: -App (ámbito del script) > cwd (vía
-# Resolve-ActiveApp); si no se resuelve -> pregunta destino en interactivo o
+# Destino Documentacion/<App>/: cwd (vía Resolve-ActiveApp, automático);
+# si no se resuelve -> pregunta destino en interactivo o
 # lista sin mover. Confirmación por archivo S/N/T/C sin bypass (-Force NO
 # aplica aquí por diseño). Tracking vivo (>50KB o nombre pendientes-*) FUERA
 # del [T]: siempre S/N individual con advertencia específica (quién lo
@@ -1115,7 +1102,7 @@ function Repair-DocStructure {
         return
     }
 
-    # ¿Qué App? -App (ámbito del script) > cwd > preguntar/listar.
+    # ¿Qué App? cwd (automático) > preguntar/listar.
     $destApp = ""
     if (Get-Variable -Name App -Scope Script -ErrorAction SilentlyContinue) {
         if ($script:App -and ($script:App -ne "root")) { $destApp = $script:App }
@@ -1427,11 +1414,6 @@ function Index-CodebaseMemory {
         [string]$ProjectName = ""
     )
 
-    if ($SkipIndexing) {
-        Write-Info "Se omite indexación de código por -SkipIndexing."
-        return
-    }
-
     if (-not (Get-Command "codebase-memory-mcp" -ErrorAction SilentlyContinue)) {
         Write-Warn "codebase-memory-mcp no está disponible; se omite indexación de código."
         return
@@ -1506,11 +1488,6 @@ function Index-ContextMode {
         [string]$RootPath,
         [string[]]$PathsToIndex
     )
-
-    if ($SkipIndexing) {
-        Write-Info "Se omite indexación de documentación por -SkipIndexing."
-        return
-    }
 
     if (-not (Get-Command "context-mode" -ErrorAction SilentlyContinue)) {
         Write-Warn "context-mode no está disponible; se omite indexación de documentación."
@@ -1732,8 +1709,8 @@ function Show-VerificationCommands {
 function Reload-ProjectWindow {
     param([string]$RootPath = "")
 
-    if ($NoRestart -or $DryRun) {
-        Write-Info "Se omite recargar la ventana de VS Code porque -NoRestart o -DryRun está activo."
+    if ($DryRun) {
+        Write-Info "Se omite recargar la ventana de VS Code porque -DryRun está activo."
         return
     }
 
@@ -1767,8 +1744,8 @@ function Reload-ProjectWindow {
 }
 
 # [SELF-UPDATE] ADR-0005 relacionado: el bootstrap se auto-actualiza desde el maestro
-# antes de ejecutarse (fail-open, -SkipSelfUpdate para saltar). El sync del paso 3
-# actualiza el kit transversal pero NO este script; aquí se corrige esa brecha.
+# antes de ejecutarse (fail-open, auto-omitido en el checkout maestro). El sync
+# del paso 3 actualiza el kit transversal pero NO este script; aquí se corrige esa brecha.
 function Update-Self {
     param(
         [string]$RootPath = "",
@@ -1854,8 +1831,8 @@ function Update-Self {
 }
 
 # [011-BOOTSTRAP-UPGRADE] Invoca upgrade_framework para sincronizar dependencias
-# externas (proyect_ext/) desde dependencias-manifest.yml. Fail-open, gated por
-# -ForceUpgradeTools, respeta -DryRun. Idempotente.
+# externas (proyect_ext/) desde dependencias-manifest.yml. Fail-open, incluido
+# en -Force del bootstrap, respeta -DryRun. Idempotente.
 function Invoke-UpgradeFramework {
     param(
         [string]$RootPath = "",
@@ -1869,7 +1846,7 @@ function Invoke-UpgradeFramework {
     }
 
     if (-not $ForceUpgradeTools) {
-        Write-Info "Invoke-UpgradeFramework: -ForceUpgradeTools no especificado; se omite sync de dependencias."
+        Write-Info "Invoke-UpgradeFramework: sin -Force; se omite sync de dependencias (o directo: upgrade_framework.ps1 -ForceUpgradeTools)."
         return
     }
 
@@ -1978,10 +1955,30 @@ function Invoke-SyncKit {
 }
 
 # =============================================================================
-# Resolve-ActiveApp (T-I1 / RF-07): -App > cwd dentro de app conocida > root
+# Test-IsMasterCheckout (002-SIMPLE): detecta si RootPath ES el checkout del kit
+# maestro (origin == RepoUrl). Reemplaza al antiguo flag -SkipSync: el modo kit
+# seguro ahora es AUTOMATICO (nunca auto-sobrescribe al maestro ni revierte
+# trabajo de rama no pusheado).
 # =============================================================================
-# Precedencia: 1) -AppName si se pasó -> ese nombre. 2) cwd dentro de una app
-# conocida (src\<app>\ o \<app>\ en la raíz). 3) "root" (kit, sin doc de app).
+function Test-IsMasterCheckout {
+    param([string]$RootPath = "", [string]$RepoUrl = "")
+    try {
+        $originOut = git -C $RootPath remote get-url origin 2>$null
+        if ($LASTEXITCODE -ne 0) { return $false }
+        $normLocal = (@($originOut)[0]).Trim().TrimEnd('/')
+        if ($normLocal.EndsWith('.git')) { $normLocal = $normLocal.Substring(0, $normLocal.Length - 4) }
+        $normMaster = "$RepoUrl".Trim().TrimEnd('/')
+        if ($normMaster.EndsWith('.git')) { $normMaster = $normMaster.Substring(0, $normMaster.Length - 4) }
+        return ($normLocal -eq $normMaster)
+    } catch { return $false }
+}
+
+# =============================================================================
+# Resolve-ActiveApp (T-I1 / RF-07): automático — cwd dentro de app conocida > root
+# =============================================================================
+# Precedencia (sin flags): 1) -AppName si se pasó directo a la función. 2) cwd
+# dentro de una app conocida (src\<app>\ o \<app>\ en la raíz). 3) "root" (kit,
+# sin doc de app). El bootstrap siempre resuelve automático (vacío).
 # Devuelve el nombre de la app (string).
 function Resolve-ActiveApp {
     param(
@@ -1997,11 +1994,11 @@ function Resolve-ActiveApp {
         }
     }
 
-    # [SOLUCION-GENERICA] RF-S3: lista resuelta del proyecto (flag/manifest/
-    # src/*); vacía + WARN si no hay nada (nunca hardcodeada).
+    # [SOLUCION-GENERICA] RF-S3: lista resuelta del proyecto (manifest/
+    # src/*, automático sin flags); vacía + WARN si no hay nada (nunca hardcodeada).
     $effectiveApps = @(Resolve-AppList -RootPath $RootPath)
 
-    # 1) Flag -App (equivale a -AppName): precedencia máxima.
+    # 1) -AppName si se pasó (el bootstrap usa resolución automática: vacío).
     if ($AppName) {
         if (($AppName -ne "root") -and ($AppName -notin $effectiveApps)) {
             Write-Warn "App '$AppName' no está en la lista resuelta ($($effectiveApps -join ', ')); se usa igual por precedencia del flag."
@@ -2303,12 +2300,12 @@ function Prepare-Apps {
 
     Write-Step "Preparando apps (verificación sin mover ni clonar)..."
 
-    # [SOLUCION-GENERICA] RF-S3/RF-S5: lista resuelta del proyecto: -Apps
-    # explícito > manifest del proyecto > descubrimiento src/* > vacía + WARN.
+    # [SOLUCION-GENERICA] RF-S3/RF-S5: lista resuelta del proyecto (automático):
+    # manifest del proyecto > descubrimiento src/* > vacía + WARN.
     $apps = @($Apps | Where-Object { $_ -ne "" })
     if ($apps.Count -eq 0) { $apps = @(Resolve-AppList -RootPath $RootPath) }
     if ($apps.Count -eq 0) {
-        Write-Warn "Sin apps que preparar (lista vacía; pasa -Apps o define el manifest local). Nada que instalar."
+        Write-Warn "Sin apps que preparar (lista vacía; define el manifest local). Nada que instalar."
     }
     foreach ($app in $apps) {
         $inSrc = Join-Path $RootPath "src\$app"
@@ -2672,32 +2669,14 @@ Write-Host "===============================================================" -Fo
 $resolvedRoot = (Resolve-Path $ProjectRoot).Path
 Write-Info "Ruta resuelta: $resolvedRoot"
 
-# [SELF-UPDATE] auto-actualización desde el maestro antes de ejecutar (fail-open)
-if (-not $SkipSelfUpdate) {
-    Update-Self -RootPath $resolvedRoot -RepoUrl $RepoUrl
-}
+# [SELF-UPDATE] auto-actualización desde el maestro antes de ejecutar (fail-open;
+# se omite solo dentro del checkout maestro). Sin flag: siempre se intenta.
+Update-Self -RootPath $resolvedRoot -RepoUrl $RepoUrl
 
 Ensure-Directory (Join-Path $resolvedRoot ".vscode")
 Ensure-Directory (Join-Path $resolvedRoot ".github\hooks")
 Ensure-Directory (Join-Path $resolvedRoot "Documentacion")
 Ensure-Directory (Join-Path $resolvedRoot "scripts")
-
-if ($VerifyOnly) {
-    Write-Step "Modo verificación únicamente (-VerifyOnly)"
-    Verify-McpAndIndexes $resolvedRoot
-    Show-VerificationCommands $resolvedRoot
-    exit 0
-}
-
-if ($SyncOnly) {
-    Write-Step "Modo sync únicamente (-SyncOnly): delegación a sync-kit.ps1"
-    Invoke-SyncKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
-    Write-Host ""
-    Write-Host "===============================================================" -ForegroundColor Green
-    Write-Host " Sync de kit transversal completado" -ForegroundColor Green
-    Write-Host "===============================================================" -ForegroundColor Green
-    exit 0
-}
 
 Write-Step "1) Validando y preparando la estructura base..."
 # [007-MCP] A2/D2: `.env.mcp` (fuente de verdad portable) se crea ANTES del
@@ -2712,26 +2691,22 @@ Ensure-OpenCodeMcp $resolvedRoot
 Ensure-ContextHooks $resolvedRoot
 
 Write-Step "2) Validando dependencias externas y MCPs..."
-if (-not $SkipInstall) {
-    # [BOOTSTRAP-FIXES] F4: capturar el boolean de Ensure-Command ($null =) —
-    # sin captura, el `return $true` se escapaba y imprimía un `True` suelto
-    # tras cada "[OK] Comando disponible:".
-    $null = Ensure-Command -Name "npm" -InstallCommand "npm --version" -AllowMissing
-    $null = Ensure-Command -Name "pip" -InstallCommand "python -m pip --version" -AllowMissing
-    $null = Ensure-Command -Name "context-mode" -InstallCommand "npm install -g context-mode" -AllowMissing
-    $null = Ensure-Command -Name "codebase-memory-mcp" -InstallCommand "npm install -g codebase-memory-mcp" -AllowMissing
-    $null = Ensure-Command -Name "markitdown" -InstallCommand "python -m pip install 'markitdown[all]'" -AllowMissing
-    $null = Ensure-Command -Name "markitdown-mcp" -InstallCommand "python -m pip install 'markitdown-mcp==0.0.1a3' 'mcp<2'" -AllowMissing
-} else {
-    Write-Info "Se omite la instalación de dependencias por -SkipInstall."
-}
+# [BOOTSTRAP-FIXES] F4: capturar el boolean de Ensure-Command ($null =) —
+# sin captura, el `return $true` se escapaba y imprimía un `True` suelto
+# tras cada "[OK] Comando disponible:".
+$null = Ensure-Command -Name "npm" -InstallCommand "npm --version" -AllowMissing
+$null = Ensure-Command -Name "pip" -InstallCommand "python -m pip --version" -AllowMissing
+$null = Ensure-Command -Name "context-mode" -InstallCommand "npm install -g context-mode" -AllowMissing
+$null = Ensure-Command -Name "codebase-memory-mcp" -InstallCommand "npm install -g codebase-memory-mcp" -AllowMissing
+$null = Ensure-Command -Name "markitdown" -InstallCommand "python -m pip install 'markitdown[all]'" -AllowMissing
+$null = Ensure-Command -Name "markitdown-mcp" -InstallCommand "python -m pip install 'markitdown-mcp==0.0.1a3' 'mcp<2'" -AllowMissing
 
-# [007-MCP] D3/RF-04: -ForceUpgradeTools (opt-in). Reinstala/actualiza las
+# [007-MCP] D3/RF-04 + [002-SIMPLE]: con -Force se reinstalan/actualizan las
 # herramientas externas con nombres oficiales exactos, FAIL-OPEN (CN-4/CN-5):
-# fallo -> WARN + continuar; sin el flag no se intenta ninguna instalación.
+# fallo -> WARN + continuar. Sin -Force no se intenta ninguna instalación.
 # No auto-compila terceros fuera del clon controlado de tokenslayer.
 if ($ForceUpgradeTools) {
-    Write-Step "2b) -ForceUpgradeTools: actualizando herramientas externas (fail-open)..."
+    Write-Step "2b) -Force: actualizando herramientas externas (fail-open)..."
     $upgradeSteps = @(
         @{ Name = "context-mode";        Cmd = "npm";    Args = @("install", "-g", "context-mode@latest") },
         @{ Name = "codebase-memory-mcp"; Cmd = "npm";    Args = @("install", "-g", "codebase-memory-mcp@latest") },
@@ -2753,25 +2728,27 @@ if ($ForceUpgradeTools) {
     }
     }
 
-if ($SkipSync) {
-    # [007-MCP] D5/RF-06: modo kit seguro — NO sincronizar el kit transversal
-    # (evita la auto-sobrescritura del maestro); el resto del flujo sigue.
-    Write-Step "3) Sync-TransversalKit OMITIDO (-SkipSync: modo kit seguro)."
+$inMasterCheckout = Test-IsMasterCheckout -RootPath $resolvedRoot -RepoUrl $RepoUrl
+if ($inMasterCheckout) {
+    # [002-SIMPLE] Modo kit seguro AUTOMATICO (antes -SkipSync): la raiz ES el
+    # checkout maestro; sincronizar seria auto-sobrescribirse (y podria
+    # revertir trabajo de rama no pusheado con robocopy). El resto sigue.
+    Write-Step "3) Sync-TransversalKit OMITIDO (modo kit seguro automatico: la raiz es el checkout maestro)."
 } else {
     Write-Step "3) Sincronizando kit transversal (sync-kit.ps1)..."
     Invoke-SyncKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
     
     # [011-BOOTSTRAP-UPGRADE] Invocar upgrade_framework para sincronizar dependencias
-    # externas (proyect_ext/) ANTES de compilar tokenslayer. Fail-open, gated por
-    # -ForceUpgradeTools, respeta -DryRun.
+    # externas (proyect_ext/) ANTES de compilar tokenslayer. Fail-open, incluido
+    # en -Force, respeta -DryRun.
     if ($ForceUpgradeTools) {
-        Invoke-UpgradeFramework -RootPath $resolvedRoot -ForceUpgradeTools -DryRun:$DryRun
+        Invoke-UpgradeFramework -RootPath $resolvedRoot -ForceUpgradeTools:$ForceUpgradeTools -DryRun:$DryRun
     }
-    
-    # [007-MCP] D3/RF-04: -ForceUpgradeTools — build de tokenslayer DESPUÉS del sync
+
+    # [007-MCP] D3/RF-04: -Force incluye build de tokenslayer DESPUÉS del sync
     # (el sync clona proyect_ext/tokenslayer/; aquí compilamos si existe).
     if ($ForceUpgradeTools) {
-        Write-Step "3b) -ForceUpgradeTools: compilando tokenslayer (fail-open)..."
+        Write-Step "3b) -Force: compilando tokenslayer (fail-open)..."
         $tsBuildDir = Join-Path $resolvedRoot "proyect_ext\tokenslayer\mcp-server"
         if ((Get-Command "node" -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath (Join-Path $tsBuildDir "package.json"))) {
             if ($DryRun) {
@@ -2887,9 +2864,7 @@ Write-OK "App activa: $activeApp | Spec-kit orientado a: $activeApp"
 Write-OK "Kit transversal sincronizado. Documentacion/<AppName>/ NO fue tocada (frontera kit ↔ app)."
 Write-OK "Los MCPs (VS Code + OpenCode), el entorno y los índices quedaron preparados."
 
-if (-not $NoRestart) {
-    Reload-ProjectWindow -RootPath $resolvedRoot
-}
+Reload-ProjectWindow -RootPath $resolvedRoot
 
 # [BOOTSTRAP-FIXES] F5: cuadro resumen de la ejecución (WARNs/ERRORs únicos).
 Show-ExecutionSummary

@@ -32,7 +32,12 @@ param(
     [string]$RootPath = "",
     [string]$OrphanAction = "Preguntar",
     [switch]$DryRun,
-    [switch]$Force
+    [switch]$Force,
+    # [002-KITPATH] Fuente local del kit (opt-in): checkout local del kit que
+    # manda sobre GitHub. Permite replicar rama + cambios sin pushear a los
+    # proyectos consumidores. Solo -Force controla sobrescritura (igual que
+    # en modo GitHub). Jamas acepta URLs (fail-closed).
+    [string]$KitPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -447,7 +452,8 @@ function Sync-TransversalKit {
     param(
         [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
         [string]$RootPath = "",
-        [string]$OrphanAction = "Preguntar"
+        [string]$OrphanAction = "Preguntar",
+        [string]$KitPath = ""
     )
 
     if (-not $RootPath) {
@@ -483,7 +489,11 @@ function Sync-TransversalKit {
     )
 
     if ($DryRun) {
-        Write-Info "DryRun: clonaria shallow `"$RepoUrl`" en `$env:TEMP\agents-sync-temp"
+        if ($KitPath) {
+            Write-Info "DryRun: fuente LOCAL del kit: $KitPath (sin clonar GitHub; incluye rama y cambios locales sin pushear)"
+        } else {
+            Write-Info "DryRun: clonaria shallow `"$RepoUrl`" en `$env:TEMP\agents-sync-temp"
+        }
         foreach ($d in $transversalDirs) {
             Write-Info "DryRun: copiaria $d -> $(Join-Path $RootPath $d)"
         }
@@ -498,20 +508,56 @@ function Sync-TransversalKit {
     }
 
     $tempDir = Join-Path $env:TEMP "agents-sync-temp"
+    $ownsTemp = $false
     try {
-        if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue }
+        if ($KitPath) {
+            # [002-KITPATH] Fuente local del kit: el checkout local manda (rama +
+            # cambios sin pushear incluidos). Fail-closed: solo directorios
+            # locales con marcadores de kit; jamas URLs ni el propio destino.
+            if ($KitPath -match '^[a-zA-Z][a-zA-Z0-9+.-]*://' -or $KitPath.StartsWith('git@')) {
+                throw "[SECURITY] -KitPath no acepta URLs ni esquemas remotos (fail-closed): $KitPath (usa una ruta local, ej. C:\Proyectos\Agents_IA_TECH)"
+            }
+            try { $kitCanon = [IO.Path]::GetFullPath($KitPath) } catch { throw "sync-kit: -KitPath invalido ($KitPath): $_" }
+            if (-not (Test-Path -LiteralPath $kitCanon -PathType Container)) {
+                throw "sync-kit: -KitPath no existe o no es un directorio: $kitCanon"
+            }
+            $missing = @()
+            foreach ($m in @("scripts", ".github", ".opencode", ".doc_agents", "AGENTS.md")) {
+                if (-not (Test-Path -LiteralPath (Join-Path $kitCanon $m))) { $missing += $m }
+            }
+            if ($missing.Count -gt 0) {
+                throw "sync-kit: -KitPath no parece un checkout del kit (faltan: $($missing -join ', ') en $kitCanon)"
+            }
+            try { $rootCanon = [IO.Path]::GetFullPath($RootPath) } catch { throw "sync-kit: -RootPath invalido ($RootPath): $_" }
+            $sep = [IO.Path]::DirectorySeparatorChar
+            if ($kitCanon.TrimEnd($sep) -eq $rootCanon.TrimEnd($sep)) {
+                Write-Warn "sync-kit: -KitPath es el propio proyecto destino; no hay nada que sincronizar (se omite)."
+                return
+            }
+            $tempDir = $kitCanon
+            $commitHash = "local-kit"
+            try {
+                $kitBranch = (git -C $kitCanon rev-parse --abbrev-ref HEAD 2>$null)
+                $kitShort = (git -C $kitCanon rev-parse --short HEAD 2>$null)
+                if ($kitBranch -and $kitShort) { $commitHash = "local-kit ($kitBranch@$kitShort)" }
+            } catch { }
+            Write-Info "Fuente LOCAL del kit: $kitCanon [$commitHash] (rama y cambios locales incluidos, sin pasar por GitHub)"
+        } else {
+            if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue }
 
-        Write-Host "  Clonando repo maestro..." -NoNewline
-        git clone --depth 1 $RepoUrl $tempDir 2>$null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host " ERROR" -ForegroundColor Red
-            throw "No se pudo clonar el repo maestro $RepoUrl (verifica git y URL)."
+            Write-Host "  Clonando repo maestro..." -NoNewline
+            git clone --depth 1 $RepoUrl $tempDir 2>$null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host " ERROR" -ForegroundColor Red
+                throw "No se pudo clonar el repo maestro $RepoUrl (verifica git y URL)."
+            }
+            Write-Host " OK" -ForegroundColor Green
+            $ownsTemp = $true
+
+            $commitHash = (git -C $tempDir rev-parse --short HEAD 2>$null)
+            $commitDate = (git -C $tempDir log -1 --format=%ci 2>$null)
+            Write-Info "Version repo maestro: $commitHash ($commitDate)"
         }
-        Write-Host " OK" -ForegroundColor Green
-
-        $commitHash = (git -C $tempDir rev-parse --short HEAD 2>$null)
-        $commitDate = (git -C $tempDir log -1 --format=%ci 2>$null)
-        Write-Info "Version repo maestro: $commitHash ($commitDate)"
 
         $transversalItems = @(
             @{ Source = (Join-Path $tempDir ".github");                    Target = (Join-Path $RootPath ".github");                    Type = "Dir";  Label = ".github/" },
@@ -650,7 +696,9 @@ function Sync-TransversalKit {
     }
     catch { Write-Warn "Error en Sync-TransversalKit: $_" }
     finally {
-        if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue }
+        # [002-KITPATH] Solo se borra el clon temporal propio; la fuente local
+        # del kit (-KitPath) jamas se toca.
+        if ($ownsTemp -and (Test-Path $tempDir)) { Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue }
     }
 }
 
@@ -660,5 +708,5 @@ function Sync-TransversalKit {
 $resolvedRoot = if ($RootPath) { $RootPath } else { (Split-Path -Parent $PSScriptRoot) }
 
 Write-Step "sync-kit: sincronizando kit transversal en $resolvedRoot"
-Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction
+Sync-TransversalKit -RepoUrl $RepoUrl -RootPath $resolvedRoot -OrphanAction $OrphanAction -KitPath $KitPath
 Show-ExecutionSummary

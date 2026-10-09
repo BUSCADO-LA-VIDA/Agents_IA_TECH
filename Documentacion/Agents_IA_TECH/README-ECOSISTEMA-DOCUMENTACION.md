@@ -363,16 +363,13 @@ El script `scripts/plataformador-bootstrap.ps1` ahora incluye **todo el flujo au
 6. **Verificación**: Comprueba que todos los MCPs responden y los índices existen
 7. **Comandos manuales**: Muestra en consola los comandos de verificación para usar en terminal
 
-### Parámetros útiles
+### Interfaz (simplificada, Spec 002 — sin parámetros / `-DryRun` / `-Force`)
 
-| Parámetro | Uso |
+| Forma | Uso |
 |-----------|-----|
-| `-SkipInstall` | Omite instalación de dependencias (npm, pip, MCPs) |
-| `-NoRestart` | No reinicia VS Code al final |
-| `-DryRun` | Simula sin hacer cambios |
-| `-Force` | Sobrescribe archivos existentes |
-| `-SkipIndexing` | Omite indexación de código y documentación |
-| `-VerifyOnly` | **Solo verifica** MCPs e índices (no modifica nada) |
+| (sin parámetros) | Ejecución completa (instala, configura, indexa, verifica). No sobrescribe archivos que difieren |
+| `-DryRun` | Simula sin hacer cambios (demo/prueba) |
+| `-Force` | Todo + sobrescribe archivos que difieren + upgrade de herramientas externas |
 
 ### Ejemplos de uso
 
@@ -380,14 +377,11 @@ El script `scripts/plataformador-bootstrap.ps1` ahora incluye **todo el flujo au
 # Ejecución completa (instala, configura, indexa, verifica)
 .\scripts\plataformador-bootstrap.ps1
 
-# Solo verificar estado actual (rápido, sin cambios)
-.\scripts\plataformador-bootstrap.ps1 -VerifyOnly
+# Previsualizar sin cambios
+.\scripts\plataformador-bootstrap.ps1 -DryRun
 
-# Configurar sin reinstalar dependencias ni reiniciar VS Code
-.\scripts\plataformador-bootstrap.ps1 -SkipInstall -NoRestart
-
-# Solo configurar OpenCode y indexar, sin tocar VS Code
-.\scripts\plataformador-bootstrap.ps1 -SkipInstall -NoRestart -SkipIndexing
+# Forzar actualización total
+.\scripts\plataformador-bootstrap.ps1 -Force
 ```
 
 ---
@@ -399,4 +393,4 @@ El script `scripts/plataformador-bootstrap.ps1` ahora incluye **todo el flujo au
 3. **Indexar la documentación** con `context-mode index "Documentacion"`.
 4. **Reiniciar OpenCode** para que cargue los MCPs.
 5. **Verificar** que las herramientas (`ctx_search`, `search_graph`, `convert_to_markdown`) aparezcan disponibles.
-6. **Opcional**: Ejecutar `.\scripts\plataformador-bootstrap.ps1 -VerifyOnly` para confirmar todo.
+6. **Opcional**: Ejecutar `.\scripts\plataformador-bootstrap.ps1 -DryRun` para previsualizar, o el flujo completo para confirmar todo (el paso 10 siempre verifica MCPs e índices).

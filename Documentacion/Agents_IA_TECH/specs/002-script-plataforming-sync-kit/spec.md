@@ -28,7 +28,7 @@ Actualmente, esta funcionalidad está dispersa en la spec 009 (MCP Update Lifecy
 
 - **Q001**: Crear un script independiente `scripts/update-mcp.ps1` que gestione la instalación, actualización y activación de MCPs.
 - **Q002**: Implementar normalización de rutas a forward slashes en la resolución de MCP para evitar errores JSON.
-- **Q003**: Documentar el protocolo de sincronización del kit transversal usando `plataformador-bootstrap.ps1 -SyncOnly` o `sync-kit.ps1`.
+- **Q003**: Documentar el protocolo de sincronización del kit transversal usando `plataformador-bootstrap.ps1` (flujo completo, interfaz simplificada) o `sync-kit.ps1` directo (motor de sync).
 - **Q004**: Establecer el mecanismo de auto-actualización diaria basada en `.bootstrap-state.json` y ventana de 24h.
 - **Q005**: Integrar las tareas de actualización en el agente `pensador` y `.opencode/agents/pensador.md`.
 - **Q006**: Asegurar que el archivo `AGENTS.md` raíz mantiene reglas generales y la personalización por proyecto está en `Documentacion/<AppName>/`.
@@ -70,13 +70,14 @@ Actualmente, esta funcionalidad está dispersa en la spec 009 (MCP Update Lifecy
 
 **Actor**: Agente `plataformador` / Usuario
 
-**Flujo**: Ejecutar `plataformador-bootstrap.ps1 -SyncOnly` o `sync-kit.ps1` para sincronizar los archivos transversales (`.github/`, `.opencode/`, `.doc_agents/`, `scripts/`, `constitution.md`, `AGENTS.md`, `opencode.json`, `README.md`, `sync-agents.ps1`, `upgrade_framework.ps1`) desde el repositorio maestro.
+**Flujo**: Ejecutar `plataformador-bootstrap.ps1` (flujo completo, paso 3 incluido) o `sync-kit.ps1` directo para sincronizar los archivos transversales (`.github/`, `.opencode/`, `.doc_agents/`, `scripts/`, `constitution.md`, `AGENTS.md`, `opencode.json`, `README.md`, `sync-agents.ps1`, `upgrade_framework.ps1`) desde la fuente del kit (repositorio maestro en GitHub, o checkout local con `-KitPath`).
 
-**Criterio de aceptación**: Los archivos transversales del proyecto coinciden con el repositorio maestro; `Documentacion/<AppName>/` no se toca (frontera kit ↔ app).
+**Criterio de aceptación**: Los archivos transversales del proyecto coinciden con la fuente del kit; `Documentacion/<AppName>/` no se toca (frontera kit ↔ app).
 
 **Acceptance Scenarios**:
-1. **Given** ejecución de `plataformador-bootstrap.ps1 -SyncOnly`, **When** finaliza, **Then** los archivos `.github/`, `.opencode/`, etc. están actualizados desde el repositorio maestro.
+1. **Given** ejecución de `plataformador-bootstrap.ps1`, **When** finaliza, **Then** los archivos `.github/`, `.opencode/`, `scripts/`, etc. están actualizados desde la fuente del kit.
 2. **Given** proyecto con personalizaciones en `Documentacion/<AppName>/`, **When** se sincroniza, **Then** las personalizaciones se conservan y no se sobrescriben.
+3. **Given** trabajo del kit sin pushear a GitHub, **When** se ejecuta `sync-kit.ps1 -KitPath <kit-local> -RootPath <proyecto> -Force`, **Then** el proyecto recibe rama + cambios locales (ej. `scripts/ecc-orchestrator.ps1` nuevo).
 
 ---
 
@@ -108,8 +109,10 @@ Actualmente, esta funcionalidad está dispersa en la spec 009 (MCP Update Lifecy
 - **FR-008**: El sistema DEBE respetar el inventario central `.env.mcp` y no crear rutas absolutas en archivos versionados.
 - **FR-009**: El sistema DEBE verificar y actualizar `.env.mcp`: si encuentra valores, validar que sean rutas correctas; si están vacíos o incorrectos, resolver y actualizar con rutas reales.
 - **FR-010**: El sistema DEBE actualizar `opencode.json` resolviendo tokens `{env:...}` a rutas reales y habilitando MCPs (`enabled: true`).
-- **FR-011**: El sistema DEBE sincronizar el kit transversal usando `plataformador-bootstrap.ps1 -SyncOnly` o `sync-kit.ps1`, respetando la whitelist Art‑VII y sin tocar `Documentacion/<AppName>/`.
+- **FR-011**: El sistema DEBE sincronizar el kit transversal en el flujo completo de `plataformador-bootstrap.ps1` (paso 3) o vía `sync-kit.ps1` directo, respetando la whitelist Art‑VII y sin tocar `Documentacion/<AppName>/`.
 - **FR-012**: El archivo `AGENTS.md` raíz mantiene las reglas generales del kit. La personalización por proyecto debe gestionarse en `Documentacion/<AppName>/`.
+- **FR-013**: El sistema DEBE aceptar un checkout local del kit como fuente de sincronización (`sync-kit.ps1 -KitPath <ruta>`), para replicar rama + cambios sin pushear. Solo acepta directorios locales con marcadores de kit (`scripts/`, `.github/`, `.opencode/`, `.doc_agents/`, `AGENTS.md`); jamás URLs ni el propio destino (fail-closed).
+- **FR-014**: La interfaz del bootstrap es simplificada: sin parámetros (todo el flujo), `-DryRun` (demo sin escribir), `-Force` (sobrescribe archivos que difieren + incluye upgrade de herramientas externas). El modo kit seguro es automático (se omite el sync dentro del checkout maestro).
 
 ### Key Entities
 
@@ -138,7 +141,7 @@ Actualmente, esta funcionalidad está dispersa en la spec 009 (MCP Update Lifecy
 - **SC-003**: La auto-actualización diaria se ejecuta correctamente cuando han pasado >24h desde la última actualización.
 - **SC-004**: El bootstrap invoca `update-mcp.ps1` sin errores en el 100% de las ejecuciones.
 - **SC-005**: El agente `pensador` puede solicitar actualización de MCPs y recibir reporte de estado.
-- **SC-006**: La sincronización del kit transversal (`-SyncOnly`) completa exitosamente y conserva personalizaciones en `Documentacion/<AppName>/`.
+- **SC-006**: La sincronización del kit transversal (paso 3 del bootstrap o `sync-kit.ps1` directo) completa exitosamente y conserva personalizaciones en `Documentacion/<AppName>/`.
 - **SC-007**: El archivo `AGENTS.md` raíz no es modificado por las tareas de sincronización/actualización de MCPs.
 
 ---
@@ -160,7 +163,8 @@ Actualmente, esta funcionalidad está dispersa en la spec 009 (MCP Update Lifecy
 - El usuario tiene permisos de escritura en `scripts/` y raíz del proyecto.
 - `.bootstrap-state.json` es gitignored y no se versiona.
 - El script se ejecuta en PowerShell 7+ en Windows.
-- El repositorio maestro está en `https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH`.
+- El repositorio maestro está en `https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH` (fuente por defecto del sync).
+- Con trabajo del kit sin pushear, la fuente es el checkout local vía `sync-kit.ps1 -KitPath <kit-local>` (ver FR-013).
 
 ---
 
@@ -169,7 +173,7 @@ Actualmente, esta funcionalidad está dispersa en la spec 009 (MCP Update Lifecy
 - Desarrollar o modificar el código de los propios MCPs (solo su actualización/activación).
 - Cambiar el mecanismo de interpolación `{env:...}` de OpenCode.
 - Integrar los otros MCP externos en esta spec — cada uno tiene su propia spec.
-- Modificar la lógica de bootstrap más allá de invocar `update-mcp.ps1`.
+- Modificar la lógica de bootstrap más allá de lo cubierto por esta spec (interfaz simplificada FR-014 + fuente local FR-013).
 
 ---
 

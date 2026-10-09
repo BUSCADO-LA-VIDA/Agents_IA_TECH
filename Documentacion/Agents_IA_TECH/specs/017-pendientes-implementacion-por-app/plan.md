@@ -39,8 +39,32 @@
 ### Fase 6: Implement — `speckit-implement`
 - **Agentes delegados**: `api-developer`, `frontend-developer`, `devops`, `qa-senior`
 - **Artefacto**: `Documentacion/<AppName>/pendientes-implementacion.md` actualizado automáticamente
-- **Validación**: El usuario confirma la implementación. El archivo se actualiza con el estado final.
+- **Validaci�n**: El usuario confirma la implementaci�n. El archivo se actualiza con el estado final.
 - **Contexto previo**: codebase-memory (callers/callees), graphify (impacto de tareas).
+
+### Fase 7 – Estado de especificación y ciclo de vida (T017)
+- **Descripción**: Definir y documentar los tres estados posibles que puede tener una spec (ACTIVO, EN PROCESO, ARCHIVADO), sus transiciones permitidas y la regla de oro para crear specs nuevas ante requerimientos evolutivos.
+- **Comando**: Documentación en `specs/017-pendientes-implementacion-por-app/spec.md`.
+- **Validaci�n**: El `pensador` asegura que la definición de estados esté completa y acordada.
+- **Contexto previo**: Mismo que Fase 6.
+
+### Fase 8 – Migración de specs completadas a archived (T018)
+- **Descripción**: Al finalizar una spec (all tasks `[x]`), moverla de `specs/` a `specs/archived/`. Registrar en `pendientes-implementacion.md` la migración y actualizar `00-indice.md`.
+- **Comando**: Procedimiento manual o script de plataformador.
+- **Validaci�n**: El `pensador` verifica que todas las tasks tengan estado `[x]` antes de migrar.
+- **Contexto previo**: Mismo que Fase 6.
+
+### Fase 9 – Creación de nueva spec para funcionalidad evolutiva (T019)
+- **Descripción**: Cuando la funcionalidad de una spec activa evoluciona o se añaden features nuevos, **NO reactivar la spec anterior**, sino crear una spec nueva con número incremental.
+- **Comando**: `speckit-specify` para spec 018, 019, etc.
+- **Validaci�n**: El `pensador` asegura que la nueva spec tenga su propio `spec.md`, `plan.md`, `tasks.md` con IDs calificados `<spec-id>-T<nnn>`.
+- **Contexto previo**: Mismo que Fase 6.
+
+### Fase 10 – Documentación de historial de evolución de specs (T020)
+- **Descripción**: Registrar en `00-indice.md` y `pendientes-implementacion.md` los cambios significativos entre versiones de specs relacionadas.
+- **Comando**: Añadir sección de historial al `00-indice.md`.
+- **Validaci�n**: El `pensador` verifica que el historial esté completo y sea coherente.
+- **Contexto previo**: Mismo que Fase 6.
 
 **Contexto previo obligatorio antes de cada fase**:
 - `codebase-memory-mcp` -> `get_architecture`, `search_graph`, `trace_path`

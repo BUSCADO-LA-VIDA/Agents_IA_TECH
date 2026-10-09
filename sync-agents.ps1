@@ -1,13 +1,11 @@
 <#
 .SYNOPSIS
     Wrapper que delega la sincronización del KIT TRANSVERSAL DE AGENTES en
-    Sync-TransversalKit del instalador/actualizador único
-    (scripts/plataformador-bootstrap.ps1 -SyncOnly). Opción A, ADR-0003.
+    scripts/sync-kit.ps1 (motor de sync). Opción A, ADR-0003.
 .DESCRIPTION
     La lógica de sincronización del kit transversal (Opción A del ADR-0003)
-    vive ahora en `Sync-TransversalKit` dentro de `plataformador-bootstrap.ps1`.
-    Este script solo reenvía la llamada, preservando compatibilidad con los
-    parámetros previos:
+    vive en `scripts/sync-kit.ps1`. Este script solo reenvía la llamada con
+    la interfaz simplificada (Spec 002):
     - -RepoUrl (repo maestro; default https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH)
     - -DryRun  (simula sin escribir)
     - -Force   (fuerza sobrescritura)
@@ -22,12 +20,10 @@
     .\sync-agents.ps1 -DryRun -RepoUrl "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH"
 .NOTES
     ADR-0003 / spec plataforma-bootstrap-instalador-unico (T-I4).
-    Delegación como PROCESO HIJO (no dot-sourcing): el bootstrap NO tiene
-    guard anti-ejecución al cargar (su MAIN en líneas ~1349+ corre
-    incondicionalmente al hacer dot-sourcing, ejecutaría el flujo completo).
-    Por eso se invoca con -SyncOnly. El switch -SyncOnly SÍ existe en el
-    bootstrap (param + rama MAIN "Modo sync únicamente"), así que se usa
-    directamente. Mapeo: -DryRun→-DryRun, -Force→-Force, -RepoUrl→-RepoUrl.
+    Delegación como PROCESO HIJO (no dot-sourcing). Invoca directo al motor
+    scripts/sync-kit.ps1 (el bootstrap ya no expone modo sync: interfaz
+    simplificada Spec 002 — sin parametros / -DryRun / -Force).
+    Mapeo: -DryRun→-DryRun, -Force→-Force, -RepoUrl→-RepoUrl.
 #>
 
 [CmdletBinding()]
@@ -46,21 +42,25 @@ if ($parentDir -eq ".github" -or $parentDir -eq ".opencode" -or $parentDir -eq "
     exit 1
 }
 
-# El bootstrap vive en scripts\plataformador-bootstrap.ps1 (raíz del repo)
-$bootstrapPath = Join-Path $PSScriptRoot "scripts\plataformador-bootstrap.ps1"
+# El motor de sync vive en scripts\sync-kit.ps1 (raíz del repo). Si falta es
+# porque aún no corrió el bootstrap: él lo descarga del maestro en frío.
+$syncKitPath = Join-Path $PSScriptRoot "scripts\sync-kit.ps1"
 
-if (-not (Test-Path $bootstrapPath)) {
-    Write-Host "[ERROR] No se encontró el instalador/actualizador único: $bootstrapPath" -ForegroundColor Red
+if (-not (Test-Path -LiteralPath $syncKitPath)) {
+    Write-Host "[ERROR] No se encontró el motor de sync: $syncKitPath" -ForegroundColor Red
+    Write-Host "  Ejecuta primero .\scripts\plataformador-bootstrap.ps1 (lo descarga del maestro) y reintenta." -ForegroundColor Yellow
     exit 1
 }
 
-Write-Host "=== sync-agents.ps1 → delegando en Sync-TransversalKit (bootstrap) ===" -ForegroundColor Cyan
+Write-Host "=== sync-agents.ps1 → delegando en scripts/sync-kit.ps1 ===" -ForegroundColor Cyan
 Write-Host "Repo origen: $RepoUrl" -ForegroundColor Gray
 Write-Host "Modo: $(if ($DryRun) { 'DRY-RUN (simulación)' } else { 'REAL' })" -ForegroundColor Yellow
 Write-Host "EXCLUIDOS (nunca se tocan): Documentacion/<AppName>/, src/, tests/ de las apps, .opencode/config.json" -ForegroundColor DarkGray
 Write-Host ""
 
-$invokeArgs = @{ SyncOnly = $true; DryRun = $DryRun; Force = $Force; RepoUrl = $RepoUrl }
+$syncArgs = @("-RepoUrl", $RepoUrl, "-RootPath", $PSScriptRoot, "-OrphanAction", "Preguntar")
+if ($DryRun) { $syncArgs += "-DryRun" }
+if ($Force)  { $syncArgs += "-Force" }
 
-& $bootstrapPath @invokeArgs
+pwsh -NoProfile -File $syncKitPath @syncArgs
 exit $LASTEXITCODE

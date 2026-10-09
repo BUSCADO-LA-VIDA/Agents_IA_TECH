@@ -6,14 +6,14 @@ $ProjectRoot=Split-Path -Parent $ScriptRoot
 $StateFile=Join-Path $ProjectRoot ".bootstrap-state.json"
 $EnvMcpFile=Join-Path $ProjectRoot ".env.mcp"
 function Write-Log{param($Level,$Message); Write-Host "[$(Get-Date -Format "yyyy-MM-dd HH:mm:ss")] [$Level] $Message"}
-function Get-State{ if(Test-Path $StateFile){ try{ Get-Content $StateFile -Raw -Encoding UTF8 | ConvertFrom-Json }catch{ return $null } } return $null }
+function Get-State{ $parsed=$null; if(Test-Path $StateFile){ try{ $parsed=Get-Content $StateFile -Raw -Encoding UTF8 | ConvertFrom-Json }catch{ $parsed=$null } }; if($null -eq $parsed -or $null -eq $parsed.PSObject.Properties['lastUpdate']){ return $null }; return $parsed }
 function Save-State{ param($State); Set-Content -Path $StateFile -Value ($State | ConvertTo-Json -Depth 5) -Encoding UTF8 }
 function Read-EnvMcp{ $m=@{}; if(Test-Path $EnvMcpFile){ Get-Content $EnvMcpFile | ForEach-Object{ if($_ -match "^\s*([^#=]+?)\s*=\s*(.+?)\s*$"){ $m[$matches[1].Trim()]=$matches[2].Trim() } } }; return $m }
 Write-Log "INFO" "Iniciando update-mcp.ps1"
 $state=Get-State
 if(-not $state){ $state=[PSCustomObject]@{ lastUpdate=(Get-Date).ToString("o"); tools=@{} } }
 $now=Get-Date
-try{ $last=[DateTime]::Parse($state.lastUpdate) }catch{ $last=$now.AddDays(-2) }
+try{ $last=if($state.lastUpdate -is [DateTime]){ $state.lastUpdate }else{ [DateTime]::Parse($state.lastUpdate) } }catch{ $last=$now.AddDays(-2) }
 $needsUpdate=$Force -or ($now-$last).TotalHours -ge 24
 if(-not $needsUpdate -and -not $DryRun){ Write-Log "INFO" "MCPs actualizados recientemente"; Write-Host "MCP_NAME | ESTADO | VERSION | RUTA | NOTA"; Write-Host "ALL | UP_TO_DATE | - | - | Ultima $($last.ToString("yyyy-MM-dd HH:mm"))"; exit 0 }
 $envMcp=Read-EnvMcp

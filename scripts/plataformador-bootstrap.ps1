@@ -2882,10 +2882,11 @@ Write-Host "  5. Reiniciar OpenCode para cargar la nueva configuración MCP" -Fo
 Write-Host "  6. Usar comandos de verificación manual si necesitas confirmar" -ForegroundColor White
 
 
-# Invocar actualización de MCPs
+# Invocar actualización de MCPs (sin flags: aplica la ventana de 24h; -Quick era
+# un flag muerto de una versión anterior que update-mcp.ps1 no declara).
 $updateScript = Join-Path $PSScriptRoot "update-mcp.ps1"
 if (Test-Path -LiteralPath $updateScript) {
-    & $updateScript -Quick
+    & $updateScript
 } else {
     Write-Warn "No se encontró scripts/update-mcp.ps1; se omite la actualización automática."
 }

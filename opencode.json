@@ -135,6 +135,13 @@
         "stdio"
       ],
       "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "C:/Users/tomas/AppData/Roaming/npm/playwright-mcp.ps1"
+      ],
+      "enabled": true
     }
   }
 }

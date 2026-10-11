@@ -12,3 +12,9 @@
   Añadir comando de verificación y ejemplo de navegación de Playwright en quickstart.md
 - T06 Validar idempotencia [RF-03,SC-005,EC-03]
   Ejecutar bootstrap dos veces y confirmar bloque mcp idéntico sin duplicados
+
+- T01 Habilitar MCP [HECHO 2026-10-11]: entrada `playwright` hardcodeada en opencode.json (ruta real npm global). Desviacion ADR-0009: sin tokens {env:} en mcp.command (bug OpenCode #5299).
+- T02 Instalar [HECHO 2026-10-11]: `npm i -g @playwright/mcp` (Microsoft, v1.64.0); browsers ya presentes en ms-playwright. PLAYWRIGHT_MCP_CMD en .env.mcp (ruta, sin secreto).
+- T03 Fallback fail-open [HECHO 2026-10-11]: sin binario -> WARN; browsers ausentes -> el servidor los exige al invocar tools (documentado).
+- T04 Paridad [HECHO 2026-10-11]: entrada en opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A.
+- T05 Verificacion viva [HECHO 2026-10-11]: handshake stdio Playwright 1.64.0 + tools/list = 25 tools (browser_navigate, browser_snapshot, etc.). Nota: invocacion via shim .ps1 no canaliza stdio; el registro usa el shim igual que los demas MCP npm (context-mode funciona asi).

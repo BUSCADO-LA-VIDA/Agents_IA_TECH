@@ -38,3 +38,7 @@ graphify-out/
 # Permitir versionar manifest
 
 # Manifest versionado
+
+# Artefactos de pruebas Playwright MCP (snapshots locales)
+.playwright-mcp/
+

@@ -92,7 +92,8 @@
     "context-mode": {
       "type": "local",
       "command": [
-        "C:/Users/tomas/AppData/Roaming/npm/context-mode.ps1"
+        "C:/Program Files/nodejs/node.exe",
+        "C:/Users/tomas/AppData/Roaming/npm/node_modules/context-mode/build/cli.js"
       ],
       "enabled": true
     },
@@ -106,7 +107,7 @@
     "markitdown": {
       "type": "local",
       "command": [
-        "C:/Python314/Scripts/markitdown.exe"
+        "C:/Python314/Scripts/markitdown-mcp.exe"
       ],
       "enabled": true
     },
@@ -139,7 +140,8 @@
     "playwright": {
       "type": "local",
       "command": [
-        "C:/Users/tomas/AppData/Roaming/npm/playwright-mcp.ps1"
+        "C:/Program Files/nodejs/node.exe",
+        "C:/Users/tomas/AppData/Roaming/npm/node_modules/@playwright/mcp/cli.js"
       ],
       "enabled": true
     },
@@ -148,6 +150,14 @@
       "command": [
         "C:/Users/tomas/.local/bin/semgrep.exe",
         "mcp"
+      ],
+      "enabled": true
+    },
+    "context7": {
+      "type": "local",
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "C:/Users/tomas/AppData/Roaming/npm/node_modules/@upstash/context7-mcp/dist/index.js"
       ],
       "enabled": true
     }

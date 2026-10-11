@@ -12,3 +12,9 @@
   Añadir verificación `context7 --list-sources` y ejemplo de consulta en quickstart.md
 - T06 Validar idempotencia [RF-03,SC-005,EC-03]
   Ejecutar bootstrap dos veces y confirmar bloque mcp idéntico sin duplicados
+
+- T01 Habilitar MCP [HECHO 2026-10-11]: entrada `context7` hardcodeada en opencode.json (node directo a dist/index.js). Desviacion ADR-0009: sin tokens {env:} (bug OpenCode #5299).
+- T02 Instalar [HECHO 2026-10-11]: `npm i -g @upstash/context7-mcp`. CONTEXT7_CMD en .env.mcp.
+- T03 Fallback fail-open [HECHO 2026-10-11]: sin binario -> WARN; sin red -> la API no resuelve (documentado).
+- T04 Paridad [HECHO 2026-10-11]: opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A. Sin keys (API publica).
+- T05 Verificacion viva [HECHO 2026-10-11]: handshake + tools/list = 2 tools + resolve-library-id(react) real contra la API.

@@ -12,3 +12,9 @@
   Añadir comando de verificación y ejemplo de consulta de issues de Sentry en quickstart.md
 - T06 Validar idempotencia [RF-03,SC-005,EC-03]
   Ejecutar bootstrap dos veces y confirmar bloque mcp idéntico sin duplicados
+
+- T01 [2026-10-11]: instalacion `npm i -g @sentry/mcp-server` 0.42.0 OK. Entrada NO registrada habilitada (ver T05).
+- T02 [2026-10-11]: binario en npm global. Ruta pendiente de registro hasta que el binario responda.
+- T03 [BLOQUEADO]: el binario se cuelga en toda invocacion (--help, auth status, stdio) sin salida; mas auth interactiva (device flow) que requiere al usuario.
+- T04 [PENDIENTE]: paridad pendiente del registro.
+- T05 [PENDIENTE - NO VALIDADO]: verificacion viva imposible sin auth + hang. NO se marca [x] por regla de integridad.

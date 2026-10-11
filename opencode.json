@@ -127,6 +127,14 @@
         "proyect_ext/tokenslayer/mcp-server/build/index.js"
       ],
       "enabled": true
+    },
+    "github": {
+      "type": "local",
+      "command": [
+        "C:/Users/tomas/.local/bin/github-mcp-server.exe",
+        "stdio"
+      ],
+      "enabled": true
     }
   }
 }

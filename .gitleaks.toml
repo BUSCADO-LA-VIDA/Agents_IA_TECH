@@ -1,11 +1,10 @@
+[extend]
+useDefault = true
+
 [[rules]]
 id = "generic-api-key"
 description = "Generic API key"
-regex = '"apiKey"\s*:\s*"[^"]+"'
-allowlist = [
-  { path = "temp_*" },
-  { path = "temp_opencode_output.txt" },
-  { path = ".env.mcp" },
-  { path = ".bootstrap-state.json" }
-]
-
+regex = '''"apiKey"\s*:\s*"[^"]+"'''
+  [rules.allowlist]
+  paths = ["temp_*", "temp_opencode_output.txt", ".env.mcp", ".bootstrap-state.json"]
+  stopwords = ["REDACTED", "{env:"]

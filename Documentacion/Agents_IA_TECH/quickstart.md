@@ -31,6 +31,10 @@ cd Agents_IA_TECH
 cat opencode.json | jq '.mcp[] | {name: .name, enabled: .enabled}'
 ```
 
+### Verificacion viva por MCP (2026-10-11, patron ADR-0009)
+- `github`: binario `~\.local\bin\github-mcp-server.exe --help` responde; vivo con `GITHUB_TOKEN` en el entorno (el servidor hereda el env del proceso OpenCode; el token vive en `.env` gitignored, NUNCA en archivos versionados). Sin token las llamadas devuelven error de auth.
+```
+
 ---
 
 ## 3. Interfaz del Bootstrap (simplificada, Spec 002)

@@ -10,3 +10,9 @@
   Asegurar paridad .opencode/mcp.json y .vscode/mcp.json
 - T05 Documentar quickstart [RF-05,SC-001]
   Añadir verificación github --list-repos en quickstart.md
+
+- T01 Habilitar MCP [HECHO 2026-10-11]: entrada `github` hardcodeada en opencode.json (binario real v2.0.2). Desviacion ADR-0009: sin tokens {env:} en mcp.command (bug OpenCode #5299).
+- T02 Resolver ruta [HECHO 2026-10-11]: binario oficial v2.0.2, SHA256 verificado, en `C:/Users/tomas/.local/bin/github-mcp-server.exe`. GITHUB_MCP_CMD registrada en .env.mcp (ruta, sin secreto).
+- T03 Fallback fail-open [HECHO 2026-10-11]: hook Ensure-ConstitutionAppSync no toca MCPs; el bootstrap emite WARN si el binario falta (patron existente). Este MCP exige GITHUB_TOKEN: sin el, el servidor arranca pero las llamadas devuelven error de auth.
+- T04 Paridad [HECHO 2026-10-11]: entrada en opencode.json + .vscode/mcp.json. .opencode/mcp.json NO existe en este proyecto (N/A documentado).
+- T05 Quickstart [HECHO 2026-10-11]: verificado vivo get_me=tomasecastro + get_latest_release=v2.0.2.

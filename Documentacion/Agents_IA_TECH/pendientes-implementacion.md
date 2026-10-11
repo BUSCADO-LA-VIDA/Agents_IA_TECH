@@ -17,8 +17,6 @@
 
 | ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a | Aprobación del plan |
 |----|------|-------|-------------|-------------|--------|------------|---------------------|
-| 000-mcp-testsprite-integracion-T01 | 000‑mcp‑testsprite‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP testsprite en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:TESTSPRITE_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
-| 000-mcp-sentry-integracion-T01 | 000‑mcp‑sentry‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP sentry en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:SENTRY_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-semgrep-integracion-T01 | 000‑mcp‑semgrep‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP semgrep en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:SEMGREP_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-semgrep-integracion-T02 | 000-mcp-semgrep-integracion | T02 Instalar binario y registrar ruta | CLI semgrep 1.180.0 + servidor `semgrep mcp`; pivot por deprecacion upstream (ADR-0009). | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-semgrep-integracion-T03 | 000-mcp-semgrep-integracion | T03 Fallback fail-open | WARN si binario ausente. | `plataformador` | `[x]` | `plataformador` | Si |
@@ -29,8 +27,6 @@
 | 000-mcp-playwright-integracion-T03 | 000-mcp-playwright-integracion | T03 Fallback fail-open | WARN si binario/browsers ausentes. | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-playwright-integracion-T04 | 000-mcp-playwright-integracion | T04 Paridad configuraciones | opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A. | `documentador` | `[x]` | `documentador` | Si |
 | 000-mcp-playwright-integracion-T05 | 000-mcp-playwright-integracion | T05 Verificacion viva | Handshake + 25 tools en vivo. | `qa-senior` | `[x]` | `qa-senior` | Si |
-| 000-mcp-pieces-integracion-T01 | 000‑mcp‑pieces‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP pieces en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:PIECES_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
-| 000-mcp-perplexity-integracion-T01 | 000‑mcp‑perplexity‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP perplexity en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:PERPLEXITY_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-context7-integracion-T01 | 000‑mcp‑context7‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP context7 en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:CONTEXT7_CMD}` + args `--stdio` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-context7-integracion-T02 | 000-mcp-context7-integracion | T02 Instalar binario y registrar ruta | npm i -g @upstash/context7-mcp; entrada hardcodeada (ADR-0009). | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-context7-integracion-T03 | 000-mcp-context7-integracion | T03 Fallback fail-open | WARN si binario ausente o sin red. | `plataformador` | `[x]` | `plataformador` | Si |

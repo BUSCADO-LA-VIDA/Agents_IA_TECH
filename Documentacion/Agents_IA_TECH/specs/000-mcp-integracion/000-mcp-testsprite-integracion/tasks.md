@@ -12,3 +12,5 @@
   Añadir comando de verificación y ejemplo de suites de TestSprite en quickstart.md
 - T06 Validar idempotencia [RF-03,SC-005,EC-03]
   Ejecutar bootstrap dos veces y confirmar bloque mcp idéntico sin duplicados
+
+- DESCARTADO 2026-10-11 por decision del usuario: servicio de pago. Binario desinstalado (sentry) o nunca instalado (los otros 3). Sin entrada en opencode.json. Ver bitacora 2026-10-11-mcp-descartados-pago.

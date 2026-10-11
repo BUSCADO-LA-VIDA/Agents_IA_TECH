@@ -18,3 +18,6 @@
 - T03 [BLOQUEADO]: el binario se cuelga en toda invocacion (--help, auth status, stdio) sin salida; mas auth interactiva (device flow) que requiere al usuario.
 - T04 [PENDIENTE]: paridad pendiente del registro.
 - T05 [PENDIENTE - NO VALIDADO]: verificacion viva imposible sin auth + hang. NO se marca [x] por regla de integridad.
+- 0.41.0 responde CLI pero el handshake stdio expira: el servidor intenta device-flow al arrancar. Fijado pin 0.41.0 (0.42.0 ni siquiera responde --version). Falta: token o `auth login` del usuario.
+
+- DESCARTADO 2026-10-11 por decision del usuario: servicio de pago. Binario desinstalado (sentry) o nunca instalado (los otros 3). Sin entrada en opencode.json. Ver bitacora 2026-10-11-mcp-descartados-pago.

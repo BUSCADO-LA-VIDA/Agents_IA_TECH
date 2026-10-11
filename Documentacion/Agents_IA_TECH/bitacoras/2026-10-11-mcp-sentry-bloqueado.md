@@ -11,3 +11,7 @@
 - NO se registra la entrada habilitada: un binario colgado colgaria el arranque de OpenCode.
 - T05 queda pendiente sin [x] por regla de integridad (2026-09-26).
 - Para retomar: usuario ejecuta `sentry-mcp auth login`, luego reintentar handshake; si sigue colgando, probar version anterior o `npx -y @sentry/mcp-server@<prev>`.
+
+## Actualizacion: pin 0.41.0
+- 0.42.0 (latest) se cuelga en TODO (regresion). 0.41.0 responde CLI al instante pero el handshake stdio expira: intenta device-flow al arrancar.
+- Fijado `npm i -g @sentry/mcp-server@0.41.0`. Entrada NO registrada habilitada (bloquearia el arranque). Falta token o `auth login` del usuario.

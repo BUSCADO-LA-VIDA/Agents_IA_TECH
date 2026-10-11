@@ -17,19 +17,19 @@
 
 | ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a | Aprobación del plan |
 |----|------|-------|-------------|-------------|--------|------------|---------------------|
-| 000-mcp-testsprite-integracion-T01 | 000‑mcp‑testsprite‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP testsprite en plantilla con configuración stdio. | `documentador` | `[ ]` | `documentador` | No |
-| 000-mcp-sentry-integracion-T01 | 000‑mcp‑sentry‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP sentry en plantilla con configuración stdio. | `documentador` | `[ ]` | `documentador` | No |
-| 000-mcp-semgrep-integracion-T01 | 000‑mcp‑semgrep‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP semgrep en plantilla con configuración stdio. | `documentador` | `[ ]` | `documentador` | No |
-| 000-mcp-playwright-integracion-T01 | 000‑mcp‑playwright‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP playwright en plantilla con configuración stdio. | `documentador` | `[ ]` | `documentador` | No |
-| 000-mcp-pieces-integracion-T01 | 000‑mcp‑pieces‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP pieces en plantilla con configuración stdio. | `documentador` | `[ ]` | `documentador` | No |
-| 000-mcp-perplexity-integracion-T01 | 000‑mcp‑perplexity‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP perplexity en plantilla con configuración stdio. | `documentador` | `[ ]` | `documentador` | No |
-| 000-mcp-context7-integracion-T01 | 000‑mcp‑context7‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP context7 en plantilla con configuración stdio. | `documentador` | `[ ]` | `documentador` | No |
-| 000-mcp-github-integracion-T01 | 000‑mcp‑github‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP github en plantilla con configuración stdio. | `documentador` | `[ ]` | `documentador` | No |
-| 000-mcp-integracion-estandar-T01 | 000‑mcp‑integracion‑estandar | T01 Revisar organización | Revisar y validar la organización de integraciones MCP. | `arquitecto` | `[ ]` | `arquitecto` | No |
-| 006-T001 | 006 | Pipeline post‑platforming | Verificar y validar el pipeline Speckit post‑platforming (spec 006). | `pensador` | `[ ]` | `pensador` | No |
-| 008-T001 | 008 | Configuración MCP portable | Verificar y validar la configuración MCP portable (spec 008). | `documentador` | `[ ]` | `documentador` | No |
+| 000-mcp-testsprite-integracion-T01 | 000‑mcp‑testsprite‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP testsprite en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:TESTSPRITE_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
+| 000-mcp-sentry-integracion-T01 | 000‑mcp‑sentry‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP sentry en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:SENTRY_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
+| 000-mcp-semgrep-integracion-T01 | 000‑mcp‑semgrep‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP semgrep en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:SEMGREP_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
+| 000-mcp-playwright-integracion-T01 | 000‑mcp‑playwright‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP playwright en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:PLAYWRIGHT_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
+| 000-mcp-pieces-integracion-T01 | 000‑mcp‑pieces‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP pieces en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:PIECES_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
+| 000-mcp-perplexity-integracion-T01 | 000‑mcp‑perplexity‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP perplexity en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:PERPLEXITY_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
+| 000-mcp-context7-integracion-T01 | 000‑mcp‑context7‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP context7 en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:CONTEXT7_CMD}` + args `--stdio` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
+| 000-mcp-github-integracion-T01 | 000‑mcp‑github‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP github en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:GITHUB_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
+| 000-mcp-integracion-estandar-T01 | 000‑mcp‑integracion‑estandar | T01 Revisar organización | Revisar y validar la organización de integraciones MCP. Verificado 2026‑10‑10: estándar vigente, 8 specs individuales existen y las 8 integraciones implementadas (plantilla+resolver+WARN+quickstart+idempotencia). | `arquitecto` | `[x]` | `arquitecto` | Sí |
+| 006-T001 | 006 | Pipeline post‑platforming | Verificar y validar el pipeline Speckit post‑platforming (spec 006). Verificado 2026‑10‑10: flujo SSD completo ejecutado en vivo en specs 002/013/015/019 (specify→plan→tasks→implement→verify). | `pensador` | `[x]` | `pensador` | Sí |
+| 008-T001 | 008 | Configuración MCP portable | Verificar y validar la configuración MCP portable (spec 008). Verificado 2026‑10‑10: template con tokens `{env:...}` + `enabled:false` restaurado (había rutas absolutas commiteadas); bootstrap DryRun resuelve a rutas locales; `.vscode/` no versionado. | `documentador` | `[x]` | `documentador` | Sí |
 | 009-T001 | 009 | Actualización lifecycle MCP | Verificar y validar la actualización del lifecycle MCP (spec 009). | `documentador` | `[x]` | `documentador` | Sí |
-| 010-T001 | 010 | Remediación de fugas de secretos | Revisar y validar la remediación de fugas de secretos (spec 010). | `devops` | `[ ]` | `devops` | No |
+| 010-T001 | 010 | Remediación de fugas de secretos | Revisar y validar la remediación de fugas de secretos (spec 010). Verificado 2026‑10-10: `.env.mcp` y `.opencode/config.json` jamás commiteados; sin patrones de secretos vivos en trackeados; `.gitignore` cubre `.env*`, `secrets.*`, `config.local.json`, `.opencode/config.json`, `.env.mcp`. | `devops` | `[x]` | `devops` | Sí |
 | 011-T040 | 011 | Allowlist URLs | Revisar y validar la allowlist de URLs (spec 011). | `devops` | `[x]` | `devops` | Sí |
 | 011-T051 | 011 | Verificar identidad | Verificar identidad de agentes y configuraciones (spec 011). | `devops` | `[x]` | `devops` | No (sección Finalizado Security) |
 | 011-T059 | 011 | Validar DryRun | Validar ejecución dry‑run del pipeline (spec 011). | `qa-senior` | `[x]` | `qa-senior` | No (sección Finalizado QA) |
@@ -42,10 +42,10 @@
 | 013-T006 | 013 | Revisar y validar namespace | Revisar y validar el namespace `ecc‑` definido. | `pensador` | `[x]` | `pensador` | No |
 | 013-T007 | 013 | Integrar scripts ECC en el pipeline CI/CD | Integrar los scripts ECC en el pipeline de CI/CD. | `devops` | `[x]` | `devops` | No |
 | 013-T008 | 013 | Completar spec 013 — flujo completo, operativa | Cierre = flujo SSD completo, lista para producción (NO archivar). | `pensador` | `[x]` | `pensador` | Sí |
-| 014-T001 | 014 | Quitar dependencias‑manifest.yml de .gitignore | Quitar el archivo dependencias‑manifest.yml de la lista de ignorado de Git. | `devops` | `[ ]` | `devops` | No |
-| 014-T002 | 014 | Crear manifest de referencia en proyect_ext/ | Crear un manifest de referencia en el directorio proyect_ext/. | `devops` | `[ ]` | `devops` | No |
-| 014-T003 | 014 | Implementar Sync‑Manifest en módulos | Implementar la sincronización del manifest en los módulos del proyecto. | `devops` | `[ ]` | `devops` | No |
-| 014-T004 | 014 | Implementar hooks post‑update | Implementar hooks post‑update para notificar cambios de versión. | `devops` | `[ ]` | `devops` | No |
+| 014-T001 | 014 | Quitar dependencias‑manifest.yml de .gitignore | Quitar el archivo dependencias‑manifest.yml de la lista de ignorado de Git. | `devops` | `[x]` | `devops` | Sí |
+| 014-T002 | 014 | Crear manifest de referencia en proyect_ext/ | Crear un manifest de referencia en el directorio proyect_ext/. | `devops` | `[x]` | `devops` | Sí |
+| 014-T003 | 014 | Implementar Sync‑Manifest en módulos | Implementar la sincronización del manifest en los módulos del proyecto. | `devops` | `[x]` | `devops` | Sí |
+| 014-T004 | 014 | Implementar hooks post‑update | Implementar hooks post‑update para notificar cambios de versión. | `devops` | `[x]` | `devops` | Sí |
 | 015-T001 | 015 | Orquestador ecc‑orchestrator.ps1 creado y verificado | Parámetros action/mcp/dryrun, whitelist Art‑VII, status/dry‑run/run con marcador (75 líneas, lectura directa). | `devops` | `[x]` | `devops` | Sí |
 | 015-T002 | 015 | Sección MCP en agents (32/32 verificado) | Sección `## 🎯 Rol Scrum: Integración MCP` en 16 `.github` + 16 `.opencode`, marcador `MCP‑ROLE‑v1` grep 16+16 (verificado 2026‑10‑09; se renombraron `ssh-connection-agent.md` y `usuario-preferencias.md` a `*.agent.md` + frontmatter para descubrimiento Copilot). | `documentador` | `[x]` | `documentador` | Sí |
 | 015-T003 | 015 | Constitution Check formal Art‑VII | El glosario del ciclo de vida (Spec 015/013) y la regla en AGENTS.md sirven como evidencia formal; el check de Constitution se considera completado para cerrar el flujo. | `pensador` | `[x]` | `pensador` | Sí |
@@ -61,19 +61,30 @@
 | 016-T006 | 016 | Validar cumplimiento | Verificar que todos los agents contienen la regla y que pendientes‑implementacion.md tiene columna. | `pensador` | `[x]` | `pensador` | Sí |
 | 016-T007 | 016 | Documentar y cerrar spec | Actualizar 00‑indice.md y marcar spec como cerrado. | `pensador` | `[x]` | `pensador` | Sí |
 | 017-T001 | 017 | Crear estructura de specs para feature 017 | Crear carpeta `Documentacion/<AppName>/specs/017‑pendientes‑implementacion‑por‑app/` y archivos iniciales `spec.md`, `plan.md`, `tasks.md`. | `pensador` | `[x]` | `pensador` | Sí |
-| 017-T002 | 017 | Implementar lógica de actualización automática en speckit pipeline | Modificar el pipeline Speckit para actualizar `pendientes‑implementacion.md` automáticamente al finalizar cada fase. | `Agent‑SSD` | `[ ]` | `Agent‑SSD` | No |
-| 017-T003 | 017 | Agregar contexto previo obligatorio a cada fase speckit | Asegurar que antes de cada `speckit-*` se ejecuta el contexto previo obligatorio con MCPs y graphify. | `pensador` | `[ ]` | `pensador` | No |
-| 017-T004 | 017 | Crear template de `pendientes‑implementacion.md` por proyecto | Diseñar y crear el template con secciones obligatorias y contenido real. | `documentador` | `[ ]` | `documentador` | No |
-| 017-T005 | 017 | Prohibir placeholders en `pendientes‑implementacion.md` | Implementar validación para asegurar que el archivo no contiene placeholders prohibidos. | `pensador` | `[ ]` | `pensador` | No |
-| 018-T001 | 018 | Actualizar plantilla pendientes‑implementacion‑template.md con columnas Estado y Asignado a | Actualizar plantilla con las columnas Estado y Asignado a según nuevo formato. | `pensador` | `[ ]` | `pensador` | No |
-| 018-T002 | 018 | Migrar pendientes‑implementacion.md actual a nuevo formato con estados | Migrar el archivo actual al nuevo formato con columnas Estado y Asignado a. | `pensador` | `[ ]` | `pensador` | No |
-| 018-T003 | 018 | Actualizar pensador.agent.md en .github y .opencode con reglas Scrum | Añadir reglas Scrum a los agentes pensador en ambos harnesses. | `pensador` | `[ ]` | `pensador` | No |
-| 018-T004 | 018 | Actualizar Agent‑SSD.agent.md en ambos harnesses | Añadir reglas Scrum al agente Agent‑SSD en .github y .opencode. | `pensador` | `[ ]` | `pensador` | No |
-| 018-T005 | 018 | Actualizar arquitecto, security‑auditor, documentador | Añadir reglas Scrum aarquitecto, security‑auditor, documentador. | `pensador` | `[ ]` | `pensador` | No |
-| 018-T006 | 018 | Actualizar api‑developer, frontend‑developer, devops, qa‑senior | Añadir reglas Scrum a los implementadores por dominio. | `pensador` | `[ ]` | `pensador` | No |
-| 018-T007 | 018 | Actualizar gitflow, plataformador, analista‑tecnico | Añadir reglas Scrum a gitflow, plataformador, analista‑tecnico. | `pensador` | `[ ]` | `pensador` | No |
-| 018-T008 | 018 | Validar Constitución Art‑VII whitelist paths | Validar que la whitelist de paths Art‑VII está correcta y respeta Art.IX (sin placeholders). | `pensador` | `[ ]` | `pensador` | No |
-| 018-T009 | 018 | Converge documentación y actualizar 00‑indice.md | Converger la documentación y actualizar el índice 00‑indice.md con el nuevo formato. | `pensador` | `[ ]` | `pensador` | No |
+| 017-T002 | 017 | Implementar lógica de actualización automática en speckit pipeline | Modificar el pipeline Speckit para actualizar `pendientes‑implementacion.md` automáticamente al finalizar cada fase. | `Agent‑SSD` | `[x]` | `Agent‑SSD` | Sí |
+| 017-T003 | 017 | Agregar contexto previo obligatorio a cada fase speckit | Asegurar que antes de cada `speckit-*` se ejecuta el contexto previo obligatorio con MCPs y graphify. | `pensador` | `[x]` | `pensador` | Sí |
+| 017-T004 | 017 | Crear template de `pendientes‑implementacion.md` por proyecto | Diseñar y crear el template con secciones obligatorias y contenido real. | `documentador` | `[x]` | `documentador` | Sí |
+| 017-T005 | 017 | Prohibir placeholders en `pendientes‑implementacion.md` | Implementar validación para asegurar que el archivo no contiene placeholders prohibidos. | `pensador` | `[x]` | `pensador` | Sí |
+| 018-T001 | 018 | Actualizar plantilla pendientes‑implementacion‑template.md con columnas Estado y Asignado a | Actualizar plantilla con las columnas Estado y Asignado a según nuevo formato. | `pensador` | `[x]` | `pensador` | Si |
+| 018-T002 | 018 | Migrar pendientes‑implementacion.md actual a nuevo formato con estados | Migrar el archivo actual al nuevo formato con columnas Estado y Asignado a. | `pensador` | `[x]` | `pensador` | No |
+| 018-T003 | 018 | Actualizar pensador.agent.md en .github y .opencode con reglas Scrum | Añadir reglas Scrum a los agentes pensador en ambos harnesses. | `pensador` | `[x]` | `pensador` | No |
+| 018-T004 | 018 | Actualizar Agent‑SSD.agent.md en ambos harnesses | Añadir reglas Scrum al agente Agent‑SSD en .github y .opencode. | `pensador` | `[x]` | `pensador` | No |
+| 018-T005 | 018 | Actualizar arquitecto, security‑auditor, documentador | Añadir reglas Scrum aarquitecto, security‑auditor, documentador. | `pensador` | `[x]` | `pensador` | No |
+| 018-T006 | 018 | Actualizar api‑developer, frontend‑developer, devops, qa‑senior | Añadir reglas Scrum a los implementadores por dominio. | `pensador` | `[x]` | `pensador` | Si |
+| 018-T007 | 018 | Actualizar gitflow, plataformador, analista‑tecnico | Añadir reglas Scrum a gitflow, plataformador, analista‑tecnico. | `pensador` | `[x]` | `pensador` | Si |
+| 018-T008 | 018 | Validar Constitución Art‑VII whitelist paths | Validar que la whitelist de paths Art‑VII está correcta y respeta Art.IX (sin placeholders). | `pensador` | `[x]` | `pensador` | Si |
+| 018-T009 | 018 | Converge documentación y actualizar 00‑indice.md | Converger la documentación y actualizar el índice 00‑indice.md con el nuevo formato. | `pensador` | `[x]` | `pensador` | Si |
+
+| 002-T026 | 002 | Respaldo git antes de actualizar kit | Realizar respaldo git de seguridad antes de actualizar el kit. | `devops` | `[x]` | `devops` | Si |
+| 002-T027 | 002 | Actualizar kit (plataformador-bootstrap) | Modificar plataformador-bootstrap.ps1 con interfaz simplificada y parámetros validados. | `plataformador` | `[x]` | `plataformador` | Hecho: bootstrap simplificado a sin-params/`-DryRun`/`-Force` el 2026-10-10. |
+| 002-T028 | 002 | Restaurar cambios del proyecto | Restaurar el proyecto a su estado previo a la actualización del kit. | `devops` | `[x]` | `devops` | Si |
+| 002-T029 | 002 | Verificar estado post-actualizaci�n | Verificar que los MCPs y configuraciones quedan correctos despu�s de la actualización. | `devops` | `[x]` | `devops` | Si |
+| 002-T030 | 002 | Commit de cambios del kit (solo en repo maestro) | Hacer commit de los cambios del kit solo en el repositorio maestro (origin). | `gitflow` | `[x]` | `gitflow` | Si |
+| 002-T031 | 002 | Migrar archivo obsoleto de pendientes-implementacion.md | Migrar el archivo Documentacion/pendientes-implementacion.md (ubicaci�n previa) al formato por app Documentacion/<App>/pendientes-implementacion.md o borrarlo si est� vac�o. | `documentador` | `[x]` | `documentador` | Hecho: T013 migrado a formato por app y archivo anterior eliminado el 2026-10-10. |
+| 002-T032 | 002 | Sincronizar archivo constitution.md (llamado por plataformador-bootstrap) | Ejecutar sincronizaci�n de constitution.md desde Documentacion a .specify/ y src/<App>/.specify/ mediante el bootstrap. | `plataformador` | `[x]` | `plataformador` | Si |
+| 002-T033 | 002 | Verificar sincronizaci�n de constitution (post-bootstrap) | Confirmar que constitution.md existe en las tres ubicaciones y que la versi�n de Documentaci�n es la que manda. | `documentador` | `[x]` | `documentador` | Si |
+| 002-T034 | 002 | Agregar constitution.md a gitignore si corresponde | Agregar constitution.md al .gitignore del proyecto si no debe versionarse (se gestiona por el kit). | `devops` | `[x]` | `devops` | Si |
+| 002-T035 | 002 | Documentar ruta de constitution en AGENTS.md | Documentar en AGENTS.md la jerarqu�a de prioridad y ubicaciones del archivo constitution.md. | `arquitecto` | `[x]` | `arquitecto` | Si |
 
 ## En progreso
 

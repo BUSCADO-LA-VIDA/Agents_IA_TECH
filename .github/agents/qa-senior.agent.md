@@ -1,4 +1,5 @@
 ---
+tier: Implementador
 description: "Use when: writing tests, TDD cycle, E2E testing, benchmarking, or verifying code quality. QA Senior: 80%+ coverage, 3 testing layers."
 tools: [read, search, edit, execute]
 user-invocable: true

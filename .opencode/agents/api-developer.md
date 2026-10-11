@@ -1,4 +1,5 @@
 ---
+tier: Implementador
 description: "Use when: designing REST APIs, backend patterns, database schema, API connectors, or backend services. API-first development."
 mode: primary
 temperature: 0.2

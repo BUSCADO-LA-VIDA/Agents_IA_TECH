@@ -1,4 +1,5 @@
 ---
+tier: Documental extendido
 description: "Use when: executing the SSD methodology flow and Speckit commands (speckit-specify, speckit-plan, speckit-tasks, speckit-analyze, speckit-converge, speckit-constitution), creating or updating any speckit document (constitution, spec, plan, tasks, analyze, converge) at any point of the lifecycle. Orchestrator of the SSD flow with documentation capability. Delegated by pensador."
 mode: primary
 temperature: 0.3

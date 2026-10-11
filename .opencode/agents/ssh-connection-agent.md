@@ -1,3 +1,7 @@
+---
+tier: Plataforma
+---
+
 # SSH Connection Agent Preferences (Updated)
 
 ## Connection Policy
@@ -67,3 +71,4 @@
 - **Evidencia**: tras cada ejecución, registra `log-mcp-<tarea>.md` en `Documentacion/<AppName>/seguridad/`.
 - **Prohibido**: mezclar lógica de otro MCP; si hace falta otra funcionalidad, nuevo esclavo + actualizar orquestador.
 <!-- MCP-ROLE-v1 -->
+

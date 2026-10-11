@@ -204,6 +204,30 @@ ctx_search "bootstrap"  # si context-mode indexado
 # graphify stats si grafo existe
 ```
 
+### Verificación de MCPs extendidos (specs 000-mcp-*, T05)
+
+```powershell
+# Ver entradas + estado en la plantilla/runtime
+cat opencode.json | jq '.mcp | to_entries[] | {name: .key, enabled: .value.enabled}'
+
+# Resolver una herramienta concreta: instálala según su spec
+# (ver `Origen` en Documentacion/Agents_IA_TECH/specs/000-mcp-integracion/000-mcp-*-integracion/spec.md)
+# y re-ejecuta el bootstrap; contexto verificado: context7 vía `npm install -g @upstash/context7-mcp`
+.\scripts\plataformador-bootstrap.ps1
+cat .env.mcp  # la clave *_CMD debe tener ruta (vacía + WARN = herramienta ausente, fail-open)
+```
+
+| MCP | Env var | Estado sin herramienta |
+|---|---|---|
+| testsprite | `TESTSPRITE_MCP_CMD` | degradado + WARN |
+| sentry | `SENTRY_MCP_CMD` | degradado + WARN |
+| semgrep | `SEMGREP_MCP_CMD` | degradado + WARN |
+| playwright | `PLAYWRIGHT_MCP_CMD` | degradado + WARN |
+| pieces | `PIECES_MCP_CMD` | degradado + WARN |
+| perplexity | `PERPLEXITY_MCP_CMD` | degradado + WARN |
+| context7 | `CONTEXT7_CMD` | degradado + WARN |
+| github | `GITHUB_MCP_CMD` | degradado + WARN |
+
 ---
 
 ## 8. Troubleshooting Común

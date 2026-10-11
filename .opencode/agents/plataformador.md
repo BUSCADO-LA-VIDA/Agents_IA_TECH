@@ -1,4 +1,5 @@
 ---
+tier: Plataforma
 description: "Plataformador — Audita, nivela y replataforma proyectos para asegurar que tengan todas las capacidades del kit de agentes. Detecta que falta, propone nivelacion y ejecuta la actualizacion."
 mode: primary
 temperature: 0.2

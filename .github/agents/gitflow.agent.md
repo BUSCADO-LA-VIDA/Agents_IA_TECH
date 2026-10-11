@@ -1,4 +1,5 @@
 ---
+tier: Tooling
 description: "Use when: managing git branches, creating commits, pushing PRs, syncing forks, reverting changes, rebasing, resolving merge conflicts, or any git workflow operation."
 tools: [read, search, edit, execute]
 user-invocable: true

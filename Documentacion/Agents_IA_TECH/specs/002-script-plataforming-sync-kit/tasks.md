@@ -1,7 +1,7 @@
 ## T026 – Respaldo git antes de actualizar kit
 - **Descripción**: Ejecutar `git stash push -m "Backup antes de actualizar kit"` o guardar el hash del commit actual con `git log --oneline -1` para respaldar los cambios locales antes de actualizar el kit.
 - **Comando**: `git stash push -m "Backup antes de actualizar kit"` o `git log --oneline -1`
-- **Estado**: `[ ]` Pendiente
+- **Estado**: `[x]` Hecho 2026-10-11 (runbook cierre: ver bitacora 2026-10-11-cierre-runbook).
 - **Dependencias**: Ninguna.
 
 ## T027 – Actualizar kit (plataformador-bootstrap)
@@ -25,19 +25,19 @@
 ## T028 – Restaurar cambios del proyecto
 - **Descripción**: Ejecutar `git stash pop` para restaurar los cambios locales, o `git checkout <commit-anterior>` para volver al estado previo.
 - **Comando**: `git stash pop` o `git checkout <commit-anterior>`
-- **Estado**: `[ ]` Pendiente
+- **Estado**: `[x]` Hecho 2026-10-11 (runbook cierre: ver bitacora 2026-10-11-cierre-runbook).
 - **Dependencias**: T027. La actualización del kit debe completarse antes de restaurar.
 
 ## T029 – Verificar estado post-actualización
 - **Descripción**: Ejecutar `git status` para verificar que el proyecto queda con: KIT actualizado, estructura por apps creada y código sin tocar. Revisar que no haya conflictos inesperados en archivos de código (src/, tests/).
 - **Comando**: `git status`
-- **Estado**: `[ ]` Pendiente
+- **Estado**: `[x]` Hecho 2026-10-11 (runbook cierre: ver bitacora 2026-10-11-cierre-runbook).
 - **Dependencias**: T028. Los cambios deben restaurarse antes de verificar.
 
 ## T030 – Commit de cambios del kit (solo en repo maestro)
 - **Descripción**: En el repositorio maestro (Agents_IA_TECH), hacer commit de los archivos del kit actualizados: `.github/`, `.opencode/`, `scripts/`, `AGENTS.md`, `opencode.json`, `.env.mcp`, `.specify/`. NOTA: Los proyectos consumidores NO hacen commit de estos archivos, solo su código.
 - **Comando**: `git add .github/ .opencode/ .doc_agents/ scripts/ AGENTS.md opencode.json .env.mcp .specify/ && git commit -m "feat: actualizar kit Agents_IA_TECH a versión"`
-- **Estado**: `[ ]` Pendiente
+- **Estado**: `[x]` Hecho 2026-10-11 (runbook cierre: ver bitacora 2026-10-11-cierre-runbook).
 - **Dependencias**: T029. La verificación post-actualización debe completarse antes del commit.
 
 ## T031 – Migrar archivo obsoleto de pendientes-implementacion.md (T013)
@@ -55,25 +55,25 @@
      - `src\\<App>\\.specify\\constitution.md` (acceso del agente Agent-SSD dentro de su whitelist)
   - El script se puede ejecutar también de forma independiente: `.\\scripts\\sync-constitution.ps1 -App trading_bot`
 - **Comando**: `.\\scripts\\plataformador-bootstrap.ps1 -Force` (llamada interna que incluye la sincronización de constitution)
-- **Estado**: `[ ]` Pendiente
+- **Estado**: `[x]` Hecho 2026-10-11: `Ensure-ConstitutionAppSync` en bootstrap + seed L2 Documentacion (SHA256 igual al original). Ver bitacora 2026-10-11-cierre-bloque-constitution.
 - **Dependencias**: T029. La verificación post-actualización debe completarse antes de la sincronización.
 
 ## T033 – Verificar sincronización de constitution (post-bootstrap)
 - **Descripción**: Confirmar que el archivo constitution.md existe en las tres ubicaciones esperadas después de ejecutar `.\\scripts\\plataformador-bootstrap.ps1 -Force` (Task T027). **La versión en `Documentacion\\<App>\\.specify\\constitution.md` debe ser la idéntica a `.specify\\memory\\constitution.md` (raíz)** y a `src\\<App>\\.specify\\constitution.md` (acceso agente), ya que el bootstrap sincronizó desde Documentacion hacia estas ubicaciones. Comparar hash y reportar diferencias si el bootstrap no las igualó.
 - **Comando**: `Get-FileHash -Path ".specify\\memory\\constitution.md"` y `Get-FileHash -Path "Documentacion\\<App>\\.specify\\constitution.md"` y `Get-FileHash -Path "src\\<App>\\.specify\\constitution.md"`
-- **Estado**: `[ ]` Pendiente
+- **Estado**: `[x]` Hecho 2026-10-11: L1 raiz EXISTE + L2 Documentacion EXISTE con hash igual; L3 N/A (sin src/ en el kit).
 - **Dependencias**: T032. La sincronización (ejecutada por el bootstrap en T027) debe completarse antes de la verificación.
 
 ## T034 – Agregar constitution.md a gitignore si corresponde
 - **Descripción**: Si el archivo constitution.md no debe versionarse en el repositorio del proyecto (porque se despliega a PRO y se gestiona por este kit), **agregarlo al `.gitignore` después de haber verificado que la sincronización T032 ha puesto la versión correcta en la raíz**. NOTA: Esto asegura que el archivo no aparezca en `git status` ni en commits, pero seguirá existiendo en el sistema de archivos gracias al script de sincronización, y la versión Documentacion (que manda) se mantiene actualizada por el bootstrap.
 - **Comando**: Agregar la línea `.specify\\memory\\constitution.md` al archivo `.gitignore` del proyecto.
-- **Estado**: `[ ]` Pendiente
+- **Estado**: `[x]` Hecho 2026-10-11: raiz .gitignore NO ignora constitution (correcto, el original se versiona); el hook agrega la regla `.specify/constitution.md` en `src/<App>/.gitignore` cuando exista src. Desviacion vs descripcion original (pedia ignorar la raiz): rige la regla del usuario.
 - **Dependencias**: T032 y T033. La sincronización y verificación deben completarse antes de decidir sobre el gitignore.
 
 ## T035 – Documentar ruta de constitution en AGENTS.md
 - **Descripción**: Agregar una sección al `AGENTS.md` del proyecto que indique la ubicación del archivo constitution.md y su propósito: "El archivo constitution.md tiene prioridad en `Documentacion/<App>/.specify/constitution.md` (versión que manda). Esta versión se sincroniza automáticamente a `.specify/memory/constitution.md` (raíz) mediante el script `sync-constitution.ps1` al ejecutar la actualización del kit (`plataformador-bootstrap.ps1 -Force`). No se versiona en git porque se despliega a PRO, pero está respaldado por la sincronización del kit, siendo la versión Documentacion la que manda."
 - **Comando**: Agregar la sección correspondiente al `AGENTS.md` del proyecto.
-- **Estado**: `[ ]` Pendiente
+- **Estado**: `[x]` Hecho 2026-10-11: ruta constitution 3 niveles agregada en AGENTS.md L100.
 - **Dependencias**: T032 y T034. La sincronización y la decisión sobre gitignore deben completarse antes de documentar.
 
 ---

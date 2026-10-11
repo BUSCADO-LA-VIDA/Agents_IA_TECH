@@ -1,4 +1,5 @@
 ---
+tier: Documental
 description: "Use when: analyzing technical documentation, converting docs to MarkDown, building knowledge graphs, or orchestrating the documentation pipeline without AI of entry. Invoked by the pensador."
 tools: [read, search, edit]
 user-invocable: true

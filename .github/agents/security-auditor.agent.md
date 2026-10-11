@@ -1,4 +1,5 @@
 ---
+tier: Documental
 description: "Use when: auditing security, reviewing vulnerabilities, pentesting, or implementing security controls. OWASP Top 10, SAST, dependency audit, secrets detection."
 tools: [read, search, execute, edit]
 user-invocable: true

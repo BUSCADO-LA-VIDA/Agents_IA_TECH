@@ -310,11 +310,46 @@ function Ensure-McpJson {
                     command = "context-mode"
                     type = "stdio"
                 }
+                # [000-MCP] Servidores extendidos (specs 000-mcp-*-integracion,
+                # RF-04): resueltos por PATH en runtime de VS Code; si el
+                # binario falta, solo falla ese servidor (aislado).
+                "testsprite" = [ordered]@{
+                    command = "testsprite"
+                    type = "stdio"
+                }
+                "sentry" = [ordered]@{
+                    command = "sentry"
+                    type = "stdio"
+                }
+                "semgrep" = [ordered]@{
+                    command = "semgrep"
+                    type = "stdio"
+                }
+                "playwright" = [ordered]@{
+                    command = "playwright"
+                    type = "stdio"
+                }
+                "pieces" = [ordered]@{
+                    command = "pieces"
+                    type = "stdio"
+                }
+                "perplexity" = [ordered]@{
+                    command = "perplexity"
+                    type = "stdio"
+                }
+                "context7" = [ordered]@{
+                    command = "context7"
+                    type = "stdio"
+                }
+                "github" = [ordered]@{
+                    command = "github"
+                    type = "stdio"
+                }
             }
         }
 
         if ($DryRun) {
-            Write-Info "DryRun: crear .vscode/mcp.json con servidores markitdown, codebase-memory-mcp y context-mode"
+            Write-Info "DryRun: crear .vscode/mcp.json con servidores base + extendidos [000-MCP]"
             return
         }
 
@@ -339,8 +374,9 @@ function Resolve-McpCommand {
 
 # [007-MCP] D2/RF-03: fuente de rutas MCP portable por proyecto (`.env.mcp`).
 # Crea <root>/.env.mcp si no existe (idempotente; con -Force re-escribe) con
-# CONTEXT_MODE_CMD/CODEBASE_MEMORY_CMD/MARKITDOWN_CMD resueltas en runtime local
-# vía Resolve-McpCommand. `.env.mcp` es la fuente de verdad legible/portable
+# las claves base + extendidas [000-MCP] (valores vacíos; se resuelven en
+# Ensure-OpenCodeMcp o quedan vacías + WARN si la herramienta falta).
+# `.env.mcp` es la fuente de verdad legible/portable
 # (nunca versionada; se agrega a .gitignore); el mecanismo efectivo en OpenCode
 # es `environment`/ruta real (ver Ensure-OpenCodeMcp). Sin secretos: solo rutas.
 function Ensure-McpEnvFile {
@@ -368,7 +404,7 @@ function Ensure-McpEnvFile {
     }
 
     if ($DryRun) {
-        Write-Info "DryRun: crear $envPath con CONTEXT_MODE_CMD/CODEBASE_MEMORY_CMD/MARKITDOWN_CMD (rutas resueltas)."
+        Write-Info "DryRun: crear $envPath con claves base + extendidas [000-MCP] (rutas resueltas o vacías)."
         Add-McpEnvGitignore -RootPath $RootPath
         return
     }
@@ -377,6 +413,17 @@ function Ensure-McpEnvFile {
         "CONTEXT_MODE_CMD"    = "context-mode"
         "CODEBASE_MEMORY_CMD" = "codebase-memory-mcp"
         "MARKITDOWN_CMD"      = "markitdown"
+        # [000-MCP] Claves extendidas (specs 000-mcp-*-integracion, RF-02):
+        # placeholders vacíos; se resuelven en Ensure-OpenCodeMcp o quedan
+        # vacías + WARN (fail-open) si la herramienta no está instalada.
+        "TESTSPRITE_MCP_CMD"  = "testsprite"
+        "SENTRY_MCP_CMD"      = "sentry"
+        "SEMGREP_MCP_CMD"     = "semgrep"
+        "PLAYWRIGHT_MCP_CMD"  = "playwright"
+        "PIECES_MCP_CMD"      = "pieces"
+        "PERPLEXITY_MCP_CMD"  = "perplexity"
+        "CONTEXT7_CMD"        = "context7"
+        "GITHUB_MCP_CMD"      = "github"
     }
     $lines = [System.Collections.Generic.List[string]]::new()
     $lines.Add("# [007-MCP] Rutas MCP resueltas localmente (NO se versiona; gitignored).") | Out-Null
@@ -528,6 +575,50 @@ function Ensure-OpenCodeMcp {
                 command = @("{env:MARKITDOWN_CMD}")
                 enabled = $false
             }
+            # [000-MCP] Entradas extendidas (specs 000-mcp-*-integracion, RF-01):
+            # plantilla degradada con enabled=false; la re-resolución las
+            # promueve si el binario se resuelve, o las deja degradadas + WARN.
+            "testsprite" = [ordered]@{
+                type = "stdio"
+                command = @("{env:TESTSPRITE_MCP_CMD}")
+                enabled = $false
+            }
+            "sentry" = [ordered]@{
+                type = "stdio"
+                command = @("{env:SENTRY_MCP_CMD}")
+                enabled = $false
+            }
+            "semgrep" = [ordered]@{
+                type = "stdio"
+                command = @("{env:SEMGREP_MCP_CMD}")
+                enabled = $false
+            }
+            "playwright" = [ordered]@{
+                type = "stdio"
+                command = @("{env:PLAYWRIGHT_MCP_CMD}")
+                enabled = $false
+            }
+            "pieces" = [ordered]@{
+                type = "stdio"
+                command = @("{env:PIECES_MCP_CMD}")
+                enabled = $false
+            }
+            "perplexity" = [ordered]@{
+                type = "stdio"
+                command = @("{env:PERPLEXITY_MCP_CMD}")
+                enabled = $false
+            }
+            "context7" = [ordered]@{
+                type = "stdio"
+                command = @("{env:CONTEXT7_CMD}")
+                args = @("--stdio")
+                enabled = $false
+            }
+            "github" = [ordered]@{
+                type = "stdio"
+                command = @("{env:GITHUB_MCP_CMD}")
+                enabled = $false
+            }
         }
         Write-Warn "Plantilla MCP con {env:...} (ejecuta el bootstrap para resolver a rutas locales)."
 
@@ -551,6 +642,16 @@ function Ensure-OpenCodeMcp {
         "context-mode"        = @{ Tool = "context-mode";        Var = "CONTEXT_MODE_CMD";    Token = "__CONTEXT_MODE_CMD__" }
         "codebase-memory-mcp" = @{ Tool = "codebase-memory-mcp"; Var = "CODEBASE_MEMORY_CMD"; Token = "__CODEBASE_MEMORY_CMD__" }
         "markitdown"          = @{ Tool = "markitdown";          Var = "MARKITDOWN_CMD";      Token = "__MARKITDOWN_CMD__" }
+        # [000-MCP] Entradas extendidas (specs 000-mcp-*-integracion, RF-02/RF-03):
+        # si el binario no está en PATH -> degradado + WARN (fail-open).
+        "testsprite"          = @{ Tool = "testsprite";          Var = "TESTSPRITE_MCP_CMD";  Token = "__TESTSPRITE_MCP_CMD__" }
+        "sentry"              = @{ Tool = "sentry";              Var = "SENTRY_MCP_CMD";      Token = "__SENTRY_MCP_CMD__" }
+        "semgrep"             = @{ Tool = "semgrep";             Var = "SEMGREP_MCP_CMD";     Token = "__SEMGREP_MCP_CMD__" }
+        "playwright"          = @{ Tool = "playwright";          Var = "PLAYWRIGHT_MCP_CMD";  Token = "__PLAYWRIGHT_MCP_CMD__" }
+        "pieces"              = @{ Tool = "pieces";              Var = "PIECES_MCP_CMD";      Token = "__PIECES_MCP_CMD__" }
+        "perplexity"          = @{ Tool = "perplexity";          Var = "PERPLEXITY_MCP_CMD";  Token = "__PERPLEXITY_MCP_CMD__" }
+        "context7"            = @{ Tool = "context7";            Var = "CONTEXT7_CMD";        Token = "__CONTEXT7_CMD__" }
+        "github"              = @{ Tool = "github";              Var = "GITHUB_MCP_CMD";      Token = "__GITHUB_MCP_CMD__" }
     }
     $mcpReasons = [ordered]@{}
 
@@ -2278,6 +2379,142 @@ function Ensure-AppDocumentation {
 }
 
 # =============================================================================
+# [002-CONSTITUTION] Ensure-ConstitutionAppSync: sincronización constitution en 3 niveles
+# =============================================================================
+# [002-CONSTITUTION] Regla de 3 niveles (fuente de verdad):
+# [002-CONSTITUTION] Nivel 1 = .specify/memory/constitution.md (raíz, original del
+# [002-CONSTITUTION] KIT versionado que replica sync-kit.ps1; NO modificar aquí).
+# [002-CONSTITUTION] Nivel 2 = Documentacion/<App>/.specify/constitution.md (propio
+# [002-CONSTITUTION] de cada APP, versionado; se siembra desde nivel 1 si falta y se
+# [002-CONSTITUTION] conserva si ya existe salvo -Force).
+# [002-CONSTITUTION] Nivel 3 = src/<App>/.specify/constitution.md (copia runtime
+# [002-CONSTITUTION] desde el nivel 2 —nunca desde la raíz— para preservar
+# [002-CONSTITUTION] independencia por APP; ignorada en src/<App>/.gitignore).
+# [002-CONSTITUTION] Todo fail-open: error por app -> Write-Warn + continuar.
+function Ensure-ConstitutionAppSync {
+    param([string]$RootPath = "", [string[]]$Apps = @())
+
+    # [002-CONSTITUTION] Resolver RootPath igual que Prepare-Apps.
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    # [002-CONSTITUTION] Si no hay lista, resolver igual que Prepare-Apps.
+    $list = @($Apps | Where-Object { $_ -ne "" })
+    if ($list.Count -eq 0) { $list = @(Resolve-AppList -RootPath $RootPath) }
+    if ($list.Count -eq 0) {
+        Write-Warn "[002-CONSTITUTION] Sin apps que sincronizar (lista vacía; define el manifest local)."
+        return
+    }
+
+    # [002-CONSTITUTION] Nivel 1: original del KIT (solo lectura, nunca escribir).
+    $rootConstitution = Join-Path $RootPath ".specify\memory\constitution.md"
+
+    Write-Step "[002-CONSTITUTION] Sincronizando constitution por app (3 niveles)..."
+
+    foreach ($app in $list) {
+        try {
+            # [002-CONSTITUTION] Nivel 2: Documentacion/<App>/.specify/constitution.md
+            $docDir = Join-Path $RootPath "Documentacion\$app\.specify"
+            $doc = Join-Path $docDir "constitution.md"
+            if (-not (Test-Path -LiteralPath $doc)) {
+                if (Test-Path -LiteralPath $rootConstitution) {
+                    if ($DryRun) {
+                        Write-Info "[002-CONSTITUTION] DryRun: sembraría nivel 2 de '$app' desde .specify/memory/constitution.md -> $doc"
+                    } else {
+                        Ensure-Directory -Path $docDir
+                        Copy-Item -LiteralPath $rootConstitution -Destination $doc -Force
+                        Write-OK "[002-CONSTITUTION] Nivel 2 sembrado para '$app': $doc"
+                    }
+                } else {
+                    Write-Warn "[002-CONSTITUTION] No existe constitución raíz ($rootConstitution); no se puede sembrar nivel 2 para '$app'."
+                }
+            } else {
+                if ($Force) {
+                    if (Test-Path -LiteralPath $rootConstitution) {
+                        if ($DryRun) {
+                            Write-Info "[002-CONSTITUTION] DryRun: sobrescribiría nivel 2 de '$app' con -Force: $doc"
+                        } else {
+                            Copy-Item -LiteralPath $rootConstitution -Destination $doc -Force
+                            Write-OK "[002-CONSTITUTION] Nivel 2 actualizado con -Force para '$app': $doc"
+                        }
+                    } else {
+                        Write-Warn "[002-CONSTITUTION] No existe constitución raíz ($rootConstitution); no se puede actualizar nivel 2 para '$app'."
+                    }
+                } else {
+                    Write-Info "[002-CONSTITUTION] Nivel 2 de '$app' se conserva (existe; usa -Force para sobrescribir): $doc"
+                }
+            }
+
+            # [002-CONSTITUTION] Nivel 3: src/<App>/.specify/constitution.md (desde nivel 2).
+            $srcApp = Join-Path $RootPath "src\$app"
+            if (Test-Path -LiteralPath $srcApp) {
+                $runtimeDir = Join-Path $srcApp ".specify"
+                $runtime = Join-Path $runtimeDir "constitution.md"
+                if (-not (Test-Path -LiteralPath $doc)) {
+                    Write-Warn "[002-CONSTITUTION] Sin nivel 2 para '$app' ($doc); se omite nivel 3 (runtime)."
+                } elseif (-not (Test-Path -LiteralPath $runtime) -or $Force) {
+                    $isOverwrite = (Test-Path -LiteralPath $runtime) -and $Force
+                    if ($DryRun) {
+                        if ($isOverwrite) {
+                            Write-Info "[002-CONSTITUTION] DryRun: sobrescribiría nivel 3 de '$app' con -Force: $runtime"
+                        } else {
+                            Write-Info "[002-CONSTITUTION] DryRun: copiaría nivel 2 -> nivel 3 de '$app': $runtime"
+                        }
+                    } else {
+                        Ensure-Directory -Path $runtimeDir
+                        Copy-Item -LiteralPath $doc -Destination $runtime -Force
+                        if ($isOverwrite) {
+                            Write-OK "[002-CONSTITUTION] Nivel 3 actualizado con -Force para '$app': $runtime"
+                        } else {
+                            Write-OK "[002-CONSTITUTION] Nivel 3 copiado para '$app': $runtime"
+                        }
+                    }
+                } else {
+                    Write-Info "[002-CONSTITUTION] Nivel 3 de '$app' se conserva (existe; usa -Force para sobrescribir): $runtime"
+                }
+
+                # [002-CONSTITUTION] Gitignore en src/<App>: regla idempotente (patrón Add-McpEnvGitignore).
+                try {
+                    $giPath = Join-Path $srcApp ".gitignore"
+                    $hasEntry = $false
+                    if (Test-Path -LiteralPath $giPath) {
+                        $giText = Get-Content -LiteralPath $giPath -Raw -ErrorAction Stop
+                        if ($giText -match '(?m)^\s*\.specify/constitution\.md\s*$') { $hasEntry = $true }
+                    }
+                    if ($hasEntry) {
+                        Write-Info "[002-CONSTITUTION] src/$app/.gitignore ya ignora .specify/constitution.md (se conserva)."
+                    } elseif ($DryRun) {
+                        Write-Info "[002-CONSTITUTION] DryRun: agregaría '.specify/constitution.md' a src/$app/.gitignore"
+                    } else {
+                        if (-not (Test-Path -LiteralPath $giPath)) {
+                            $giContent = "# [002-CONSTITUTION] copia runtime de constitution (no versionar)" + [Environment]::NewLine + ".specify/constitution.md" + [Environment]::NewLine
+                            Set-Content -LiteralPath $giPath -Value $giContent -Encoding UTF8
+                        } else {
+                            $entry = [Environment]::NewLine + "# [002-CONSTITUTION] copia runtime de constitution (no versionar)" + [Environment]::NewLine + ".specify/constitution.md" + [Environment]::NewLine
+                            Add-Content -LiteralPath $giPath -Value $entry -Encoding UTF8
+                        }
+                        Write-OK "[002-CONSTITUTION] '.specify/constitution.md' agregado a src/$app/.gitignore"
+                    }
+                } catch {
+                    Write-Warn "[002-CONSTITUTION] No se pudo actualizar src/$app/.gitignore: $_"
+                }
+            } else {
+                Write-Info "[002-CONSTITUTION] App '$app' sin src\$app; se omite nivel 3 (runtime) y su .gitignore."
+            }
+        } catch {
+            # [002-CONSTITUTION] Fail-open por app: nunca abortar el bootstrap.
+            Write-Warn "[002-CONSTITUTION] No se pudo sincronizar constitution para '$app': $_"
+            continue
+        }
+    }
+}
+
+# =============================================================================
 # Prepare-Apps (T-I3 / RF-05): verificar apps sin mover ni clonar (RNF-04, RNF-06)
 # =============================================================================
 # Para cada app conocida verifica src\<app>\ primero y luego \<app>\ en la raíz.
@@ -2333,6 +2570,9 @@ function Prepare-Apps {
         # verificada, guardrails 3 y 8), clonar shallow aquí:
         #   git clone --depth 1 <url-validada> (Join-Path $RootPath "src\$app")
     }
+
+    # [002-CONSTITUTION] Sincronización constitution en 3 niveles (fail-open, respeta -DryRun/-Force).
+    Ensure-ConstitutionAppSync -RootPath $RootPath -Apps $apps
 
     $specKitDir = Join-Path $RootPath "proyect_ext\spec-kit"
     if (Test-Path $specKitDir) {

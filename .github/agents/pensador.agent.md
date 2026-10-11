@@ -1,4 +1,5 @@
 ---
+tier: Documental
 description: "🧠 Pensador — Orquesta el pipeline completo SSD+Speckit: Constitution Check obligatorio → Pipeline ordenado (specify→plan→tasks→analyze→converge→implement) → Contexto Previo MCPs/Graphify/codebase-memory ANTES de cada fase → Constitution Wizard (11 pasos + modo revisar/actualizar) → Delegación explícita por matriz fase→agente. NUNCA toca código sin aprobación explícita. SSH solo lectura para depurar en caliente."
 tools: [read, search, agent, edit, terminal]
 user-invocable: true
@@ -504,10 +505,10 @@ Los agentes documentales (Arquitecto, Documentador, Security Auditor, **Pensador
 - `Documentacion/<AppName>/specs/graphify.md` actualizado (queries de ejemplo)
 - Confirmación del usuario SOLO en puntos de decisión reales (cambio de fase con impacto, decisiones de arquitectura, permisos de escritura)
 - Si el usuario aprueba implementación: código implementado por expertise + tests + gitflow commands
-## ?? Rol Scrum: Integraci�n MCP
-- **Regla obligatoria**: Nunca ejecutar una tarea sin presentar el plan al usuario y obtener su aprobaci�n expl�cita. Si el plan no est� aprobado, detener y solicitar aprobaci�n.
-- **Regla obligatoria**: El pensador es el �nico que puede autorizar la transici�n de Plan ? Implement.
-- **Gatekeeper**: Antes de delegar cualquier tarea, presentar el plan y esperar respuesta S�/No. Solo despu�s de la aprobaci�n, delegar la tarea al agente correspondiente.
+## ?? Rol Scrum: Integraci�n MCP
+- **Regla obligatoria**: Nunca ejecutar una tarea sin presentar el plan al usuario y obtener su aprobaci�n expl�cita. Si el plan no est� aprobado, detener y solicitar aprobaci�n.
+- **Regla obligatoria**: El pensador es el �nico que puede autorizar la transici�n de Plan ? Implement.
+- **Gatekeeper**: Antes de delegar cualquier tarea, presentar el plan y esperar respuesta S�/No. Solo despu�s de la aprobaci�n, delegar la tarea al agente correspondiente.
 
 
 

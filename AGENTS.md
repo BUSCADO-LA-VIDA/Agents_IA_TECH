@@ -97,6 +97,8 @@
 
 - .specify por proyecto: `.specify/` es específico de cada proyecto. Contiene la constitución, principios y configuración particular. Ubicación típica: `<proyecto>/.specify/memory/constitution.md`.
 
+- Ruta constitution en 3 niveles (002-T035): (1) raiz del KIT `.specify/memory/constitution.md` = original versionado que `sync-kit.ps1` replica a todos los proyectos; (2) `Documentacion/<App>/.specify/constitution.md` = propio de cada APP y versionado (el bootstrap lo siembra desde el nivel 1 si falta, funcion `Ensure-ConstitutionAppSync`); (3) `src/<App>/.specify/constitution.md` = copia runtime del script desde el nivel 2 (nunca desde la raiz), ignorada en el `.gitignore` dentro de `src/<App>`. No se pierde porque se conserva en Documentacion.
+
 - Estructura de documentación por aplicación: cada aplicación tiene su propia carpeta `Documentacion/<AppName>/` aislada. El kit transversal (`.github/`, `.opencode/`, `.doc_agents/`) se copia/sincroniza entre proyectos. `Documentacion/<AppName>/` es propia de cada app y NUNCA se copia. Ver `.doc_agents/estructura-aplicacion.md`.
 
 - Agent road assignment: 14 agentes, cinco tiers.

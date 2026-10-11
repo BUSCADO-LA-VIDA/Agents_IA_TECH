@@ -1,12 +1,30 @@
+# Manifest de referencia del KIT (014-manifest, T002).
+# Plantilla versionada con flags `upgrade:` por herramienta. Los proyectos
+# derivados sincronizan su manifest local contra esta referencia vía
+# Sync-Manifest (scripts/modules/Manifest/). Esquema mapa (spec 014 §38-49).
+# `upgrade: false` pinnea la herramienta (nunca se auto-aplica su versión).
+# Actualizado 2026-10-10 desde dependencias-manifest.yml raíz.
 dependencias_externas:
-  context-mode:
-    version_actual: '1.0.0'
-    upgrade: true
-  codebase-memory-mcp:
-    version_actual: '1.0.0'
+  spec-kit:
+    version_actual: 'v0.0.0'
     upgrade: true
   graphify:
-    version_actual: '1.0.0'
+    version_actual: '0.9.48'
+    upgrade: true
+  markitdown:
+    version_actual: '0.1.7'
+    upgrade: true
+  markitdown-mcp:
+    version_actual: '0.0.1a3'
+    upgrade: true
+  codebase-memory-mcp:
+    version_actual: '0.9.0'
+    upgrade: true
+  context-mode:
+    version_actual: 'v1.0.169'
+    upgrade: true
+  tokenslayer-mcp-server:
+    version_actual: 'v1.5.0'
     upgrade: true
 aplicaciones:
   Agents_IA_TECH:

@@ -1,4 +1,5 @@
 ---
+tier: Implementador
 description: "Use when: creating Dockerfiles, docker-compose configs, deployment pipelines, self-hosting infrastructure, or CI/CD automation."
 mode: primary
 temperature: 0.2

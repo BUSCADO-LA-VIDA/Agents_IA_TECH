@@ -1,4 +1,5 @@
 ---
+tier: Documental
 description: "Use when: designing architecture, evaluating patterns, making technical decisions, or reviewing code structure. Clean architecture, hexagonal, ADRs, production audit, coding standards."
 tools: [read, search, agent, edit]
 user-invocable: true

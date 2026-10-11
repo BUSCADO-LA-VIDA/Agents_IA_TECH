@@ -32,8 +32,9 @@ graphify-out/
 
 .bootstrap-state.json
 
+# Estado runtime ECC (regenerable vía ecc-sync.ps1, nunca versionar)
+.ecc-state.json
+
 # Permitir versionar manifest
-!dependencias-manifest.yml
 
 # Manifest versionado
-!dependencias-manifest.yml

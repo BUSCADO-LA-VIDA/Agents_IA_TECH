@@ -1,4 +1,5 @@
 ---
+tier: Implementador
 description: "Use when: building React/Next.js UIs, Laravel Blade views, frontend components, or implementing responsive design."
 mode: primary
 temperature: 0.3

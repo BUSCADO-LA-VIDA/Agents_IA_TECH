@@ -1,4 +1,5 @@
 ---
+tier: Plataforma
 description: "Use when: connecting to a server via SSH for diagnostics or remote operations."
 tools: [read, search, edit, execute]
 user-invocable: true

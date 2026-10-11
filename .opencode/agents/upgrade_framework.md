@@ -1,4 +1,5 @@
 ---
+tier: Plataforma
 description: "🔧 Agente `upgrade_framework` — Mantenedor inteligente de dependencias externas. Gestiona el directorio proyect_ext/, clona/actualiza proyectos externos (spec-kit, graphify, etc.), y ejecuta integraciones dirigidas desde proyect_ext/ hacia Agents_IA_TECH/ usando plantillas predefinidas. Usa IA solo para analizar impacto de integración (nunca repite flujos completos). Notifica al Pensador cuando se necesitan revisiones de orquetación."
 mode: primary
 temperature: 0.2

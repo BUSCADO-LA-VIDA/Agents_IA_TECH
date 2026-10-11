@@ -52,7 +52,7 @@
     *Estado*: Completada/operativa — flujo SSD completo, lista para producción (NO archivada).
   ```
 - **Comando**: Editar `00-indice.md` y añadir la línea correspondiente.
-- **Estado**: `[ ] Pendiente`
+- **Estado**: `[x] Completado — entrada 015 presente en `00-indice.md` (línea 20), misma evidencia que T007`
 
 ## T007 – Revisar y validar que spec 015 esté integrada en el índice 00‑indice.md
 - **Descripción**: Ejecutar una revisión final que compruebe que la spec 015 está referenciada en el índice y que todos los agents cumplen la regla.
@@ -72,8 +72,8 @@
 - **Estado**: `[x] Completado — la spec 015 está ACTIVA en `specs/`, verificada por lectura directa y presencia en `00-indice.md` (línea 20). Nada se movió a `archived/`. El estado `Cerrado` en `pendientes-implementacion.md` refleja flujo completo/operativo.`
 
 ## T009 – Implementar sincronización de scripts y protocolo de AGENTS.md
-- **Descripción**: Sincronizar archivos transversales del kit (.github/, .opencode/, .doc_agents/, .specify/, scripts/, AGENTS.md, opencode.json) desde el repositorio maestro usando plataformador-bootstrap.ps1 -SyncOnly o sync-kit.ps1. El archivo AGENTS.md raíz mantiene las reglas generales del kit. La personalización por proyecto debe gestionarse en Documentacion/<AppName>/ (ver sección de Personalización por Proyecto en AGENTS.md). Los scripts del kit se actualizan respetando la whitelist Art-VII y sin sobrescribir configuraciones locales del proyecto.
-- **Comando**: `plataformador-bootstrap.ps1 -SyncOnly` o `sync-kit.ps1`
+- **Descripción**: Sincronizar archivos transversales del kit (.github/, .opencode/, .doc_agents/, .specify/, scripts/, AGENTS.md, opencode.json) desde el repositorio maestro usando `plataformador-bootstrap.ps1` (flujo completo, paso 3) o `sync-kit.ps1` directo (interfaz simplificada Spec 002: el modo `-SyncOnly` se retiró). El archivo AGENTS.md raíz mantiene las reglas generales del kit. La personalización por proyecto debe gestionarse en Documentacion/<AppName>/ (ver sección de Personalización por Proyecto en AGENTS.md). Los scripts del kit se actualizan respetando la whitelist Art-VII y sin sobrescribir configuraciones locales del proyecto.
+- **Comando**: `plataformador-bootstrap.ps1` (completo) o `sync-kit.ps1 [-Force]`
 - **Responsable**: pensador (órchestrator) o documentador (según expertise)
-- **Estado**: [ ] (pending)
-- **Aprobación del plan**: No
+- **Estado**: [x] (completado 2026-10-09 — sync verificado en proyecto consumidor: 0 WARNs, scripts/ y agents idénticos por hash, `Documentacion/<AppName>/` intacta; AGENTS.md con reglas generales vigente)
+- **Aprobación del plan**: Sí

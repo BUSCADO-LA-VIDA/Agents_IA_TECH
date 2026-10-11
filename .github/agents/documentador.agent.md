@@ -1,4 +1,5 @@
 ---
+tier: Documental
 description: "Use when: writing documentation, creating specs, onboarding, generating ADRs, or auditing docs quality. Design-first: document before coding."
 tools: [read, search, edit]
 user-invocable: true

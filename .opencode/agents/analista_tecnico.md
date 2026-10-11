@@ -1,4 +1,5 @@
 ---
+tier: Documental
 description: "Use when: analyzing technical documentation, converting docs to Markdown, building knowledge graphs, or orchestrating the documentation pipeline without AI of entry. Invoked by the pensador."
 mode: primary
 temperature: 0.3

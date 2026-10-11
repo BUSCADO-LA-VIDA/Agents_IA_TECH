@@ -1,22 +1,19 @@
-name: ECC Dry‑run
+name: ECC Dry-run
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   dry-run:
     runs-on: windows-latest
     steps:
-      - name: Run orchestrator dry‑run
-        run: .\\scripts\\ecc-orchestrator.ps1 --dry-run
+      - uses: actions/checkout@v4
+      - name: Run orchestrator dry-run
+        shell: pwsh
+        run: .\scripts\ecc-orchestrator.ps1 -action status -dryrun
       - name: Report result
+        shell: pwsh
         run: |
-          if %errorlevel% equ 0 (
-            echo 
-Dry‑run
-succeeded > reports\ecc-test-dryrun.md
-          ) else (
-            echo Dry‑run
-failed > reports\ecc-test-dryrun.md
-          )
+          if ($LASTEXITCODE -eq 0) { "Dry-run succeeded" | Out-File reports\ecc-test-dryrun.md -Encoding utf8 }
+          else { "Dry-run failed" | Out-File reports\ecc-test-dryrun.md -Encoding utf8 }

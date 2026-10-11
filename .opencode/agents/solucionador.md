@@ -1,4 +1,5 @@
 ---
+tier: Plataforma
 description: "Solucionador — Agente de altos privilegios para diagnosticar y resolver problemas en servidores remotos via SSH. Solo se invoca bajo demanda. Consulta soluciones conocidas primero, guarda bitacora de cada intervencion y ofrece reflejar cambios en codigo local."
 mode: primary
 temperature: 0.2

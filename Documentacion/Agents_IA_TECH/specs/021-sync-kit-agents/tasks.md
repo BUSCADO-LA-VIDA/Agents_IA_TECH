@@ -8,15 +8,17 @@
 - [x] T005 Verificación fase 1: `-DryRun` sin escrituras + parseo 0 errores — Hecho 2026-10-12.
 
 ## Fase 2
-- [ ] T006 `kit-files/` (scripts/, AGENTS.md, README.md, constitution raíz).
-- [ ] T007 `constitutions/` (seed L2 + verify 3 niveles).
-- [ ] T008 `src-structure/` (estructura `src/<App>` + `.specify`).
+- [x] T006 `kit-files/` (scripts/, AGENTS.md, README.md, constitution raíz).
+- [x] T007 `constitutions/` (seed L2 + verify 3 niveles).
+- [x] T008 `src-structure/` (estructura `src/<App>` + `.specify`).
 
 ## Fase 3
-- [ ] T009 `mcp/install.ps1` portable por máquina.
-- [ ] T010 `mcp/lift-opencode.ps1` + `lift-vscode.ps1` (fusión aditiva + graphify regenerado + des-ignorar `.vscode/mcp.json`).
+- [x] T009 `mcp/install.ps1` portable por máquina.
+- [x] T010 `mcp/lift-opencode.ps1` + `lift-vscode.ps1` (fusión aditiva + graphify regenerado + des-ignorar `.vscode/mcp.json`).
 
 ## Fase 4
 - [ ] T011 `indexing/` (extraer Index-* + Graphify, corre al iniciar harness).
 - [ ] T012 `externals/` (envolver Manifest modules, sin copia).
 - [ ] T013 Orquestador completo + prueba en 1 consumidor + deprecación `sync-kit.ps1`.
+
+

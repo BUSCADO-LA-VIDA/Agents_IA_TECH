@@ -1,10 +1,10 @@
 #!/usr/bin/env powershell
 #requires -Version 7.0
 # =============================================================================
-# [021] scripts/sync-kit-agents.ps1 — Orquestador del sync por capas (esqueleto)
-# [021] Spec 021-sync-kit-agents, fase 1. 5 fases: Stage -> Sync -> Plataformar
-# [021] -> Verify -> Restart-flag. Capas fase 1: docs, agents-github,
-# [021] agents-opencode, agents-vscode.
+# [021] scripts/sync-kit-agents.ps1 — Orquestador del sync por capas (fases 1-2)
+# [021] Spec 021-sync-kit-agents, fases 1-2. 5 fases: Stage -> Sync -> Plataformar
+# [021] -> Verify -> Restart-flag. Capas: kit-files, agents-github,
+# [021] agents-opencode, agents-vscode, docs, constitutions, src-structure.
 # [021] Invoke-SyncKit del bootstrap NO se modifica en esta fase: este
 # [021] orquestador es independiente (compatibilidad = no romper su firma).
 # [021] En -DryRun, CERO escrituras: ni temp, ni gitignore, ni reportes.
@@ -29,14 +29,26 @@ Initialize-SyncLog
 if (-not $RootPath) { $RootPath = (Split-Path -Parent $PSScriptRoot) }
 try { $RootPath = [IO.Path]::GetFullPath($RootPath) } catch { Write-Fail "sync-kit-agents: -RootPath invalido ($RootPath): $_"; exit 1 }
 
-# [021] Capas fase 1: nombre logico -> script relativo a scripts/.
-# [021] AcceptsForce indica si la capa acepta -Force (solo harnesses; docs
-# [021] nunca sobrescribe contenido y no lo declara).
+# [021] Capas fases 1-2 en orden RF-02 (kit-files -> agents -> docs ->
+# [021] constitutions -> src-structure; mcp/indexing/externals en fases 3-4):
+# [021] nombre logico -> script relativo a scripts/.
+# [021] AcceptsForce indica si la capa acepta -Force (docs nunca sobrescribe
+# [021] contenido y no lo declara; kit-files lo acepta por uniformidad aunque su
+# [021] clean+replace siempre sobrescribe diferencias).
 $script:Layers = @(
-    @{ Name = "docs";            Script = "sync/docs/sync-docs.ps1";               AcceptsForce = $false },
-    @{ Name = "agents-github";   Script = "sync/agents/sync-agents-github.ps1";   AcceptsForce = $true },
-    @{ Name = "agents-opencode"; Script = "sync/agents/sync-agents-opencode.ps1"; AcceptsForce = $true },
-    @{ Name = "agents-vscode";   Script = "sync/agents/sync-agents-vscode.ps1";   AcceptsForce = $true }
+    @{ Name = "kit-files";         Script = "sync/kit-files/sync-kit-files.ps1";                 AcceptsForce = $true },
+    @{ Name = "agents-github";     Script = "sync/agents/sync-agents-github.ps1";       AcceptsForce = $true },
+    @{ Name = "agents-opencode";   Script = "sync/agents/sync-agents-opencode.ps1";     AcceptsForce = $true },
+    @{ Name = "agents-vscode";     Script = "sync/agents/sync-agents-vscode.ps1";       AcceptsForce = $true },
+    @{ Name = "docs";              Script = "sync/docs/sync-docs.ps1";                   AcceptsForce = $false },
+    @{ Name = "constitutions";     Script = "sync/constitutions/sync-constitutions.ps1"; AcceptsForce = $true },
+    @{ Name = "src-structure";     Script = "sync/src-structure/sync-src-structure.ps1"; AcceptsForce = $true },
+    # [021] Fase 3 (T009-T010, RF-04/RF-06): mcp-install es portable por maquina
+    # [021] (NoStage: se invoca solo con -RootPath, sin -StageDir); los lifts son
+    # [021] fusion aditiva (aceptan -Force para refrescar commands del maestro).
+    @{ Name = "mcp-install";       Script = "sync/mcp/install.ps1";         AcceptsForce = $true; NoStage = $true },
+    @{ Name = "mcp-lift-opencode"; Script = "sync/mcp/lift-opencode.ps1";   AcceptsForce = $true },
+    @{ Name = "mcp-lift-vscode";   Script = "sync/mcp/lift-vscode.ps1";     AcceptsForce = $true }
 )
 $script:LayerNames = @($script:Layers | Select-Object -ExpandProperty Name)
 
@@ -46,12 +58,12 @@ function Resolve-ActiveLayers {
     $active = @($script:LayerNames)
     if ($OnlyList.Count -gt 0) {
         $unknown = @($OnlyList | Where-Object { $_ -and $script:LayerNames -notcontains $_ })
-        foreach ($u in $unknown) { Write-Warn "sync-kit-agents: -Only '$u' no es una capa fase 1 (capas: $($script:LayerNames -join ', ')); se ignora." }
+        foreach ($u in $unknown) { Write-Warn "sync-kit-agents: -Only '$u' no es una capa conocida (fases 1-2) (capas: $($script:LayerNames -join ', ')); se ignora." }
         $active = @($OnlyList | Where-Object { $script:LayerNames -contains $_ })
     }
     if ($SkipList.Count -gt 0) {
         $unknown = @($SkipList | Where-Object { $_ -and $script:LayerNames -notcontains $_ })
-        foreach ($u in $unknown) { Write-Warn "sync-kit-agents: -Skip '$u' no es una capa fase 1; se ignora." }
+        foreach ($u in $unknown) { Write-Warn "sync-kit-agents: -Skip '$u' no es una capa conocida (fases 1-2); se ignora." }
         $active = @($active | Where-Object { $SkipList -notcontains $_ })
     }
     return $active
@@ -206,7 +218,11 @@ if ($DryRun -and (-not $KitPath)) {
             # [021] -Force solo se pasa a las capas que lo declaran (harnesses).
             # [021] Las capas emiten RESULT: via Write-Host (stream informacion 6):
             # [021] se fusiona todo a stdout con *>&1 para recolectar el reporte.
-            if ($layer.AcceptsForce) {
+            # [021] Fase 3: mcp-install es portable por maquina (NoStage) y se
+            # [021] invoca solo con -RootPath (sin -StageDir).
+            if ($layer.NoStage) {
+                $out = @(& $scriptPath -RootPath $RootPath -DryRun:$DryRun -Force:$Force *>&1)
+            } elseif ($layer.AcceptsForce) {
                 $out = @(& $scriptPath -StageDir $stageKitRoot -RootPath $RootPath -DryRun:$DryRun -Force:$Force *>&1)
             } else {
                 $out = @(& $scriptPath -StageDir $stageKitRoot -RootPath $RootPath -DryRun:$DryRun *>&1)
@@ -228,7 +244,7 @@ if ($DryRun -and (-not $KitPath)) {
 # =============================================================================
 # [021] F3 PLATAFORMAR (fase 1: placeholder operativo, no funcional)
 # =============================================================================
-Write-Info "Fase Plataformar: pendiente fases 2-4 (mcp/indexing/externals)"
+Write-Info "Fase Plataformar: pendiente fases 3-4 (mcp/indexing/externals)"
 
 # =============================================================================
 # [021] F4 VERIFY (.kit-last-sync.json; NO se escribe en DryRun)
@@ -240,7 +256,7 @@ if ($DryRun) {
     try {
         $report = [ordered]@{
             tool   = "sync-kit-agents"
-            phase  = 1
+            phase  = 2
             commit = $commitHash
             date   = $runDate
             layers = $activeLayers

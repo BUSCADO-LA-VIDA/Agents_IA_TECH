@@ -1,0 +1,50 @@
+{
+  "servers": {
+    "markitdown": {
+      "command": "markitdown-mcp",
+      "type": "stdio"
+    },
+    "codebase-memory-mcp": {
+      "command": "codebase-memory-mcp",
+      "type": "stdio"
+    },
+    "context-mode": {
+      "command": "context-mode",
+      "type": "stdio"
+    },
+    "graphify": {
+      "command": "C:/Python314/python.exe",
+      "args": [
+        "-m",
+        "graphify.serve",
+        "C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json"
+      ],
+      "type": "stdio"
+    },
+    "github": {
+      "command": "C:/Users/tomas/.local/bin/github-mcp-server.exe",
+      "args": [
+        "stdio"
+      ],
+      "type": "stdio"
+    },
+    "playwright": {
+      "command": "C:/Users/tomas/AppData/Roaming/npm/playwright-mcp.ps1",
+      "type": "stdio"
+    },
+    "semgrep": {
+      "command": "C:/Users/tomas/.local/bin/semgrep.exe",
+      "args": [
+        "mcp"
+      ],
+      "type": "stdio"
+    },
+    "context7": {
+      "command": "C:/Users/tomas/AppData/Roaming/npm/context7-mcp.ps1",
+      "args": [
+        "--stdio"
+      ],
+      "type": "stdio"
+    }
+  }
+}

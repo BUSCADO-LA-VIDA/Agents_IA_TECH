@@ -5,9 +5,7 @@
   "model": "groq-custom/llama-3.3-70b-versatile",
   "small_model": "groq-custom/llama-3.1-8b-instant",
   "default_agent": "build",
-  "plugin": [
-    "context-mode"
-  ],
+  "plugin": [],
   "instructions": [
     "AGENTS.md"
   ],
@@ -95,21 +93,24 @@
         "C:/Program Files/nodejs/node.exe",
         "C:/Users/tomas/AppData/Roaming/npm/node_modules/context-mode/build/cli.js"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     },
     "codebase-memory-mcp": {
       "type": "local",
       "command": [
         "C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     },
     "markitdown": {
       "type": "local",
       "command": [
         "C:/Python314/Scripts/markitdown-mcp.exe"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     },
     "graphify": {
       "type": "local",
@@ -119,7 +120,8 @@
         "graphify.serve",
         "C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     },
     "tokenslayer": {
       "type": "local",
@@ -127,7 +129,8 @@
         "node",
         "proyect_ext/tokenslayer/mcp-server/build/index.js"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     },
     "github": {
       "type": "local",
@@ -135,7 +138,8 @@
         "C:/Users/tomas/.local/bin/github-mcp-server.exe",
         "stdio"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     },
     "playwright": {
       "type": "local",
@@ -143,7 +147,8 @@
         "C:/Program Files/nodejs/node.exe",
         "C:/Users/tomas/AppData/Roaming/npm/node_modules/@playwright/mcp/cli.js"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     },
     "semgrep": {
       "type": "local",
@@ -151,7 +156,8 @@
         "C:/Users/tomas/.local/bin/semgrep.exe",
         "mcp"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     },
     "context7": {
       "type": "local",
@@ -159,7 +165,8 @@
         "C:/Program Files/nodejs/node.exe",
         "C:/Users/tomas/AppData/Roaming/npm/node_modules/@upstash/context7-mcp/dist/index.js"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     }
   }
 }

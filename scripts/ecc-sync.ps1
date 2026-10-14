@@ -36,7 +36,7 @@ switch($Action){
         git reset --hard origin/main
         Pop-Location
         $state = Get-State
-        $state.lastToolUpdate = (Get-Date).ToString('o')
+        $state | Add-Member -NotePropertyName 'lastToolUpdate' -NotePropertyValue ((Get-Date).ToString('o')) -Force
         Save-State $state
         Write-Log 'INFO' 'ECC actualizado. Ejecuta update-indexes para índices y grafos.'
     }
@@ -46,7 +46,7 @@ switch($Action){
         if(-not $state){ Write-Log 'ERROR' 'ECC no instalado'; exit 1 }
         # Placeholder para re-indexar context-mode, codebase-memory-mcp, graphify
         Write-Log 'INFO' 'Re-indexando context-mode + codebase-memory + graphify...'
-        $state.lastIndexUpdate = (Get-Date).ToString('o')
+        $state | Add-Member -NotePropertyName 'lastIndexUpdate' -NotePropertyValue ((Get-Date).ToString('o')) -Force
         Save-State $state
         Write-Log 'INFO' 'Índices actualizados'
     }

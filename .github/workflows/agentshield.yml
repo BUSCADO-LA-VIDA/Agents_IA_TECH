@@ -15,4 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Run AgentShield
-        run: npx ecc-agentshield scan
+        # Version pineada (1.6.0) para CI determinista: npx latest cambia reglas sin aviso.
+        # Gate contra baseline: solo fallan hallazgos criticos/altos NUEVOS o caida de score.
+        # Riesgo aceptado por el dueno (2026-10-16, bitacora): `permission.bash: allow`
+        # en opencode.json es decision deliberada del flujo sin-preguntas; consta en baseline.
+        run: |
+          npx ecc-agentshield@1.6.0 scan --path . --baseline .agentshield-baseline.json --gate
+          code=$?
+          if [ "$code" -eq 0 ] || [ "$code" -eq 2 ]; then echo "AgentShield gate OK (exit $code: 0=limpio, 2=sin regresiones vs baseline)"; exit 0; fi
+          echo "AgentShield gate FAILED (exit $code)"; exit "$code"

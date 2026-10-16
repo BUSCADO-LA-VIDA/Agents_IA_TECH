@@ -39,3 +39,7 @@ public class UserResourceTest {
 - Use Wiremock for external services
 - Test reactive endpoints with await().atMost()
 - Use @TestProfile for different configs
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/quarkus-tdd/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

@@ -68,3 +68,7 @@ def test_notification(mock_send) -> None:
 - Test behavior, not implementation details
 - Aim for > 80% coverage
 - Use factory pattern for test data
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/python-testing/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

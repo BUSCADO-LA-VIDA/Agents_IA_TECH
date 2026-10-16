@@ -86,3 +86,7 @@ while True:
 - Monitor memory with `INFO memory`
 - Use Redis Sentinel or Cluster for high availability
 - Never store sensitive data unencrypted in Redis
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/redis-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

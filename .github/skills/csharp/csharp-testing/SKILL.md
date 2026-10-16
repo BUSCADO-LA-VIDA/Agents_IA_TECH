@@ -68,3 +68,7 @@ public class UsersApiTests : IClassFixture<WebApplicationFactory<Program>>
 - Use WebApplicationFactory for integration tests
 - Use TestContainers for database testing
 - Name tests: Method_Scenario_ExpectedResult
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/csharp-testing/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

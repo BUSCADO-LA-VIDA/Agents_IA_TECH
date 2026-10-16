@@ -39,3 +39,7 @@ Commit → Secret scan → SAST → Dep audit → Container scan → Deploy
 - Keep a vulnerability database (`docs/security/advisories.md`)
 - Schedule regular full scans (weekly)
 - Rotate exposed secrets immediately
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/security-scan/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

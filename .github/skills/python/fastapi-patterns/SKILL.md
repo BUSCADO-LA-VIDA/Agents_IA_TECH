@@ -86,3 +86,7 @@ async def health(db: AsyncSession = Depends(get_session)):
 - Use `status_code` explicitly on all endpoints
 - Group endpoints by version (v1, v2)
 - Auto-generate OpenAPI docs — keep them accurate
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/fastapi-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

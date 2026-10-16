@@ -61,3 +61,7 @@ func BenchmarkCalculateTotal(b *testing.B) {
 - Use httptest for HTTP handler tests
 - Use testify/assert for readable assertions
 - Run `go test -race` for race detection
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/golang-testing/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

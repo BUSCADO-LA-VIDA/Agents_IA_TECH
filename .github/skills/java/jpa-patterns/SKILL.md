@@ -60,3 +60,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 - Use `@Transactional(readOnly = true)` for reads
 - Use projections for read-only queries
 - Enable query logging in development
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/jpa-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

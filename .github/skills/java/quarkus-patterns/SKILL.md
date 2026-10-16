@@ -62,3 +62,7 @@ public class UserResource {
 - Use @Transaction for database operations
 - Profile for native compilation early
 - Use application.properties per profile
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/quarkus-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

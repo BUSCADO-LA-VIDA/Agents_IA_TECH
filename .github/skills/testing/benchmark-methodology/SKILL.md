@@ -42,3 +42,7 @@ user-invocable: true
 - Test under realistic load, not just ideal conditions
 - Include confidence intervals
 - Share raw data for reproducibility
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/benchmark-methodology/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

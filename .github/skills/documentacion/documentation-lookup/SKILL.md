@@ -56,3 +56,7 @@ Before writing ANY code:
 - Keep a `docs/` index or SUMMARY.md for discoverability
 - Use ADRs to record why decisions were made, not just what
 - When a test reveals a missing case → update the spec, then the code
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/documentation-lookup/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

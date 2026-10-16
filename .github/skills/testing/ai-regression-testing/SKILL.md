@@ -44,3 +44,7 @@ def test_model_regression(model):
 - Set thresholds for acceptable change
 - Review regression failures manually
 - Maintain a diverse test dataset
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/ai-regression-testing/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

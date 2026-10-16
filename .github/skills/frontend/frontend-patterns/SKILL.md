@@ -60,3 +60,7 @@ export function UserCard({ user, onSelect }: UserCardProps) {
 - Client components only when interactivity needed
 - Extract logic into custom hooks
 - Use composition over inheritance
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/frontend-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

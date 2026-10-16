@@ -35,3 +35,7 @@ user-invocable: true
 - Automate backups to external storage
 - Monitor with Uptime Kuma + self-hosted Grafana
 - Document your infra in a runbook
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/uncloud/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

@@ -81,3 +81,7 @@ def process_order(order_id: int) -> None:
 - Add correlation IDs for request tracing
 - Use structured logging (JSON)
 - Handle errors at the boundary, not everywhere
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/error-handling/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

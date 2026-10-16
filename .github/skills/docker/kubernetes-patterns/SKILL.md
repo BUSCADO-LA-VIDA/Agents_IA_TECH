@@ -62,3 +62,7 @@ spec:
 - Never store secrets in plain text — use SealedSecrets or External Secrets Operator
 - Use network policies for pod isolation
 - Prefer docker-compose for local dev, K8s only for prod
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/kubernetes-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

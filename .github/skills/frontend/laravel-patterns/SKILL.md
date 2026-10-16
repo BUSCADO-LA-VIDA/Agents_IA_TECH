@@ -93,3 +93,7 @@ class UserController extends Controller
 - Use Spatie Permission for roles
 - Use Laravel's cache facade for performance
 - Register routes with Route::apiResource() when possible
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/laravel-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

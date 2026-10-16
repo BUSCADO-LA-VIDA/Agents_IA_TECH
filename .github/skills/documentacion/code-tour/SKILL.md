@@ -42,3 +42,7 @@ docs/tours/
 - Include "why" explanations, not just "what"
 - Link to ADRs for architectural decisions
 - Use before/after examples for complex changes
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/code-tour/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

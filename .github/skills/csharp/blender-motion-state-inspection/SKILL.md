@@ -41,3 +41,7 @@ def export_motion_data(obj_name: str, output_path: str):
 - Export to JSON for .NET consumption
 - Use System.Text.Json for deserialization
 - Batch process frames for performance
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/blender-motion-state-inspection/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

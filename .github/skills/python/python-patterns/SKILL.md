@@ -86,3 +86,7 @@ settings = Settings()
 - Keep functions < 50 lines, files < 400 lines
 - Never use `from module import *`
 - Use enums for constants, not magic strings
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/python-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

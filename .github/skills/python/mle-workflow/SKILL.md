@@ -43,3 +43,7 @@ with mlflow.start_run(run_name="experiment-1"):
 - Monitor for data drift and concept drift
 - Automate retraining pipelines
 - Document model cards (what, why, limitations)
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/mle-workflow/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

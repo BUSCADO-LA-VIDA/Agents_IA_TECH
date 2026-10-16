@@ -35,3 +35,7 @@ Measure → Identify bottleneck → Optimize → Measure again → Compare
 - Profile first — the bottleneck is never where you expect
 - Optimize for the p95, not the average
 - Document every optimization with before/after numbers
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/benchmark-optimization-loop/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

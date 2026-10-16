@@ -34,3 +34,7 @@ user-invocable: true
 - Test on real devices (not just emulation)
 - Document test cases with screenshots
 - Use BrowserStack for cross-browser coverage
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/browser-qa/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

@@ -42,3 +42,7 @@ user-invocable: true
 - Implement emergency pause mechanisms
 - Get multiple professional audits before mainnet
 - Bug bounty program before launch
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/defi-amm-security/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

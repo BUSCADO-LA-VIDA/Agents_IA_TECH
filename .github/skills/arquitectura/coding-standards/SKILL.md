@@ -45,3 +45,7 @@ user-invocable: true
 - One abstraction level per function
 - Immutable by default — create new objects, don't mutate
 - Fail fast — validate early, fail with clear messages
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/coding-standards/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

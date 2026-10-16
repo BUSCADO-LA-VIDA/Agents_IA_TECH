@@ -97,3 +97,7 @@ services:
 - Keep images small — use Alpine/slim variants
 - Label your images with version and date
 - Scan images with Trivy or Docker Scout
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/docker-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

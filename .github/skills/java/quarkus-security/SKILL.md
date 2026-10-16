@@ -47,3 +47,7 @@ public class AdminResource {
 - Use @RolesAllowed for method security
 - Never expose stack traces in error responses
 - Validate all inputs with Bean Validation
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/quarkus-security/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

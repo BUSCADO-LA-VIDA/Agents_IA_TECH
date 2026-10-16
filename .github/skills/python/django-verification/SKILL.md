@@ -26,3 +26,7 @@ user-invocable: true
 - [ ] CSRF enabled on all forms
 - [ ] CORS configured correctly
 - [ ] API returns proper status codes
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/django-verification/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

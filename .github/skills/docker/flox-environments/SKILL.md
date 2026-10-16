@@ -38,3 +38,7 @@ flox activate -- python --version
 - Use one environment per project
 - Combine with direnv for auto-activation
 - Pin package versions for reproducible builds
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/flox-environments/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

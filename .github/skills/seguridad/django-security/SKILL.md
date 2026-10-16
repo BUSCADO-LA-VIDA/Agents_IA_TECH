@@ -52,3 +52,7 @@ X_FRAME_OPTIONS = 'DENY'
 - Implement rate limiting with `django-ratelimit`
 - Run `python manage.py check --deploy` before production
 - Never log sensitive data — use Django's filter for sensitive variables
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/django-security/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

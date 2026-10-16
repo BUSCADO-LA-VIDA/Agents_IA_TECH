@@ -40,3 +40,7 @@ user-invocable: true
 - Conduct annual risk assessments
 - Sign BAAs with all third-party vendors handling PHI
 - Never log PHI to debug logs, error reports, or analytics
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/hipaa-compliance/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

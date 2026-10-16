@@ -45,3 +45,7 @@ def delete_project(project_id: str, confirm: bool = False) -> Result:
 - Log all safety guard triggers for audit
 - Make destructive actions require elevated privileges
 - Default to safe — require opting into risk
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/safety-guard/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

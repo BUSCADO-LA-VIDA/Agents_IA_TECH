@@ -62,3 +62,7 @@ public class UserService {
 - Never catch generic Exception
 - Use SLF4J for logging
 - Keep methods < 50 lines, classes < 400 lines
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/java-coding-standards/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

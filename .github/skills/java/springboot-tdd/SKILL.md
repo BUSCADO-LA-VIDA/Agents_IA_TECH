@@ -78,3 +78,7 @@ class UserControllerTest {
 - Use AssertJ for fluent assertions
 - Test error cases (400, 401, 403, 404, 500)
 - Use @Sql for test data setup
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/springboot-tdd/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

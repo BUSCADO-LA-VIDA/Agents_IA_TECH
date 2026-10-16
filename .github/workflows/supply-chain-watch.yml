@@ -1,0 +1,37 @@
+name: Supply-Chain Watch
+
+# Adaptado de ECC supply-chain-watch al manifest del kit:
+# audita superficie instalable (npm global del kit + uv tools).
+# Solo lectura: nunca instala ni modifica nada.
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # lunes 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe502 # v7.0.0
+        with:
+          node-version: '24'
+      - name: Audit npm surface (.opencode)
+        working-directory: .opencode
+        run: npm audit --omit=dev --audit-level=high || echo "::warning::npm audit con hallazgos (revisar)"
+      - name: Audit Python surface (uv tools fijados)
+        run: |
+          pip install pip-audit 2>/dev/null || echo "::warning::sin pip-audit"
+          for pkg in markitdown-mcp graphifyy semgrep; do
+            pip index versions "$pkg" >/dev/null 2>&1 && echo "$pkg: resoluble en PyPI" || echo "::warning::$pkg no resoluble"
+          done
+      - name: Check manifest pins
+        run: |
+          test -f dependencias-manifest.yml && echo "manifest presente" || echo "::warning::sin dependencias-manifest.yml"
+          test -f proyect_ext/dependencias-manifest.yml && echo "manifest proyect_ext presente" || echo "::warning::sin manifest proyect_ext"

@@ -49,3 +49,7 @@ Specification (funcionalidades/)
 - Keep a single source of truth — no duplication
 - Update docs when the code changes (or before)
 - Use `docs/README.md` as entry point
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/knowledge-ops/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

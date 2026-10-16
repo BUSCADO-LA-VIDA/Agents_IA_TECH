@@ -43,3 +43,7 @@ Define dev requirements → Configure workspace → Document setup → Verify �
 - Define tasks for common operations (build, test, lint)
 - Keep copilot-instructions.md up to date with project conventions
 - Audit workspace config when project requirements change
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/workspace-surface-audit/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

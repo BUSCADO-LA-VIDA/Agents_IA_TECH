@@ -68,3 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
 - Rate limiting on auth endpoints
 - CORS config per environment
 - Use @PreAuthorize for method-level security
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/springboot-security/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

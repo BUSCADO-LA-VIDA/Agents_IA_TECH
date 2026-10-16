@@ -51,3 +51,7 @@ user-invocable: true
 - Audit all PHI access automatically
 - Encrypt PHI at rest (AES-256) and in transit (TLS 1.3)
 - Never include PHI in logs, error messages, or analytics
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/healthcare-phi-compliance/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

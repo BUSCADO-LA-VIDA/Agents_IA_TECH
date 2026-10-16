@@ -78,3 +78,7 @@ def train_epoch(
 - Enable `pin_memory=True` and `num_workers>0` for speed
 - Use gradient clipping for stable training
 - Log metrics with TensorBoard or Weights & Biases
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/pytorch-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

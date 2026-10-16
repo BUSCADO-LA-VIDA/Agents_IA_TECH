@@ -38,3 +38,7 @@ TEST(UserTest, EmptyEmailThrows) {
 - Use EXPECT_* for non-fatal assertions
 - Use ASSERT_* for fatal assertions (stop on failure)
 - Mock with GoogleMock
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/cpp-testing/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

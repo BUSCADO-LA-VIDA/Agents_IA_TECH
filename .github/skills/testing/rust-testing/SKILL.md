@@ -67,3 +67,7 @@ fn create_user_returns_201() {
 - Use `cargo test` for running all tests
 - Use proptest for property-based testing
 - Use criterion for benchmarks
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/rust-testing/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

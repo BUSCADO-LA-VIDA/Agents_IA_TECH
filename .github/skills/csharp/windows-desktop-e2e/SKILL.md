@@ -44,3 +44,7 @@ public void Login_ValidCredentials_OpensDashboard()
 - Use Appium/WinAppDriver for automation
 - Test critical user flows only
 - Use video recording for debugging failures
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/windows-desktop-e2e/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

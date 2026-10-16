@@ -45,3 +45,7 @@ def process_data():
 - Test with realistic data sizes
 - Document benchmark environment (CPU, RAM, OS)
 - Use dedicated tools (pytest-benchmark, k6 for APIs)
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/benchmark/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

@@ -41,3 +41,7 @@ LLM Output → Validator → Risk Check → Circuit Breaker → Execute
 - Never give LLMs direct access to exchange APIs
 - Implement kill-switch that can halt all trading
 - Use read-only API keys for LLM-connected endpoints
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/llm-trading-agent-security/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

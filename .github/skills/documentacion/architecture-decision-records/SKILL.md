@@ -58,3 +58,7 @@ Design → Write ADR → Review → Accept → Implement → Test → Update ADR
 - Link ADRs from code comments: `// See ADR-042`
 - ADRs can be superseded — keep history
 - If implementation contradicts the ADR → update the ADR (the doc is truth)
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/architecture-decision-records/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

@@ -64,3 +64,7 @@ class UserService:
 - Cache aggressively at the right layer
 - Use middleware for cross-cutting concerns (auth, logging, rate limit)
 - Separate read and write models (CQRS when needed)
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/backend-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

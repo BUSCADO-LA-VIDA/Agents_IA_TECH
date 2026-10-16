@@ -42,3 +42,7 @@ Onboarding is about understanding the **design decisions** behind the code. Star
 - Document as you learn — future devs will thank you
 - If docs are missing → create them; that IS the documentation task
 - Architecture first, then details
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/codebase-onboarding/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

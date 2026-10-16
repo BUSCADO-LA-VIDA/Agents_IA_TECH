@@ -67,3 +67,7 @@ class TestUserAPI(APITestCase):
 - Use APIRequestFactory for view tests
 - Test error cases, not just happy paths
 - Use django-test-migrations for migration tests
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/django-tdd/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

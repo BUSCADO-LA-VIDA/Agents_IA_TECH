@@ -77,3 +77,7 @@ class UserPolicy
 - Enable 2FA for admin users
 - Log failed login attempts
 - Use `env()` only in config files — use config() everywhere else
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/laravel-security/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

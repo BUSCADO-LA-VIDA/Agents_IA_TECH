@@ -50,3 +50,7 @@ Code → Security Review → Fix Issues → Re-review → Commit
 - Defense in depth — multiple layers of security controls
 - Fail securely — errors should default to secure state
 - Validate at every trust boundary, not just at entry points
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/security-review/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

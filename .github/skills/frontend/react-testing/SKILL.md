@@ -69,3 +69,7 @@ describe("useUsers", () => {
 - Avoid testing internal state — test rendered output
 - Use wrapper in render for providers
 - Mock API calls, not modules
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/react-testing/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

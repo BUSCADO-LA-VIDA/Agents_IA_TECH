@@ -65,3 +65,7 @@ COMMIT;
 - Set statement_timeout to prevent runaway queries
 - Regular VACUUM and ANALYZE maintenance
 - Use migrations for ALL schema changes — no manual ALTER
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/postgres-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

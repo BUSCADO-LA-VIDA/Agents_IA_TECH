@@ -60,3 +60,7 @@ tests/e2e/
 - Record videos on failure
 - Use page objects for reusable selectors
 - Keep tests independent — no shared state
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/e2e-testing/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

@@ -70,3 +70,7 @@ app.conf.beat_schedule = {
 - Keep tasks small and idempotent
 - Monitor with Flower or Prometheus
 - Use task result backend only when needed
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/django-celery/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

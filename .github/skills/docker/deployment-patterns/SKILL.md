@@ -62,3 +62,6 @@ docker image prune -f
 - Use git tags for versioned releases
 - Always have a rollback plan (previous docker-compose config)
 - Notify on deploy success/failure (configurable notification channel: webhook, email, chat, etc.)
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/deployment-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

@@ -1,0 +1,71 @@
+name: Validate Skills
+
+# Patron adaptado de ECC taste-skills (motor propio minimo):
+# valida ESTRUCTURA de las skills del kit, sin engine externo.
+on:
+  pull_request:
+    paths:
+      - '.github/skills/**'
+      - '.opencode/skills/**'
+      - '.github/workflows/validate-skills.yml'
+  push:
+    branches: [main, master]
+    paths:
+      - '.github/skills/**'
+      - '.opencode/skills/**'
+      - '.github/workflows/validate-skills.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate skill structure
+        run: |
+          python3 - <<'EOF'
+          import os, re, sys
+          errors = []
+          # .github/skills/<categoria>/<skill>/SKILL.md con frontmatter name+description
+          base = '.github/skills'
+          n = 0
+          for cat in sorted(os.listdir(base)):
+              cdir = os.path.join(base, cat)
+              if not os.path.isdir(cdir):
+                  continue
+              for skill in sorted(os.listdir(cdir)):
+                  sdir = os.path.join(cdir, skill)
+                  if not os.path.isdir(sdir):
+                      continue
+                  n += 1
+                  f = os.path.join(sdir, 'SKILL.md')
+                  if not os.path.isfile(f):
+                      errors.append(f'{cat}/{skill}: falta SKILL.md')
+                      continue
+                  head = open(f, encoding='utf-8').read(800)
+                  if not head.startswith('---'):
+                      errors.append(f'{cat}/{skill}: sin frontmatter')
+                      continue
+                  if 'name:' not in head or 'description:' not in head:
+                      errors.append(f'{cat}/{skill}: frontmatter sin name/description')
+          # .opencode/skills: archivos SKILL.md directos
+          obase = '.opencode/skills'
+          if os.path.isdir(obase):
+              for f in sorted(os.listdir(obase)):
+                  if f.endswith('.md'):
+                      head = open(os.path.join(obase, f), encoding='utf-8').read(800)
+                      if 'name:' not in head or 'description:' not in head:
+                          errors.append(f'.opencode/skills/{f}: sin name/description')
+          print(f'skills verificadas: {n}')
+          if errors:
+              print('ERRORES:')
+              [print(' - ' + e) for e in errors]
+              sys.exit(1)
+          print('OK: estructura valida')
+          EOF

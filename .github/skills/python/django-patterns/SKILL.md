@@ -81,3 +81,7 @@ class UserViewSet(viewsets.ModelViewSet):
 - Keep settings in environment variables
 - Use django-filter for complex filtering
 - Cache with django-cacheops or redis
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/django-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

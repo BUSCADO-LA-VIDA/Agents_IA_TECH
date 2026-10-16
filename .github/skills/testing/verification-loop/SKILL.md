@@ -48,3 +48,7 @@ user-invocable: true
 - Use pre-commit hooks for instant feedback
 - Run full verification in CI
 - Never bypass verification with --no-verify
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/verification-loop/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

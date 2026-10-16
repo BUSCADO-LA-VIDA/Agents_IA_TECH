@@ -42,3 +42,7 @@ Scan → Document findings → Design changes → Update specs → Code → Test
 - Track findings as GitHub Issues
 - Prioritize: Security → Data integrity → Functionality → Docs
 - If documentation is missing → create it (fill the gap)
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/repo-scan/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

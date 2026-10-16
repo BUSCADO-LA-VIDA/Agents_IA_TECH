@@ -39,3 +39,7 @@ eval-harness/
 - Set baseline metrics and alert on regression
 - Document evaluation methodology
 - Use consistent random seeds for reproducibility
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/eval-harness/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

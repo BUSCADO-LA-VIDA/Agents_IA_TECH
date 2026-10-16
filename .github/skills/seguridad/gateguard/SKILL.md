@@ -40,3 +40,7 @@ PR → Code Review → Tests → Security Scan → Staging → Approval → Prod
 - Allow emergency bypass with audit trail
 - Monitor gate metrics — too many failures = process problem
 - Document gate exceptions and why they were granted
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/gateguard/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

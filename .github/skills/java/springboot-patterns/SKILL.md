@@ -72,3 +72,7 @@ public class UserService {
 - Use @ExceptionHandler for global error handling
 - Use Pageable for pagination
 - Profile-specific configs (application-dev.yml, application-prod.yml)
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/springboot-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

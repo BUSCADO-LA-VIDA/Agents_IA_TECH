@@ -45,3 +45,7 @@ user-invocable: true
 - Test rollback procedures regularly
 - Document incident response steps
 - Monitor after every deployment (watch metrics for 15 min)
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/production-audit/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

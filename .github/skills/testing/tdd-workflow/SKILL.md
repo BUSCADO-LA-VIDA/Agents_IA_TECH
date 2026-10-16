@@ -57,3 +57,7 @@ def test_calculate_total():
 - One assertion per test when possible
 - Test behavior, not implementation
 - If a test is hard to write, the design might be wrong
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/tdd-workflow/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

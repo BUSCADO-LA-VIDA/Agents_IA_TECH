@@ -42,3 +42,7 @@ user-invocable: true
 - Test in isolation — don't affect production data
 - Keep a security research journal
 - Follow responsible disclosure timelines (typically 90 days)
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/security-bounty-hunter/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

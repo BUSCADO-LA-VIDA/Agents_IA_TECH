@@ -78,3 +78,7 @@ Select.Option = function Option({ value, children }: OptionProps) {
 - Use Zustand for client state
 - Lazy load components with React.lazy
 - Test components with React Testing Library
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/react-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

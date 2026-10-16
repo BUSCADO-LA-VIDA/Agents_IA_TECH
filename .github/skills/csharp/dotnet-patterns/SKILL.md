@@ -84,3 +84,7 @@ public class UsersController : ControllerBase
 - Use EF Core with migrations
 - Never use synchronous .Result or .Wait() on async calls
 - Use IOptions pattern for configuration
+
+## Profundidad ECC
+Detalle tecnico completo (20 KB aprox): `../../../../proyect_ext/ECC/skills/dotnet-patterns/SKILL.md`.
+Esta ficha es la fachada SSD del kit; ante duda tecnica, leer la fuente ECC (no se sincroniza: `proyect_ext/` nunca sale del KIT).

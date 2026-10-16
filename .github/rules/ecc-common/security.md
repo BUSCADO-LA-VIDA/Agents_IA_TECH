@@ -1,3 +1,4 @@
+<!-- KIT ECC-integrado b92f181b 2026-10-16: copiado de proyect_ext/ECC/rules/ (cache, no se sincroniza). Viaja en git. -->
 <!-- KIT: en este repo `security-reviewer` = `security-auditor` (agente propio). Ver bitacora 2026-10-16-ecc-rules. -->
 # Security Guidelines
 

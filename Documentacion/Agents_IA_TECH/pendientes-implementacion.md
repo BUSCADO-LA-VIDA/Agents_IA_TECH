@@ -84,6 +84,8 @@
 | 021-T003 | 021 | Fase 3 sync-kit-agents | mcp/install + lift x2 verificados en sandbox + sentry fuera del maestro. | `pensador` | `[x]` | `pensador` | Si |
 | 021-T004 | 021 | Fase 4 sync-kit-agents | indexing + externals + orquestador 12 capas + deprecacion sync-kit.ps1, verificado. | `pensador` | `[x]` | `pensador` | Si |
 | 022-T002 | 022 | Script sync-skills + espejo 76 | sync-skills.ps1 verificado parse 0, espejos 76/76 hash, idempotente. | `plataformador` | `[x]` | `plataformador` | Si |
+| 022-T003 | 022 | Ejecutar script + verificar | sync-skills ejecutado: 76 integradas + espejo 76/76 + idempotente. | `plataformador` | `[x]` | `plataformador` | Si |
+| 022-T004 | 022 | Converge + registrar T012/021 | Backlog, indice, bitacora; T012/021 consume el script. | `documentador` | `[x]` | `documentador` | Si |
 | 023-T001 | 023 | Spec workflows ECC | Spec 023 con 2 workflows propios y 8 rechazos documentados. | `documentador` | `[x]` | `documentador` | Si |
 | 018-T002 | 018 | Migrar pendientes‑implementacion.md actual a nuevo formato con estados | Migrar el archivo actual al nuevo formato con columnas Estado y Asignado a. | `pensador` | `[x]` | `pensador` | No |
 | 018-T003 | 018 | Actualizar pensador.agent.md en .github y .opencode con reglas Scrum | Añadir reglas Scrum a los agentes pensador en ambos harnesses. | `pensador` | `[x]` | `pensador` | No |

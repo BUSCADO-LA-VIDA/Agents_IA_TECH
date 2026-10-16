@@ -53,7 +53,7 @@
 
 **Implementar Spec-kit + MCPs + Graphify en todos los proyectos, con `plataformador-bootstrap.ps1` como instalador/actualizador único.**
 
-- [ ] `[PLATAFORMA]` **Implementar Spec-kit + MCPs + Graphify en todos los proyectos, con `plataformador-bootstrap.ps1` como instalador/actualizador único**
+- [x] `[PLATAFORMA]` (superada: metodologia lift por proyecto spec 021 + install portable) **Implementar Spec-kit + MCPs + Graphify en todos los proyectos, con `plataformador-bootstrap.ps1` como instalador/actualizador único**
   - **Qué implementar**: Convertir `plataformador-bootstrap.ps1` en el instalador/actualizador único que: (1) implementa Spec-kit en todos los proyectos (incluido este como principal), (2) implementa los MCPs para todos los harnesses, (3) activa y usa los MCPs junto a Graphify y las aplicaciones de apoyo, (4) descarga las apps desde sus repos git y las coloca en `src\AppXXX\`, (5) crea `.specify` + `Documentacion\<AppName>\` por app, (6) resuelve rutas de spec-kit por app activa, (7) valida que el flujo se respeta desde la carga de VS Code sin re-ejecutar scripts.
   - **Basado en**: Plan aprobado por el usuario (2026-09-17) — 6 prioridades + decisiones de diseño + ADR-0003 + `specs/plataforma-bootstrap-instalador-unico/spec.md`.
   - **Decisiones del usuario (2026-09-17)**:

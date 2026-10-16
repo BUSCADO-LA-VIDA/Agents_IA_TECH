@@ -17,9 +17,10 @@
 - [x] T010 `mcp/lift-opencode.ps1` + `lift-vscode.ps1` (fusión aditiva + graphify regenerado + des-ignorar `.vscode/mcp.json`).
 
 ## Fase 4
-- [ ] T011 `indexing/` (extraer Index-* + Graphify, corre al iniciar harness).
-- [ ] T012 `externals/` (envolver Manifest modules + re-integrar contenido seleccionado con copia al KIT con tag de origen, segun modelo 2026-10-16: externo = cache, integrado viaja en git).
-- [ ] T013 Orquestador completo + prueba en 1 consumidor + deprecación `sync-kit.ps1`.
+- [x] T011 `indexing/` (extraer Index-* + Graphify, corre al iniciar harness).
+- [x] T012 `externals/` (envolver Manifest modules + re-integrar contenido seleccionado con copia al KIT con tag de origen, segun modelo 2026-10-16: externo = cache, integrado viaja en git).
+- [x] T013 Orquestador completo + prueba en 1 consumidor + deprecación `sync-kit.ps1`.
+
 
 
 

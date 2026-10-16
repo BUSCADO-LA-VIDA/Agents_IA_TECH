@@ -1,5 +1,6 @@
 #!/usr/bin/env powershell
 #requires -Version 7.0
+# [021-DEPRECATED] Flujo nuevo: scripts/sync-kit-agents.ps1 (spec 021-sync-kit-agents). Este script se mantiene por compatibilidad (lo invoca Invoke-SyncKit del bootstrap); no agregar funcionalidad aqui.
 # =============================================================================
 # sync-kit.ps1
 # =============================================================================

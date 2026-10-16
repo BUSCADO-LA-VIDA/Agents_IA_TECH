@@ -1,10 +1,11 @@
 #!/usr/bin/env powershell
 #requires -Version 7.0
 # =============================================================================
-# [021] scripts/sync-kit-agents.ps1 — Orquestador del sync por capas (fases 1-2)
-# [021] Spec 021-sync-kit-agents, fases 1-2. 5 fases: Stage -> Sync -> Plataformar
-# [021] -> Verify -> Restart-flag. Capas: kit-files, agents-github,
-# [021] agents-opencode, agents-vscode, docs, constitutions, src-structure.
+# [021] scripts/sync-kit-agents.ps1 — Orquestador del sync por capas (fases 1-4)
+# [021] Spec 021-sync-kit-agents, fases 1-4. 5 fases: Stage -> Sync ->
+# [021] Plataformar -> Verify -> Restart-flag. Capas: kit-files, agents-github,
+# [021] agents-opencode, agents-vscode, docs, constitutions, src-structure,
+# [021] mcp-install, mcp-lift-opencode, mcp-lift-vscode, indexing, externals.
 # [021] Invoke-SyncKit del bootstrap NO se modifica en esta fase: este
 # [021] orquestador es independiente (compatibilidad = no romper su firma).
 # [021] En -DryRun, CERO escrituras: ni temp, ni gitignore, ni reportes.
@@ -29,12 +30,15 @@ Initialize-SyncLog
 if (-not $RootPath) { $RootPath = (Split-Path -Parent $PSScriptRoot) }
 try { $RootPath = [IO.Path]::GetFullPath($RootPath) } catch { Write-Fail "sync-kit-agents: -RootPath invalido ($RootPath): $_"; exit 1 }
 
-# [021] Capas fases 1-2 en orden RF-02 (kit-files -> agents -> docs ->
-# [021] constitutions -> src-structure; mcp/indexing/externals en fases 3-4):
+# [021] Capas fases 1-4 en orden RF-02 (kit-files -> agents -> docs ->
+# [021] constitutions -> src-structure -> mcp-* -> indexing -> externals):
 # [021] nombre logico -> script relativo a scripts/.
 # [021] AcceptsForce indica si la capa acepta -Force (docs nunca sobrescribe
 # [021] contenido y no lo declara; kit-files lo acepta por uniformidad aunque su
 # [021] clean+replace siempre sobrescribe diferencias).
+# [021] NoStage = la capa opera sobre el destino (sin -StageDir): mcp-install
+# [021] es portable por maquina; indexing y externals plataforman el destino ya
+# [021] sincronizado (fase 4, T011-T013, RF-06).
 $script:Layers = @(
     @{ Name = "kit-files";         Script = "sync/kit-files/sync-kit-files.ps1";                 AcceptsForce = $true },
     @{ Name = "agents-github";     Script = "sync/agents/sync-agents-github.ps1";       AcceptsForce = $true },
@@ -48,22 +52,29 @@ $script:Layers = @(
     # [021] fusion aditiva (aceptan -Force para refrescar commands del maestro).
     @{ Name = "mcp-install";       Script = "sync/mcp/install.ps1";         AcceptsForce = $true; NoStage = $true },
     @{ Name = "mcp-lift-opencode"; Script = "sync/mcp/lift-opencode.ps1";   AcceptsForce = $true },
-    @{ Name = "mcp-lift-vscode";   Script = "sync/mcp/lift-vscode.ps1";     AcceptsForce = $true }
+    @{ Name = "mcp-lift-vscode";   Script = "sync/mcp/lift-vscode.ps1";     AcceptsForce = $true },
+    # [021] Fase 4 (T011-T013, RF-06): indexing (Index-CodebaseMemory,
+    # [021] Index-ContextMode, Configure-Graphify del bootstrap) y externals
+    # [021] (Manifest modules + upgrade_framework + re-integracion con copia).
+    # [021] Ambas NoStage: operan sobre el destino; aceptan -Force (indexing:
+    # [021] refresca registro graphify; externals: aplica manifest + upgrade).
+    @{ Name = "indexing";          Script = "sync/indexing/run-indexing.ps1";      AcceptsForce = $true; NoStage = $true },
+    @{ Name = "externals";         Script = "sync/externals/resolve-externals.ps1"; AcceptsForce = $true; NoStage = $true }
 )
 $script:LayerNames = @($script:Layers | Select-Object -ExpandProperty Name)
 
-# [021] --Only limita, --Skip excluye (nombres validados contra las capas fase 1).
+# [021] --Only limita, --Skip excluye (nombres validados contra las capas fases 1-4).
 function Resolve-ActiveLayers {
     param([string[]]$OnlyList, [string[]]$SkipList)
     $active = @($script:LayerNames)
     if ($OnlyList.Count -gt 0) {
         $unknown = @($OnlyList | Where-Object { $_ -and $script:LayerNames -notcontains $_ })
-        foreach ($u in $unknown) { Write-Warn "sync-kit-agents: -Only '$u' no es una capa conocida (fases 1-2) (capas: $($script:LayerNames -join ', ')); se ignora." }
+        foreach ($u in $unknown) { Write-Warn "sync-kit-agents: -Only '$u' no es una capa conocida (fases 1-4) (capas: $($script:LayerNames -join ', ')); se ignora." }
         $active = @($OnlyList | Where-Object { $script:LayerNames -contains $_ })
     }
     if ($SkipList.Count -gt 0) {
         $unknown = @($SkipList | Where-Object { $_ -and $script:LayerNames -notcontains $_ })
-        foreach ($u in $unknown) { Write-Warn "sync-kit-agents: -Skip '$u' no es una capa conocida (fases 1-2); se ignora." }
+        foreach ($u in $unknown) { Write-Warn "sync-kit-agents: -Skip '$u' no es una capa conocida (fases 1-4); se ignora." }
         $active = @($active | Where-Object { $SkipList -notcontains $_ })
     }
     return $active
@@ -230,6 +241,15 @@ if ($DryRun -and (-not $KitPath)) {
             if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) {
                 Write-Warn "sync-kit-agents: capa $($layer.Name) salio con codigo $LASTEXITCODE; se continua con las demas (fail-open)."
             }
+            # [021] Fase 4: normalizar el exit residual del hijo a nivel
+            # [021] orquestador. Los hijos ya dejaron su WARN + RESULT (fail-
+            # [021] open real); sin esto, el codigo de un nativo nieto (p. ej.
+            # [021] sync-skills exit 1 dentro de externals) queda visible aqui
+            # [021] porque la asignacion a $LASTEXITCODE dentro de un script
+            # [021] hijo es local a ese script y se descarta al retornar
+            # [021] (verificado empiricamente). Evita falsos positivos en las
+            # [021] capas siguientes y en el exit code del proceso.
+            $LASTEXITCODE = 0
             foreach ($line in $out) { Write-Host "$line" }
             foreach ($line in ($out | Where-Object { "$_".StartsWith("RESULT:") })) {
                 $results += "$line".Trim()
@@ -242,9 +262,11 @@ if ($DryRun -and (-not $KitPath)) {
 }
 
 # =============================================================================
-# [021] F3 PLATAFORMAR (fase 1: placeholder operativo, no funcional)
+# [021] F3 PLATAFORMAR (fases 3-4 completas): las capas mcp-install,
+# [021] mcp-lift-*, indexing y externals ya corrieron en F2 sobre el destino
+# [021] (RF-06: el destino queda funcional, no solo copiado). Sin pasos extra.
 # =============================================================================
-Write-Info "Fase Plataformar: pendiente fases 3-4 (mcp/indexing/externals)"
+Write-Info "Fase Plataformar: ejecutada en F2 (capas mcp-install, mcp-lift-opencode, mcp-lift-vscode, indexing, externals)"
 
 # =============================================================================
 # [021] F4 VERIFY (.kit-last-sync.json; NO se escribe en DryRun)
@@ -256,7 +278,7 @@ if ($DryRun) {
     try {
         $report = [ordered]@{
             tool   = "sync-kit-agents"
-            phase  = 2
+            phase  = 4
             commit = $commitHash
             date   = $runDate
             layers = $activeLayers

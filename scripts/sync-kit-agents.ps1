@@ -27,6 +27,30 @@ $ErrorActionPreference = "Stop"
 . "$PSScriptRoot/sync/lib/common.ps1"
 Initialize-SyncLog
 
+# [021] Normalizar -Only/-Skip: aceptar coma o array. Forma recomendada: string
+# [021] con comas entrecomillado, p. ej. -Skip "src-structure,constitutions".
+# [021] Motivo: con `pwsh -File` el binding posicional fragmenta arrays CLI no
+# [021] entrecomillados (`-Skip a,b` liga `b` al siguiente parametro posicional,
+# [021] aqui $RepoUrl, y F1 aborta con "[SECURITY] URL no permitida: b"). Con la
+# [021] forma recomendada llega un solo string "a,b" y esta funcion lo divide por
+# [021] coma, aplana, recorta espacios y descarta vacios. Tambien cubre
+# [021] `-Skip @('a','b')` (llamada desde sesion pwsh con -Command/-NoExit o
+# [021] dot-sourcing) y `-Skip a` / sin -Skip (pasan intactos).
+function Expand-CommaSeparatedFilter {
+    param([string[]]$Values)
+    $out = @()
+    foreach ($v in $Values) {
+        if ($null -eq $v) { continue }
+        foreach ($part in ($v -split ',')) {
+            $t = "$part".Trim()
+            if ($t) { $out += $t }
+        }
+    }
+    return $out
+}
+$Only = @(Expand-CommaSeparatedFilter -Values $Only)
+$Skip = @(Expand-CommaSeparatedFilter -Values $Skip)
+
 if (-not $RootPath) { $RootPath = (Split-Path -Parent $PSScriptRoot) }
 try { $RootPath = [IO.Path]::GetFullPath($RootPath) } catch { Write-Fail "sync-kit-agents: -RootPath invalido ($RootPath): $_"; exit 1 }
 
@@ -185,21 +209,27 @@ if ($KitPath) {
     }
 }
 
-# [021] Asegurar gitignore de .kit-sync-temp/ en el destino (append idempotente).
+# [021] Asegurar gitignore de .kit-sync-temp/ y .kit-backup/ en el destino
+# [021] (append idempotente cada una).
 $gitignorePath = Join-Path $RootPath ".gitignore"
+$kitIgnoreRules = @(".kit-sync-temp/", ".kit-backup/")
 if ($DryRun) {
-    Write-Info "DryRun: aseguraria regla .kit-sync-temp/ en .gitignore (sin escribir)"
+    Write-Info "DryRun: aseguraria reglas .kit-sync-temp/ y .kit-backup/ en .gitignore (sin escribir)"
 } else {
     try {
         $gitText = ""
         if (Test-Path -LiteralPath $gitignorePath -PathType Leaf) {
             $gitText = Get-Content -LiteralPath $gitignorePath -Raw -ErrorAction Stop
         }
-        if ($gitText -notmatch '(?m)^\.kit-sync-temp/') {
-            Add-Content -LiteralPath $gitignorePath -Value "`n.kit-sync-temp/`n" -Encoding UTF8
-            Write-OK ".gitignore: regla .kit-sync-temp/ agregada."
-        } else {
-            Write-Info ".gitignore: regla .kit-sync-temp/ ya presente (idempotente)."
+        foreach ($rule in $kitIgnoreRules) {
+            $rulePattern = '(?m)^' + [regex]::Escape($rule)
+            if ($gitText -notmatch $rulePattern) {
+                Add-Content -LiteralPath $gitignorePath -Value "`n$rule`n" -Encoding UTF8
+                $gitText += "`n$rule`n"
+                Write-OK ".gitignore: regla $rule agregada."
+            } else {
+                Write-Info ".gitignore: regla $rule ya presente (idempotente)."
+            }
         }
     } catch {
         Write-Warn "sync-kit-agents: no se pudo asegurar .gitignore ($_); se continua."
@@ -323,6 +353,33 @@ if ($ownsTemp -and $tempBase -and (Test-Path -LiteralPath $tempBase)) {
         Write-Info "Temp de stage limpiado ($tempBase)."
     } else {
         Write-Warn "Temp de stage conservado para forense ($tempBase) por errores en la corrida."
+    }
+}
+
+# [021] Higiene .kit-backup/: al final exitoso (0 ERRORs y no DryRun) podar
+# [021] backups viejos conservando los ultimos 2 por fecha de nombre (formato
+# [021] existente yyyyMMdd-HHmmss: el orden lexicografico es cronologico).
+# [021] Fail-open: si la poda falla, WARN y se sigue.
+if ((-not $DryRun) -and ($script:Errors.Count -eq 0)) {
+    try {
+        $backupBase = Join-Path $RootPath ".kit-backup"
+        if (Test-Path -LiteralPath $backupBase -PathType Container) {
+            $backupDirs = @(Get-ChildItem -LiteralPath $backupBase -Directory -ErrorAction Stop |
+                Sort-Object -Property Name -Descending)
+            if ($backupDirs.Count -gt 2) {
+                $toPrune = @($backupDirs | Select-Object -Skip 2)
+                $pruned = 0
+                foreach ($d in $toPrune) {
+                    Remove-Item -LiteralPath $d.FullName -Recurse -Force -ErrorAction Stop
+                    $pruned++
+                }
+                Write-Info "Backups podados: $pruned (se conservan los ultimos 2 en .kit-backup/)."
+            } else {
+                Write-Info "Backups: $($backupDirs.Count) en .kit-backup/; nada que podar (se conservan los ultimos 2)."
+            }
+        }
+    } catch {
+        Write-Warn "sync-kit-agents: no se pudo podar .kit-backup/ ($_); se continua."
     }
 }
 

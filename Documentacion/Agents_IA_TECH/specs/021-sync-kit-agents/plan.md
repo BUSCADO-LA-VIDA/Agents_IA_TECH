@@ -35,7 +35,7 @@ Estructura + `lib/common.ps1` (logging `Write-*/Show-ExecutionSummary` extraído
 `mcp/install.ps1` (detecta npm/uv/python → instala ausentes → verifica versión → anota `.env.mcp`) + `mcp/lift-opencode.ps1` y `lift-vscode.ps1` (fusión aditiva + `graphify` regenerado + des-ignorar `.vscode/mcp.json`).
 
 ### Fase 4
-`indexing/` (extraer `Index-CodebaseMemory`, `Index-ContextMode`, `Configure-Graphify`) + `externals/` (envolver Manifest modules + `Invoke-UpgradeFramework`, sin copia) + orquestador completo + prueba en 1 consumidor + deprecación de `sync-kit.ps1`.
+`indexing/` (extraer `Index-CodebaseMemory`, `Index-ContextMode`, `Configure-Graphify`) + `externals/` (envolver Manifest modules + `Invoke-UpgradeFramework` + re-integrar contenido seleccionado con copia al KIT con tag de origen, modelo 2026-10-16: externo = cache gitignored, integrado viaja en git) + orquestador completo + prueba en 1 consumidor + deprecación de `sync-kit.ps1`.
 
 ## Constitution Check
 
@@ -46,3 +46,5 @@ Estructura + `lib/common.ps1` (logging `Write-*/Show-ExecutionSummary` extraído
 - **R1**: Divergencia bootstrap↔nuevas capas (duplicación temporal). Mitigación: las capas importan/invocan, no duplican; el bootstrap sigue llamando hasta la deprecación.
 - **R2**: `clean+replace` borra personalizaciones locales del consumidor. Mitigación: backup previo obligatorio + reporte; huérfanos default Conservar.
 - **R3**: `.vscode/` entero está gitignored: des-ignorar solo `mcp.json` (`!.vscode/mcp.json`) o el sync no persiste. Incluido en fase 3.
+
+

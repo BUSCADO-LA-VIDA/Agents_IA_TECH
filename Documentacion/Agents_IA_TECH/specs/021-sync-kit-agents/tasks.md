@@ -18,7 +18,8 @@
 
 ## Fase 4
 - [ ] T011 `indexing/` (extraer Index-* + Graphify, corre al iniciar harness).
-- [ ] T012 `externals/` (envolver Manifest modules, sin copia).
+- [ ] T012 `externals/` (envolver Manifest modules + re-integrar contenido seleccionado con copia al KIT con tag de origen, segun modelo 2026-10-16: externo = cache, integrado viaja en git).
 - [ ] T013 Orquestador completo + prueba en 1 consumidor + deprecación `sync-kit.ps1`.
+
 
 

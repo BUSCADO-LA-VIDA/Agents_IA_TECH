@@ -67,7 +67,7 @@ Mantener firma y semántica que usa `Invoke-SyncKit` del bootstrap (`-RepoUrl`, 
 
 - `sync-kit.ps1` (lógica de referencia: guards, allowlist de URLs, merge `opencode.json`).
 - `plataformador-bootstrap.ps1` (`Invoke-SyncKit`, `Ensure-ConstitutionAppSync`, funciones `Index-*`, `Ensure-AppStructure`).
-- Módulos `Manifest/*` (externals por manifest, sin copia).
+- Módulos `Manifest/*` (externals por manifest + re-integracion con copia).
 - ADR-0009 (hardcodeo MCP), ADR-0006 (diseño de tokens), regla constitution 3 niveles (bitácora 2026-10-11).
 
 ## Criterios de éxito
@@ -77,3 +77,4 @@ Mantener firma y semántica que usa `Invoke-SyncKit` del bootstrap (`-RepoUrl`, 
 - **SC-03**: Re-correr sync sin cambios produce 0 escrituras.
 - **SC-04**: `opencode.json` del destino conserva sus claves locales y suma las nuevas del maestro.
 - **SC-05**: Flag de restart aparece solo si cambió agents/opencode/.opencode.
+

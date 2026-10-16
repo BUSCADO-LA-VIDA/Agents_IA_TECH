@@ -20,6 +20,9 @@ jobs:
         # Riesgo aceptado por el dueno (2026-10-16, bitacora): `permission.bash: allow`
         # en opencode.json es decision deliberada del flujo sin-preguntas; consta en baseline.
         run: |
+          # GitHub ejecuta con bash -e: sin set +e, un exit!=0 de npx mata el step
+          # antes de evaluar el gate (fue la causa del rojo anterior).
+          set +e
           npx ecc-agentshield@1.6.0 scan --path . --baseline .agentshield-baseline.json --gate
           code=$?
           if [ "$code" -eq 0 ] || [ "$code" -eq 2 ]; then echo "AgentShield gate OK (exit $code: 0=limpio, 2=sin regresiones vs baseline)"; exit 0; fi

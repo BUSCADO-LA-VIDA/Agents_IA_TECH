@@ -11,3 +11,6 @@
 
 ## Verificacion local
 - Gate sobre el repo: PASSED, exit 2. Fixture: baseline limpia + hallazgo plantado -> gate FAILED, exit 3.
+
+## Fix 2: bash -e mataba el step antes del gate
+GitHub corre run: con bash -e: npx saliendo 2 terminaba el step sin evaluar nada. Se agrego set +e al inicio del bloque. El gate real nunca habia corrido en CI.

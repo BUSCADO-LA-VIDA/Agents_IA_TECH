@@ -65,3 +65,13 @@ Reglas (ADR-0009): rutas absolutas con forward slashes; entry-point JS directo e
 - **SC-01**: Los 9 MCP responden handshake stdio en vivo (hecho 2026-10-11 para 8/9; markitdown verificado por binario + uso en pipeline).
 - **SC-02**: `git status` limpio salvo `opencode.json` local si difiere de la plantilla commiteada (documentar la divergencia).
 - **SC-03**: Esta spec permanece como baseline: cualquier regresión futura se diagnostica comparando contra ella.
+
+---
+
+## Addendum 2026-10-16 — Cambios posteriores al congelamiento
+
+- `timeout: 120000` en las entradas MCP (el default de 5000 ms causaba timeouts masivos en arranques en frio; opcion documentada en opencode.ai/docs/mcp-servers).
+- Sentry local eliminado (binarios colgados) y luego retirado del maestro al descartarse los MCP de pago; queda documentada la alternativa remota oficial con OAuth.
+- Entrada `plugin: [context-mode]` eliminada (el paquete npm no exporta plugin valido; el servidor MCP ya provee las tools).
+- Comandos `.ps1` reemplazados por `node <cli.js>` directo en context-mode/playwright/context7 (el envoltorio pwsh rompia el transporte stdio).
+- Estado vigente: 9 MCP (5 base + github, playwright, semgrep, context7); sentry/perplexity/pieces/testsprite descartados por pago.

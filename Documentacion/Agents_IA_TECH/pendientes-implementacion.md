@@ -78,6 +78,12 @@
 | 017-T004 | 017 | Crear template de `pendientes‑implementacion.md` por proyecto | Diseñar y crear el template con secciones obligatorias y contenido real. | `documentador` | `[x]` | `documentador` | Sí |
 | 017-T005 | 017 | Prohibir placeholders en `pendientes‑implementacion.md` | Implementar validación para asegurar que el archivo no contiene placeholders prohibidos. | `pensador` | `[x]` | `pensador` | Sí |
 | 018-T001 | 018 | Actualizar plantilla pendientes‑implementacion‑template.md con columnas Estado y Asignado a | Actualizar plantilla con las columnas Estado y Asignado a según nuevo formato. | `pensador` | `[x]` | `pensador` | Si |
+| 020-T001 | 020 | Congelar config MCP operativa como spec | Spec 020-mcp-config-operativa: 9 MCP + indices verificados en vivo como baseline. | `documentador` | `[x]` | `documentador` | Si |
+| 021-T001 | 021 | Spec + fase 1 sync-kit-agents | Spec 021 + estructura scripts/sync/ + docs + agents x3 + orquestador F1-F5 verificado. | `pensador` | `[x]` | `pensador` | Si |
+| 021-T002 | 021 | Fase 2 sync-kit-agents | kit-files + constitutions + src-structure verificados (7 capas, idempotente). | `pensador` | `[x]` | `pensador` | Si |
+| 021-T003 | 021 | Fase 3 sync-kit-agents | mcp/install + lift x2 verificados en sandbox + sentry fuera del maestro. | `pensador` | `[x]` | `pensador` | Si |
+| 022-T002 | 022 | Script sync-skills + espejo 76 | sync-skills.ps1 verificado parse 0, espejos 76/76 hash, idempotente. | `plataformador` | `[x]` | `plataformador` | Si |
+| 023-T001 | 023 | Spec workflows ECC | Spec 023 con 2 workflows propios y 8 rechazos documentados. | `documentador` | `[x]` | `documentador` | Si |
 | 018-T002 | 018 | Migrar pendientes‑implementacion.md actual a nuevo formato con estados | Migrar el archivo actual al nuevo formato con columnas Estado y Asignado a. | `pensador` | `[x]` | `pensador` | No |
 | 018-T003 | 018 | Actualizar pensador.agent.md en .github y .opencode con reglas Scrum | Añadir reglas Scrum a los agentes pensador en ambos harnesses. | `pensador` | `[x]` | `pensador` | No |
 | 018-T004 | 018 | Actualizar Agent‑SSD.agent.md en ambos harnesses | Añadir reglas Scrum al agente Agent‑SSD en .github y .opencode. | `pensador` | `[x]` | `pensador` | No |

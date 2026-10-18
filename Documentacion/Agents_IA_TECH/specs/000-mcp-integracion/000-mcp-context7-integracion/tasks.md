@@ -18,3 +18,8 @@
 - T03 Fallback fail-open [HECHO 2026-10-11]: sin binario -> WARN; sin red -> la API no resuelve (documentado).
 - T04 Paridad [HECHO 2026-10-11]: opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A. Sin keys (API publica).
 - T05 Verificacion viva [HECHO 2026-10-11]: handshake + tools/list = 2 tools + resolve-library-id(react) real contra la API.
+
+- T07 Actualizar agentes afectados por context7 [RF-04,SC-005] [RF-04,SC-005]
+  Anadir la linea de `context7` a la seccion 'Uso de MCPs' de Agent-SSD, analista_tecnico, api-developer, arquitecto, documentador, frontend-developer, pensador, plataformador, qa-senior y upgrade_framework, replicando en .github/agents/ y .opencode/agents/ con bloques identicos (0 desajustes)
+- T08 Verificacion anti-huerfano [RF-07,SC-005,SC-006] [RF-07,SC-005,SC-006]
+  Cruz ar MCPs de opencode.json contra los bloques 'Uso de MCPs' de los 16 agentes. Exigir: cobertura total, 0 huerfanos inversos, 0 desajustes entre arneses, y al menos una ejecucion real de agente que llame la herramienta. Adjuntar el resultado del cruce a la spec

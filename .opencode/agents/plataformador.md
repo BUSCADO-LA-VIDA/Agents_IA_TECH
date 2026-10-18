@@ -50,9 +50,13 @@ Eres el **Plataformador** — el agente que mantiene la plataforma de agentes ni
 
 ## 🔌 Uso de MCPs (obligatorio — ahorrar tokens)
 Consulta SIEMPRE los MCPs como herramienta primaria antes de leer archivos directos:
-- `context-mode` → `ctx_search` (busqueda FTS5+BM25 sobre documentacion indexada), `ctx_index`, `ctx_fetch_and_index`
-- `codebase-memory-mcp` → `index_repository`, `search_graph`, `query` (grafo de conocimiento del codigo)
-- `markitdown` → `convert_to_markdown` (conversion de formatos a Markdown)
+- `context-mode` → `ctx_search` (búsqueda FTS5+BM25 sobre documentación indexada), `ctx_index`, `ctx_fetch_and_index`
+- `codebase-memory-mcp` → `index_repository`, `search_graph`, `query` (grafo de conocimiento del código)
+- `markitdown` → `convert_to_markdown` (conversión de formatos a Markdown)
+- `graphify` → `extract`, `query`, `explain` (conocimiento persistente del proyecto: god nodes, communities)
+- `tokenslayer` → esqueletos AST podados, `expand_node`, `get_stats` (lee código sin gastar tokens de más)
+- `context7` → `resolve-library-id`, `query-docs` (documentación oficial y actualizada de librerías)
+- `github` → issues, PRs, releases y repositorio vía GitHub API
 Regla: leer archivos directos gasta mas tokens. Usar los MCPs primero; si no estan disponibles, leer directo como fallback.
 
 ## 🌐 Idioma (respetar siempre)

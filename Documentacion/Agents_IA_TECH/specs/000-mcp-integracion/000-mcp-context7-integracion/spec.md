@@ -130,3 +130,15 @@ La entrada DEBE existir en `.opencode/mcp.json` y `.vscode/mcp.json` con el mism
 - La herramienta se instala vía npm global y expone `context7 --stdio`.
 - El usuario acepta instalar la herramienta externa manualmente si falla el auto-detect.
 
+
+---
+
+## Addendum 2026-10-18 — Paridad incompleta yCoverage en agentes
+
+La tarea **T04 "Paridad configuraciones"** de esta spec se dio por cumplida (`[x]`) tras verificar que el MCP aparecía en `opencode.json` y `.vscode/mcp.json`. Esa verificación era **insuficiente**: cubría la capa de configuración, no la capa de agentes.
+
+El 2026-10-18, al cruzar los MCPs registrados contra las 32 definiciones de agente, `context7` resultó **0 de 32**: ningún agente del kit lo declaraba en su sección "Uso de MCPs", pese a estar instalado y funcionando. Un MCP que ningún agente declara no se usa: la integración estaba incompleta en la capa que importa.
+
+**Corrección aplicada**: `context7` fue restituido en `opencode.json` y declarado en 10 agentes (`Agent-SSD`, `analista_tecnico`, `api-developer`, `arquitecto`, `documentador`, `frontend-developer`, `pensador`, `plataformador`, `qa-senior`, `upgrade_framework`).
+
+**Nuevo criterio de cierre** (incorporado a la spec 020 como RF-05): una integración de MCP no se cierra por tener la entrada en la configuración, sino por tener **al menos un agente que lo declare con el nombre de sus herramientas**. La prueba de paridad debe abarcar las tres capas: `opencode.json`, `.vscode/mcp.json` y definiciones de agente.

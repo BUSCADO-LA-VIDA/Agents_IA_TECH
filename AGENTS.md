@@ -77,7 +77,8 @@
 
 ### Reglas transversales de los agentes (gobernanza)
 
-- Consultar los MCPs como herramienta primaria (Regla 1): `context-mode` (`ctx_search`), `codebase-memory-mcp` (`search_graph`), `markitdown` (`convert_to_markdown`).
+- Consultar los MCPs como herramienta primaria (Regla 1): `context-mode` (`ctx_search`), `codebase-memory-mcp` (`search_graph`), `markitdown` (`convert_to_markdown`), `graphify` (`query`), `tokenslayer` (esqueletos AST). Además, según el rol: `context7` (documentación de librerías), `github` (issues/PRs/releases), `playwright` (QA en navegador). Reparto completo en `Documentacion/Agents_IA_TECH/specs/020-mcp-config-operativa/spec.md` (RF-05).
+- **Regla 1b - cobertura obligatoria**: todo MCP registrado en `opencode.json` debe estar declarado en la sección "Uso de MCPs" de al menos un agente, con el nombre de sus herramientas. Un MCP instalado que ningún agente declara es una implementación **incompleta**: se corrige el agente, no se retira el MCP.
 - Estructura estándar de agente (Regla 2): frontmatter, introducción, skills, enfoque, MCPs, idioma, constraints.
 - Sincronización entre arneses (Regla 3): `.github/agents/` y `.opencode/agents/` en paralelo.
 - Orquestación y delegación (Regla 4): cada agente hace UNA cosa; los orquestadores hacen cumplir las reglas a los agentes debajo.

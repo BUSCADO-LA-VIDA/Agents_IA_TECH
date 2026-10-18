@@ -75,3 +75,71 @@ Reglas (ADR-0009): rutas absolutas con forward slashes; entry-point JS directo e
 - Entrada `plugin: [context-mode]` eliminada (el paquete npm no exporta plugin valido; el servidor MCP ya provee las tools).
 - Comandos `.ps1` reemplazados por `node <cli.js>` directo en context-mode/playwright/context7 (el envoltorio pwsh rompia el transporte stdio).
 - Estado vigente: 9 MCP (5 base + github, playwright, semgrep, context7); sentry/perplexity/pieces/testsprite descartados por pago.
+
+---
+
+## Addendum 2026-10-18 — Forma V2 y regla de cobertura en los agentes
+
+### Corrección de forma: `mcp.servers`
+
+La tabla de la sección "Configuración congelada" describe la forma V1. OpenCode **v2.0.32** usa otra, y el schema es estricto (`additionalProperties: false`). La forma vigente es:
+
+```jsonc
+{
+  "mcp": {
+    "timeout": { "startup": 180000, "catalog": 120000, "execution": 900000 },
+    "servers": {
+      "<nombre>": { "type": "local", "command": ["<abs>", "..."] }
+    }
+  }
+}
+```
+
+Cambios obligatorios respecto de la forma congelada:
+
+| Antes (V1) | Ahora (V2) | Motivo |
+|---|---|---|
+| servidores sueltos bajo `mcp` | bajo `mcp.servers` | el schema V2 solo admite `timeout` y `servers` en `mcp` |
+| `timeout: 120000` (entero) por servidor | `mcp.timeout.startup` / `catalog` / `execution` | el entero no controla el arranque; el default de `startup` es 30 s |
+| `"enabled": true` | omitido | `Mcp.LocalConfigEncoded` no admite `enabled`; para deshabilitar existe `disabled` |
+| `provider` singular con `nvidia-custom` y `deepinfra-custom` | proveedores builtin | los custom duplicaban el catálogo, y `deepinfra-custom` usaba una variable de entorno ausente, es decir token vacío |
+
+`startup` se sube a 180 s porque la medición real dio 21,2 s para `markitdown` y más de 25 s para `semgrep`: con el default de 30 s, los servidores que arrancan bien fallan igual cuando se levantan en paralelo. Detalle y alternativas en `Documentacion/Agents_IA_TECH/arquitectura/adr/adr-0010-opencode-v2-mcp-shape.md`.
+
+### Corrección de la sección "Secretos"
+
+La línea que afirma *".env del proyecto es plantilla gitignored con la clave vacía"* queda **anulada**. OpenCode no soporta archivos `.env`: `{env:NAME}` se resuelve contra el entorno real del proceso y una variable no definida se reemplaza por cadena vacía. El `.env` fue eliminado del kit. Las credenciales se administran con `opencode auth` o con variables de entorno de Windows.
+
+### RF-05 — Cobertura obligatoria en las definiciones de agente (nuevo)
+
+> **Todo MCP instalado y registrado en `opencode.json` debe estar declarado en la sección "Uso de MCPs" de los agentes que lo usan, con el nombre de sus herramientas. Un MCP instalado que ningún agente declara es una implementación incompleta: se corrige el agente, no se retira el MCP.**
+
+El defecto que motivó el requisito: el 2026-10-18 se cruzaron los MCPs registrados contra las 32 definiciones de agente (`.github/agents/` y `.opencode/agents/`) y el resultado fue que **13 de 16 agentes declaraban solo 3 MCPs (`context-mode`, `codebase-memory-mcp`, `markitdown`) teniendo 8 instalados**. Solo `pensador` declaraba un cuarto. `tokenslayer`, `semgrep` y `context7` no aparecían en ningún agente.
+
+La lectura errónea fue tratar ese cero como prueba de que los MCPs sobraban. La lectura correcta es la inversa: los agentes estaban incompletos.
+
+### Reparto vigente (8 MCPs, 16 agentes)
+
+**Transversales a los 16** — `context-mode`, `codebase-memory-mcp`, `markitdown`, `graphify`, `tokenslayer`.
+
+| MCP | Agentes que lo declaran además de los transversales |
+|---|---|
+| `context7` | `Agent-SSD`, `analista_tecnico`, `api-developer`, `arquitecto`, `documentador`, `frontend-developer`, `pensador`, `plataformador`, `qa-senior`, `upgrade_framework` |
+| `github` | `api-developer`, `devops`, `frontend-developer`, `gitflow`, `plataformador`, `security-auditor` |
+| `playwright` | `devops`, `frontend-developer`, `qa-senior` |
+
+`ssh-connection-agent` y `usuario-preferencias` no tenían sección de MCPs; se les agregó el bloque completo con los 5 transversales.
+
+### RF-06 — Paridad entre arneses y verificación
+
+> Los bloques MCP de `.github/agents/` y `.opencode/agents/` deben ser idénticos para el mismo agente. La verificación compara el bloque extraído de ambos archivos y exige 0 desajustes.
+
+Aplicado el 2026-10-18 a los 32 archivos (16 agentes × 2 arneses): 0 desajustes, frontmatter intacto, UTF-8 sin BOM y finales de línea LF preservados.
+
+### SC-04 — Nuevo criterio de éxito
+
+- **SC-04**: Cada MCP de `opencode.json` aparece en al menos un bloque "Uso de MCPs" de agente. Cobertura al 2026-10-18: 8 de 8 MCPs declarados, con reparto transversal 5 + específico por rol.
+
+### Pendiente
+
+`semgrep` está instalado en la máquina y quedó fuera del reparto de RF-05 por decisión del usuario, que solo confirmó la devolución de `context7` y `tokenslayer`. Sigue abierta la decisión de readmitirlo, junto con su declaración en `security-auditor` y `qa-senior`, que son los dos agentes que lo usarían.

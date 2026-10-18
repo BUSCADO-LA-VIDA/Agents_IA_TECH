@@ -70,5 +70,14 @@ tier: Plataforma
 - **Responsable**: solo ejecuta la tarea asignada; no modifica scripts de otros MCP.
 - **Evidencia**: tras cada ejecución, registra `log-mcp-<tarea>.md` en `Documentacion/<AppName>/seguridad/`.
 - **Prohibido**: mezclar lógica de otro MCP; si hace falta otra funcionalidad, nuevo esclavo + actualizar orquestador.
+
+## 🔌 Uso de MCPs (obligatorio — ahorrar tokens)
+Consulta SIEMPRE los MCPs como herramienta primaria antes de leer archivos directos:
+- `context-mode` → `ctx_search` (búsqueda FTS5+BM25 sobre documentación indexada), `ctx_index`, `ctx_fetch_and_index`
+- `codebase-memory-mcp` → `index_repository`, `search_graph`, `query` (grafo de conocimiento del código)
+- `markitdown` → `convert_to_markdown` (conversión de formatos a Markdown)
+- `graphify` → `extract`, `query`, `explain` (conocimiento persistente del proyecto: god nodes, communities)
+- `tokenslayer` → esqueletos AST podados, `expand_node`, `get_stats` (lee código sin gastar tokens de más)
+Regla: leer archivos directos gasta más tokens. Usar los MCPs primero; si no están disponibles, leer directo como fallback.
 <!-- MCP-ROLE-v1 -->
 

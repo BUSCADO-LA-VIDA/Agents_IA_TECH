@@ -18,3 +18,8 @@
 - T03 Fallback fail-open [HECHO 2026-10-11]: sin binario -> WARN; browsers ausentes -> el servidor los exige al invocar tools (documentado).
 - T04 Paridad [HECHO 2026-10-11]: entrada en opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A.
 - T05 Verificacion viva [HECHO 2026-10-11]: handshake stdio Playwright 1.64.0 + tools/list = 25 tools (browser_navigate, browser_snapshot, etc.). Nota: invocacion via shim .ps1 no canaliza stdio; el registro usa el shim igual que los demas MCP npm (context-mode funciona asi).
+
+- T07 Actualizar agentes afectados por playwright [RF-04,SC-005] [RF-04,SC-005]
+  Anadir la linea de `playwright` a la seccion 'Uso de MCPs' de devops, frontend-developer y qa-senior, replicando en .github/agents/ y .opencode/agents/ con bloques identicos (0 desajustes)
+- T08 Verificacion anti-huerfano [RF-07,SC-005,SC-006] [RF-07,SC-005,SC-006]
+  Cruz ar MCPs de opencode.json contra los bloques 'Uso de MCPs' de los 16 agentes. Exigir: cobertura total, 0 huerfanos inversos, 0 desajustes entre arneses, y al menos una ejecucion real de agente que llame la herramienta. Adjuntar el resultado del cruce a la spec

@@ -1,63 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "region": "global",
-  "_note": "Configuración MCP activa (spec 020 + Art-VII). Rutas de MCPs hardcodeadas = fuente de verdad del kit maestro. API keys vía {env:...} para no commitear secretos. Configura tu .env local con: NVIDIA_API_KEY, DEEPINFRA_API_KEY.",
-  "model": "z-ai/glm-5.2",
-  "small_model": "deepseek-ai/deepseek-v4-flash",
+  "model": "opencode/deepseek-v4.1-flash-free",
+  "small_model": "opencode/beam-free",
   "default_agent": "build",
-  "plugin": [],
   "instructions": [
     "AGENTS.md"
   ],
-  "provider": {
-    "nvidia-custom": {
-      "name": "NVIDIA",
-      "npm": "@ai-sdk/openai-compatible",
-      "options": {
-        "apiKey": "{env:NVIDIA_API_KEY}",
-        "baseURL": "https://integrate.api.nvidia.com/v1"
-      },
-      "models": {
-        "z-ai/glm-5.2": {
-          "name": "GLM 5.2",
-          "tool_call": true,
-          "temperature": true,
-          "limit": {
-            "context": 128000,
-            "output": 32000
-          }
-        },
-        "deepseek-ai/deepseek-v4-flash": {
-          "name": "DeepSeek V4 Flash",
-          "tool_call": true,
-          "temperature": true,
-          "limit": {
-            "context": 128000,
-            "output": 16000
-          }
-        }
-      }
-    },
-    "deepinfra-custom": {
-      "name": "DeepInfra",
-      "npm": "@ai-sdk/openai-compatible",
-      "options": {
-        "apiKey": "{env:DEEPINFRA_API_KEY}",
-        "baseURL": "https://api.deepinfra.com/v1/openai"
-      },
-      "models": {
-        "deepseek-ai/DeepSeek-V4-Flash-0731": {
-          "name": "DeepSeek V4 Flash",
-          "tool_call": true,
-          "temperature": true,
-          "limit": {
-            "context": 128000,
-            "output": 16000
-          }
-        }
-      }
-    }
-  },
   "lsp": {
     "python": {
       "command": [
@@ -87,86 +35,68 @@
     }
   },
   "mcp": {
-    "context-mode": {
-      "type": "local",
-      "command": [
-        "C:/Program Files/nodejs/node.exe",
-        "C:/Users/tomas/AppData/Roaming/npm/node_modules/context-mode/build/cli.js"
-      ],
-      "enabled": true,
-      "timeout": 120000
+    "timeout": {
+      "startup": 180000,
+      "catalog": 120000,
+      "execution": 900000
     },
-    "codebase-memory-mcp": {
-      "type": "local",
-      "command": [
-        "C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"
-      ],
-      "enabled": true,
-      "timeout": 120000
-    },
-    "markitdown": {
-      "type": "local",
-      "command": [
-        "C:/Python314/Scripts/markitdown-mcp.exe"
-      ],
-      "enabled": true,
-      "timeout": 120000
-    },
-    "graphify": {
-      "type": "local",
-      "command": [
-        "C:/Python314/python.exe",
-        "-m",
-        "graphify.serve",
-        "C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json"
-      ],
-      "enabled": true,
-      "timeout": 120000
-    },
-    "tokenslayer": {
-      "type": "local",
-      "command": [
-        "node",
-        "proyect_ext/tokenslayer/mcp-server/build/index.js"
-      ],
-      "enabled": true,
-      "timeout": 120000
-    },
-    "github": {
-      "type": "local",
-      "command": [
-        "C:/Users/tomas/.local/bin/github-mcp-server.exe",
-        "stdio"
-      ],
-      "enabled": true,
-      "timeout": 120000
-    },
-    "playwright": {
-      "type": "local",
-      "command": [
-        "C:/Program Files/nodejs/node.exe",
-        "C:/Users/tomas/AppData/Roaming/npm/node_modules/@playwright/mcp/cli.js"
-      ],
-      "enabled": true,
-      "timeout": 120000
-    },
-    "semgrep": {
-      "type": "local",
-      "command": [
-        "C:/Users/tomas/.local/bin/semgrep.exe",
-        "mcp"
-      ],
-      "enabled": true,
-      "timeout": 120000
-    },
-    "context7": {
-      "type": "local",
-      "command": [
-        "C:/Program Files/nodejs/node.exe",
-        "C:/Users/tomas/AppData/Roaming/npm/node_modules/@upstash/context7-mcp/dist/index.js"
-      ],
-      "enabled": true,
-      "timeout": 120000
+    "servers": {
+      "context-mode": {
+        "type": "local",
+        "command": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:/Users/tomas/AppData/Roaming/npm/node_modules/context-mode/build/cli.js"
+        ]
+      },
+      "codebase-memory-mcp": {
+        "type": "local",
+        "command": [
+          "C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"
+        ]
+      },
+      "markitdown": {
+        "type": "local",
+        "command": [
+          "C:/Python314/Scripts/markitdown-mcp.exe"
+        ]
+      },
+      "graphify": {
+        "type": "local",
+        "command": [
+          "C:/Python314/python.exe",
+          "-m",
+          "graphify.serve",
+          "C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json"
+        ]
+      },
+      "github": {
+        "type": "local",
+        "command": [
+          "C:/Users/tomas/.local/bin/github-mcp-server.exe",
+          "stdio"
+        ]
+      },
+      "playwright": {
+        "type": "local",
+        "command": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:/Users/tomas/AppData/Roaming/npm/node_modules/@playwright/mcp/cli.js"
+        ]
+      },
+      "tokenslayer": {
+        "type": "local",
+        "command": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:/Proyectos/Agents_IA_TECH/proyect_ext/tokenslayer/mcp-server/build/index.js"
+        ]
+      },
+      "context7": {
+        "type": "local",
+        "command": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:/Users/tomas/AppData/Roaming/npm/node_modules/@upstash/context7-mcp/dist/index.js"
+        ]
+      }
     }
   }
 }

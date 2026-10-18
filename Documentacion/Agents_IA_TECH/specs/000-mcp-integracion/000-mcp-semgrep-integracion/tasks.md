@@ -18,3 +18,8 @@
 - T03 Fallback fail-open [HECHO 2026-10-11]: sin binario semgrep -> el servidor no arranca; WARN con `uv tool install semgrep`.
 - T04 Paridad [HECHO 2026-10-11]: opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A.
 - T05 Verificacion viva [HECHO 2026-10-11]: handshake stdio + tools/list = 7 tools (semgrep_scan, semgrep_findings, supply_chain, etc.).
+
+- T07 Actualizar agentes afectados por semgrep [RF-04,SC-005] [RF-04,SC-005]
+  PENDIENTE DE DECISION: semgrep esta instalado pero fue retirado de opencode.json. Si se readmite, anadir la linea a 'Uso de MCPs' de security-auditor y qa-senior en ambos arneses. Si se descarta, marcar la spec como obsoleta en vez de cerrarla como completada
+- T08 Verificacion anti-huerfano [RF-07,SC-005,SC-006] [RF-07,SC-005,SC-006]
+  Cruz ar MCPs de opencode.json contra los bloques 'Uso de MCPs' de los 16 agentes. Exigir: cobertura total, 0 huerfanos inversos, 0 desajustes entre arneses, y al menos una ejecucion real de agente que llame la herramienta. Adjuntar el resultado del cruce a la spec

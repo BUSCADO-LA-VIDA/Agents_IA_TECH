@@ -33,10 +33,17 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
    | `context-mode` | Índice FTS5+BM25 de docs, ejecución sandbox |
    | `codebase-memory-mcp` | Grafo de conocimiento del código |
    | `markitdown` / `markitdown-mcp` | Conversión de documentos a Markdown |
-   | `tokenslayer-mcp-server` | Esqueletos AST, call graphs, patch estructural |
+   | `tokenslayer` | Esqueletos AST, call graphs, patch estructural |
+   | `graphify` | Grafo de conocimiento con detección de comunidades |
+   | `github` | Issues, PRs, releases vía GitHub API |
+   | `playwright` | Automatización de navegador para QA visual |
 
-   - `tokenslayer-mcp-server` se registra como **4º MCP** vía `Ensure-OpenCodeMcp` con `type: local`, `command: [node, <repo>/proyect_ext/tokenslayer/mcp-server/build/index.js]`, `enabled: true`.
-   - Fuente del binario: entrada `tokenslayer-mcp-server` en `dependencias-manifest.yml`. Si el binario no existe → **WARN + instrucciones de compilar, no falla**.
+   **MCPs retirados el 2026-10-18:** `semgrep` y `context7`. Ambos estaban registrados pero **ningún agente del kit los referencia** (0 de 32 definiciones en `.github/agents/` y `.opencode/agents/`).
+
+   - `tokenslayer` se conserva por decisión explícita del usuario, aunque tampoco figure en las definiciones de agente. **Limitación conocida:** su ruta apunta a `proyect_ext/tokenslayer/mcp-server/build/index.js` y `proyect_ext/*` está gitignored, por lo que en un clon nuevo hay que instalar el binario antes de que el servidor arranque.
+   - `graphify` tiene la misma limitación: su ruta apunta a `graphify-out/graph.json` y ese directorio está gitignored.
+   - `opencode.json` usa la **forma V2**: servidores bajo `mcp.servers` y tiempos en `mcp.timeout` (`startup` / `catalog` / `execution`). Ver `Documentacion/Agents_IA_TECH/arquitectura/adr/adr-0010-opencode-v2-mcp-shape.md`.
+   - El schema V2 no admite el campo `enabled` en un servidor local: se omite (por defecto habilitado) o se usa `disabled: true`.
    - Herramientas de apoyo vía `dependencias-manifest.yml`: `spec-kit` (github/spec-kit), `graphify` (ver sección Graphify abajo). Ver `dependencias-manifest.yml` para URLs, versiones y licencias.
 
 3. **Índices:** crea/actualiza índices de `codebase-memory-mcp` + `context-mode` y verifica que los MCPs responden.
@@ -142,7 +149,7 @@ Variantes (interfaz simplificada, Spec 002 — sin parámetros / `-DryRun` / `-F
 2. Abre **Copilot Chat** (`Ctrl+Shift+I`), escribe `/` — debes ver `plan`, `tdd`, `security-review`, `build-fix`, `refactor`, `pensar`.
 3. En el selector de agente elige un rol (p. ej. **Arquitecto**, **QA Senior**).
 4. En **OpenCode** (`opencode` en terminal) comprueba que los agentes responden.
-5. Verifica MCPs: `codebase-memory-mcp`, `context-mode`, `markitdown`, `tokenslayer` responden (el bootstrap ya hace esta comprobación al final; si falla, registra el fallo en `pendientes-implementacion.md`).
+5. Verifica MCPs: `codebase-memory-mcp`, `context-mode`, `markitdown`, `tokenslayer`, `graphify`, `github` y `playwright` responden (el bootstrap ya hace esta comprobación al final; si falla, registra el fallo en `pendientes-implementacion.md`).
 
 ### Qué esperar al final
 

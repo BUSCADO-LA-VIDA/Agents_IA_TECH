@@ -65,25 +65,40 @@ La spec DEBE documentar:
 ### RF-03 — Integración en el kit
 
 La spec DEBE documentar integración en:
-- `opencode.json` con patrón `{env:XXX_CMD}` y `enabled: false` en plantilla
-- `.opencode/mcp.json` y `.vscode/mcp.json`
-- `.env.mcp` gestionado por el bootstrap
+- `opencode.json` en **forma V2**: la entrada vive bajo `mcp.servers.<nombre>` con `{ "type": "local", "command": [<ruta absoluta>, ...] }`
+- `mcp.timeout` con `startup` / `catalog` / `execution` explícitos
+- `.vscode/mcp.json` bajo su clave `servers` (formato propio de VS Code, no el de OpenCode)
 
 **Criterios de aceptación**:
-- Sin rutas absolutas versionadas.
-- Resolución vía `Resolve-McpCommand` y `Ensure-McpEnvFile`.
+- El campo `enabled` **no se usa**: el schema V2 no lo admite en `Mcp.LocalConfigEncoded` y tiene `additionalProperties: false`. Para deshabilitar se usa `disabled: true`.
+- Los servidores cuelgan de `mcp.servers`, nunca sueltos bajo `mcp`.
+- Rutas absolutas con forward slashes y entry-point JS directo (ADR-0009, bug OpenCode #5299). No usar `{env:...}` dentro de `mcp.command`.
 - Idempotente y fail-open.
+- Validado contra `https://opencode.ai/config.json` con `jsonschema` antes de darse por terminada.
 
-### RF-04 — Consumo por agentes
+### RF-04 — Consumo por agentes (EDITAR las definiciones, no solo documentar)
 
-La spec DEBE documentar cómo los agentes del kit consumen el MCP:
-- Agente orquestador que invoca el MCP
-- Parámetros de entrada/salida
-- Ejemplos de uso
+> **Documentar el consumo no es integrar el MCP. Un MCP que ningún agente declara no se usa: es una implementación incompleta.**
+
+La spec DEBE:
+1. Documentar cómo los agentes consumen el MCP: agente orquestador, parámetros de entrada/salida, ejemplos de uso.
+2. **Editar la sección "Uso de MCPs" de cada agente afectado**, agregando la línea del MCP con el nombre real de sus herramientas.
+3. Replicar el cambio en los **dos arneses**: `.github/agents/<nombre>.agent.md` y `.opencode/agents/<nombre>.md`, con bloques idénticos.
+4. Declarar el MCP en el transversal si aplica a todos los agentes, o en la lista por rol si es específico.
+
+**Reparto vigente** (detalle y tabla por rol en la spec 020, RF-05):
+
+| MCP | Dónde se declara |
+|---|---|
+| `context-mode`, `codebase-memory-mcp`, `markitdown`, `graphify`, `tokenslayer` | transversal: los 16 agentes |
+| `context7` | `Agent-SSD`, `analista_tecnico`, `api-developer`, `arquitecto`, `documentador`, `frontend-developer`, `pensador`, `plataformador`, `qa-senior`, `upgrade_framework` |
+| `github` | `api-developer`, `devops`, `frontend-developer`, `gitflow`, `plataformador`, `security-auditor` |
+| `playwright` | `devops`, `frontend-developer`, `qa-senior` |
 
 **Criterios de aceptación**:
-- Al menos un ejemplo de llamada real con agente.
-- Documentado en `quickstart.md`.
+- Al menos un ejemplo de llamada real con agente, documentado en `quickstart.md`.
+- Cada agente afectado tiene la línea del MCP en su bloque "Uso de MCPs".
+- 0 desajustes entre `.github/agents/` y `.opencode/agents/` para el mismo agente.
 
 ### RF-05 — Uso integrado
 
@@ -94,6 +109,22 @@ La spec DEBE documentar uso integrado en flujo SSD:
 **Criterios de aceptación**:
 - Mapa de flujo con el MCP incluido.
 - Criterios de éxito medibles.
+
+### RF-07 — Verificación anti-huérfano (obligatoria antes de cerrar)
+
+> Ninguna integración de MCP se cierra sin cruzar la configuración contra las definiciones de agente.
+
+Al cerrar una spec de integración se DEBE ejecutar el cruce y adjuntar el resultado:
+
+| Comprobación | Criterio de cierre |
+|---|---|
+| Cobertura | Todo MCP de `opencode.json` aparece en al menos un bloque "Uso de MCPs" de agente |
+| Sin huérfanos | Ningún agente declara un MCP que no esté en `opencode.json` |
+| Paridad de arneses | Bloques MCP idénticos entre `.github/agents/` y `.opencode/agents/`, 0 desajustes |
+| Integridad | Frontmatter intacto, UTF-8 sin BOM, finales de línea preservados |
+| Uso real | Al menos una ejecución del agente que **llama** el MCP, no solo lo declara |
+
+**Regla de interpretación**: si el cruce da cero agentes para un MCP instalado, **el defecto está en los agentes**, no en el MCP. La corrección es editar los agentes, no retirar el MCP.
 
 ### RF-06 — Gobernanza y trazabilidad
 
@@ -124,7 +155,8 @@ flowchart TD
     B --> C[RF-02 Instalación: comando + verificación]
     C --> D[RF-03 Integración: opencode.json + .env.mcp + mcp.json]
     D --> E[RF-04 Consumo: agente orquestador + ejemplo]
-    E --> F[RF-05 Uso integrado: flujo SSD + métricas]
+    E --> E2
+    E2 --> F[RF-05 Uso integrado: flujo SSD + métricas]
     F --> G[Review Security + QA]
     G --> H[Cerrar spec con gitflow]
 ```
@@ -145,6 +177,8 @@ flowchart TD
 - **SC-002**: `opencode.json` versionado sin rutas absolutas.
 - **SC-003**: Bootstrap activa el MCP con `enabled: true` si está instalado.
 - **SC-004**: `quickstart.md` permite validar instalación y consumo en <5 min.
+- **SC-005**: Cobertura de agentes = 100%. Todo MCP registrado es declarado por al menos un agente, con 0 desajustes entre arneses.
+- **SC-006**: Evidencia de uso real: al menos una ejecución de agente por MCP que llame la herramienta y devuelva resultado.
 
 ---
 

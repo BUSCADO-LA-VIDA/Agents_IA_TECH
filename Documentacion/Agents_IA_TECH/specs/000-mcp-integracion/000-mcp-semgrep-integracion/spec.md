@@ -120,3 +120,17 @@ La entrada DEBE existir en `.opencode/mcp.json` y `.vscode/mcp.json` con el mism
 - OpenCode soporta interpolación `{env:SEMGREP_MCP_CMD}`.
 - La herramienta expone interfaz stdio y binario verificable con `semgrep --version`.
 - El usuario acepta instalar la herramienta externa manualmente si falla el auto-detect.
+
+---
+
+## Addendum 2026-10-18 — Paridad incompleta y retiro pendiente de decisión
+
+La tarea **T04 "Paridad configuraciones"** de esta spec se dio por cumplida (`[x]`) tras verificar que el MCP aparecía en `opencode.json` y `.vscode/mcp.json`. Esa verificación era **insuficiente**: cubría la capa de configuración, no la capa de agentes.
+
+El 2026-10-18, al cruzar los MCPs registrados contra las 32 definiciones de agente, `semgrep` resultó **0 de 32**: ningún agente del kit lo declaraba en su sección "Uso de MCPs", pese a estar instalado y con handshake verificado.
+
+El mismo cruce llevó a retirar el MCP de `opencode.json` bajo el criterio erróneo de que "cero usos" significaba "sobra". **Ese razonamiento fue corregido**: un MCP instalado que ningún agente declara es una implementación incompleta, y la corrección corresponde al agente, no al retiro del MCP. `context7` y `tokenslayer` fueron restituidos por ese motivo.
+
+**Estado actual**: `semgrep` está instalado en la máquina pero **no está en `opencode.json`** y no figura en el reparto de agentes de la spec 020 (RF-05). Queda abierta la decisión de readmitirlo junto con su declaración en `security-auditor` y `qa-senior`.
+
+**Nuevo criterio de cierre** (incorporado a la spec 020 como RF-05): una integración de MCP no se cierra por tener la entrada en la configuración, sino por tener **al menos un agente que lo declare con el nombre de sus herramientas**.

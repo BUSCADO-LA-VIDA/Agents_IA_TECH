@@ -12,6 +12,13 @@
 | ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a | Aprobación del plan |
 |----|------|-------|-------------|-------------|--------|------------|---------------------|
 | 013-T001 | 013 | Crear rama feature/ecc-integration | Rama git | `pensador` | Pendiente | `pensador` | No |
+| 020-T010 | 020 | Verificar lift preserva forma V2 | `scripts/sync/mcp/lift-opencode.ps1` debe preservar `mcp.servers` y `mcp.timeout` al fusionar contra un destino, y no reintroducir servidores sueltos bajo `mcp` (forma V1). Riesgo registrado en ADR-0010. | `plataformador` | Pendiente | `plataformador` | No |
+| 020-T011 | 020 | Decidir commit y replicacion de opencode.json | El archivo quedo sin commitear a pedido del usuario. Definir si entra al repo y si se propaga a los proyectos consumidores por `sync-kit-agents.ps1`. | `pensador` | Pendiente | `pensador` | No |
+| 020-T012 | 020 | Renovar o eliminar credencial de Groq | `GROQ_API_KEY` responde `does not exist or you do not have access` en `groq/llama-3.3-70b-versatile`. Renovar en groq.com/console o quitar de `opencode auth` para que no vuelva a ser el default por error. | usuario | Pendiente | usuario | No |
+| 020-T013 | 020 | Silenciar WARN de plugin context-mode | OpenCode autodescubre el paquete npm global `context-mode` e intenta cargarlo como plugin; su `main` es un CLI de MCP, no un plugin. No bloquea. Descartar con `"plugins": ["-context-mode"]` si molesta. | `plataformador` | Pendiente | `plataformador` | No |
+| 020-T014 | 020 | Retirar regla .env del .gitignore | El `.env` fue eliminado: OpenCode no lo lee, `{env:NAME}` se resuelve contra el entorno real del proceso. La regla de gitignore quedo sin objeto. Retirar o dejar como barrera futura. | `plataformador` | Pendiente | `plataformador` | No |
+| 020-T015 | 020 | Reconciliar specs de MCPs retirados | `000-mcp-semgrep-integracion` y `000-mcp-context7-integracion` tienen T01-T05 en `[x]` pero los MCPs se retiraron del `opencode.json` del KIT el 2026-10-18 por tener 0 de 32 agentes que los referencien. Marcar como superadas o reescribir el alcance. | `pensador` | Pendiente | `pensador` | No |
+| 020-T016 | 020 | Resolver portabilidad de graphify | `opencode.json` esta trackeado en git pero la entrada `graphify` apunta a `graphify-out/graph.json`, directorio gitignored (L31). En un clon nuevo el servidor no arranca. Opciones: generarlo en el bootstrap antes de levantar el servicio, o documentar que `graphify` requiere `uv graphifyy` previo. | `plataformador` | Pendiente | `plataformador` | No |
 
 ## Pendiente
 

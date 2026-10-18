@@ -1,9 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "region": "global",
-  "_note": "WORKAROUND OpenCode bug #5299: {env:...} no se resuelve de forma consistente en el arranque, por lo que los comandos MCP van HARCODEADOS con rutas absolutas (forward slashes). No commitear este archivo en repos publicos; usar .env.mcp + bootstrap cuando OpenCode corrija la interpolacion. MCPs extendidos (testsprite/sentry/semgrep/playwright/pieces/perplexity/context7/github) NO incluidos: no estan instalados en la maquina.",
-  "model": "groq-custom/llama-3.3-70b-versatile",
-  "small_model": "groq-custom/llama-3.1-8b-instant",
+  "_note": "Configuración MCP activa (spec 020 + Art-VII). Rutas de MCPs hardcodeadas = fuente de verdad del kit maestro. API keys vía {env:...} para no commitear secretos. Configura tu .env local con: NVIDIA_API_KEY, DEEPINFRA_API_KEY.",
+  "model": "z-ai/glm-5.2",
+  "small_model": "deepseek-ai/deepseek-v4-flash",
   "default_agent": "build",
   "plugin": [],
   "instructions": [
@@ -47,7 +47,7 @@
       },
       "models": {
         "deepseek-ai/DeepSeek-V4-Flash-0731": {
-          "name": "DeepSeek V4 Flash 0731",
+          "name": "DeepSeek V4 Flash",
           "tool_call": true,
           "temperature": true,
           "limit": {

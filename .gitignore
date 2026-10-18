@@ -43,3 +43,4 @@ graphify-out/
 # Artefactos de pruebas Playwright MCP (snapshots locales)
 .playwright-mcp/
 
+opencode.json.backup.*

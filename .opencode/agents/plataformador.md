@@ -331,7 +331,7 @@ Cuando un archivo obligatorio no existe, **el script lo crea** con el contenido 
 | `crear_archivo` | Crear archivo faltante desde plantilla (via script) |
 | `actualizar_agente` | Reemplazar `.agent.md` por version nueva (via `Sync-TransversalKit`) |
 | `instalar_mcp` | Ejecutar comando de instalacion de MCP server (pregunta antes) |
-| `crear_estructura` | Crear carpetas faltantes (`Documentacion/<AppName>/specs|adr|bitacoras`, etc. — el script las crea al aprobar) |
+| `crear_estructura` | Crear carpetas vacías `Documentacion/<AppName>/` y `src/<AppName>/` primero cuando se solicite nueva app. Dejarlas vacías para que `plataformador-bootstrap.ps1` las poblará con Ensure-AppStructure y Ensure-SrcAppStructure. No crear carpetas en raíz. |
 | `registrar_capacidad` | Solo marcar en memoria que una capacidad esta presente |
 | `eliminar_obsoleto` | Huerfanos: preguntar borrar/conservar (default conservar con respaldo) |
 | `delegar_bootstrap` | Invocar `plataformador-bootstrap.ps1` (con `-DryRun` primero) |

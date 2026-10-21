@@ -69,7 +69,7 @@ Tareas accionables para implementar el flujo post-plataformado → speckit (3 es
 
 ## Phase 8: Tests de validación (RF-009 — Constitution Wizard Instructions)
 
-**Objetivo**: Validar que la nueva funcionalidad cumple con lo solicitado, usando como guía el ejemplo `Constitution_Wizard_Instructions.md` de trading_bot. NO incluir un nuevo proyecto en el actual — solo generar tests para verificar que la funcionalidad genera el documento estandarizado correctamente.
+**Objetivo**: Validar que la nueva funcionalidad cumple con lo solicitado, usando como guía el ejemplo `Constitution_Wizard_Instructions.md`. NO incluir un nuevo proyecto en el actual — solo generar tests para verificar que la funcionalidad genera el documento estandarizado correctamente.
 **Test independiente**: Verificar que al requerir ejecutar el Constitution Wizard, se genera `Documentacion/Constitution_Wizard_Instructions.md` con la estructura estándar y comandos accionables.
 
 - [x] T021 [P] [US1] Crear test de validación: verificar que al detectar constitution = plantilla genérica (RF-06), el flujo genera `Documentacion/Constitution_Wizard_Instructions.md` con la estructura estándar (lista de apps objetivo, comando único por app, comportamiento del wizard, script opcional, qué hacer después)

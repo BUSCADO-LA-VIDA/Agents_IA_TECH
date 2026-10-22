@@ -27,22 +27,27 @@ Regla: leer archivos directos gasta más tokens. Usar los MCPs primero; si no es
 
 ### Connection Procedure (Mandatory)
 1. **Identify server**: When user says "conectate a un servidor por ssh", ask for the server IP/hostname (default: `192.168.188.13`)
-2. **Execute SSH**: `ssh root@<server-ip>` (user will provide password in terminal)
-3. **Request password**: User types directly in terminal - NEVER transmit password through model
-4. **Maintain session**: Keep connection active while user requires - do NOT disconnect after each command
-5. **Upon completion**: Offer local reflection of changes and save as known solution if applicable
+2. **Clarify intent**: Siempre preguntar antes de conectar: ¿es por terminal para depurar Linux/Docker/Podman o para mirar aplicación web directamente?
+3. **Execute SSH**: `ssh root@<server-ip>` (user will provide password in terminal)
+4. **Request password**: User types directly in terminal - NEVER transmit password through model
+5. **Limite de Copilot**: Copilot NO puede mantener una sesión SSH persistente en la terminal de VSCode. No puede reutilizar sesión ni evitar lanzar ssh por cada comando. La interacción debe ser guiada: se indica el comando al usuario para que lo ejecute en la terminal de VSCode con pwsh, donde el usuario puede interactuar.
+6. **Upon completion**: Offer local reflection of changes and save as known solution if applicable
 
 ### Session Management
-- **Keep session open**: Once connected, maintain the SSH session active
-- **Do not request password each time**: After first successful connection, session remains open
-- **Session timeout**: Only request re-authentication if session has been inactive for extended period OR if explicitly requested by user
-- **Multiple commands**: Execute multiple commands within the same session without disconnecting
+- **Keep session open**: Una vez conectado, mantener la sesión activa mientras el usuario lo requiera
+- **Limitación Copilot**: Copilot no mantiene sesión SSH persistente. Guía al usuario para ejecutar comandos en la terminal de VSCode con pwsh y el usuario mantiene la sesión abierta.
+- **No solicitar contraseña cada vez**: Después de primera conexión exitosa, la sesión se mantiene en la terminal del usuario
+- **Session timeout**: Solo solicitar re-autenticación si la sesión ha estado inactiva por tiempo prolongado o si el usuario lo pide explícitamente
+- **Multiple commands**: Indicar al usuario la secuencia de comandos para ejecutar dentro de la misma sesión SSH sin desconectar
 
 ### Server Configuration
 - **Default Server**: `192.168.188.13`
 - **Default User**: `root`
 - **Server varies**: Be ready for different IPs when user specifies
 - **User provides IP**: User will indicate which server to connect to
+- **Tipología**: Por lo general servidores Linux con aplicaciones web, casi siempre Docker o Podman.
+- **Depuración en caliente**: Siempre preguntar antes de conectar. Si es terminal, depurar Linux/Docker/Podman. Si es web, mirar directamente en aplicación web.
+- **Credenciales**: Nunca solicitar usuario/contraseña al agente. El usuario proporciona credenciales directamente en la terminal de VSCode. No almacenar credenciales.
 
 ### Exceptions
 - Only DON'T connect if user explicitly indicates security risk

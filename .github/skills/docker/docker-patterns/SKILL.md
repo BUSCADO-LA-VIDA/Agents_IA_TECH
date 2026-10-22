@@ -1,4 +1,149 @@
----
+Using Single: one solver will work on your request.
+
+Read `SKILL.md`
+Completed with input: {
+  "path": "c:\\Users\\tomas\\AppData\\Local\\Programs\\Microsoft VS Code\\2d0b7506a3\\resources\\app\\extensions\\copilot\\assets\\prompts\\skills\\migrate-customizations\\SKILL.md"
+}
+
+Read `SKILL.md`, lines 1 to 148
+Completed with input: {
+  "path": "c:\\Users\\tomas\\AppData\\Local\\Programs\\Microsoft VS Code\\2d0b7506a3\\resources\\app\\extensions\\copilot\\assets\\prompts\\skills\\migrate-customizations\\SKILL.md",
+  "view_range": [
+    1,
+    148
+  ],
+  "forceReadLargeFiles": true
+}
+
+Ask User
+Completed with input: {
+  "message": "Which scope should I migrate? (Inventory: 1 user agent \"mikrotik-expert\", 12 workspace MCP servers from .vscode/mcp.json → .mcp.json.) No changes are made before a recovery bundle is created. Approval covers destination writes only; source cleanup is asked separately.",
+  "requestedSchema": {
+    "properties": {
+      "scope": {
+        "type": "string",
+        "title": "Scope",
+        "enum": [
+          "user",
+          "workspace",
+          "both"
+        ],
+        "default": "both"
+      },
+      "pr": {
+        "type": "boolean",
+        "title": "Open a pull request for workspace changes? (the workspace is not a git repo, so likely no)",
+        "default": false
+      }
+    }
+  }
+}
+
+Ran terminal command: $r='c:\Users\tomas\AppData\Local\Programs\Microsoft VS Code\2d0b7506a3\resources\app\extensions\copilot\assets\prompts\skills\migrate-customizations\references\migration-techniques.md'; Get-Content $r -Raw; '-----'; Get-Content c:\Proyectos\Generator_IA_Projects\.vscode\mcp.json -Raw; '-----'; Test-Path c:\Proyectos\Generator_IA_Projects\.mcp.json; Test-Path c:\Users\tomas\.copilot\agents\mikrotik-expert.agent.md; Get-ChildItem c:\Users\tomas\.copilot\agents -ErrorAction SilentlyContinue | select Name; Get-ChildItem c:\Users\tomas\AppData\Roaming\Code\User\workspaceStorage\customizationMigrations\d98daa8a-18cd-4d2c-a343-f20e21bbba9e -ErrorAction SilentlyContinue
+
+Read tool output
+Completed with input: {
+  "path": "C:\\Users\\tomas\\AppData\\Local\\Temp\\1792651856208-copilot-tool-output-10652-deaf41b6-6d79-4c99-a0ab-caf0357ec7f8.txt"
+}
+
+Read tool output
+Completed with input: {
+  "path": "C:\\Users\\tomas\\AppData\\Local\\Temp\\1792651856208-copilot-tool-output-10652-deaf41b6-6d79-4c99-a0ab-caf0357ec7f8.txt",
+  "view_range": [
+    1,
+    400
+  ],
+  "forceReadLargeFiles": true
+}
+
+Ran terminal command: $b='c:\Users\tomas\AppData\Roaming\Code\User\workspaceStorage\customizationMigrations\d98daa8a-18cd-4d2c-a343-f20e21bbba9e'; New-Item -ItemType Directory -Force "$b\backups" | Out-Null
+Copy-Item 'c:\Users\tomas\AppData\Roaming\Code\User\prompts\mikrotik-expert.agent.md' "$b\backups\mikrotik-expert.agent.md"
+Copy-Item 'c:\Proyectos\Generator_IA_Projects\.vscode\mcp.json' "$b\backups\vscode-mcp.json"
+Get-ChildItem $b -Recurse | select FullName,Length; Get-Content 'c:\Users\tomas\AppData\Roaming\Code\User\prompts\mikrotik-expert.agent.md' -TotalCount 15
+
+Backups are done. Group 1 (user agent): copying `mikrotik-expert.agent.md` unchanged to `C:\Users\tomas\.copilot\agents`. It won't sync via Settings Sync. Source cleanup would be asked separately.
+
+Ask User
+Completed with input: {
+  "message": "Group 1: copy user agent \"mikrotik-expert\" to ~/.copilot/agents (destination write only; source kept). Proceed?",
+  "requestedSchema": {
+    "properties": {
+      "proceed": {
+        "default": true,
+        "title": "Proceed with copy",
+        "type": "boolean"
+      }
+    }
+  }
+}
+
+Ran terminal command: New-Item -ItemType Directory -Force c:\Users\tomas\.copilot\agents | Out-Null
+Copy-Item 'c:\Users\tomas\AppData\Roaming\Code\User\prompts\mikrotik-expert.agent.md' c:\Users\tomas\.copilot\agents\mikrotik-expert.agent.md
+(Get-FileHash c:\Users\tomas\.copilot\agents\mikrotik-expert.agent.md).Hash -eq (Get-FileHash 'c:\Users\tomas\AppData\Roaming\Code\User\prompts\mikrotik-expert.agent.md').Hash
+
+Ask User
+Completed with input: {
+  "message": "Group 2: write all 12 MCP servers to c:\\Proyectos\\Generator_IA_Projects\\.mcp.json (new file, no conflicts). All use plain command/args with no variables, so they migrate as-is; `type` is kept, and `tools: [\"*\"]` is added (all tools exposed). Source .vscode\\mcp.json stays untouched; cleanup is asked separately. Note: the workspace is not a git repo, so a pull request isn't possible. Proceed?",
+  "requestedSchema": {
+    "properties": {
+      "proceed": {
+        "default": true,
+        "title": "Proceed with writing .mcp.json",
+        "type": "boolean"
+      }
+    }
+  }
+}
+
+Ran terminal command: $src=Get-Content c:\Proyectos\Generator_IA_Projects\.vscode\mcp.json -Raw | ConvertFrom-Json
+$out=[ordered]@{}
+foreach($p in $src.servers.PSObject.Properties){ $o=[ordered]@{}; foreach($q in $p.Value.PSObject.Properties){$o[$q.Name]=$q.Value}; $o['tools']=@('*'); $out[$p.Name]=$o }
+$j=[ordered]@{mcpServers=$out} | ConvertTo-Json -Depth 6
+[IO.File]::WriteAllText('c:\Proyectos\Generator_IA_Projects\.mcp.json',$j,(New-Object Text.UTF8Encoding $false))
+$c=Get-Content c:\Proyectos\Generator_IA_Projects\.mcp.json -Raw | ConvertFrom-Json
+$c.mcpServers.PSObject.Properties.Count
+# direct start test
+foreach($n in 'markitdown-mcp','codebase-memory-mcp','context-mode','testsprite','sentry','semgrep','pieces','perplexity'){ "$n : " + [bool](Get-Command $n -ErrorAction SilentlyContinue) }
+foreach($f in 'C:/Users/tomas/AppData/Roaming/npm/playwright-mcp.ps1','C:/Users/tomas/AppData/Roaming/npm/context7-mcp.ps1','C:/Users/tomas/.local/bin/github-mcp-server.exe','C:/Python314/python.exe','C:/Proyectos/Generator_IA_Projects/graphify-out/graph.json'){ "$f : " + (Test-Path $f) }
+
+Ran terminal command: $b='c:\Users\tomas\AppData\Roaming\Code\User\workspaceStorage\customizationMigrations\d98daa8a-18cd-4d2c-a343-f20e21bbba9e'
+$log=@"
+# Migration log
+Harness: Copilot (agent-host-copilotcli). Flow: d98daa8a-18cd-4d2c-a343-f20e21bbba9e. Date: 2026-10-22. Scope chosen: both (PR requested, but workspace is not a git repo -> not possible).
+- Backups: backups\mikrotik-expert.agent.md, backups\vscode-mcp.json (made before any write).
+- Group 1 (approved): copied user agent mikrotik-expert.agent.md from VS Code User\prompts to C:\Users\tomas\.copilot\agents (Copy-Item); SHA256 hash identical. Source kept.
+- Group 2 (approved): generated c:\Proyectos\Generator_IA_Projects\.mcp.json from .vscode\mcp.json with 12 servers, each with tools ["*"] added; JSON parsed OK. No conflicts. Source kept.
+- Direct checks: commands testsprite, sentry, pieces, perplexity were not found on PATH (others and absolute paths exist). Runtime discovery in the Copilot harness NOT verified.
+- Cleanup: deferred; no source removed.
+"@
+Set-Content "$b\migration-log.md" $log -Encoding UTF8
+$rs=@"
+# Restore
+1. Delete C:\Users\tomas\.copilot\agents\mikrotik-expert.agent.md (new copy).
+2. Delete c:\Proyectos\Generator_IA_Projects\.mcp.json (new file; did not exist before).
+3. Sources were never modified; backups\ hold byte-for-byte copies if needed.
+"@
+Set-Content "$b\restore.md" $rs -Encoding UTF8
+@'
+{"version":1,"migrationFlowId":"d98daa8a-18cd-4d2c-a343-f20e21bbba9e","cancelled":false,"results":[{"category":"userData","scope":"user","customizationType":"agent","outcome":"migrated","count":1},{"category":"mcpServers","scope":"workspace","customizationType":"mcpServer","outcome":"migrated","count":12}]}
+'@ | Set-Content "$b\migration-results.json" -Encoding UTF8
+Get-ChildItem $b -Recurse -File | select Name
+
+Both groups are copied, but I couldn't check that Copilot actually loads any of them, so I deleted nothing. That covers the `mikrotik-expert` agent and all 12 MCP servers.
+
+**Migrated**
+- **User agent:** I copied `mikrotik-expert.agent.md` unchanged to `C:\Users\tomas\.copilot\agents`, and the file hash matches the original. It won't follow Settings Sync, and the original copy is still in the VS Code profile.
+- **MCP servers:** I wrote all 12 servers to `.mcp.json`. They had no variables or unsupported properties, so I only added `tools: ["*"]`, which exposes every tool each server offers. The file parses as valid JSON, and `.vscode/mcp.json` is untouched.
+
+**Not verified**
+- **Runtime checks:** I haven't confirmed the servers start or appear in the Copilot Agent Host. I only confirmed the file shape.
+- **Missing commands:** `testsprite`, `sentry`, `pieces` and `perplexity` weren't found on PATH on this machine, so they may fail to start.
+- **Pull request:** I skipped it because the workspace isn't a git repository.
+
+**Cleanup**
+- I haven't removed the old agent file or the entries in `.vscode/mcp.json`. Remove them only after you've confirmed the migrated ones work in a new session. That confirmation is a separate approval.
+
+The recovery bundle is at `C:\Users\tomas\AppData\Roaming\Code\User\workspaceStorage\customizationMigrations\d98daa8a-18cd-4d2c-a343-f20e21bbba9e`. It holds the backups, the migration log, restore steps, and the results file. To undo, delete the two new files, as described in `restore.md`.---
 name: docker-patterns
 description: "Use when: creating Dockerfiles, docker-compose setups, or containerizing applications. Especializado en docker-compose y depliegues personalizados."
 user-invocable: true

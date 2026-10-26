@@ -135,3 +135,27 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Objetivo**: Forzar flujo SSD+Speckit mediante reglas obligatorias en agents y gatekeeper en pensador.
 - **Artefactos**: spec.md, plan.md, tasks.md
 
+## Especificación 024 - Hooks de gobernanza y determinismo
+- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados
+- **Ubicación**: specs/024-hooks-gobernanza-determinismo/
+- **Objetivo**: Hooks pre-commit, gate PR, checksum Speckit y determinismo de harnesses
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
+
+## Especificación 025 - Actualización automática herramientas externas
+- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados
+- **Ubicación**: specs/025-actualizacion-herramientas-externas/
+- **Objetivo**: Hook diario y CI semanal para upgrade_framework y propagación vía sync-kit
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
+
+## Especificación 026 - Agente developer único
+- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados
+- **Ubicación**: specs/026-agente-developer-unico/
+- **Objetivo**: Unificar implementadores en un agente developer con skills especializadas y context7
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
+
+## Especificación 027 - Patrón estructura de proyecto
+- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados
+- **Ubicación**: specs/027-patron-estructura-proyecto/
+- **Objetivo**: Estructura canónica obligatoria Documentacion/<App>/ + src/<App>/ y validación
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
+

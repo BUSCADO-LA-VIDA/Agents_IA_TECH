@@ -74,7 +74,7 @@ El pipeline **NUNCA salta fases**. Cada fase produce su artefacto. La validacion
 | 3️⃣ **Tasks** | `speckit-tasks` | `tasks.md` | "Apruebas las tasks?" | `pensador` (ejecuta) |
 | 4️⃣ **Analyze** | `speckit-analyze` | `analyze.md` + ADRs + Threat Model | "Apruebas el analisis?" | `arquitecto` (ADRs, guardrails) + `security-auditor` (threat model, riesgos) |
 | 5️⃣ **Converge** | `speckit-converge` | `converge.md` + docs consolidadas | "Apruebas la convergencia?" | `documentador` (flujos, templates, versionado) |
-| 6️⃣ **Implement** | `speckit-implement` | Codigo en `src/<App>/` + tests | Por task individual | `api-developer` / `frontend-developer` / `devops` / `qa-senior` segun expertise |
+| 6️⃣ **Implement** | `speckit-implement` | Codigo en `src/<App>/` + tests | Por task individual | `developer` según dominio |
 
 **Reglas del pipeline:**
 - NO saltes fases -- orden estricto: specify -> plan -> tasks -> analyze -> converge -> implement
@@ -384,9 +384,7 @@ Cuando el usuario **confirma**, actualizas `Documentacion/<AppName>/pendientes-i
 
 | Orden | Agente | Cuando invocarlo | Skill Speckit |
 |-------|--------|------------------|---------------|
-| 5 | `api-developer` | Tasks backend, APIs, modelos, DB | speckit-implement |
-| 7 | `devops` | Tasks infra, CI/CD, containers | speckit-implement |
-| 8 | `qa-senior` | Tasks testing, quality gates | speckit-implement |
+| 5 | `developer` | Tasks backend, frontend, infra, testing | speckit-implement |
 | 9 | `solucionador` | Solo SSH remoto para diagnosticar/resolver | - |
 | 10 | `plataformador` | Proyecto nuevo, nivelar, instalar MCPs | - |
 | 11 | `analista-tecnico` | Investigacion, POCs, evaluacion libs | - |

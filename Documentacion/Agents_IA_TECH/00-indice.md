@@ -148,7 +148,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
 
 ## Especificación 026 - Agente developer único
-- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados
+- **Estado**: Completada — flujo Speckit completo spec/plan/tasks/analyze/converge, agentes obsoletos eliminados y Constitución actualizada
 - **Ubicación**: specs/026-agente-developer-unico/
 - **Objetivo**: Unificar implementadores en un agente developer con skills especializadas y context7
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md

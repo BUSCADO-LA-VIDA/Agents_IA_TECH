@@ -105,6 +105,7 @@
 | 028-T01 | 028 | Crear ADR-0011 public docs routing | ADR-0011 aceptada con routing src/<App>/docs/ y README*.md | `arquitecto` | `[x]` | `arquitecto` | Sí |
 | 028-T02 | 028 | Actualizar Constitution Art.VII | Whitelist actualizada con routing docs públicas | `pensador` | `[x]` | `pensador` | Sí |
 | 028-T03 | 028 | Actualizar índice 00-indice.md | Entrada Spec 028 añadida | `documentador` | `[x]` | `documentador` | Sí |
+| 028-T04 | 028 | Implementar skill public-documentation | Crear skill public-documentation y actualizar pensador con routing docs públicas | `developer` | `[x]` | `developer` | Sí |
 
 | 002-T026 | 002 | Respaldo git antes de actualizar kit | Realizar respaldo git de seguridad antes de actualizar el kit. | `devops` | `[x]` | `devops` | Si |
 | 002-T027 | 002 | Actualizar kit (plataformador-bootstrap) | Modificar plataformador-bootstrap.ps1 con interfaz simplificada y parámetros validados. | `plataformador` | `[x]` | `plataformador` | Hecho: bootstrap simplificado a sin-params/`-DryRun`/`-Force` el 2026-10-10. |

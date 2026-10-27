@@ -159,3 +159,9 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Objetivo**: Estructura canónica obligatoria Documentacion/<App>/ + src/<App>/ y validación
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
 
+## Especificación 028 - Public Docs Routing
+- **Estado**: En proceso — spec/plan/tasks creados vía Speckit, ADR-0011 aceptada
+- **Ubicación**: specs/028-public-docs-routing/
+- **Objetivo**: Routing docs públicas a `src/<App>/docs/` y README a `src/<App>/README*.md`; delegación documentador→developer
+- **Artefactos**: spec.md, plan.md, tasks.md, ADR-0011-public-docs-routing.md
+

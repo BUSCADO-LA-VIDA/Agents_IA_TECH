@@ -1,10 +1,10 @@
 # Pendientes de implementación — Agents_IA_TECH
 
 ## Estado general del proyecto
-- **Última actualización:** 2026-10-07
+- **Última actualización:** 2026-10-27
 - **Fase actual:** implement
-- **Specs con tareas:** 12
-- **Total de tareas inventariadas:** 148
+- **Specs con tareas:** 13
+- **Total de tareas inventariadas:** 151
 - **Próxima tarea:** Ver sección "Pendiente" para la próxima tarea por ejecutar (017-T002, 018-T001, 000‑mcp‑testsprite‑T01, etc.).
 
 ## Sin asignar
@@ -102,6 +102,9 @@
 | 018-T007 | 018 | Actualizar gitflow, plataformador, analista‑tecnico | Añadir reglas Scrum a gitflow, plataformador, analista‑tecnico. | `pensador` | `[x]` | `pensador` | Si |
 | 018-T008 | 018 | Validar Constitución Art‑VII whitelist paths | Validar que la whitelist de paths Art‑VII está correcta y respeta Art.IX (sin placeholders). | `pensador` | `[x]` | `pensador` | Si |
 | 018-T009 | 018 | Converge documentación y actualizar 00‑indice.md | Converger la documentación y actualizar el índice 00‑indice.md con el nuevo formato. | `pensador` | `[x]` | `pensador` | Si |
+| 028-T01 | 028 | Crear ADR-0011 public docs routing | ADR-0011 aceptada con routing src/<App>/docs/ y README*.md | `arquitecto` | `[x]` | `arquitecto` | Sí |
+| 028-T02 | 028 | Actualizar Constitution Art.VII | Whitelist actualizada con routing docs públicas | `pensador` | `[x]` | `pensador` | Sí |
+| 028-T03 | 028 | Actualizar índice 00-indice.md | Entrada Spec 028 añadida | `documentador` | `[x]` | `documentador` | Sí |
 
 | 002-T026 | 002 | Respaldo git antes de actualizar kit | Realizar respaldo git de seguridad antes de actualizar el kit. | `devops` | `[x]` | `devops` | Si |
 | 002-T027 | 002 | Actualizar kit (plataformador-bootstrap) | Modificar plataformador-bootstrap.ps1 con interfaz simplificada y parámetros validados. | `plataformador` | `[x]` | `plataformador` | Hecho: bootstrap simplificado a sin-params/`-DryRun`/`-Force` el 2026-10-10. |

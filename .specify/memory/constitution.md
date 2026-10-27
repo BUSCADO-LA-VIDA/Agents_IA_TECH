@@ -119,7 +119,7 @@ El agente `upgrade_framework` es responsable de:
 
 Este principio faltaba en la v1.0.0 pese a ser la regla mas aplicada del kit, por eso es articulo propio. Cada agente pertenece a un tier y cada tier tiene una **whitelist de escritura**. Escribir fuera de la whitelist es violacion de la constitution, no un bug menor.
 
-| Tier | Agentes | Escribe codigo | Rutas permitidas |
+| Tier | Agentes | Escribe codigo | Rutas permitidas | Nota: docs públicas en src/<App>/docs/ y README en src/<App>/|
 |------|---------|:---:|---------------------|
 | **Documental** | `pensador`, `arquitecto`, `documentador`, `security-auditor` | No | `Documentacion/<AppName>/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md` |
 | **Documental extendido** | `Agent-SSD` | No | `src/<App>/.specify/` (**solo esa subcarpeta**), `Documentacion/<AppName>/specs/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md` |
@@ -263,3 +263,5 @@ Este documento se genera y revisa mediante el **Constitution Wizard**, que funci
 **Workflow**: el ciclo de vida incorpora el tier `Agent-SSD` creado por ADR-0005.
 
 **Pendiente para v3.0.0**: constitutionalizar formalmente el Constitution Wizard interactivo (12 bloques de preguntas) cuando el usuario lo priorice; hoy esta registrado como pendiente de prioridad baja.
+
+

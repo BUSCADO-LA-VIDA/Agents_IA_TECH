@@ -71,7 +71,7 @@ El pipeline **NUNCA salta fases**. Cada fase produce su artefacto. La validació
 | 3️⃣ **Tasks** | `speckit-tasks` | `tasks.md` | "¿Apruebas las tasks?" | `pensador` (ejecuta) |
 | 4️⃣ **Analyze** | `speckit-analyze` | `analyze.md` + ADRs + Threat Model | "¿Apruebas el análisis?" | `arquitecto` (ADRs, guardrails) + `security-auditor` (threat model, riesgos) |
 | 5️⃣ **Converge** | `speckit-converge` | `converge.md` + docs consolidadas | "¿Apruebas la convergencia?" | `documentador` (flujos, templates, versionado) |
-| 6️⃣ **Implement** | `speckit-implement` | Código en `src/<App>/` + tests | Por task individual | `api-developer` / `frontend-developer` / `devops` / `qa-senior` según expertise |
+| 6️⃣ **Implement** | `speckit-implement` | Código en `src/<App>/` + tests | Por task individual | `developer` según dominio |
 
 **Reglas del pipeline:**
 - ❌ NUNCA saltes fases — orden estricto: specify → plan → tasks → analyze → converge → implement
@@ -247,10 +247,7 @@ Tras ejecutar el bootstrap (`plataformador-bootstrap.ps1`), llevas el proyecto a
 | **Tasks** | `Agent-SSD` | Ejecuta `speckit-tasks`, documenta tasks.md (ADR-0005) | `tasks.md` |
 | **Analyze** | `arquitecto` + `security-auditor` | ADRs, guardrails, threat model (STRIDE), riesgos etiquetados `security-risk:` | `analyze.md`, ADRs en `Documentacion/<app>/specs/adr/`, threat model |
 | **Converge** | `documentador` | Flujos, templates, versionado semver, docs consolidadas | `converge.md`, `Documentacion/<app>/specs/` completo |
-| **Implement** | `api-developer` | Backend, APIs, modelos, DB, auth (tasks dominio backend) | Código en `src/<app>/` |
-| | `frontend-developer` | UI, state, componentes, accesibilidad (tasks dominio frontend) | Código en `src/<app>/` |
-| | `devops` | CI/CD, infra, containers, observabilidad (tasks dominio infra) | Código en `src/<app>/` + configs |
-| | `qa-senior` | Tests, quality gates, contract testing (tasks dominio testing) | Tests en `tests/` |
+| **Implement** | `developer` | Backend, APIs, modelos, DB, auth, UI, infra, testing (tasks multi-dominio) | Código en `src/<app>/` |
 | **Transversal** | `gitflow` | Branching/PRs en implement, merge en converge | Comandos git |
 | | `plataformador` | Nivelación proyectos, diagnóstico remoto, MCP setup | Configuración entorno |
 | | `solucionador` | Solo si SSH remoto para diagnosticar/resolver | - |
@@ -357,10 +354,10 @@ Cuando recibas una solicitud, **siempre** creá un plan estructurado que incluya
 ### Fase 4: Implement (Delegado por expertise)
 | Orden | Agente | Dominio tasks |
 |-------|--------|---------------|
-| 6 | `api-developer` | Backend, APIs, DB |
-| 6 | `frontend-developer` | UI, componentes |
-| 6 | `devops` | CI/CD, infra |
-| 6 | `qa-senior` | Tests, quality gates |
+| 6 | `developer` | Backend, APIs, DB, UI, infra, tests |
+
+
+
 
 **Contexto Previo ANTES de Implement**: codebase-memory (callers/callees, impacto) + graphify
 
@@ -387,10 +384,10 @@ Cuando el usuario **confirma**, actualizás `Documentacion/<AppName>/pendientes-
 
 | Orden | Agente | Cuándo invocarlo | Skill Speckit |
 |-------|--------|------------------|---------------|
-| 5º | `api-developer` | Tasks backend, APIs, modelos, DB | speckit-implement |
-| 6º | `frontend-developer` | Tasks UI, componentes, estado | speckit-implement |
-| 7º | `devops` | Tasks infra, CI/CD, containers | speckit-implement |
-| 8º | `qa-senior` | Tasks testing, quality gates | speckit-implement |
+| 5º | `developer` | Tasks backend, frontend, infra, testing | speckit-implement |
+
+
+
 | 9º | `solucionador` | 🔧 Solo SSH remoto para diagnosticar/resolver | - |
 | 10º | `plataformador` | 🏗️ Proyecto nuevo, nivelar, instalar MCPs | - |
 | 11º | `analista-tecnico` | 🔬 Investigación, POCs, evaluación libs | - |

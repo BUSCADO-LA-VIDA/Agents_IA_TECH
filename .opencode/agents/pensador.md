@@ -250,10 +250,7 @@ Tras ejecutar el bootstrap (`plataformador-bootstrap.ps1`), llevas el proyecto a
 | **Tasks** | `Agent-SSD` | Ejecuta `speckit-tasks`, documenta tasks.md (ADR-0005) | `tasks.md` |
 | **Analyze** | `arquitecto` + `security-auditor` | ADRs, guardrails, threat model (STRIDE), riesgos etiquetados `security-risk:` | `analyze.md`, ADRs en `Documentacion/<app>/specs/adr/`, threat model |
 | **Converge** | `documentador` | Flujos, templates, versionado semver, docs consolidadas | `converge.md`, `Documentacion/<app>/specs/` completo |
-| **Implement** | `api-developer` | Backend, APIs, modelos, DB, auth (tasks dominio backend) | Codigo en `src/<app>/` |
-| | `frontend-developer` | UI, state, componentes, accesibilidad (tasks dominio frontend) | Codigo en `src/<app>/` |
-| | `devops` | CI/CD, infra, containers, observabilidad (tasks dominio infra) | Codigo en `src/<app>/` + configs |
-| | `qa-senior` | Tests, quality gates, contract testing (tasks dominio testing) | Tests en `tests/` |
+| **Implement** | `developer` | Backend, APIs, modelos, DB, auth, UI, infra, testing (tasks multi-dominio) | Codigo en `src/<app>/` |
 | **Transversal** | `gitflow` | Branching/PRs en implement, merge en converge | Comandos git |
 | | `plataformador` | Nivelacion proyectos, diagnostico remoto, MCP setup | Configuracion entorno |
 | | `solucionador` | Solo si SSH remoto para diagnosticar/resolver | - |
@@ -360,10 +357,7 @@ Cuando recibas una solicitud, **siempre** crea un plan estructurado que incluya 
 ### Fase 4: Implement (Delegado por expertise)
 | Orden | Agente | Dominio tasks |
 |-------|--------|---------------|
-| 6 | `api-developer` | Backend, APIs, DB |
-| 6 | `frontend-developer` | UI, componentes |
-| 6 | `devops` | CI/CD, infra |
-| 6 | `qa-senior` | Tests, quality gates |
+| 6 | `developer` | Backend, APIs, DB, UI, infra, tests |
 
 **Contexto Previo ANTES de Implement**: codebase-memory (callers/callees, impacto) + graphify
 
@@ -391,7 +385,6 @@ Cuando el usuario **confirma**, actualizas `Documentacion/<AppName>/pendientes-i
 | Orden | Agente | Cuando invocarlo | Skill Speckit |
 |-------|--------|------------------|---------------|
 | 5 | `api-developer` | Tasks backend, APIs, modelos, DB | speckit-implement |
-| 6 | `frontend-developer` | Tasks UI, componentes, estado | speckit-implement |
 | 7 | `devops` | Tasks infra, CI/CD, containers | speckit-implement |
 | 8 | `qa-senior` | Tasks testing, quality gates | speckit-implement |
 | 9 | `solucionador` | Solo SSH remoto para diagnosticar/resolver | - |

@@ -15,7 +15,7 @@ A main orchestrator must coordinate all transversal agents, enabling communicati
 
 El orquestador principal es el **`pensador`**. Segun ADR-0005, el `pensador` **nunca implementa codigo**: delega la ejecucion de los comandos Speckit en el **`Agent-SSD`** (tier documental extendido), valida los artefactos que devuelve y gobierna el ciclo de fases (specify → plan → tasks → analyze → converge → implement). El `Agent-SSD` **nunca auto-continua** a la fase siguiente: el pipeline lo gobierna el `pensador`. La razon del tier separado es que los agentes documentales no pueden escribir en `src/<App>/.specify/`, y ese subcarpeta es precisamente donde Speckit necesita escribir.
 
-La matriz de delegacion es explicita y corta: `pensador` → Think Map → delega unico; `Agent-SSD` → ejecucion Speckit + documentacion de artefactos; implementadores (`api-developer`, `frontend-developer`, `devops`) → codigo; `qa-senior` → tests y veredictos; `security-auditor` → revisiones; `gitflow` → git; `solucionador` / `plataformador` → plataforma. Un agente que actua fuera de su fila no esta delegando: esta improvisando.
+La matriz de delegacion es explicita y corta: `pensador` → Think Map → delega unico; `Agent-SSD` → ejecucion Speckit + documentacion de artefactos; implementadores (`developer`) → código y tests; `security-auditor` → revisiones; `gitflow` → git; `solucionador` / `plataformador` → plataforma. Un agente que actua fuera de su fila no esta delegando: esta improvisando.
 
 ### III. Specification-Driven Development
 All agent behavior must be defined in structured specifications (specs) before implementation. Specs must be machine-readable (JSON/YAML) and human-readable, serving as the single source of truth for agent behavior, capabilities, and interfaces.
@@ -27,7 +27,7 @@ Ciclo obligatorio y sin saltos: **specify → plan → tasks → analyze → con
 ### IV. Copilot/Opencode Compatibility
 The project must work seamlessly with both GitHub Copilot and VS Code Opencode. Tool-agnostic design patterns must be used where possible, and any tool-specific integrations must be clearly documented and isolated.
 
-Las definiciones de agentes son **simetricas en los dos harnesses**: `.github/agents/<agente>.agent.md` (Copilot VS Code) y `.opencode/agents/<agente>.md` (OpenCode). Editar una obliga a editar la otra en la misma ronda; si divergen, `qa-senior` lo reporta como NO PASS.
+Las definiciones de agentes son **simetricas en los dos harnesses**: `.github/agents/<agente>.agent.md` (Copilot VS Code) y `.opencode/agents/<agente>.md` (OpenCode). Editar una obliga a editar la otra en la misma ronda; si divergen, el agente `developer` con skill de validación lo reporta como NO PASS.
 
 - **Skills**: globales y compartidas desde el workspace master (`.opencode/skills/`); no se duplican por proyecto.
 - **`.specify/`**: especifico de cada proyecto (tipicamente `<proyecto>/.specify/memory/constitution.md`).
@@ -198,7 +198,7 @@ Cuando un agente escribe en `.github/` y ese archivo tiene equivalente en `.open
 3. `analyze.md` (consistencia cruzada) + ADRs en `Documentacion/<AppName>/arquitectura/adr/` + threat model si hay superficie de seguridad
 4. `converge.md` con la documentacion consolidada y trazabilidad completa requisito → tarea
 5. Implementar asignando cada task de `tasks.md` al implementador segun su dominio; el `pensador` asigna, el implementador ejecuta
-6. Validar con `qa-senior` (tests + quality gates); si encuentra un bug, lo documenta y lo pasa al desarrollador — **no lo corrige**
+6. Validar con `developer` (tests + quality gates); si encuentra un bug, lo documenta y lo pasa a revisión — **no lo corrige**
 7. Commit con `gitflow` usando conventional commits; PR con code review obligatorio
 
 ### Code Review Requirements
@@ -206,7 +206,7 @@ All PRs must verify compliance with the constitution principles. Complexity must
 
 Verificacion de compliance = checklist de los 9 principios **mas** la whitelist de paths del tier del agente que hizo el cambio (principio VII).
 
-Un agente nuevo requiere ademas: spec en `Documentacion/<AppName>/agents/<agente>/spec.md`, definicion sincronizada en los dos harnesses, seccion Skills y seccion Idioma presentes, y veredicto PASS escrito del `qa-senior`. Sin ese veredicto, el agente no esta terminado por mas completo que parezca su definicion.
+Un agente nuevo requiere ademas: spec en `Documentacion/<AppName>/agents/<agente>/spec.md`, definicion sincronizada en los dos harnesses, seccion Skills y seccion Idioma presentes, y veredicto PASS escrito del `developer` con skill de testing. Sin ese veredicto, el agente no esta terminado por mas completo que parezca su definicion.
 
 ### Quality Gates
 Los gates son **proporcionales a la superficie del cambio**. No se exige cobertura a lo que no tiene ejecucion.
@@ -216,7 +216,7 @@ Los gates son **proporcionales a la superficie del cambio**. No se exige cobertu
 | `.ps1` (scripts del kit o de la app) | `Parser::ParseFile` con **0 errores** de sintaxis |
 | Funciones de `.ps1` | Tests Pester en `tests/*.Tests.ps1` para caminos felices y de fallo |
 | Specs (`spec.md`, `plan.md`, `tasks.md`) | `speckit-analyze` sin hallazgos CRITICAL; checklist de requisitos aprobado |
-| Agentes (`.github/` y `.opencode/`) | Sincronia entre harnesses + seccion Skills + seccion Idioma + veredicto `qa-senior` PASS escrito |
+| Agentes (`.github/` y `.opencode/`) | sincronia entre harnesses + seccion Skills + seccion Idioma + veredicto `developer` PASS escrito |
 | Seguridad / supply chain | Threat model STRIDE + `npx ecc-agentshield scan` + `.gitleaks.toml` |
 | Rutas destructivas | Allowlist + containment-check + fail-closed + test con fixture senuelo en `$env:TEMP` |
 | Artefactos regenerables | `graphify-out/`, `.env.mcp`, `proyect_ext/*` **no** versionados (verificado con `git check-ignore`) |

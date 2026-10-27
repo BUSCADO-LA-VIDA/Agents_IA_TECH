@@ -123,7 +123,7 @@ Este principio faltaba en la v1.0.0 pese a ser la regla mas aplicada del kit, po
 |------|---------|:---:|---------------------|
 | **Documental** | `pensador`, `arquitecto`, `documentador`, `security-auditor` | No | `Documentacion/<AppName>/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md` |
 | **Documental extendido** | `Agent-SSD` | No | `src/<App>/.specify/` (**solo esa subcarpeta**), `Documentacion/<AppName>/specs/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md` |
-| **Implementador** | `api-developer`, `frontend-developer`, `devops`, `qa-senior` | Si | `src/<App>/`, `tests/`, scripts de la app |
+| **Implementador** | `developer` | Si | `src/<App>/`, `tests/`, scripts de la app |
 | **Tooling** | `gitflow` | Solo git | Ramas, commits, PRs, merges, reverts |
 | **Plataforma** | `solucionador`, `plataformador` | Si | Diagnostico remoto y nivelacion de proyectos |
 

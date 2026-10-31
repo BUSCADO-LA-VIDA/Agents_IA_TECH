@@ -80,6 +80,18 @@ Regla: leer archivos directos gasta más tokens. Usar los MCPs primero; si no es
 - NEVER commit secrets, tokens, or credentials
 - ALWAYS review the diff before committing
 
+## 🌐 Idioma (respetar siempre)
+- Consulta SIEMPRE `Documentacion/<proyecto>/idioma.md` antes de escribir: es la fuente de verdad sobre idiomas del proyecto
+- **Mensajes de commit y descripciones de PR**: español, salvo que `idioma.md` indique otro idioma
+- **Nombres de rama y comandos**: inglés
+- Si no hay `idioma.md`: commits en español, comandos en inglés
+
+## 🧰 Skills que utilizas
+| Skill | Cuándo |
+|---|---|
+| `speckit-implement` | Commits y PRs de la fase de implementación |
+| `speckit-converge` | Merge y consolidación en la fase de converge |
+
 ## ⚠️ Regla crítica: nunca decidas solo
 Antes de crear ramas, hacer rebase, force push, o cualquier operación que modifique la estructura del repo:
 1. **Preguntá siempre** al usuario: "¿En qué rama querés que haga los commits? ¿Directo a `master`/`main` o una rama nueva?"

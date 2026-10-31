@@ -3,6 +3,43 @@
 # Al clonar el repositorio principal, este manifest indica qué proyectos externos descargar
 # y qué versiones se deben usar
 
+# -----------------------------------------------------------------------------
+# Herramientas del entorno (no se clonan: son prerequisitos del runtime)
+# -----------------------------------------------------------------------------
+# Regla de gobernanza: SIEMPRE la ultima version disponible de cada herramienta.
+# Ninguna herramienta del entorno se usa con una version anterior a la ultima
+# publicada, salvo razon documentada y aprobada por el usuario.
+# Antes de usar una herramienta, se verifica su version contra la ultima disponible.
+# Referencia: skill `dependency-hygiene` y ADR-0013.
+entorno_herramientas:
+  - nombre: powershell
+    version_minima: "7.0"
+    version_recomendada: ultima
+    verificacion: "$PSVersionTable.PSVersion"
+    rol: Runtime de todos los scripts del kit (`.ps1`). `#requires -Version 7.0` en cada script.
+
+  - nombre: pester
+    version_minima: "6.0"
+    version_recomendada: ultima
+    version_verificada: "6.2.0"
+    fecha_verificacion: 2026-10-29
+    verificacion: "Get-Module -ListAvailable Pester | Select-Object -ExpandProperty Version"
+    instalacion: "Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck -AllowClobber"
+    rol: "Framework de tests de PowerShell. Requisito 6.x: los tests usan sintaxis de Pester 5+ (Should -Be, aislamiento de scope), incompatible con Pester 3.4.0 preinstalado."
+    nota_deuda: DD-08. La suite no ejecutaba por desajuste de version. Resuelto 2026-10-29.
+
+  - nombre: node
+    version_minima: "18"
+    version_recomendada: ultima
+    verificacion: "node --version"
+    rol: Runtime de los MCP servers locales (context-mode, playwright, tokenslayer, context7).
+
+  - nombre: python
+    version_minima: "3.10"
+    version_recomendada: ultima
+    verificacion: "python --version"
+    rol: Runtime de markitdown y graphify (MCP servers locales).
+
 dependencias_externas:
   - nombre: spec-kit
     url: https://github.com/github/spec-kit

@@ -39,6 +39,41 @@ Regla: leer archivos directos gasta más tokens. Usar los MCPs primero; si no es
 
 ---
 
+## 🌐 Idioma (respetar siempre)
+- Consulta SIEMPRE `Documentacion/<AppName>/idioma.md` antes de escribir: es la fuente de verdad sobre idiomas del proyecto
+- **Docs, specs, ADRs y bitácoras**: español (documentación interna), salvo que `idioma.md` indique otro idioma
+- **Código, comandos y nombres de archivo**: inglés
+- Si no hay `idioma.md`, usá estos defaults: documentación en español, código en inglés
+
+---
+
+## 🚦 dominio_check (OBLIGATORIO antes de ejecutar o delegar)
+
+1. **Define el dominio de la tarea** con el proyecto activo (cwd o `-App`):
+   - Dominio del `pensador`: `Documentacion/<AppName>/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md`
+   - Fuera de dominio: código de aplicación (`src/`), servidores, infraestructura, otro proyecto/otra app
+2. **Si la tarea está fuera de dominio: BLOQUEAR.** No escribir nada. Mostrar en consola:
+   ```
+   ⚠ Tarea fuera de dominio. ¿Qué hacemos?
+     [1] Análisis (speckit-analyze: lee y propone, no modifica)
+     [2] Delegar a Solucionador (requiere autorización explícita)
+     [3] Cerrar sesión
+   ```
+   Y **esperar el input del usuario**. Nunca asumir la opción.
+3. **Ejecutar solo la opción elegida**, y solo para esa sesión/momento:
+   - **[1] Análisis**: `speckit-analyze` lee, analiza y devuelve propuestas. Las propuestas vuelven al ciclo Speckit por el agente que corresponda. No se modifica nada.
+   - **[2] Delegar a Solucionador**: se declara alcance, se abre sesión SSH reutilizable y se registra autorización escrita en `.bootstrap-audit.log`. El `pensador` no ejecuta la operación.
+   - **[3] Cerrar sesión**: terminar sin cambios y sin dejar artefactos.
+4. **Si la tarea está en dominio**: continuar el ciclo Speckit normal, delegando TODA escritura:
+   - Docs/specs/ADRs → `Agent-SSD`, `arquitecto`, `documentador`
+   - Código/tests → `developer`
+   - Operaciones en servidor → `solucionador`
+
+**Regla de excepción**: una autorización para salir del dominio vale **solo para esa sesión o momento**. No se persiste, no se reutiliza y no se documenta como permiso permanente.
+**Regla de oro**: el `pensador` NUNCA escribe código ni configuración crítica. Siempre delega en el agente especializado con su skill y sus reglas.
+
+---
+
 ## 🛡️ Constitution Check (OBLIGATORIO antes de CUALQUIER speckit-*)
 
 **Antes de ejecutar cualquier comando `speckit-*`, DEBES verificar:**

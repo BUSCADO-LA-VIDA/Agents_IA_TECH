@@ -1,70 +1,42 @@
 ---
-tier: Documental
-description: "Use when: applying user preferences for SSH policy, git workflow and documentation format."
+tier: Documental (gobernanza)
+description: "Capa de gobernanza transversal — forma de trabajar del usuario: organización de proyectos, formato de documentación, políticas y preferencias SSH. Política conservada; procedimiento cedido a skill ssh-operations."
 tools: [read, search, edit]
 user-invocable: true
 version: "2.0"
+categories: [gobernanza]
 ---
 
-# Usuario Preferences (Updated)
+# Usuario Preferences (Gobernanza)
 
-## SSH Policy
-- Política de SSH: Conectar por SSH cuando el usuario dice "conectate al servidor por ssh"
-- Servidor por defecto: `192.168.188.13`
-- Usuario por defecto: `root`
-- **Sesión persistente**: Mantener la conexión abierta, no solicitar clave cada vez
+## Estado actual
+Esta entidad **no es un agente operativo activo**. Su rol es **gobernanza transversal**: define y conserva la política de trabajo, pero no ejecuta procedimientos directamente.
 
-## Server Configuration
-- Servidor SSH: `192.168.188.13` (o el que el usuario indique)
-- Usuario: `root`
-- **IP variable**: Estar listo para diferentes servidores cuando el usuario los especifique
+## Política (conservada)
+- **Organización de proyectos:** Estructura de directorios, convenios de nombrado, uso de `proyecto_tipo` marker
+- **Formato de documentación:** ES para docs y comentarios; EN para código y variables
+- **Políticas SSH:** Servidor `192.168.188.13`, usuario `root`, sesión persistente
+- **Preferencias de git:** backup antes de `reset --hard`, `merge --allow-unrelated-histories`
+- **Preferencias de specs:** flujo SSD+Speckit, Art. VII whitelist, resolución `task → agente` por FR-08
 
-## Git Preferences
-- Preferencia de git: Hacer backup antes de `reset --hard`
-- Preferir `git merge --allow-unrelated-histories` o backup manual de directorios
+## Procedimiento cedido a skills
+Toda ejecución procedural queda delegada a la skill correspondiente:
 
-## Documentation Format
-- ES para documentación (docs, comentarios en español)
-- EN para código (variables, funciones, clases, commits)
+| Tema | Skill responsable |
+|---|---|
+| Conexión SSH | `ssh-operations` |
+| Flujo de specs | `speckit-specify`, `speckit-plan`, `speckit-tasks` |
+| Convergencia de specs | `speckit-converge` |
+| Implementación | `speckit-implement` |
+| Análisis | `speckit-analyze` |
 
-## SSH Connection Procedure (Updated)
-1. **Primera conexión**: `ssh root@<servidor>` - el usuario provee la clave en la terminal
-2. **Sesión mantenida**: Una vez conectada, mantenerla abierta
-3. **Múltiples comandos**: Ejecutar varios comandos en la misma sesión sin desconectar
-4. **Re-autenticación**: Solo solicitar clave nuevamente si la sesión ha estado inactiva por tiempo prolongado O si el usuario lo solicita explícitamente
-5. **Al terminar**: Desconectar voluntariamente o mantener sesión para futuro uso
+**Directiva:** ningún agente MUST intentar ejecutar procedimientos que correspondan a una skill sin invocarla primero. La vía alternativa (shell, scripts inline) queda prohibida por FR-09 de Spec 030.
 
-## Session Management Rules
-- **No repetir clave**: Después de la primera conexión exitosa, la sesión permanece activa
-- **Solicitar IP**: El usuario indicará qué servidor conectarse si no es el por defecto
-- **Timeouts**: Si la sesión está inactiva mucho tiempo, pedir re-autenticación
-- **Commands in session**: Ejecutar múltiples comandos dentro de la sesión SSH sin cerrar
+## Referencias transversales
+- **Spec 030:** FR-16 (gobernanza), FR-19 (whitelist contextual), FR-08 (resolución task→agente)
+- **Skill `ssh-operations`:** procedimiento SSH reutilizable
+- **Art. X de la constitution:** expansión del Implementador en kit por `proyecto_tipo`
+- **Tabla FR-04:** whitelist efectiva por `(tier, proyecto_tipo)`
 
-## Agent Roles (Updated)
-- **Solucionador**: Permisos amplios SSH - puede iniciar, mantener y terminar sesiones
-- **Pensador**: Principalmente para auditoría/detección de errores - puede solicitar SSH cuando el contexto diagnóstico lo requiera, pero no debe iniciar conexiones de forma independiente
-
-## 📌 Ciclo de vida de specs (vinculante)
-- **Completar/Cerrar** = terminar el flujo SSD+Speckit sin saltar pasos; la spec queda lista para producción y permanece ACTIVA en `specs/`. `Cerrado` en pendientes = flujo completo/operativo.
-- **Archivar** (`specs/archived/`) = SOLO cuando el usuario indique explícitamente que algo se retira del flujo/proceso.
-- Canónico: `Documentacion/Agents_IA_TECH/specs/015-mcp-integration-flow/spec.md` (Glosario del ciclo de vida).
-<!-- LIFECYCLE-GLOSSARY-v1 -->
-
-
-## 🎯 Rol Scrum: Integración MCP
-- **Namespace**: `ecc-` (Spec 013, whitelist Art-VII).
-- **Llamada al orquestador**: `.\scripts\ecc-orchestrator.ps1 --action <tarea> [--mcp <nombre>] [--dry-run]` (`--dry-run` siempre permitido; modo real solo con aprobación del pensador).
-- **Estados**: `status` devuelve `active`/`inactive` según `proyect_ext/ECC/.ecc-levanta`.
-- **Responsable**: solo ejecuta la tarea asignada; no modifica scripts de otros MCP.
-- **Evidencia**: tras cada ejecución, registra `log-mcp-<tarea>.md` en `Documentacion/<AppName>/seguridad/`.
-- **Prohibido**: mezclar lógica de otro MCP; si hace falta otra funcionalidad, nuevo esclavo + actualizar orquestador.
-
-## 🔌 Uso de MCPs (obligatorio — ahorrar tokens)
-Consulta SIEMPRE los MCPs como herramienta primaria antes de leer archivos directos:
-- `context-mode` → `ctx_search` (búsqueda FTS5+BM25 sobre documentación indexada), `ctx_index`, `ctx_fetch_and_index`
-- `codebase-memory-mcp` → `index_repository`, `search_graph`, `query` (grafo de conocimiento del código)
-- `markitdown` → `convert_to_markdown` (conversión de formatos a Markdown)
-- `graphify` → `extract`, `query`, `explain` (conocimiento persistente del proyecto: god nodes, communities)
-- `tokenslayer` → esqueletos AST podados, `expand_node`, `get_stats` (lee código sin gastar tokens de más)
-Regla: leer archivos directos gasta más tokens. Usar los MCPs primero; si no están disponibles, leer directo como fallback.
-<!-- MCP-ROLE-v1 -->
+---
+*Esta entidad fue reclasificada de "agente par" a "capa de gobernanza" el 2026-10-29. Su frontmatter mantiene `tier: Documental` pero con marca `categories: [gobernanza]`. El procedimiento SSH y de specs fue migrado a skills dedicadas (FR-12). Política conservada tal como definió el usuario.*

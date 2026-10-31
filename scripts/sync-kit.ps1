@@ -638,12 +638,13 @@ function Sync-TransversalKit {
                 }
             } else {
                 if ((Test-Path $dst) -and (-not $Force)) {
-                    $srcHash = (Get-FileHash $src).Hash
-                    $dstHash = (Get-FileHash $dst).Hash
-                    if ($srcHash -eq $dstHash) {
-                        Write-OK "  [OK] $($item.Label) - sin cambios"
+                    $comparison = Compare-KitFileContent -Source $src -Destination $dst
+                    if ($comparison -eq 'Equal') {
+                        Write-OK "  [OK] $($item.Label) - contenido identico"
+                    } elseif ($comparison -eq 'EolOnly') {
+                        Write-Info "  [INFO] $($item.Label) - solo difiere el fin de linea"
                     } else {
-                        Write-Warn "  [SKIP] $($item.Label) - existe y difiere; usa -Force para sobrescribir (se conserva local)"
+                        Write-Warn "  [SKIP] $($item.Label) - contenido distinto; usa -Force para sobrescribir"
                     }
                     continue
                 }

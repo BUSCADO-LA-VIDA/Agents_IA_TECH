@@ -1,4 +1,4 @@
-# Índice de Agents_IA_TECH
+﻿# Índice de Agents_IA_TECH
 
 > Proyecto base de agentes y herramientas del ecosistema.
 > Generado por plataformador-bootstrap.ps1.
@@ -131,7 +131,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 
 ## Especificación 016 - Enforcement of SSD+Speckit Flow via Agents
 - **Estado**: Completada/Cerrada — flujo SSD completo, lista para producción, permanece ACTIVA en `specs/` (archivar solo al retirar del flujo)
-- **Ubicaci�n**: specs/016-ssd-enforcement/ 
+- **Ubicación**: specs/016-ssd-enforcement/ 
 - **Objetivo**: Forzar flujo SSD+Speckit mediante reglas obligatorias en agents y gatekeeper en pensador.
 - **Artefactos**: spec.md, plan.md, tasks.md
 
@@ -164,4 +164,24 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Ubicación**: specs/028-public-docs-routing/
 - **Objetivo**: Routing docs públicas a `src/<App>/docs/` y README a `src/<App>/README*.md`; delegación documentador→developer
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, ADR-0011-public-docs-routing.md, skill public-documentation
+
+## Especificación 029 - Sync honesto: EOL normalizado y `-Force` efectivo
+- **Estado**: En proceso — implementación iniciada. 37 tasks en `tasks.md`; **2 cerradas** (T028, T030); 35 pendientes. T036 fue **revertida de `[x]` a `[ ]`** el 2026-10-29 (nota en `tasks.md` L123) porque se había marcado apoyándose en `tests/upgrade_framework.Tests.ps1`, que no compila (DD-08). T025 y T036 están bloqueadas por DD-08
+- **Ubicación**: `specs/029-sync-eol-y-force-real/`
+- **Objetivo**: Que el sync distinga contenido igual / igual-salvo-EOL / distinto con mensajes observables, y que `-Force` y `-DryRun` sean flags explícitos de `Sync-TransversalKit` (sin dynamic scoping); escritura LF y bloque `mcp` local intacto
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, threat-model.md, checklists/requirements.md. Fases 1-8 de `tasks.md`; Fase 8 (T030..T037) derivada de Analyze el 2026-10-28. T038 descartada con evidencia
+- **Deudas abiertas** (registradas en `pendientes-implementacion.md`): **DD-08** (`tests/upgrade_framework.Tests.ps1` no compila: 4 errores de parseo, la suite del kit nunca corrió; bloquea T025, T036 y NFR-02 entero) y **DD-09** (NFR-02 se apoya en una suite que no toca el motor y no compila; hasta resolverlo NFR-02 es aspiración, no gate)
+
+## Especificación 030 - Whitelist contextual por tipo de proyecto y agentes como orquestadores
+- **Estado**: Especificada — Analyze **PASS con observaciones** (`arquitecto` + `security-auditor`), **Converge completado** 2026-10-29. **Implementación NO iniciada**: 66 tasks en `tasks.md`, 0 ejecutadas
+- **Ubicación**: `specs/030-whitelist-contextual-por-tipo-proyecto/`
+- **Objetivo**: Que la whitelist de escritura sea contextual al tipo de proyecto (`kit` | `consumidor`), determinista y sin fuga del kit hacia los consumidores; y replantear los agentes como orquestadores delgados con las capacidades de procedimiento en skills declaradas en el frontmatter
+- **Métricas**: 23 FR (FR-01..FR-11, FR-02b, FR-12..FR-22), 12 CA (CA-01..CA-12), 6 NFR, 66 tasks, cobertura verificada 23/23 FR y 12/12 CA
+- **Artefactos**: spec.md (1.1.0), plan.md (1.1.0), tasks.md (1.2.0), analyze.md (1.0.0), threat-model.md (1.0.0), checklists/requirements.md (1.0.0), converge.md. ADR-0013 aceptado y registrado en `arquitectura/adr/00-index.md`
+- **Decisiones pendientes** (bloquean tasks): D-01 (`usuario-preferencias` vs Constitution → bloquea T020), D-02 (`plataformador` fragmentar → task no creada), D-03 (`gitflow` retirar o delgado → bloquea T021). D-04 resuelta: `Agent-SSD` y `pensador` NO se fusionan
+- **Deudas registradas en converge.md**: 030-DD-01 (FR-11 sin cambio `C-NN` en el plan), 030-DD-02 (`terminal`/`execute` sin acotar en el consumidor), 030-DD-03 (anti-fuga del marcador sin test permanente), 030-DD-04 (skills nuevas sin validación de contenido; IP SSH propagable), 030-DD-05 ("workspace completo" del `developer` en kit sin denylist)
+
+---
+
+*Última actualización del índice: 2026-10-29 (registradas las specs 029 y 030; antes la última entrada era la 028).*
 

@@ -1,15 +1,15 @@
-﻿# Pendientes de implementaciÃ³n â€” Agents_IA_TECH
+﻿# Pendientes de implementación — Agents_IA_TECH
 
 ## Estado general del proyecto
-- **Ãšltima actualizaciÃ³n:** 2026-10-27
+- **Última actualización:** 2026-10-27
 - **Fase actual:** implement
-- **Specs con tareas:** 13
-- **Total de tareas inventariadas:** 151
-- **PrÃ³xima tarea:** Ver secciÃ³n "Pendiente" para la prÃ³xima tarea por ejecutar (017-T002, 018-T001, 000â€‘mcpâ€‘testspriteâ€‘T01, etc.).
+- **Specs con tareas:** 14
+- **Total de tareas inventariadas:** 180
+- **Próxima tarea:** 029-T001 (spec 029, sync honesto: EOL normalizado y `-Force` efectivo). Plan aprobado el 2026-10-27.
 
 ## Sin asignar
 
-| ID | Spec | Tarea | DescripciÃ³n | Responsable | Estado | Asignado a | AprobaciÃ³n del plan |
+| ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a | Aprobación del plan |
 |----|------|-------|-------------|-------------|--------|------------|---------------------|
 | 013-T001 | 013 | Crear rama feature/ecc-integration | Rama git | `pensador` | Pendiente | `pensador` | No |
 | 020-T010 | 020 | Verificar lift preserva forma V2 | `scripts/sync/mcp/lift-opencode.ps1` debe preservar `mcp.servers` y `mcp.timeout` al fusionar contra un destino, y no reintroducir servidores sueltos bajo `mcp` (forma V1). Riesgo registrado en ADR-0010. | `plataformador` | Pendiente | `plataformador` | No |
@@ -22,69 +22,69 @@
 
 ## Pendiente
 
-| ID | Spec | Tarea | DescripciÃ³n | Responsable | Estado | Asignado a | AprobaciÃ³n del plan |
+| ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a | Aprobación del plan |
 |----|------|-------|-------------|-------------|--------|------------|---------------------|
-| 000-mcp-semgrep-integracion-T01 | 000â€‘mcpâ€‘semgrepâ€‘integracion | T01 Habilitar MCP en plantilla | Habilitar MCP semgrep en plantilla con configuraciÃ³n stdio. Verificado 2026â€‘10â€‘10: entrada stdio + `{env:SEMGREP_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | SÃ­ |
+| 000-mcp-semgrep-integracion-T01 | 000‑mcp‑semgrep‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP semgrep en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:SEMGREP_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-semgrep-integracion-T02 | 000-mcp-semgrep-integracion | T02 Instalar binario y registrar ruta | CLI semgrep 1.180.0 + servidor `semgrep mcp`; pivot por deprecacion upstream (ADR-0009). | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-semgrep-integracion-T03 | 000-mcp-semgrep-integracion | T03 Fallback fail-open | WARN si binario ausente. | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-semgrep-integracion-T04 | 000-mcp-semgrep-integracion | T04 Paridad configuraciones | opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A. | `documentador` | `[x]` | `documentador` | Si |
 | 000-mcp-semgrep-integracion-T05 | 000-mcp-semgrep-integracion | T05 Verificacion viva | Handshake + 7 tools en vivo. | `qa-senior` | `[x]` | `qa-senior` | Si |
-| 000-mcp-playwright-integracion-T01 | 000â€‘mcpâ€‘playwrightâ€‘integracion | T01 Habilitar MCP en plantilla | Habilitar MCP playwright en plantilla con configuraciÃ³n stdio. Verificado 2026â€‘10â€‘10: entrada stdio + `{env:PLAYWRIGHT_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | SÃ­ |
+| 000-mcp-playwright-integracion-T01 | 000‑mcp‑playwright‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP playwright en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:PLAYWRIGHT_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-playwright-integracion-T02 | 000-mcp-playwright-integracion | T02 Instalar binario y registrar ruta | npm i -g @playwright/mcp v1.64.0; entrada hardcodeada (ADR-0009). | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-playwright-integracion-T03 | 000-mcp-playwright-integracion | T03 Fallback fail-open | WARN si binario/browsers ausentes. | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-playwright-integracion-T04 | 000-mcp-playwright-integracion | T04 Paridad configuraciones | opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A. | `documentador` | `[x]` | `documentador` | Si |
 | 000-mcp-playwright-integracion-T05 | 000-mcp-playwright-integracion | T05 Verificacion viva | Handshake + 25 tools en vivo. | `qa-senior` | `[x]` | `qa-senior` | Si |
-| 000-mcp-context7-integracion-T01 | 000â€‘mcpâ€‘context7â€‘integracion | T01 Habilitar MCP en plantilla | Habilitar MCP context7 en plantilla con configuraciÃ³n stdio. Verificado 2026â€‘10â€‘10: entrada stdio + `{env:CONTEXT7_CMD}` + args `--stdio` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | SÃ­ |
+| 000-mcp-context7-integracion-T01 | 000‑mcp‑context7‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP context7 en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:CONTEXT7_CMD}` + args `--stdio` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-context7-integracion-T02 | 000-mcp-context7-integracion | T02 Instalar binario y registrar ruta | npm i -g @upstash/context7-mcp; entrada hardcodeada (ADR-0009). | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-context7-integracion-T03 | 000-mcp-context7-integracion | T03 Fallback fail-open | WARN si binario ausente o sin red. | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-context7-integracion-T04 | 000-mcp-context7-integracion | T04 Paridad configuraciones | opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A. | `documentador` | `[x]` | `documentador` | Si |
 | 000-mcp-context7-integracion-T05 | 000-mcp-context7-integracion | T05 Verificacion viva | Handshake + resolve React real. | `qa-senior` | `[x]` | `qa-senior` | Si |
-| 000-mcp-github-integracion-T01 | 000â€‘mcpâ€‘githubâ€‘integracion | T01 Habilitar MCP en plantilla | Habilitar MCP github en plantilla con configuraciÃ³n stdio. Verificado 2026â€‘10â€‘10: entrada stdio + `{env:GITHUB_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | SÃ­ |
+| 000-mcp-github-integracion-T01 | 000‑mcp‑github‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP github en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:GITHUB_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-github-integracion-T02 | 000-mcp-github-integracion | T02 Instalar binario y registrar ruta | Binario oficial v2.0.2 SHA256 verificado en ~/.local/bin; entrada hardcodeada (ADR-0009). | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-github-integracion-T03 | 000-mcp-github-integracion | T03 Fallback fail-open | WARN si binario ausente; exige GITHUB_TOKEN (auth). | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-github-integracion-T04 | 000-mcp-github-integracion | T04 Paridad configuraciones | Entrada en opencode.json + .vscode/mcp.json; .opencode/mcp.json N/A. | `documentador` | `[x]` | `documentador` | Si |
 | 000-mcp-github-integracion-T05 | 000-mcp-github-integracion | T05 Verificacion viva | get_me=tomasecastro + latest release v2.0.2 en vivo. | `qa-senior` | `[x]` | `qa-senior` | Si |
-| 000-mcp-integracion-estandar-T01 | 000â€‘mcpâ€‘integracionâ€‘estandar | T01 Revisar organizaciÃ³n | Revisar y validar la organizaciÃ³n de integraciones MCP. Verificado 2026â€‘10â€‘10: estÃ¡ndar vigente, 8 specs individuales existen y las 8 integraciones implementadas (plantilla+resolver+WARN+quickstart+idempotencia). | `arquitecto` | `[x]` | `arquitecto` | SÃ­ |
-| 006-T001 | 006 | Pipeline postâ€‘platforming | Verificar y validar el pipeline Speckit postâ€‘platforming (spec 006). Verificado 2026â€‘10â€‘10: flujo SSD completo ejecutado en vivo en specs 002/013/015/019 (specifyâ†’planâ†’tasksâ†’implementâ†’verify). | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 008-T001 | 008 | ConfiguraciÃ³n MCP portable | Verificar y validar la configuraciÃ³n MCP portable (spec 008). Verificado 2026â€‘10â€‘10: template con tokens `{env:...}` + `enabled:false` restaurado (habÃ­a rutas absolutas commiteadas); bootstrap DryRun resuelve a rutas locales; `.vscode/` no versionado. | `documentador` | `[x]` | `documentador` | SÃ­ |
-| 009-T001 | 009 | ActualizaciÃ³n lifecycle MCP | Verificar y validar la actualizaciÃ³n del lifecycle MCP (spec 009). | `documentador` | `[x]` | `documentador` | SÃ­ |
-| 010-T001 | 010 | RemediaciÃ³n de fugas de secretos | Revisar y validar la remediaciÃ³n de fugas de secretos (spec 010). Verificado 2026â€‘10-10: `.env.mcp` y `.opencode/config.json` jamÃ¡s commiteados; sin patrones de secretos vivos en trackeados; `.gitignore` cubre `.env*`, `secrets.*`, `config.local.json`, `.opencode/config.json`, `.env.mcp`. | `devops` | `[x]` | `devops` | SÃ­ |
-| 011-T040 | 011 | Allowlist URLs | Revisar y validar la allowlist de URLs (spec 011). | `devops` | `[x]` | `devops` | SÃ­ |
-| 011-T051 | 011 | Verificar identidad | Verificar identidad de agentes y configuraciones (spec 011). | `devops` | `[x]` | `devops` | No (secciÃ³n Finalizado Security) |
-| 011-T059 | 011 | Validar DryRun | Validar ejecuciÃ³n dryâ€‘run del pipeline (spec 011). | `qa-senior` | `[x]` | `qa-senior` | No (secciÃ³n Finalizado QA) |
-| 012-T011 | 012 | Congelar spec | Congelar la spec 012 para evitar modificaciones no autorizadas. | `pensador` | `[x]` | `pensador` | No (secciÃ³n Cerrado) |
-| 013-T001 | 013 | Crear rama feature/eccâ€‘integration | Crear la rama feature/eccâ€‘integration en el repositorio. | `pensador` | `[x]` | `pensador` | No |
-| 013-T002 | 013 | Clonar ECC en proyect_ext/ECC | Clonar el repositorio ECC en el directorio proyect_ext/ECC. | `plataformador` | `[x]` | `plataformador` | SÃ­ |
-| 013-T003 | 013 | Crear matriz de comparaciÃ³n ECC â†” Agents_IA_TECH | Crear la matriz de comparaciÃ³n entre ECC y Agents_IA_TECH. | `analista-tecnico` | `[x]` | `analista-tecnico` | No |
-| 013-T004 | 013 | Crear scripts/eccâ€‘sync.ps1 | Crear el script eccâ€‘sync.ps1 para sincronizaciÃ³n de ECC. | `devops` | `[x]` | `devops` | No |
-| 013-T005 | 013 | Definir namespace `eccâ€‘` y reglas de noâ€‘duplicaciÃ³n | Definir el namespace `eccâ€‘` y reglas de noâ€‘duplicaciÃ³n asociadas. | `arquitecto` | `[x]` | `arquitecto` | No |
-| 013-T006 | 013 | Revisar y validar namespace | Revisar y validar el namespace `eccâ€‘` definido. | `pensador` | `[x]` | `pensador` | No |
+| 000-mcp-integracion-estandar-T01 | 000‑mcp‑integracion‑estandar | T01 Revisar organización | Revisar y validar la organización de integraciones MCP. Verificado 2026‑10‑10: estándar vigente, 8 specs individuales existen y las 8 integraciones implementadas (plantilla+resolver+WARN+quickstart+idempotencia). | `arquitecto` | `[x]` | `arquitecto` | Sí |
+| 006-T001 | 006 | Pipeline post‑platforming | Verificar y validar el pipeline Speckit post‑platforming (spec 006). Verificado 2026‑10‑10: flujo SSD completo ejecutado en vivo en specs 002/013/015/019 (specify→plan→tasks→implement→verify). | `pensador` | `[x]` | `pensador` | Sí |
+| 008-T001 | 008 | Configuración MCP portable | Verificar y validar la configuración MCP portable (spec 008). Verificado 2026‑10‑10: template con tokens `{env:...}` + `enabled:false` restaurado (había rutas absolutas commiteadas); bootstrap DryRun resuelve a rutas locales; `.vscode/` no versionado. | `documentador` | `[x]` | `documentador` | Sí |
+| 009-T001 | 009 | Actualización lifecycle MCP | Verificar y validar la actualización del lifecycle MCP (spec 009). | `documentador` | `[x]` | `documentador` | Sí |
+| 010-T001 | 010 | Remediación de fugas de secretos | Revisar y validar la remediación de fugas de secretos (spec 010). Verificado 2026‑10-10: `.env.mcp` y `.opencode/config.json` jamás commiteados; sin patrones de secretos vivos en trackeados; `.gitignore` cubre `.env*`, `secrets.*`, `config.local.json`, `.opencode/config.json`, `.env.mcp`. | `devops` | `[x]` | `devops` | Sí |
+| 011-T040 | 011 | Allowlist URLs | Revisar y validar la allowlist de URLs (spec 011). | `devops` | `[x]` | `devops` | Sí |
+| 011-T051 | 011 | Verificar identidad | Verificar identidad de agentes y configuraciones (spec 011). | `devops` | `[x]` | `devops` | No (sección Finalizado Security) |
+| 011-T059 | 011 | Validar DryRun | Validar ejecución dry‑run del pipeline (spec 011). | `qa-senior` | `[x]` | `qa-senior` | No (sección Finalizado QA) |
+| 012-T011 | 012 | Congelar spec | Congelar la spec 012 para evitar modificaciones no autorizadas. | `pensador` | `[x]` | `pensador` | No (sección Cerrado) |
+| 013-T001 | 013 | Crear rama feature/ecc‑integration | Crear la rama feature/ecc‑integration en el repositorio. | `pensador` | `[x]` | `pensador` | No |
+| 013-T002 | 013 | Clonar ECC en proyect_ext/ECC | Clonar el repositorio ECC en el directorio proyect_ext/ECC. | `plataformador` | `[x]` | `plataformador` | Sí |
+| 013-T003 | 013 | Crear matriz de comparación ECC ↔ Agents_IA_TECH | Crear la matriz de comparación entre ECC y Agents_IA_TECH. | `analista-tecnico` | `[x]` | `analista-tecnico` | No |
+| 013-T004 | 013 | Crear scripts/ecc‑sync.ps1 | Crear el script ecc‑sync.ps1 para sincronización de ECC. | `devops` | `[x]` | `devops` | No |
+| 013-T005 | 013 | Definir namespace `ecc‑` y reglas de no‑duplicación | Definir el namespace `ecc‑` y reglas de no‑duplicación asociadas. | `arquitecto` | `[x]` | `arquitecto` | No |
+| 013-T006 | 013 | Revisar y validar namespace | Revisar y validar el namespace `ecc‑` definido. | `pensador` | `[x]` | `pensador` | No |
 | 013-T007 | 013 | Integrar scripts ECC en el pipeline CI/CD | Integrar los scripts ECC en el pipeline de CI/CD. | `devops` | `[x]` | `devops` | No |
-| 013-T008 | 013 | Completar spec 013 â€” flujo completo, operativa | Cierre = flujo SSD completo, lista para producciÃ³n (NO archivar). | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 014-T001 | 014 | Quitar dependenciasâ€‘manifest.yml de .gitignore | Quitar el archivo dependenciasâ€‘manifest.yml de la lista de ignorado de Git. | `devops` | `[x]` | `devops` | SÃ­ |
-| 014-T002 | 014 | Crear manifest de referencia en proyect_ext/ | Crear un manifest de referencia en el directorio proyect_ext/. | `devops` | `[x]` | `devops` | SÃ­ |
-| 014-T003 | 014 | Implementar Syncâ€‘Manifest en mÃ³dulos | Implementar la sincronizaciÃ³n del manifest en los mÃ³dulos del proyecto. | `devops` | `[x]` | `devops` | SÃ­ |
-| 014-T004 | 014 | Implementar hooks postâ€‘update | Implementar hooks postâ€‘update para notificar cambios de versiÃ³n. | `devops` | `[x]` | `devops` | SÃ­ |
-| 015-T001 | 015 | Orquestador eccâ€‘orchestrator.ps1 creado y verificado | ParÃ¡metros action/mcp/dryrun, whitelist Artâ€‘VII, status/dryâ€‘run/run con marcador (75 lÃ­neas, lectura directa). | `devops` | `[x]` | `devops` | SÃ­ |
-| 015-T002 | 015 | SecciÃ³n MCP en agents (32/32 verificado) | SecciÃ³n `## ðŸŽ¯ Rol Scrum: IntegraciÃ³n MCP` en 16 `.github` + 16 `.opencode`, marcador `MCPâ€‘ROLEâ€‘v1` grep 16+16 (verificado 2026â€‘10â€‘09; se renombraron `ssh-connection-agent.md` y `usuario-preferencias.md` a `*.agent.md` + frontmatter para descubrimiento Copilot). | `documentador` | `[x]` | `documentador` | SÃ­ |
-| 015-T003 | 015 | Constitution Check formal Artâ€‘VII | El glosario del ciclo de vida (Specâ€¯015/013) y la regla en AGENTS.md sirven como evidencia formal; el check de Constitution se considera completado para cerrar el flujo. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 015-T004 | 015 | Ejecutar pipeline CI dryâ€‘run | El pipeline YAML `ci/eccâ€‘pipeline.yml` ha sido creado y verificado; la ejecuciÃ³n `--dryâ€‘run` y el reporte `reports/eccâ€‘testâ€‘dryrun.md` serÃ¡n delegados a `devops`; la tarea se considera completada para cerrar el flujo. | `devops` | `[x]` | `devops` | SÃ­ |
-| 015-T005 | 015 | Notificar agents (commit+push) | Los agents tienen la secciÃ³n MCP y el ciclo de vida (32/32 verificadas: 16 `.github` + 16 `.opencode`). El commit+push serÃ¡ realizado por `gitflow`; la tarea se considera completada para cerrar el flujo. | `gitflow` | `[x]` | `gitflow` | SÃ­ |
-| 015-T007 | 015 | Revisar y validar spec 015 integrada en Ã­ndice | Entrada 015 en `00â€‘indice.md` L20 + 32/32 agents con regla (16 `.github` + 16 `.opencode`, verificado 2026â€‘10â€‘09). | `documentador` | `[x]` | `documentador` | SÃ­ |
-| 015-T008 | 015 | Completar spec 015 â€” operativa, lista para producciÃ³n | La spec 015 estÃ¡ ACTIVA en `specs/`, verificada por lectura directa y presencia en `00â€‘indice.md` (lÃ­nea 20). Nada se moviÃ³ a `archived/`. El estado `Cerrado` en `pendientesâ€‘implementacion.md` refleja flujo completo/operativo. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 016-T001 | 016 | Crear spec, plan y tasks | Crear directorio 016â€‘ssdâ€‘enforcement y generar spec.md, plan.md, tasks.md. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 016-T002 | 016 | Actualizar agents .github/agents con regla | AÃ±adir regla en frontmatter y secciÃ³n `## ðŸŽ¯ Rol Scrum: IntegraciÃ³n MCP` a .github/agents/*.md. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 016-T003 | 016 | Actualizar agents .opencode/agents con regla | AÃ±adir regla en frontmatter y secciÃ³n `## ðŸŽ¯ Rol Scrum: IntegraciÃ³n MCP` a .opencode/agents/*.md. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 016-T004 | 016 | Actualizar pensador como gatekeeper | AÃ±adir lÃ³gica de gatekeeper en pensador.agent.md y pensador.md. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 016-T005 | 016 | Actualizar pendientesâ€‘implementacion.md con columna | AÃ±adir columna AprobaciÃ³n del plan al header y a cada fila. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 016-T006 | 016 | Validar cumplimiento | Verificar que todos los agents contienen la regla y que pendientesâ€‘implementacion.md tiene columna. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 016-T007 | 016 | Documentar y cerrar spec | Actualizar 00â€‘indice.md y marcar spec como cerrado. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 017-T001 | 017 | Crear estructura de specs para feature 017 | Crear carpeta `Documentacion/<AppName>/specs/017â€‘pendientesâ€‘implementacionâ€‘porâ€‘app/` y archivos iniciales `spec.md`, `plan.md`, `tasks.md`. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 017-T002 | 017 | Implementar lÃ³gica de actualizaciÃ³n automÃ¡tica en speckit pipeline | Modificar el pipeline Speckit para actualizar `pendientesâ€‘implementacion.md` automÃ¡ticamente al finalizar cada fase. | `Agentâ€‘SSD` | `[x]` | `Agentâ€‘SSD` | SÃ­ |
-| 017-T003 | 017 | Agregar contexto previo obligatorio a cada fase speckit | Asegurar que antes de cada `speckit-*` se ejecuta el contexto previo obligatorio con MCPs y graphify. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 017-T004 | 017 | Crear template de `pendientesâ€‘implementacion.md` por proyecto | DiseÃ±ar y crear el template con secciones obligatorias y contenido real. | `documentador` | `[x]` | `documentador` | SÃ­ |
-| 017-T005 | 017 | Prohibir placeholders en `pendientesâ€‘implementacion.md` | Implementar validaciÃ³n para asegurar que el archivo no contiene placeholders prohibidos. | `pensador` | `[x]` | `pensador` | SÃ­ |
-| 018-T001 | 018 | Actualizar plantilla pendientesâ€‘implementacionâ€‘template.md con columnas Estado y Asignado a | Actualizar plantilla con las columnas Estado y Asignado a segÃºn nuevo formato. | `pensador` | `[x]` | `pensador` | Si |
+| 013-T008 | 013 | Completar spec 013 — flujo completo, operativa | Cierre = flujo SSD completo, lista para producción (NO archivar). | `pensador` | `[x]` | `pensador` | Sí |
+| 014-T001 | 014 | Quitar dependencias‑manifest.yml de .gitignore | Quitar el archivo dependencias‑manifest.yml de la lista de ignorado de Git. | `devops` | `[x]` | `devops` | Sí |
+| 014-T002 | 014 | Crear manifest de referencia en proyect_ext/ | Crear un manifest de referencia en el directorio proyect_ext/. | `devops` | `[x]` | `devops` | Sí |
+| 014-T003 | 014 | Implementar Sync‑Manifest en módulos | Implementar la sincronización del manifest en los módulos del proyecto. | `devops` | `[x]` | `devops` | Sí |
+| 014-T004 | 014 | Implementar hooks post‑update | Implementar hooks post‑update para notificar cambios de versión. | `devops` | `[x]` | `devops` | Sí |
+| 015-T001 | 015 | Orquestador ecc‑orchestrator.ps1 creado y verificado | Parámetros action/mcp/dryrun, whitelist Art‑VII, status/dry‑run/run con marcador (75 líneas, lectura directa). | `devops` | `[x]` | `devops` | Sí |
+| 015-T002 | 015 | Sección MCP en agents (32/32 verificado) | Sección `## 🎯 Rol Scrum: Integración MCP` en 16 `.github` + 16 `.opencode`, marcador `MCP‑ROLE‑v1` grep 16+16 (verificado 2026‑10‑09; se renombraron `ssh-connection-agent.md` y `usuario-preferencias.md` a `*.agent.md` + frontmatter para descubrimiento Copilot). | `documentador` | `[x]` | `documentador` | Sí |
+| 015-T003 | 015 | Constitution Check formal Art‑VII | El glosario del ciclo de vida (Spec 015/013) y la regla en AGENTS.md sirven como evidencia formal; el check de Constitution se considera completado para cerrar el flujo. | `pensador` | `[x]` | `pensador` | Sí |
+| 015-T004 | 015 | Ejecutar pipeline CI dry‑run | El pipeline YAML `ci/ecc‑pipeline.yml` ha sido creado y verificado; la ejecución `--dry‑run` y el reporte `reports/ecc‑test‑dryrun.md` serán delegados a `devops`; la tarea se considera completada para cerrar el flujo. | `devops` | `[x]` | `devops` | Sí |
+| 015-T005 | 015 | Notificar agents (commit+push) | Los agents tienen la sección MCP y el ciclo de vida (32/32 verificadas: 16 `.github` + 16 `.opencode`). El commit+push será realizado por `gitflow`; la tarea se considera completada para cerrar el flujo. | `gitflow` | `[x]` | `gitflow` | Sí |
+| 015-T007 | 015 | Revisar y validar spec 015 integrada en índice | Entrada 015 en `00‑indice.md` L20 + 32/32 agents con regla (16 `.github` + 16 `.opencode`, verificado 2026‑10‑09). | `documentador` | `[x]` | `documentador` | Sí |
+| 015-T008 | 015 | Completar spec 015 — operativa, lista para producción | La spec 015 está ACTIVA en `specs/`, verificada por lectura directa y presencia en `00‑indice.md` (línea 20). Nada se movió a `archived/`. El estado `Cerrado` en `pendientes‑implementacion.md` refleja flujo completo/operativo. | `pensador` | `[x]` | `pensador` | Sí |
+| 016-T001 | 016 | Crear spec, plan y tasks | Crear directorio 016‑ssd‑enforcement y generar spec.md, plan.md, tasks.md. | `pensador` | `[x]` | `pensador` | Sí |
+| 016-T002 | 016 | Actualizar agents .github/agents con regla | Añadir regla en frontmatter y sección `## 🎯 Rol Scrum: Integración MCP` a .github/agents/*.md. | `pensador` | `[x]` | `pensador` | Sí |
+| 016-T003 | 016 | Actualizar agents .opencode/agents con regla | Añadir regla en frontmatter y sección `## 🎯 Rol Scrum: Integración MCP` a .opencode/agents/*.md. | `pensador` | `[x]` | `pensador` | Sí |
+| 016-T004 | 016 | Actualizar pensador como gatekeeper | Añadir lógica de gatekeeper en pensador.agent.md y pensador.md. | `pensador` | `[x]` | `pensador` | Sí |
+| 016-T005 | 016 | Actualizar pendientes‑implementacion.md con columna | Añadir columna Aprobación del plan al header y a cada fila. | `pensador` | `[x]` | `pensador` | Sí |
+| 016-T006 | 016 | Validar cumplimiento | Verificar que todos los agents contienen la regla y que pendientes‑implementacion.md tiene columna. | `pensador` | `[x]` | `pensador` | Sí |
+| 016-T007 | 016 | Documentar y cerrar spec | Actualizar 00‑indice.md y marcar spec como cerrado. | `pensador` | `[x]` | `pensador` | Sí |
+| 017-T001 | 017 | Crear estructura de specs para feature 017 | Crear carpeta `Documentacion/<AppName>/specs/017‑pendientes‑implementacion‑por‑app/` y archivos iniciales `spec.md`, `plan.md`, `tasks.md`. | `pensador` | `[x]` | `pensador` | Sí |
+| 017-T002 | 017 | Implementar lógica de actualización automática en speckit pipeline | Modificar el pipeline Speckit para actualizar `pendientes‑implementacion.md` automáticamente al finalizar cada fase. | `Agent‑SSD` | `[x]` | `Agent‑SSD` | Sí |
+| 017-T003 | 017 | Agregar contexto previo obligatorio a cada fase speckit | Asegurar que antes de cada `speckit-*` se ejecuta el contexto previo obligatorio con MCPs y graphify. | `pensador` | `[x]` | `pensador` | Sí |
+| 017-T004 | 017 | Crear template de `pendientes‑implementacion.md` por proyecto | Diseñar y crear el template con secciones obligatorias y contenido real. | `documentador` | `[x]` | `documentador` | Sí |
+| 017-T005 | 017 | Prohibir placeholders en `pendientes‑implementacion.md` | Implementar validación para asegurar que el archivo no contiene placeholders prohibidos. | `pensador` | `[x]` | `pensador` | Sí |
+| 018-T001 | 018 | Actualizar plantilla pendientes‑implementacion‑template.md con columnas Estado y Asignado a | Actualizar plantilla con las columnas Estado y Asignado a según nuevo formato. | `pensador` | `[x]` | `pensador` | Si |
 | 020-T001 | 020 | Congelar config MCP operativa como spec | Spec 020-mcp-config-operativa: 9 MCP + indices verificados en vivo como baseline. | `documentador` | `[x]` | `documentador` | Si |
 | 021-T001 | 021 | Spec + fase 1 sync-kit-agents | Spec 021 + estructura scripts/sync/ + docs + agents x3 + orquestador F1-F5 verificado. | `pensador` | `[x]` | `pensador` | Si |
 | 021-T002 | 021 | Fase 2 sync-kit-agents | kit-files + constitutions + src-structure verificados (7 capas, idempotente). | `pensador` | `[x]` | `pensador` | Si |
@@ -94,25 +94,54 @@
 | 022-T003 | 022 | Ejecutar script + verificar | sync-skills ejecutado: 76 integradas + espejo 76/76 + idempotente. | `plataformador` | `[x]` | `plataformador` | Si |
 | 022-T004 | 022 | Converge + registrar T012/021 | Backlog, indice, bitacora; T012/021 consume el script. | `documentador` | `[x]` | `documentador` | Si |
 | 023-T001 | 023 | Spec workflows ECC | Spec 023 con 2 workflows propios y 8 rechazos documentados. | `documentador` | `[x]` | `documentador` | Si |
-| 018-T002 | 018 | Migrar pendientesâ€‘implementacion.md actual a nuevo formato con estados | Migrar el archivo actual al nuevo formato con columnas Estado y Asignado a. | `pensador` | `[x]` | `pensador` | No |
-| 018-T003 | 018 | Actualizar pensador.agent.md en .github y .opencode con reglas Scrum | AÃ±adir reglas Scrum a los agentes pensador en ambos harnesses. | `pensador` | `[x]` | `pensador` | No |
-| 018-T004 | 018 | Actualizar Agentâ€‘SSD.agent.md en ambos harnesses | AÃ±adir reglas Scrum al agente Agentâ€‘SSD en .github y .opencode. | `pensador` | `[x]` | `pensador` | No |
-| 018-T005 | 018 | Actualizar arquitecto, securityâ€‘auditor, documentador | AÃ±adir reglas Scrum aarquitecto, securityâ€‘auditor, documentador. | `pensador` | `[x]` | `pensador` | No |
-| 018-T006 | 018 | Actualizar apiâ€‘developer, frontendâ€‘developer, devops, qaâ€‘senior | AÃ±adir reglas Scrum a los implementadores por dominio. | `pensador` | `[x]` | `pensador` | Si |
-| 018-T007 | 018 | Actualizar gitflow, plataformador, analistaâ€‘tecnico | AÃ±adir reglas Scrum a gitflow, plataformador, analistaâ€‘tecnico. | `pensador` | `[x]` | `pensador` | Si |
-| 018-T008 | 018 | Validar ConstituciÃ³n Artâ€‘VII whitelist paths | Validar que la whitelist de paths Artâ€‘VII estÃ¡ correcta y respeta Art.IX (sin placeholders). | `pensador` | `[x]` | `pensador` | Si |
-| 018-T009 | 018 | Converge documentaciÃ³n y actualizar 00â€‘indice.md | Converger la documentaciÃ³n y actualizar el Ã­ndice 00â€‘indice.md con el nuevo formato. | `pensador` | `[x]` | `pensador` | Si |
+| 018-T002 | 018 | Migrar pendientes‑implementacion.md actual a nuevo formato con estados | Migrar el archivo actual al nuevo formato con columnas Estado y Asignado a. | `pensador` | `[x]` | `pensador` | No |
+| 018-T003 | 018 | Actualizar pensador.agent.md en .github y .opencode con reglas Scrum | Añadir reglas Scrum a los agentes pensador en ambos harnesses. | `pensador` | `[x]` | `pensador` | No |
+| 018-T004 | 018 | Actualizar Agent‑SSD.agent.md en ambos harnesses | Añadir reglas Scrum al agente Agent‑SSD en .github y .opencode. | `pensador` | `[x]` | `pensador` | No |
+| 018-T005 | 018 | Actualizar arquitecto, security‑auditor, documentador | Añadir reglas Scrum aarquitecto, security‑auditor, documentador. | `pensador` | `[x]` | `pensador` | No |
+| 018-T006 | 018 | Actualizar api‑developer, frontend‑developer, devops, qa‑senior | Añadir reglas Scrum a los implementadores por dominio. | `pensador` | `[x]` | `pensador` | Si |
+| 018-T007 | 018 | Actualizar gitflow, plataformador, analista‑tecnico | Añadir reglas Scrum a gitflow, plataformador, analista‑tecnico. | `pensador` | `[x]` | `pensador` | Si |
+| 018-T008 | 018 | Validar Constitución Art‑VII whitelist paths | Validar que la whitelist de paths Art‑VII está correcta y respeta Art.IX (sin placeholders). | `pensador` | `[x]` | `pensador` | Si |
+| 018-T009 | 018 | Converge documentación y actualizar 00‑indice.md | Converger la documentación y actualizar el índice 00‑indice.md con el nuevo formato. | `pensador` | `[x]` | `pensador` | Si |
 
 | 002-T026 | 002 | Respaldo git antes de actualizar kit | Realizar respaldo git de seguridad antes de actualizar el kit. | `devops` | `[x]` | `devops` | Si |
-| 002-T027 | 002 | Actualizar kit (plataformador-bootstrap) | Modificar plataformador-bootstrap.ps1 con interfaz simplificada y parÃ¡metros validados. | `plataformador` | `[x]` | `plataformador` | Hecho: bootstrap simplificado a sin-params/`-DryRun`/`-Force` el 2026-10-10. |
-| 002-T028 | 002 | Restaurar cambios del proyecto | Restaurar el proyecto a su estado previo a la actualizaciÃ³n del kit. | `devops` | `[x]` | `devops` | Si |
-| 002-T029 | 002 | Verificar estado post-actualizaciï¿½n | Verificar que los MCPs y configuraciones quedan correctos despuï¿½s de la actualizaciÃ³n. | `devops` | `[x]` | `devops` | Si |
+| 002-T027 | 002 | Actualizar kit (plataformador-bootstrap) | Modificar plataformador-bootstrap.ps1 con interfaz simplificada y parámetros validados. | `plataformador` | `[x]` | `plataformador` | Hecho: bootstrap simplificado a sin-params/`-DryRun`/`-Force` el 2026-10-10. |
+| 002-T028 | 002 | Restaurar cambios del proyecto | Restaurar el proyecto a su estado previo a la actualización del kit. | `devops` | `[x]` | `devops` | Si |
+| 002-T029 | 002 | Verificar estado post-actualización | Verificar que los MCPs y configuraciones quedan correctos despuós de la actualización. | `devops` | `[x]` | `devops` | Si |
 | 002-T030 | 002 | Commit de cambios del kit (solo en repo maestro) | Hacer commit de los cambios del kit solo en el repositorio maestro (origin). | `gitflow` | `[x]` | `gitflow` | Si |
-| 002-T031 | 002 | Migrar archivo obsoleto de pendientes-implementacion.md | Migrar el archivo Documentacion/pendientes-implementacion.md (ubicaciï¿½n previa) al formato por app Documentacion/<App>/pendientes-implementacion.md o borrarlo si estï¿½ vacï¿½o. | `documentador` | `[x]` | `documentador` | Hecho: T013 migrado a formato por app y archivo anterior eliminado el 2026-10-10. |
-| 002-T032 | 002 | Sincronizar archivo constitution.md (llamado por plataformador-bootstrap) | Ejecutar sincronizaciï¿½n de constitution.md desde Documentacion a .specify/ y src/<App>/.specify/ mediante el bootstrap. | `plataformador` | `[x]` | `plataformador` | Si |
-| 002-T033 | 002 | Verificar sincronizaciï¿½n de constitution (post-bootstrap) | Confirmar que constitution.md existe en las tres ubicaciones y que la versiï¿½n de Documentaciï¿½n es la que manda. | `documentador` | `[x]` | `documentador` | Si |
+| 002-T031 | 002 | Migrar archivo obsoleto de pendientes-implementacion.md | Migrar el archivo Documentacion/pendientes-implementacion.md (ubicación previa) al formato por app Documentacion/<App>/pendientes-implementacion.md o borrarlo si está vacío. | `documentador` | `[x]` | `documentador` | Hecho: T013 migrado a formato por app y archivo anterior eliminado el 2026-10-10. |
+| 002-T032 | 002 | Sincronizar archivo constitution.md (llamado por plataformador-bootstrap) | Ejecutar sincronización de constitution.md desde Documentacion a .specify/ y src/<App>/.specify/ mediante el bootstrap. | `plataformador` | `[x]` | `plataformador` | Si |
+| 002-T033 | 002 | Verificar sincronización de constitution (post-bootstrap) | Confirmar que constitution.md existe en las tres ubicaciones y que la versión de Documentación es la que manda. | `documentador` | `[x]` | `documentador` | Si |
 | 002-T034 | 002 | Agregar constitution.md a gitignore si corresponde | Agregar constitution.md al .gitignore del proyecto si no debe versionarse (se gestiona por el kit). | `devops` | `[x]` | `devops` | Si |
-| 002-T035 | 002 | Documentar ruta de constitution en AGENTS.md | Documentar en AGENTS.md la jerarquï¿½a de prioridad y ubicaciones del archivo constitution.md. | `arquitecto` | `[x]` | `arquitecto` | Si |
+| 002-T035 | 002 | Documentar ruta de constitution en AGENTS.md | Documentar en AGENTS.md la jerarquía de prioridad y ubicaciones del archivo constitution.md. | `arquitecto` | `[x]` | `arquitecto` | Si |
+| 029-T001 | 029 | Crear `scripts/sync-kit-lib.ps1` con las cinco funciones de... | Crear `scripts/sync-kit-lib.ps1` con las cinco funciones del plan §3 (`Get-KitNormalizedBytes`, `Get-KitContentHash... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T002 | 029 | Crear `tests/sync-kit-lib.Tests.ps1` con el patron de `test... | Crear `tests/sync-kit-lib.Tests.ps1` con el patron de `tests/upgrade_framework.Tests.ps1`: `#requires -Version 7.0`... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T003 | 029 | Editar `scripts/sync-kit.ps1` (C-01 del plan) | Editar `scripts/sync-kit.ps1` (C-01 del plan): dot-source fail-closed de la lib con `Join-Path $PSScriptRoot "sync-... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T004 | 029 | En `tests/sync-kit-lib.Tests.ps1`, cubrir `Compare-KitFileC... | En `tests/sync-kit-lib.Tests.ps1`, cubrir `Compare-KitFileContent` con T-01..T-06 del plan §7: byte-identicos -> `E... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T005 | 029 | En `tests/sync-kit-lib.Tests.ps1`, cubrir T-07 | En `tests/sync-kit-lib.Tests.ps1`, cubrir T-07: la comparacion no crea, modifica ni borra archivos (hash del direct... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T006 | 029 | Correr `Invoke-Pester tests/sync-kit-lib.Tests.ps1` y ajust... | Correr `Invoke-Pester tests/sync-kit-lib.Tests.ps1` y ajustar `scripts/sync-kit-lib.ps1` hasta verde. Ningun test d... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T007 | 029 | En `tests/sync-kit-lib.Tests.ps1`, cubrir T-15 | En `tests/sync-kit-lib.Tests.ps1`, cubrir T-15: dot-source de la lib en un proceso limpio no produce salida ni escr... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T008 | 029 | Editar `scripts/sync-kit.ps1` (C-04) | Editar `scripts/sync-kit.ps1` (C-04): reemplazar el par de `Get-FileHash` de L640-649 por `Compare-KitFileContent` ... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T009 | 029 | Editar `scripts/sync-kit.ps1` (C-03) | Editar `scripts/sync-kit.ps1` (C-03): aplicar `Compare-KitFileContent` al guard de `.opencode/.gitignore` (L589-601... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T010 | 029 | Editar `scripts/sync-kit.ps1` (C-06) | Editar `scripts/sync-kit.ps1` (C-06): eliminar los `Get-FileHash` sin `-LiteralPath` de L641-642 al quedar cubierto... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T011 | 029 | Editar `scripts/sync-kit.ps1` (C-08) | Editar `scripts/sync-kit.ps1` (C-08): actualizar el bloque `# Uso:` (L20-27) documentando los tres resultados y que... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T012 | 029 | Verificar en sandbox que `opencode.json`, `AGENTS.md` y `.s... | Verificar en sandbox que `opencode.json`, `AGENTS.md` y `.specify/memory/constitution.md` reportan `[OK] ... solo d... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T013 | 029 | Editar `scripts/sync-kit.ps1` (C-02) | Editar `scripts/sync-kit.ps1` (C-02): agregar `[switch]$DryRun` y `[switch]$Force` al `param` de `Sync-TransversalK... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T014 | 029 | Editar `scripts/sync-kit.ps1` (C-07) | Editar `scripts/sync-kit.ps1` (C-07): pasar `-DryRun:$DryRun -Force:$Force` en la llamada de L712. **Sin esto, T013... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T015 | 029 | Agregar a `tests/sync-kit-lib.Tests.ps1` T-13 | Agregar a `tests/sync-kit-lib.Tests.ps1` T-13: por AST (`[System.Management.Automation.Language.Parser]::ParseFile`... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T016 | 029 | Agregar T-14 | Agregar T-14: por AST, el `CommandAst` `Sync-TransversalKit` del entrypoint incluye los argumentos `-DryRun` y `-Fo... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T017 | 029 | Verificar en sandbox CA-05 | Verificar en sandbox CA-05: con `-DryRun`, el hash del directorio destino es identico antes y despues de la corrida. | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T018 | 029 | Agregar a `tests/sync-kit-lib.Tests.ps1` T-08 y T-09 | Agregar a `tests/sync-kit-lib.Tests.ps1` T-08 y T-09: `Write-KitJsonFile` produce 0 ocurrencias de `\r\n` y exactam... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T019 | 029 | Agregar T-10, T-11 y T-12 | Agregar T-10, T-11 y T-12: `Merge-KitOpencodeJson` con `mcp` local devuelve `Merged` y conserva el `mcp` del destin... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T020 | 029 | Editar `scripts/sync-kit.ps1` (C-05) | Editar `scripts/sync-kit.ps1` (C-05): reemplazar el merge inline de L651-671 por la llamada a `Merge-KitOpencodeJso... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T021 | 029 | Verificar en sandbox CA-03/CA-04/CA-06 | Verificar en sandbox CA-03/CA-04/CA-06: tras `-Force` con `mcp` local, el bloque `mcp` es identico, hay 0 CRLF y `g... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T022 | 029 | Actualizar `Documentacion/Agents_IA_TECH/specs/002-script-p... | Actualizar `Documentacion/Agents_IA_TECH/specs/002-script-plataforming-sync-kit/spec.md`: criterio de comparacion n... | `documentador` | Pendiente | `documentador` | Si |
+| 029-T023 | 029 | Actualizar la seccion "Politica merge-no-mirror" de `README... | Actualizar la seccion "Politica merge-no-mirror" de `README.md` con el mismo criterio y los tres mensajes observabl... | `documentador` | Pendiente | `documentador` | Si |
+| 029-T024 | 029 | Verificar CA-09 por lectura de ambos archivos | Verificar CA-09 por lectura de ambos archivos: ninguno queda con el criterio viejo (hash crudo) ni describe `-Force... | `documentador` | Pendiente | `documentador` | Si |
+| 029-T025 | 029 | Correr la suite completa `Invoke-Pester tests/` y confirmar... | Correr la suite completa `Invoke-Pester tests/` y confirmar que `upgrade_framework.Tests.ps1` sigue verde (NFR-02: ... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T026 | 029 | Verificacion end-to-end de los 6 pasos del plan §7 sobre `$env | Verificacion end-to-end de los 6 pasos del plan §7 sobre `$env:TEMP` con `-KitPath`, cubriendo CA-01..CA-06 sin red. | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T027 | 029 | Aplicar DD-06 (opcional, cosmetico) | Aplicar DD-06 (opcional, cosmetico): emitir `[MERGE] opencode.json` en lugar de `[FILE]` cuando la ruta del guard a... | `plataformador` | Pendiente | `plataformador` | Si |
+| 029-T028 | 029 | Registrar en `Documentacion/Agents_IA_TECH/pendientes-imple... | Registrar en `Documentacion/Agents_IA_TECH/pendientes-implementacion.md` las tasks T001..T027 con responsable y est... | `pensador` | `[x]` | `pensador` | Si |
+| 029-T029 | 029 | Commit con conventional commits via `gitflow` | Commit con conventional commits via `gitflow`: `fix(sync): compare transversal files with normalized EOL and make -... | `gitflow` | Pendiente | `gitflow` | Si |
 
 ## En progreso
 
@@ -120,31 +149,31 @@
 
 ## Finalizada
 
-| ID | Spec | Tarea | DescripciÃ³n | Responsable | Estado | Asignado a |
+| ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a |
 |----|------|-------|-------------|-------------|--------|------------|
 | 011-T040 | 011 | Allowlist URLs | ... | `devops` | Finalizada | `devops` |
 
 ## Finalizado QA
 
-| ID | Spec | Tarea | DescripciÃ³n | Responsable | Estado | Asignado a |
+| ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a |
 |----|------|-------|-------------|-------------|--------|------------|
 | 011-T059 | 011 | Validar DryRun | ... | `qa-senior` | Finalizado QA | `qa-senior` |
 
 ## Finalizado Security
 
-| ID | Spec | Tarea | DescripciÃ³n | Responsable | Estado | Asignado a |
+| ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a |
 |----|------|-------|-------------|-------------|--------|------------|
 | 011-T051 | 011 | Verificar identidad | ... | `devops` | Finalizado Security | `devops` |
 
 ## Cerrado
 
-| ID | Spec | Tarea | DescripciÃ³n | Responsable | Estado | Asignado a |
+| ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a |
 |----|------|-------|-------------|-------------|--------|------------|
 | 012-T011 | 012 | Congelar spec | ... | `pensador` | Cerrado | `pensador` |
 | 028-T01 | 028 | Crear ADR-0011 public docs routing | ADR-0011 aceptada con routing src/<App>/docs/ y README*.md | `arquitecto` | Cerrado | `arquitecto` |
-| 028-T02 | 028 | Actualizar Constitution Art.VII | Whitelist actualizada con routing docs pÃºblicas | `pensador` | Cerrado | `pensador` |
-| 028-T03 | 028 | Actualizar Ã­ndice 00-indice.md | Entrada Spec 028 aÃ±adida | `documentador` | Cerrado | `documentador` |
-| 028-T04 | 028 | Implementar skill public-documentation | Crear skill public-documentation y actualizar pensador con routing docs pÃºblicas | `developer` | Cerrado | `developer` |
+| 028-T02 | 028 | Actualizar Constitution Art.VII | Whitelist actualizada con routing docs públicas | `pensador` | Cerrado | `pensador` |
+| 028-T03 | 028 | Actualizar índice 00-indice.md | Entrada Spec 028 añadida | `documentador` | Cerrado | `documentador` |
+| 028-T04 | 028 | Implementar skill public-documentation | Crear skill public-documentation y actualizar pensador con routing docs públicas | `developer` | Cerrado | `developer` |
 | 026-T01 | 026 | Crear research.md con validación de skills y context7 | Validar skills existentes y disponibilidad context7 | `pensador` | Cerrado | `pensador` |
 | 026-T02 | 026 | Generar data-model.md del agente developer y mapeo skills | Estructura agente developer y mapeo skills → dominios | `documentador` | Cerrado | `documentador` |
 | 026-T03 | 026 | Definir contracts de paridad harnesses .github ↔ .opencode | Paridad harnesses .github ↔ .opencode | `arquitecto` | Cerrado | `arquitecto` |
@@ -157,3 +186,44 @@
 | 026-T10 | 026 | Validar paridad harnesses y ausencia de agentes obsoletos en destino | Validar paridad y ausencia agentes obsoletos | `developer` | Cerrado | `developer` |
 | 026-T11 | 026 | Verificar compliance Constitución y sincronía harnesses | QA compliance Constitución y sincronía | `developer` | Cerrado | `developer` |
 | 026-T12 | 026 | Cerrar spec 026 en pendientes-implementacion.md | Cierre formal spec 026 | `pensador` | Cerrado | `pensador` |
+
+
+## Deuda tecnica abierta
+
+| ID | Deuda | Evidencia | Disparador para retomarla | Estado |
+|----|-------|-----------|---------------------------|--------|
+| DD-01 | El nivel 1 `.specify/memory/constitution.md` sigue en v2.0.0 con la tabla de Art. VII malformada (5 columnas de titulo, 4 de separador) | `edit` denegado al tier documental y a `Agent-SSD`; solo `plataformador` tiene `edit: "*": allow`. El nivel 2 ya fue reconciliado a v2.1.0 | Correr desde `plataformador` antes de cualquier `-Force` de `plataformador-bootstrap.ps1`, que revertiria el nivel 2 | Abierta |
+| DD-02 | `sync-constitutions.ps1` L59-60 y `sync-kit-files.ps1` L117-118 comparan con hash crudo: mismo defecto que la 029 | El flujo 021 no esta cableado (cero invocaciones) y `scripts/sync/` esta excluido de la propagacion | Cuando el flujo 021 se cablee, antes de retirar `sync-kit.ps1` | Abierta |
+| DD-03 | `sync-skills.ps1` L116-117 compara con hash crudo | Impacto acotado: copia redundante, sin perdida de datos ni sobrescritura indebida | Oportunista, cuando se toque ese script | Abierta |
+| DD-04 | Mapas de manifiesto con hash crudo: `sync-agents-github/opencode/vscode.ps1` y `sync-src-structure.ps1` | No son decisiones de escritura, son registro de drift | Solo si el drift empieza a reportar falsos positivos | Abierta |
+| DD-05 | Un archivo con EOL distinto figura como drift permanente en los manifiestos | Mismo mecanismo que el defecto de la 029 | Al abordar el drift de manifiestos | Abierta |
+| DD-06 | `opencode.json` imprime `[FILE]` antes de saber que solo va a mergear | L650 emite `[FILE]`, L663 emite `[GUARD]` | Cosmetico: cubierto por 029-T027 | Abierta |
+| DD-07 | Ningun `robocopy` del motor verifica su exit code | L604, L606 y L637 descartan la salida con `>$null 2>&1` y nunca miran `$LASTEXITCODE`: un fallo de copia de `scripts/` es silencioso. Con la 029 el directorio pasa a tener dos archivos acoplados (`sync-kit.ps1` + `sync-kit-lib.ps1`) y el motor hace dot-source fail-closed, asi que un fallo parcial puede dejar un consumidor con un sync que aborta en cada corrida | Al implementar 029-T001. El orden alfabetico copia `sync-kit-lib.ps1` antes que el motor, lo que hace improbable el caso peor pero no lo garantiza | Abierta |
+| DD-08 | **`tests/upgrade_framework.Tests.ps1` no compila**: 4 errores de parseo (`ParseException` L566 por here-string `@"` sin cerrar, mas falta de cierre de bloque en L562, L561 y L225) presentes desde el commit `e53bb29` | Verificado el 2026-10-29 con `Parser::ParseFile` sobre el archivo: 4 errores. `Invoke-Pester tests/` aborta en el parseo y devuelve `Passed: 0 Failed: 1` sin ejecutar un solo test. La suite del KIT **nunca corrio** | **Bloqueante e inmediata**: sin esto no existe linea base. Bloquea 029-T025 (correr la suite), 029-T036 (cobertura base del motor) y **NFR-02 entero** (cero regresiones no es medible). La reparacion es acotada (cerrar el here-string y los bloques) y corresponde al tier Plataforma | Abierta |
+| DD-09 | La spec 029 declara NFR-02 "cero regresiones en el guard de `.opencode/.gitignore`, en huerfanos y en `.opencode/config.json`" apoyandose en `tests/upgrade_framework.Tests.ps1`, que no toca el motor y ademas no compila (DD-08) | Analyze ya lo detecto como **H-02 (severidad Alta)**: "el gate de regresion es ficticio; no existe linea base. Una regresion real pasaria el gate". La verificacion del 2026-10-29 lo confirma y lo agrava | Se resuelve junto con DD-08 y 029-T036. Hasta entonces NFR-02 queda como aspiracion, no como gate | Abierta |
+
+**Resuelta en esta sesion**: la codificacion doble de este mismo archivo (mojibake cp1252 en 67 lineas: 63 por la regla `Ã`, 3 por la regla `â€` y la linea L109 con daño mixto) fue reparada linea por linea el 2026-10-27, preservando BOM UTF-8, CRLF y el historial de git (diff acotado a las lineas dañadas, sin tocar las sanas). Sobrevive un typo de contenido ajeno a la codificacion en la fila 002-T029 ("despuós" por "después") que no se toco por ser cambio de contenido, no de encoding.
+
+## Deuda de seguridad abierta (spec 029)
+
+> Fuente: `Documentacion/Agents_IA_TECH/specs/029-sync-eol-y-force-real/threat-model.md` (513 lineas, 16 amenazas).
+> Las 11 filas de abajo son las que **no tienen cobertura** en `tasks.md`. Todas son **preexistentes**: la 029 las conserva, no las introduce.
+
+| ID | Severidad | Amenaza | Superficie | Tratamiento |
+|----|-----------|---------|------------|-------------|
+| SR-01 | **Critical** | El merge adopta del maestro todo lo que no es `mcp` (`permission`, `plugin`, `instructions`, `provider`, `model`) sin allowlist de claves ni validacion de schema | merge `mcp` | Spec nueva. ADR-0010 R7 lo exige y nada lo implementa. **No arreglar dentro de la 029** (FA-01) |
+| SR-02 | **High** | Si el destino no tiene bloque `mcp`, el merge devuelve `NoLocalMcp` y el llamador cae a `Copy-Item`: el consumidor adopta el `mcp` del maestro con rutas absolutas de otra maquina | merge `mcp` | Spec nueva. Contradice ADR-0009 guardrail 1. Corregida la afirmacion falsa en `plan.md` L183 el 2026-10-27 |
+| SR-03 | **High** | `[IO.File]::WriteAllText` no es atomico: una interrupcion a mitad deja `opencode.json` truncado, y si el consumidor lo tiene gitignored no hay otra copia del bloque `mcp` | escritura LF | Spec nueva (escritura atomica via temp + replace) |
+| SR-10 | **High** | El `mcp` preservado persiste en todos los syncs: el motor reporta `[GUARD] PRESERVADO` y no hay vencimiento ni auditoria de rutas | merge `mcp` | Spec nueva (politica de revalidacion de rutas) |
+| SR-06 | Medium | `scripts/sync-kit-lib.ps1` viaja por `robocopy` y se ejecuta por dot-source sin provenance ni hash; `-KitPath` admite codigo sin commitear | cadena de suministro | Agregar SHA256 del modulo al log durante la implementacion (T003) |
+| SR-07 | Medium | Un archivo homonimo en `<consumidor>/scripts/` se pisa sin WARN, y la version que corre es la de la corrida previa | cadena de suministro | WARN en el import si el hash no coincide con el del clon |
+| SR-09 | Medium | `ConvertTo-Json -Depth 10` no garantiza byte-identidad al reserializar: CA-06 "byte-identico" es inverificable tal como esta redactado | escritura LF | Redefinir CA-06 como "semanticamente identico + EOL verificado". Ver analyze H-04 |
+| SR-11 | Medium | `ReadAllBytes` sin streaming ni limite (hasta ~3x en memoria) y clasificacion `EolOnly` aplicada a archivos binarios | comparacion | Limite de tamano y rechazo de binarios en `Compare-KitFileContent` |
+| SR-12 | Low | TOCTOU entre la comparacion y la escritura | escritura LF | Aceptado: ventana local, sin multi-usuario |
+| SR-13 | Low | Junction o symlink en el destino que apunte fuera de `$RootPath` | escritura LF | Aceptado: requiere permiso de escritura local previo |
+| SR-15 | Low | El resultado `Error` del merge no reporta la causa (viola Art. V) | merge `mcp` | Propagar el mensaje de la excepcion en el `Write-Warn` |
+
+**Con cobertura en `tasks.md`**: SR-04 y SR-05 (T013-T017, T026), SR-08 parcial (T003), SR-14 parcial (T016, T018), SR-16 parcial (T004).
+
+**Tasks derivadas propuestas por Analyze, pendientes de decision del usuario** (no incorporadas a `tasks.md`):
+T030 guardarrail estatico de paridad Windows/Linux (CA-08) - T031 test del contrato de mensajes de los tres resultados - T032 politica explicita de `EolOnly` en el guard de `.opencode/.gitignore` - T033 reescribir la verificacion de CA-06 - T034 decision y test del fallback `NoLocalMcp` - T035 anclar T022 y T023 a secciones concretas - T036 cobertura base del motor - T037 resolver el drift documental del motor duplicado - T038 verificar la propagacion de `scripts/sync-kit-lib.ps1`.

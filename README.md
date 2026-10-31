@@ -2,7 +2,7 @@
 
 > **Versión del documento:** 2026-09-19
 > **Kit transversal** de agentes, skills y prompts para GitHub Copilot (VS Code) y OpenCode
-> **Instalador/actualizador único · 11 agentes · 77 skills · 6 prompts**
+> **Instalador/actualizador único · 13 agentes · 77 skills · 6 prompts**
 
 **Creado:** 2026-06-25
 **Reescritura como guía única de despliegue:** 2026-09-18 (tarea `[README-DESPLIEGUE]`)
@@ -38,7 +38,7 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
    | `github` | Issues, PRs, releases vía GitHub API |
    | `playwright` | Automatización de navegador para QA visual |
 
-   **MCPs retirados el 2026-10-18:** `semgrep` y `context7`. Ambos estaban registrados pero **ningún agente del kit los referencia** (0 de 32 definiciones en `.github/agents/` y `.opencode/agents/`).
+   **MCPs retirados el 2026-10-18:** `semgrep` y `context7`. Ambos estaban registrados pero **ningún agente del kit los referencia** (0 de 26 definiciones en `.github/agents/` y `.opencode/agents/`).
 
    - `tokenslayer` se conserva por decisión explícita del usuario, aunque tampoco figure en las definiciones de agente. **Limitación conocida:** su ruta apunta a `proyect_ext/tokenslayer/mcp-server/build/index.js` y `proyect_ext/*` está gitignored, por lo que en un clon nuevo hay que instalar el binario antes de que el servidor arranque.
    - `graphify` tiene la misma limitación: su ruta apunta a `graphify-out/graph.json` y ese directorio está gitignored.
@@ -73,10 +73,10 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
 
 ## 🌳 Graphify — grafo de conocimiento del código (RF-19, `[GRAPHIFY-INSTALL]`)
 
-> Estado documental 2026-09-19 (investigación web, sin clones). Implementación pendiente de `devops` + revisión de `security-auditor`.
+> Estado documental 2026-09-19 (investigación web, sin clones). Implementación pendiente de `developer` + revisión de `security-auditor`.
 
 - **Qué es:** constructor de grafos de conocimiento del código (AST con tree-sitter, local y sin vectores; se consulta con `query`/`path`/`explain` en vez de grep). Upstream real: `https://github.com/Graphify-Labs/graphify` (paquete PyPI `graphifyy`, MIT).
-  - ⚠️ La URL antigua del manifest (`tomasgraph/graphify`) devuelve **404** — pendiente de corrección por `devops` con decisión explícita del usuario (el owner real tampoco está en la allowlist del bootstrap, el fail-closed bloquearía la descarga).
+  - ⚠️ La URL antigua del manifest (`tomasgraph/graphify`) devuelve **404** — pendiente de corrección por `developer` con decisión explícita del usuario (el owner real tampoco está en la allowlist del bootstrap, el fail-closed bloquearía la descarga).
 
 - **Cómo queda instalado — Rama A (preferida, viable: SÍ expone MCP):** servidor MCP stdio embebido `python -m graphify.serve graphify-out/graph.json` (requiere extra `mcp`: `uv tool install "graphifyy[mcp]"`), registrado en `opencode.json` (`type: local`) + `.vscode/mcp.json` (`type: stdio`), como tokenslayer, tras construir el grafo (`graphify <path>` → `graphify-out/graph.json`).
   - Herramientas: `query_graph`, `get_node`, `get_neighbors`, `shortest_path`, `list_prs`, `get_pr_impact`, `triage_prs`.
@@ -92,6 +92,7 @@ El instalador/actualizador único es `scripts/plataformador-bootstrap.ps1` (ADR-
 ### Requisitos
 
 - **PowerShell 7+ obligatorio** (`pwsh ≥ 7`). No funciona en Windows PowerShell 5.1. Compruébalo con `$PSVersionTable.PSVersion`.
+- **Pester 6+** para correr la suite de tests (`Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck`). El kit usa la sintaxis de Pester 5+; Pester 3.4.0 (el preinstalado de fábrica) NO es compatible.
 - Recomendación (texto — ejecútala manualmente si aplica): `winget install --id Microsoft.PowerShell --source winget`.
 - `git` disponible en el PATH.
 - `Node.js ≥ 22.5` para los MCPs npm (`context-mode`, `codebase-memory-mcp`).
@@ -147,7 +148,7 @@ Variantes (interfaz simplificada, Spec 002 — sin parámetros / `-DryRun` / `-F
 
 1. Abre tu proyecto en **VS Code**. Si el bootstrap reinició VS Code, vuelve a abrirlo.
 2. Abre **Copilot Chat** (`Ctrl+Shift+I`), escribe `/` — debes ver `plan`, `tdd`, `security-review`, `build-fix`, `refactor`, `pensar`.
-3. En el selector de agente elige un rol (p. ej. **Arquitecto**, **QA Senior**).
+3. En el selector de agente elige un rol (p. ej. **Arquitecto**, **Security Auditor**).
 4. En **OpenCode** (`opencode` en terminal) comprueba que los agentes responden.
 5. Verifica MCPs: `codebase-memory-mcp`, `context-mode`, `markitdown`, `tokenslayer`, `graphify`, `github` y `playwright` responden (el bootstrap ya hace esta comprobación al final; si falla, registra el fallo en `pendientes-implementacion.md`).
 
@@ -279,9 +280,11 @@ Funciones: **`Suspend-AppLocks`** (antes de mover) + **`Restore-AppLocks`** (tra
 
 ---
 
-## 🤖 Agentes (11) — Cómo usarlos
+## 🤖 Agentes (13) — Cómo usarlos
 
-Los **agentes** son roles especializados. Existen en paralelo en `.github/agents/<nombre>.agent.md` (Copilot) y `.opencode/agents/<nombre>.md` (OpenCode). Mantenlos en sync.
+Los **agentes** son roles especializados. Existen en paralelo en `.github/agents/<nombre>.agent.md` (Copilot) y `.opencode/agents/<nombre>.md` (OpenCode). Mantenlos en sync. El conteo verificado al 2026-10-29 es **13 por harness** (13 en `.opencode/agents/*.md` y 13 en `.github/agents/*.agent.md`).
+
+> ⚠️ El replanteo de agentes como orquestadores delgados (extracción de capacidades a skills, declaración explícita en frontmatter y reducción de 13 a 8 agentes) **está en especificación (spec 030, `030-whitelist-contextual-por-tipo-proyecto`)**. **No está implementado**: la tabla de abajo describe el estado vigente, no el estado objetivo de la 030.
 
 ### Cómo seleccionar un agente
 
@@ -302,7 +305,7 @@ Los **agentes** son roles especializados. Existen en paralelo en `.github/agents
                         │
                         ├── ❓ ¿Documentado? ¿Implementar? → preguntar al usuario
                         │
-                        └──▶  🌐 API Developer + ⚛️ Frontend + 🐳 DevOps + 🧪 QA
+                        └──▶  💻 Developer (único implementador)
                               (solo si el usuario aprueba)
 ```
 
@@ -314,15 +317,17 @@ Los **agentes** son roles especializados. Existen en paralelo en `.github/agents
 | 🏗️ **arquitecto** | Documental | Arquitectura, estructura, ADRs | ❌ |
 | 📝 **documentador** | Documental | Specs, flujos, requisitos | ❌ |
 | 🔒 **security-auditor** | Documental | Auditoría y tests de seguridad | ❌ |
-| 🌐 **api-developer** | Implementador | APIs REST, backend, modelos, DBs | ✅ |
-| ⚛️ **frontend-developer** | Implementador | Componentes UI, vistas, estilos | ✅ |
-| 🐳 **devops** | Implementador | Infraestructura, despliegue | ✅ |
-| 🧪 **qa-senior** | Implementador | Tests (diseña y ejecuta) | ✅ |
+| 🔎 **analista_tecnico** | Documental | Investigación técnica que alimenta a otros agentes | ❌ |
+| 🎛️ **usuario-preferencias** | Documental | Preferencias de trabajo del usuario (política SSH, formato de docs, git) | ❌ |
+| ⚙️ **Agent-SSD** | Documental extendido | Ejecuta los comandos Speckit del flujo SSD (`src/*/.specify/`) | ❌ |
+| 💻 **developer** | Implementador | Implementador único: código, tests e infraestructura de la app | ✅ |
 | 🌊 **gitflow** | Tooling | Operaciones git, branching, PRs, reverts | ✅ (git) |
 | 🧰 **solucionador** | Plataforma | Diagnóstico remoto | ✅ |
 | 🏭 **plataformador** | Plataforma | Nivelación de proyectos, opera el bootstrap | ✅ |
+| 🔌 **ssh-connection-agent** | Plataforma | Conexión y sesión SSH contra servidores declarados | ✅ |
+| ⬆️ **upgrade_framework** | Plataforma | Actualización de dependencias externas desde `proyect_ext/` | ✅ |
 
-> 💡 Documentales solo escriben en `Documentacion/<AppName>/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md`. Implementadores escriben código de app (`src/`, `tests/`).
+> 💡 Documentales solo escriben en `Documentacion/<AppName>/`, `.github/`, `.opencode/`, `.doc_agents/`, `README.md`. El implementador (`developer`) escribe código de app (`src/`, `tests/`). Esta tabla refleja el estado **vigente**; el replanteo de la spec 030 la cambiará cuando se implemente.
 
 ### Ejemplos de uso
 
@@ -330,19 +335,18 @@ Los **agentes** son roles especializados. Existen en paralelo en `.github/agents
 🧑💻 "Necesito crear un módulo de facturación"
 → 1. Arquitecto   → arquitectura, estructura, ADRs
 → 2. Documentador → specs y flujos
-→ 3. API Developer → implementa lo documentado
-→ 4. QA Senior     → tests de lo implementado
-→ 5. Security Auditor → audita antes del deploy
+→ 3. Developer    → implementa lo documentado
+→ 4. Security Auditor → audita antes del deploy
 
 🧑💻 "¿Cómo manejo autenticación de usuarios externos?"
 → /pensar o agente 🧠 Pensador → analiza, documenta (OAuth2/JWT/SAML → ADR),
-  pregunta "¿Querés que lo implemente?" → SÍ: API + Frontend + QA; NO: queda documentado.
+  pregunta "¿Querés que lo implemente?" → SÍ: Developer; NO: queda documentado.
 
 🧑💻 "Revísame la seguridad antes del deploy"
 → Security Auditor → secrets, OWASP, dependencias.
 
 🧑💻 "Agrega validación al formulario de login"
-→ API + Frontend implementan; si falta spec, deriva a Documentador primero.
+→ Developer implementa; si falta spec, deriva a Documentador primero.
 ```
 
 ---
@@ -364,7 +368,7 @@ Escribe `/` en Copilot Chat:
 
 ## 🧠 Skills por Categoría
 
-Cada skill es un `SKILL.md` con conocimiento experto. Las skills viven solo en `.github/skills/<categoria>/<nombre>/SKILL.md` (sin espejo OpenCode) y se asignan a los agentes según dominio.
+Cada skill es un `SKILL.md` con conocimiento experto. Al 2026-10-29 las skills viven en `.github/skills/<categoria>/<nombre>/SKILL.md` **y** en `.opencode/skills/` (21 directorios de primer nivel en cada harness) y se asignan a los agentes según dominio. **Nota (spec 030, en especificación):** la duplicación entre harnesses contradice el Art. IV de la constitution ("no se duplican por proyecto") y está registrada como hallazgo H-10; su resolución es la task T048 de la spec 030, no implementada.
 
 | Categoría | Skills | Cantidad |
 |-----------|--------|:--------:|

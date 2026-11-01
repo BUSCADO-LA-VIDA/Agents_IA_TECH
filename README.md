@@ -425,4 +425,153 @@ Cada skill es un `SKILL.md` con conocimiento experto. Al 2026-10-29 las skills v
 
 ---
 
-##
+## 🔑 Context7 MCP — Configuración de la API Key (variables de entorno)
+
+Context7 MCP entrega documentación versionada y actualizada de librerías y frameworks directamente a los agentes. Funciona sin API key (con límites de tasa reducidos), pero para uso continuo en el kit se recomienda configurar una API key personal.
+
+### Requisitos
+
+| Requisito | Detalle |
+|---|---|
+| Node.js | ≥ 20.18.1 (ya requerido por los MCPs npm del kit) |
+| API key de Context7 | Gratuita, se obtiene en https://context7.com/dashboard |
+| Variable de entorno | `CONTEXT7_API_KEY` definida en la sesión de Windows |
+
+### Cómo registrar la variable de entorno en Windows
+
+#### Opción A — Persistente para el usuario actual (recomendada)
+
+Sobrevive a reinicios de máquina. Se ejecuta una sola vez:
+
+```powershell
+[Environment]::SetEnvironmentVariable("CONTEXT7_API_KEY", "TU_API_KEY_AQUI", "User")
+```
+
+Después hay que **reiniciar la terminal** (y VS Code / OpenCode) para que el proceso hijo del MCP herede la variable.
+
+#### Opción B — Solo para la sesión actual
+
+Se pierde al cerrar la terminal. Útil para pruebas puntuales:
+
+```powershell
+$env:CONTEXT7_API_KEY = "TU_API_KEY_AQUI"
+```
+
+#### Opción C — Para todo el sistema (requiere Administrador)
+
+Afecta a todos los usuarios de la máquina; usar solo en equipos de un único operador:
+
+```powershell
+[Environment]::SetEnvironmentVariable("CONTEXT7_API_KEY", "TU_API_KEY_AQUI", "Machine")
+```
+
+### Verificar que la variable está activa
+
+```powershell
+# Debe devolver el valor de la key (nunca lo pegues en un chat ni en un commit)
+Get-ChildItem Env:CONTEXT7_API_KEY
+```
+
+Si no devuelve nada, la variable no está definida en esa sesión o la terminal no se reinició.
+
+### Cómo consume la key el servidor Context7
+
+El MCP `context7` está declarado en `opencode.json` (bloque `mcp.servers.context7`). El servidor resuelve la credencial en este orden:
+
+```javascript
+stdioApiKey = cliOptions.apiKey || process.env.CONTEXT7_API_KEY;
+```
+
+Es decir:
+
+1. Primero el flag `--api-key` en el comando del servidor.
+2. Si no hay flag, toma `process.env.CONTEXT7_API_KEY` heredada del proceso padre.
+
+Por eso **no hace falta modificar `opencode.json`**: basta con que la variable exista en el entorno del proceso que lanza OpenCode. Y como `opencode.json` es compartido por el kit, la misma variable sirve para ambos arneses (`.github/` y `.opencode/`).
+
+### Qué cambia al tener la API key configurada
+
+| Sin API key | Con API key |
+|---|---|
+| Límites de tasa reducidos | Límites de tasa más altos |
+| Solo documentación pública | Acceso a repositorios privados registrados en Context7 |
+| Errores de rate limit en sesiones intensivas | Uso estable en sesiones largas |
+
+### Agentes del kit que declaran Context7
+
+Los siguientes agentes incluyen `context7` en su sección de MCPs, con paridad `.github/agents/` ↔ `.opencode/agents/`:
+
+- `pensador`, `arquitecto`, `documentador`, `security-auditor`, `analista_tecnico`
+- `developer`, `plataformador`, `Agent-SSD`, `upgrade_framework`
+
+Se invoca con `resolve-library-id` (resolver el id de la librería) y luego `query-docs` (traer la documentación del concepto consultado).
+
+### ⚠️ Advertencias de seguridad
+
+- **Nunca** pegues la API key en un chat, en un issue, en un commit ni en un script versionado. La variable de entorno vive solo en tu máquina.
+- `opencode.json` no debe contener secretos reales: la key se inyecta exclusivamente por variable de entorno.
+- Si usas la Opción C (`Machine`), la credencial queda disponible para cualquier usuario del equipo; la Opción A (`User`) es la más segura para uso personal.
+- Si sospechas que la key se filtró, revócala en el dashboard de Context7 y genera una nueva.
+
+---
+
+## 🚀 Arranque por defecto del arnés
+
+El kit no solo se instala: declara **con qué agente arranca cada arnés**. Sin esto, OpenCode y VS Code Copilot usan sus agentes nativos (`build`, agentes base) y el flujo SSD+Speckit queda dependiente de que el operador seleccione el agente a mano en cada sesión.
+
+### OpenCode
+
+`opencode.json` declara:
+
+```json
+{
+  "default_agent": "pensador"
+}
+```
+
+Qué implica:
+
+| Aspecto | Comportamiento |
+|---|---|
+| Interfaces afectadas | TUI, `opencode run`, app de escritorio y GitHub Action |
+| Requisito | El agente debe tener `mode: primary` en `.opencode/agents/<nombre>.md` |
+| Si el agente no es primary o no existe | OpenCode **cae a `build` con un warning** (fallback silencioso) |
+| Cómo cambiar de agente en una sesión | Selector de agentes del arnés; el `default_agent` solo define el arranque |
+
+`pensador` es el arranque por defecto porque es el orquestador del pipeline y el agente con permisos más restrictivos del kit.
+
+### VS Code Copilot
+
+VS Code **no expone un ajuste de agente por defecto** para agentes custom. Los agentes de `.github/agents/*.agent.md` se descubren solos y aparecen en el selector, pero la selección es por sesión. Por eso la regla de arranque viaja en instrucciones *always-on*:
+
+1. `AGENTS.md` → sección "Arranque por defecto del arnés" (fuente de verdad).
+2. `.github/copilot-instructions.md` → puntero que recuerda el enrutamiento al agente del kit.
+
+### Monorepos y subcarpetas
+
+Si abres una subcarpeta del repositorio (por ejemplo `src/<App>/`), VS Code solo descubre customizaciones dentro de la carpeta abierta. Para que encuentre los agentes del repo padre:
+
+```json
+{
+  "chat.useCustomizationsInParentRepositories": true
+}
+```
+
+Ese ajuste está **desactivado por defecto** y aplica a instrucciones, agentes, skills, prompts y hooks.
+
+### Qué hacer si el `pensador` te deniega una edición
+
+El `pensador` tiene `permission.edit` limitado a `Documentacion/**`, `.github/**`, `.opencode/**` y `**README.md`. Si intenta editar `opencode.json`, `src/` o `tests/`, la operación se rechaza y **delega** en el agente implementador. Es el comportamiento esperado, no un error:
+
+- Para trabajo documental o de especificación → deja el `pensador` como agente activo.
+- Para implementación de código → cambia al agente implementador desde el selector de agentes.
+
+### Verificación
+
+```powershell
+# Test de contrato del arranque (paridad y valor válido)
+pwsh -NoProfile -File tests/harness-default.ps1
+
+# Gate completo del kit (incluye VAL-10: arranque válido)
+pwsh -NoProfile -File scripts/validate-agents-skills.ps1
+```

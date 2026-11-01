@@ -445,6 +445,417 @@ function Invoke-OrphanDecision {
 }
 
 # =============================================================================
+# 034: merge de propagacion (opencode.json por claves, AGENTS.md por bloque)
+# + comparador local B-01/B-02.
+#
+# - B-01/B-02: esta rama llamaba a Compare-KitFileContent, funcion que NO vive
+#   en este script (solo en scripts/sync-kit-lib.ps1, spec 029, sin dot-source).
+#   Con $ErrorActionPreference = "Stop" la llamada lanzaba
+#   CommandNotFoundException, el try externo la capturaba y el sync ABORTABA en
+#   el primer archivo de raiz. Ahora se usa Compare-KitFileState, local y con el
+#   contrato que el motor ya esperaba: 'Equal' | 'EolOnly' | 'Different'.
+# - opencode.json y AGENTS.md dejan de ser SKIP: viajan por merge (por claves y
+#   por bloque delimitado) preservando lo que pertenece al proyecto.
+#
+# Todo autocontenido a proposito: NO se hace dot-source de
+# scripts/sync-kit-lib.ps1 porque su ausencia en un consumidor nuevo romperia el
+# sync antes de haber copiado scripts/. Cuando la 029 se implemente, su
+# comparador reemplaza a este sin cambiar el contrato del motor.
+# =============================================================================
+
+function Compare-KitFileState {
+    <#
+    .SYNOPSIS
+        Compara maestro vs destino y clasifica la diferencia (comparador local de
+        respaldo para la rama de archivos de raiz del sync).
+    .OUTPUTS
+        'Equal'     : mismo contenido (incluye BOM y fin de linea).
+        'EolOnly'   : solo difiere el fin de linea (LF vs CRLF).
+        'Different' : otra diferencia, BOM de un solo lado, o fallo de lectura.
+    #>
+    param(
+        [string]$Source,
+        [string]$Destination
+    )
+
+    try {
+        $srcBytes = [System.IO.File]::ReadAllBytes($Source)
+        $dstBytes = [System.IO.File]::ReadAllBytes($Destination)
+    } catch {
+        Write-Warn "Compare-KitFileState: no se pudo leer '$Source' o '$Destination' ($_): se trata como 'Different'."
+        return 'Different'
+    }
+
+    # BOM UTF-8 (EF BB BF): si la presencia difiere entre los dos, no son iguales.
+    $srcHasBom = ($srcBytes.Length -ge 3 -and $srcBytes[0] -eq 0xEF -and $srcBytes[1] -eq 0xBB -and $srcBytes[2] -eq 0xBF)
+    $dstHasBom = ($dstBytes.Length -ge 3 -and $dstBytes[0] -eq 0xEF -and $dstBytes[1] -eq 0xBB -and $dstBytes[2] -eq 0xBF)
+    if ($srcHasBom -ne $dstHasBom) { return 'Different' }
+
+    try {
+        # ReadAllText descarta el BOM. Comparacion case-sensitive (-ceq).
+        $srcText = [System.IO.File]::ReadAllText($Source)
+        $dstText = [System.IO.File]::ReadAllText($Destination)
+    } catch {
+        Write-Warn "Compare-KitFileState: no se pudo leer el contenido ($_): se trata como 'Different'."
+        return 'Different'
+    }
+
+    if ($srcText -ceq $dstText) { return 'Equal' }
+
+    $srcNorm = $srcText -replace "`r`n", "`n"
+    $dstNorm = $dstText -replace "`r`n", "`n"
+    if ($srcNorm -ceq $dstNorm) { return 'EolOnly' }
+
+    return 'Different'
+}
+
+function Merge-OpenCodeConfig {
+    <#
+    .SYNOPSIS
+        Merge por claves de opencode.json: el maestro manda sobre $schema,
+        instructions y default_agent; el proyecto conserva mcp, model,
+        small_model, permission, lsp y cualquier clave desconocida.
+    .NOTES
+        La edicion es TEXTUAL sobre el string del destino a proposito:
+        re-serializar el objeto con ConvertTo-Json reordenaria claves y
+        reindentaria todo el archivo.
+    #>
+    param(
+        [string]$Source,
+        [string]$Destination,
+        [string]$ProjectRoot,
+        [switch]$Force
+    )
+
+    if (-not (Test-Path -LiteralPath $Source -PathType Leaf)) {
+        Write-Warn "opencode.json: no existe la plantilla del maestro ($Source); se omite el merge."
+        return
+    }
+    if (-not (Test-Path -LiteralPath $Destination -PathType Leaf)) {
+        Copy-Item -LiteralPath $Source -Destination $Destination -Force
+        Write-Host "  [FILE] opencode.json (copiado del maestro)" -ForegroundColor Cyan
+        return
+    }
+
+    # BOM y estilo de fin de linea originales: se preservan al escribir.
+    $dstBytes = $null
+    $original = $null
+    try {
+        $dstBytes = [System.IO.File]::ReadAllBytes($Destination)
+        $original = [System.IO.File]::ReadAllText($Destination)
+    } catch {
+        Write-Warn "opencode.json: no se pudo leer el archivo local ($_): se conserva sin tocar (fail-closed)."
+        return
+    }
+    $hadBom = ($dstBytes.Length -ge 3 -and $dstBytes[0] -eq 0xEF -and $dstBytes[1] -eq 0xBB -and $dstBytes[2] -eq 0xBF)
+    $nl = if ($original.Contains("`r`n")) { "`r`n" } else { "`n" }
+
+    # Fail-closed: si el local no parsea, no se escribe absolutamente nada.
+    $dstJson = $null
+    try {
+        $dstJson = $original | ConvertFrom-Json -ErrorAction Stop
+    } catch {
+        $dstJson = $null
+    }
+    if ($null -eq $dstJson) {
+        Write-Warn "opencode.json local no parsea (JSON invalido): se conserva sin tocar (fail-closed)."
+        return
+    }
+
+    # El maestro tambien debe parsear; si no, no se modifica el local.
+    $srcJson = $null
+    try {
+        $srcJson = [System.IO.File]::ReadAllText($Source) | ConvertFrom-Json -ErrorAction Stop
+    } catch {
+        $srcJson = $null
+    }
+    if ($null -eq $srcJson) {
+        Write-Warn "opencode.json: la plantilla del maestro no parsea (JSON invalido); no se modifica el local."
+        return
+    }
+
+    $newText = $original
+
+    # --- $schema (clave escalar gestionada) ---
+    $schemaProp = $srcJson.PSObject.Properties['$schema']
+    if (($null -ne $schemaProp) -and ($null -ne $schemaProp.Value)) {
+        # Literal JSON completo (comillas + escapes) del valor del maestro.
+        $schemaLiteral = ConvertTo-Json -InputObject ([string]$schemaProp.Value) -Compress
+        $schemaRx = '("\$schema"\s*:\s*)"[^"]*"'
+        if ([regex]::IsMatch($newText, $schemaRx)) {
+            $newText = [regex]::Replace($newText, $schemaRx, ('$1' + $schemaLiteral.Replace('$', '$$')))
+        } else {
+            $braceIdx = $newText.IndexOf('{')
+            if ($braceIdx -ge 0) {
+                $newText = $newText.Insert(($braceIdx + 1), ($nl + '  "$schema": ' + $schemaLiteral + ','))
+            }
+        }
+    }
+
+    # --- instructions (array plano de strings) ---
+    $instrProp = $srcJson.PSObject.Properties['instructions']
+    if ($null -eq $instrProp) {
+        Write-Warn "opencode.json: el maestro no declara 'instructions'; se omite esa clave (se conserva la local)."
+    } else {
+        $instrValue = $instrProp.Value
+        $instrOk = $false
+        if (($null -ne $instrValue) -and ($instrValue -isnot [string]) -and ($instrValue -is [System.Collections.IEnumerable])) {
+            $instrOk = $true
+            foreach ($entry in $instrValue) {
+                if ($entry -isnot [string]) { $instrOk = $false; break }
+            }
+        }
+        if (-not $instrOk) {
+            Write-Warn "opencode.json: 'instructions' del maestro no es un array plano de strings; se omite esa clave (se conserva la local)."
+        } else {
+            $instrLiteral = '[' + ((@($instrValue) | ForEach-Object { ConvertTo-Json -InputObject ([string]$_) -Compress }) -join ', ') + ']'
+            $instrRx = '("instructions"\s*:\s*)\[[^\]]*\]'
+            if ([regex]::IsMatch($newText, $instrRx)) {
+                $newText = [regex]::Replace($newText, $instrRx, ('$1' + $instrLiteral.Replace('$', '$$')))
+            } else {
+                $braceIdx = $newText.IndexOf('{')
+                if ($braceIdx -ge 0) {
+                    $newText = $newText.Insert(($braceIdx + 1), ($nl + '  "instructions": ' + $instrLiteral + ','))
+                }
+            }
+        }
+    }
+
+    # --- default_agent (FR-15 / spec 034 seccion 19.3) ---
+    $masterDefault = $null
+    $masterDefaultProp = $srcJson.PSObject.Properties['default_agent']
+    if (($null -ne $masterDefaultProp) -and ($null -ne $masterDefaultProp.Value)) {
+        $masterDefault = ([string]$masterDefaultProp.Value).Trim()
+    }
+
+    if (-not $masterDefault) {
+        Write-Warn "opencode.json: el maestro no declara 'default_agent'; se omite esa clave (se conserva la local)."
+    } else {
+        $writeDefault = $false
+        $defaultReason = 'igual'
+        $currentDefault = ''
+        $dstDefaultProp = $dstJson.PSObject.Properties['default_agent']
+        if ($Force) {
+            $writeDefault = $true
+            $defaultReason = 'force'
+        } elseif ($null -eq $dstDefaultProp) {
+            $writeDefault = $true
+            $defaultReason = 'agregado'
+        } else {
+            $currentDefault = ([string]$dstDefaultProp.Value).Trim()
+            if ($currentDefault -ceq $masterDefault) {
+                $defaultReason = 'igual'
+            } elseif ($currentDefault -ceq 'build') {
+                $writeDefault = $true
+                $defaultReason = 'build'
+            } else {
+                # Agente del kit con mode: primary -> se respeta la eleccion del proyecto.
+                $agentIsPrimary = $false
+                if ($ProjectRoot) {
+                    $agentPath = Join-Path $ProjectRoot (".opencode/agents/$currentDefault.md")
+                    if (Test-Path -LiteralPath $agentPath -PathType Leaf) {
+                        try {
+                            $head = @(Get-Content -LiteralPath $agentPath -TotalCount 25 -ErrorAction Stop) -join "`n"
+                            if ($head -match '(?m)^mode:\s*primary\s*$') { $agentIsPrimary = $true }
+                        } catch {
+                            $agentIsPrimary = $false
+                        }
+                    }
+                }
+                if ($agentIsPrimary) {
+                    $defaultReason = 'preservar'
+                } else {
+                    $writeDefault = $true
+                    $defaultReason = 'invalido'
+                }
+            }
+        }
+
+        if ($writeDefault) {
+            $defaultLiteral = ConvertTo-Json -InputObject $masterDefault -Compress
+            $defaultRx = '("default_agent"\s*:\s*)"[^"]*"'
+            if ([regex]::IsMatch($newText, $defaultRx)) {
+                $newText = [regex]::Replace($newText, $defaultRx, ('$1' + $defaultLiteral.Replace('$', '$$')))
+            } else {
+                $braceIdx = $newText.IndexOf('{')
+                if ($braceIdx -ge 0) {
+                    $newText = $newText.Insert(($braceIdx + 1), ($nl + '  "default_agent": ' + $defaultLiteral + ','))
+                }
+            }
+        }
+
+        if ($defaultReason -eq 'agregado') {
+            Write-OK "  [OK] opencode.json: default_agent agregado (='$masterDefault')"
+        } elseif ($defaultReason -eq 'build') {
+            Write-Warn "opencode.json: default_agent apuntaba a 'build' (fallback silencioso); se corrige a '$masterDefault'."
+        } elseif ($defaultReason -eq 'invalido') {
+            Write-Warn "opencode.json: default_agent '$currentDefault' no es un agente del kit con mode: primary; se corrige a '$masterDefault'."
+        } elseif ($defaultReason -eq 'preservar') {
+            Write-Info "opencode.json: default_agent '$currentDefault' es un agente del kit con mode: primary; se respeta la eleccion del proyecto."
+        } elseif ($defaultReason -eq 'force') {
+            Write-OK "  [OK] opencode.json: default_agent forzado a '$masterDefault' (-Force)"
+        }
+    }
+
+    if ($newText -ceq $original) {
+        Write-OK "  [OK] opencode.json - sin cambios (merge por claves)"
+        return
+    }
+
+    # Backup junto al destino (patron ignorado por .gitignore: opencode.json.bak-*).
+    $backupPath = "$Destination.bak-" + (Get-Date -Format 'yyyyMMddTHHmmss')
+    try {
+        Copy-Item -LiteralPath $Destination -Destination $backupPath -Force
+    } catch {
+        Write-Fail "opencode.json: no se pudo crear el backup ($_); no se escribe."
+        return
+    }
+
+    try {
+        $encoding = [System.Text.UTF8Encoding]::new($hadBom)
+        [System.IO.File]::WriteAllText($Destination, $newText, $encoding)
+        $null = Get-Content -LiteralPath $Destination -Raw -Encoding utf8 -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        Write-OK "  [OK] opencode.json - merge por claves aplicado (backup: $(Split-Path -Leaf $backupPath))"
+    } catch {
+        Copy-Item -LiteralPath $backupPath -Destination $Destination -Force
+        Write-Fail "opencode.json: el JSON resultante no valida ($_); se restauro el backup."
+    }
+}
+
+function Merge-KitBlock {
+    <#
+    .SYNOPSIS
+        Merge por bloque delimitado de AGENTS.md: reemplaza solo el tramo entre
+        los marcadores KIT-BLOCK del maestro, preservando el resto del archivo
+        (que es del proyecto).
+    .NOTES
+        Fail-closed ante marcadores corruptos: si el local tiene START sin END,
+        END sin START, duplicados o desordenados, no se escribe nada.
+    #>
+    param(
+        [string]$Source,
+        [string]$Destination,
+        [string]$BlockId = 'arranque-por-defecto'
+    )
+
+    $startMarker = "<!-- KIT-BLOCK:START $BlockId -->"
+    $endMarker = "<!-- KIT-BLOCK:END $BlockId -->"
+
+    if (-not (Test-Path -LiteralPath $Source -PathType Leaf)) {
+        Write-Warn "AGENTS.md: no existe la plantilla del maestro ($Source); se omite el merge del bloque."
+        return
+    }
+    if (-not (Test-Path -LiteralPath $Destination -PathType Leaf)) {
+        Copy-Item -LiteralPath $Source -Destination $Destination -Force
+        Write-Host "  [FILE] AGENTS.md (copiado del maestro)" -ForegroundColor Cyan
+        return
+    }
+
+    $masterText = $null
+    try {
+        $masterText = [System.IO.File]::ReadAllText($Source)
+    } catch {
+        Write-Warn "AGENTS.md: no se pudo leer el maestro ($_); se omite el merge del bloque."
+        return
+    }
+
+    # El maestro debe tener exactamente un START y un END, en ese orden.
+    $mStartCount = ([regex]::Matches($masterText, [regex]::Escape($startMarker))).Count
+    $mEndCount = ([regex]::Matches($masterText, [regex]::Escape($endMarker))).Count
+    $mStartIdx = $masterText.IndexOf($startMarker, [System.StringComparison]::Ordinal)
+    $mEndIdx = $masterText.IndexOf($endMarker, [System.StringComparison]::Ordinal)
+    if (($mStartCount -ne 1) -or ($mEndCount -ne 1) -or ($mStartIdx -lt 0) -or ($mEndIdx -lt 0) -or ($mStartIdx -ge $mEndIdx)) {
+        Write-Warn "AGENTS.md: bloque '$BlockId' del maestro sin marcadores KIT-BLOCK validos: no se modifica el local"
+        return
+    }
+
+    # Bloque INCLUSIVE: desde el inicio de la linea del START hasta el final de
+    # la linea del END (sin el salto de linea posterior al END).
+    $block = $masterText.Substring($mStartIdx, ($mEndIdx + $endMarker.Length) - $mStartIdx)
+
+    $dstBytes = $null
+    $original = $null
+    try {
+        $dstBytes = [System.IO.File]::ReadAllBytes($Destination)
+        $original = [System.IO.File]::ReadAllText($Destination)
+    } catch {
+        Write-Warn "AGENTS.md: no se pudo leer el archivo local ($_): no se escribe (fail-closed)."
+        return
+    }
+    $hadBom = ($dstBytes.Length -ge 3 -and $dstBytes[0] -eq 0xEF -and $dstBytes[1] -eq 0xBB -and $dstBytes[2] -eq 0xBF)
+    $usesCrlf = $original.Contains("`r`n")
+    $nl = if ($usesCrlf) { "`r`n" } else { "`n" }
+
+    # Normalizar el bloque insertado al estilo dominante del destino.
+    $blockNorm = $block -replace "`r`n", "`n"
+    if ($usesCrlf) { $blockNorm = $blockNorm -replace "`n", "`r`n" }
+
+    $dStartCount = ([regex]::Matches($original, [regex]::Escape($startMarker))).Count
+    $dEndCount = ([regex]::Matches($original, [regex]::Escape($endMarker))).Count
+    $newText = $null
+
+    if (($dStartCount -eq 1) -and ($dEndCount -eq 1)) {
+        # Caso A: marcadores presentes y unicos -> reemplazar el tramo delimitado.
+        $sIdx = $original.IndexOf($startMarker, [System.StringComparison]::Ordinal)
+        $eIdx = $original.IndexOf($endMarker, [System.StringComparison]::Ordinal)
+        if (($sIdx -lt 0) -or ($eIdx -lt 0) -or ($sIdx -ge $eIdx)) {
+            Write-Warn "AGENTS.md: marcadores KIT-BLOCK corruptos en AGENTS.md: no se escribe (fail-closed)"
+            return
+        }
+        $newText = $original.Substring(0, $sIdx) + $blockNorm + $original.Substring($eIdx + $endMarker.Length)
+    } elseif (($dStartCount -eq 0) -and ($dEndCount -eq 0)) {
+        # Caso B: seccion presente sin marcadores -> migrar y envolver.
+        # Solo el prefijo del encabezado, sin el acento, para no depender de la
+        # codificacion del archivo leido.
+        $headerRx = [regex]'(?m)^##[ \t]+Arranque por defecto del arn'
+        $headerMatch = $headerRx.Match($original)
+        if ($headerMatch.Success) {
+            $afterHeader = $headerMatch.Index + $headerMatch.Length
+            $nextHeaderMatch = ([regex]'(?m)^##[ \t]').Match($original, $afterHeader)
+            if ($nextHeaderMatch.Success) {
+                # Hasta justo antes del siguiente '## ' + una linea en blanco.
+                $newText = $original.Substring(0, $headerMatch.Index) + $blockNorm + $nl + $nl + $original.Substring($nextHeaderMatch.Index)
+            } else {
+                # Hasta EOF + salto de linea final.
+                $newText = $original.Substring(0, $headerMatch.Index) + $blockNorm + $nl
+            }
+        } else {
+            # Caso C: seccion ausente -> agregar una linea en blanco + el bloque al final.
+            $trimmed = $original.TrimEnd("`r", "`n")
+            $newText = $trimmed + $nl + $nl + $blockNorm + $nl
+            Write-Warn "AGENTS.md: seccion ausente: bloque '$BlockId' agregado al final"
+        }
+    } else {
+        # Caso D: START sin END, END sin START o duplicados -> fail-closed.
+        Write-Warn "AGENTS.md: marcadores KIT-BLOCK corruptos en AGENTS.md: no se escribe (fail-closed)"
+        return
+    }
+
+    if ($newText -ceq $original) {
+        Write-OK "  [OK] AGENTS.md - sin cambios (bloque al dia)"
+        return
+    }
+
+    # Backup junto al destino (patron ignorado por .gitignore: AGENTS.md.bak-*).
+    $backupPath = "$Destination.bak-" + (Get-Date -Format 'yyyyMMddTHHmmss')
+    try {
+        Copy-Item -LiteralPath $Destination -Destination $backupPath -Force
+    } catch {
+        Write-Fail "AGENTS.md: no se pudo crear el backup ($_); no se escribe."
+        return
+    }
+
+    try {
+        $encoding = [System.Text.UTF8Encoding]::new($hadBom)
+        [System.IO.File]::WriteAllText($Destination, $newText, $encoding)
+        Write-OK "  [OK] AGENTS.md - bloque '$BlockId' actualizado (backup: $(Split-Path -Leaf $backupPath))"
+    } catch {
+        Copy-Item -LiteralPath $backupPath -Destination $Destination -Force
+        Write-Fail "AGENTS.md: no se pudo escribir el bloque ($_); se restauro el backup."
+    }
+}
+
+# =============================================================================
 # Sync-TransversalKit: sincroniza el kit transversal desde el repo maestro.
 # Copia SOLO los transversales. NUNCA toca Documentacion/<AppName>/.
 # Seguridad: excluye .opencode/config.json y valida la URL fail-closed.
@@ -504,6 +915,8 @@ function Sync-TransversalKit {
         Write-Info "DryRun: excluiria .opencode/config.json (posibles credenciales, nunca se copia)"
         Write-Info "DryRun: hash-guard .opencode/.gitignore: si el local existe y difiere del maestro se CONSERVA el local (fail-closed); solo -Force sobrescribe"
         Write-Info "DryRun: NUNCA tocaria Documentacion/<AppName>/ (frontera kit <-> app)"
+        Write-Info "DryRun: copiaria la whitelist de tests del kit: tests/harness-default.ps1, tests/kit-sync-merge.ps1, tests/agents-parity.ps1, tests/kb-parity.ps1, tests/mcp-refresh-parity.ps1"
+        Write-Info "DryRun: NO trataria tests/ como directorio transversal (los tests propios de la app no se tocan)"
         Write-Info "DryRun: detectaria huerfanos y aplicaria -OrphanAction $OrphanAction"
         return
     }
@@ -637,8 +1050,20 @@ function Sync-TransversalKit {
                     robocopy "$src" "$dst" /E /NDL /NFL /NJH /NJS /XD "context-mode" >$null 2>&1
                 }
             } else {
+                # 034: archivos de raiz con politica de merge (no SKIP). Se
+                # resuelven antes de la regla SKIP para que apliquen con y sin -Force.
+                if ($item.Label -eq "opencode.json") {
+                    Write-Host "  [MERGE] opencode.json (merge por claves)" -ForegroundColor Cyan
+                    Merge-OpenCodeConfig -Source $src -Destination $dst -ProjectRoot $RootPath -Force:$Force
+                    continue
+                }
+                if ($item.Label -eq "AGENTS.md") {
+                    Write-Host "  [MERGE] AGENTS.md (bloque delimitado)" -ForegroundColor Cyan
+                    Merge-KitBlock -Source $src -Destination $dst
+                    continue
+                }
                 if ((Test-Path $dst) -and (-not $Force)) {
-                    $comparison = Compare-KitFileContent -Source $src -Destination $dst
+                    $comparison = Compare-KitFileState -Source $src -Destination $dst
                     if ($comparison -eq 'Equal') {
                         Write-OK "  [OK] $($item.Label) - contenido identico"
                     } elseif ($comparison -eq 'EolOnly') {
@@ -649,28 +1074,32 @@ function Sync-TransversalKit {
                     continue
                 }
                 Write-Host "  [FILE] $($item.Label)" -ForegroundColor Cyan
-                # Guard del sync sobre opencode.json: preservar el bloque `mcp` resuelto localmente.
-                if ($item.Label -eq "opencode.json" -and (Test-Path -LiteralPath $dst)) {
-                    $merged = $false
-                    try {
-                        $srcJson = Get-Content -LiteralPath $src -Raw -ErrorAction Stop | ConvertFrom-Json
-                        $dstJson = Get-Content -LiteralPath $dst -Raw -ErrorAction Stop | ConvertFrom-Json
-                        if (($null -ne $dstJson.mcp) -and ($null -ne $srcJson)) {
-                            if ($srcJson.PSObject.Properties["mcp"]) {
-                                $srcJson.PSObject.Properties.Remove("mcp")
-                            }
-                            $srcJson | Add-Member -NotePropertyName "mcp" -NotePropertyValue $dstJson.mcp -Force
-                            $srcJson | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $dst -Encoding UTF8
-                            Write-OK "  [GUARD] opencode.json: bloque mcp local PRESERVADO (merge con la plantilla del maestro)."
-                            $merged = $true
-                        }
-                    } catch {
-                        Write-Warn "  [GUARD] opencode.json: no se pudo mergear el bloque mcp local ($_); se conserva el local sin sobrescribir."
-                        $merged = $true
-                    }
-                    if ($merged) { continue }
-                }
                 Copy-Item $src -Destination $dst -Force
+            }
+        }
+
+        # 034 / T18: tests/ es de las apps, NO es un directorio transversal. Solo
+        # viaja esta whitelist, copiada por nombre exacto (una app puede tener sus
+        # propios tests/ y no se tocan). Si el archivo no esta en el maestro -> INFO,
+        # nunca se crea vacio.
+        $kitTestWhitelist = @(
+            "tests/harness-default.ps1",
+            "tests/kit-sync-merge.ps1",
+            "tests/agents-parity.ps1",
+            "tests/kb-parity.ps1",
+            "tests/mcp-refresh-parity.ps1"
+        )
+        $testsDir = Join-Path $RootPath "tests"
+        foreach ($rel in $kitTestWhitelist) {
+            $testSrc = Join-Path $tempDir $rel
+            if (Test-Path -LiteralPath $testSrc -PathType Leaf) {
+                if (-not (Test-Path -LiteralPath $testsDir)) {
+                    New-Item -ItemType Directory -Path $testsDir -Force | Out-Null
+                }
+                Copy-Item -LiteralPath $testSrc -Destination (Join-Path $RootPath $rel) -Force
+                Write-Host "  [SYNC] $rel" -ForegroundColor Cyan
+            } else {
+                Write-Info "  [INFO] $rel no esta en el maestro; se omite"
             }
         }
 

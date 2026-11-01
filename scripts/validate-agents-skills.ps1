@@ -4,10 +4,11 @@
     Validador de solo lectura de agentes y skills del kit Agents_IA_TECH.
 
 .DESCRIPTION
-    Ejecuta nueve chequeos (VAL-01 .. VAL-09) que verifican la coherencia entre los
+    Ejecuta diez chequeos (VAL-01 .. VAL-10) que verifican la coherencia entre los
     dos arneses del kit (.github/ para GitHub Copilot y .opencode/ para OpenCode),
-    la estructura minima de cada agente exigida por AGENTS.md (Regla 2) y la
-    cobertura de MCPs exigida por AGENTS.md (Regla 1b).
+    la estructura minima de cada agente exigida por AGENTS.md (Regla 2), la
+    cobertura de MCPs exigida por AGENTS.md (Regla 1b) y el arranque por defecto
+    del arnes declarado en opencode.json (spec 034).
 
     El script es de SOLO LECTURA: no crea, modifica ni elimina archivos del repo.
     Reporta [OK] / [WARN] / [FAIL] por chequeo y detalla cada violacion con el
@@ -941,21 +942,117 @@ function Test-OrphanSkills {
         -ViolationSummary "$($violations.Count) de $total skill(s) sin agente declarante (aviso)" -Violations $violations
 }
 
+function Test-DefaultAgentBoot {
+    <#
+        VAL-10: arranque por defecto valido (spec 034). opencode.json debe declarar
+        default_agent; el valor no puede ser el agente incorporado 'build'; debe
+        existir .opencode/agents/<valor>.md y ese archivo debe declarar mode: primary.
+        Si falta cualquiera de esas condiciones, OpenCode degrada el arranque a
+        'build' con un warning, por lo que se reporta como FAIL.
+    #>
+    param(
+        [string]$ConfigPath = $script:OpencodeConfigPath,
+        [string]$AgentsDir = $script:AgentsOpencodeDir
+    )
+
+    $id = 'VAL-10'
+    $name = 'Arranque por defecto valido'
+    $reglaNode = Get-FirstMatchingLine -Path $script:AgentsMdPath -Pattern 'Arranque por defecto del arnes'
+    $rule = if ($null -ne $reglaNode) {
+        "AGENTS.md L$($reglaNode.Line): $($reglaNode.Text)"
+    }
+    else { 'AGENTS.md - "Arranque por defecto del arnes" (spec 034; no se pudo citar la linea)' }
+
+    $configRelative = Get-RelativeDisplayPath -BasePath $script:RootPath -FullPath $ConfigPath
+    $violations = @()
+
+    if (-not (Test-Path -LiteralPath $ConfigPath -PathType Leaf)) {
+        $violations += New-Violation -File $configRelative `
+            -Message 'no existe opencode.json: no se puede verificar el arranque por defecto'
+        return New-CheckOutcome -Id $id -Name $name -Rule $rule -OkMessage '' `
+            -ViolationSummary 'no existe opencode.json' -Violations $violations
+    }
+
+    try {
+        $config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json -ErrorAction Stop
+    }
+    catch {
+        $violations += New-Violation -File $configRelative `
+            -Message "opencode.json no es JSON valido: $($_.Exception.Message)"
+        return New-CheckOutcome -Id $id -Name $name -Rule $rule -OkMessage '' `
+            -ViolationSummary 'opencode.json invalido' -Violations $violations
+    }
+
+    if (-not (@($config.PSObject.Properties.Name) -contains 'default_agent')) {
+        $violations += New-Violation -File $configRelative `
+            -Message 'opencode.json no declara default_agent: el arnes arranca con el agente incorporado'
+        return New-CheckOutcome -Id $id -Name $name -Rule $rule -OkMessage '' `
+            -ViolationSummary 'falta default_agent' -Violations $violations
+    }
+
+    $defaultAgent = ([string]$config.default_agent).Trim()
+    if ([string]::IsNullOrWhiteSpace($defaultAgent)) {
+        $violations += New-Violation -File $configRelative -Message 'default_agent esta vacio'
+    }
+    elseif ($defaultAgent -eq 'build') {
+        $violations += New-Violation -File $configRelative `
+            -Message "default_agent apunta al agente incorporado 'build': no es un agente del kit"
+    }
+    else {
+        $agentFile = Join-Path $AgentsDir ($defaultAgent + '.md')
+        if (-not (Test-Path -LiteralPath $agentFile -PathType Leaf)) {
+            $violations += New-Violation -File $configRelative `
+                -Message "default_agent '$defaultAgent' no tiene archivo .opencode/agents/$defaultAgent.md"
+        }
+        else {
+            $agentDoc = Get-AgentDocument -Path $agentFile
+            $mode = Get-FieldValue -Fields $agentDoc.Fields -Key 'mode'
+            if ($mode -ne 'primary') {
+                $modeLine = 0
+                if ($agentDoc.Fields.Contains('mode')) { $modeLine = [int]$agentDoc.Fields['mode'].Line }
+                $shownMode = if ([string]::IsNullOrWhiteSpace($mode)) { '(sin mode)' } else { $mode }
+                $violations += New-Violation -File (Get-RelativeDisplayPath -BasePath $script:RootPath -FullPath $agentFile) `
+                    -Line $modeLine `
+                    -Message "el agente por defecto '$defaultAgent' declara mode: $shownMode (se exige primary)"
+            }
+        }
+    }
+
+    $okMessage = "default_agent = '$defaultAgent', agente del kit presente y con mode: primary"
+    return New-CheckOutcome -Id $id -Name $name -Rule $rule -OkMessage $okMessage `
+        -ViolationSummary "$($violations.Count) problema(s) en el arranque por defecto" -Violations $violations
+}
+
 function Get-CanonicalTiers {
     <#
         Deriva los tiers canonicos de la tabla "Agent road assignment" de AGENTS.md.
-        Si no se pueden derivar (>= 3 filas con agentes entre backticks), se usa la
-        lista hardcodeada de respaldo. Fuente de verdad: AGENTS.md ("Agent road
-        assignment: 14 agentes, cinco tiers").
+        El parseo se ANCLA en la cabecera de esa tabla (linea que matchea
+        '| Tier | Agents |') y solo recorre las filas contiguas de esa misma tabla:
+        al topar la primera linea que deja de ser fila de tabla, corta (break). Asi
+        una tabla ajena que tambien use backticks en su segunda columna (por
+        ejemplo la "Matriz de enrutamiento por tarea") ya NO contamina la lista
+        canonica. Dentro de la tabla se conserva la logica previa: se salta la
+        cabecera y la fila separadora y se toma la columna 0 como tier.
+        Si no se pueden derivar >= 3 tiers, se usa la lista hardcodeada de respaldo.
+        Fuente de verdad: AGENTS.md ("Agent road assignment: 14 agentes, cinco tiers").
     #>
     param([Parameter(Mandatory)][string]$AgentsMdPath)
 
     $fallback = @('Documental', 'Documental extendido', 'Implementador', 'Tooling', 'Plataforma')
     if (-not (Test-Path -LiteralPath $AgentsMdPath -PathType Leaf)) { return $fallback }
 
+    $lines = @(Get-Content -LiteralPath $AgentsMdPath)
     $tiers = @()
-    foreach ($line in (Get-Content -LiteralPath $AgentsMdPath)) {
-        if ($line -notmatch '^\s*\|.*\|\s*$') { continue }
+    $enTabla = $false
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = [string]$lines[$i]
+        if (-not $enTabla) {
+            # Ancla: cabecera exacta de la tabla de tiers.
+            if ($line -match '^\s*\|\s*Tier\s*\|\s*Agents\s*\|') { $enTabla = $true }
+            continue
+        }
+        # Ya dentro de la tabla: la primera linea que no es fila cierra el bloque.
+        if ($line -notmatch '^\s*\|.*\|\s*$') { break }
         $cells = @($line.Trim().Trim('|') -split '\|')
         if ($cells.Count -lt 2) { continue }
         $tierCell = $cells[0].Trim()
@@ -988,6 +1085,7 @@ $checks += Test-SkillsParity
 $checks += Test-McpCoverage -Documents $agentDocuments
 $checks += Test-AgentStructure -Documents $agentDocuments
 $checks += Test-OrphanSkills -Documents $agentDocuments
+$checks += Test-DefaultAgentBoot
 
 $failChecks = @($checks | Where-Object { $_.Severity -eq 'FAIL' })
 $warnChecks = @($checks | Where-Object { $_.Severity -eq 'WARN' })

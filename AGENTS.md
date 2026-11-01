@@ -114,6 +114,34 @@
 
 ---
 
+<!-- KIT-BLOCK:START arranque-por-defecto -->
+## Arranque por defecto del arnés
+
+> Regla transversal (spec 034). Aplica a todos los harness: GitHub Copilot VS Code, OpenCode, Codex, Claude Code, Cursor y Windsurf.
+
+- **OpenCode**: `opencode.json` declara `"default_agent": "pensador"`. Ese valor debe corresponder a un agente del kit con `mode: primary` en `.opencode/agents/<nombre>.md`. Si el agente no existe o no es primary, OpenCode cae a `build` con un warning: esa degradación se considera fallo de configuración.
+- **VS Code Copilot**: no existe ajuste de agente por defecto para agentes custom. La sesión arranca con el agente del kit que corresponda a la tarea, según la matriz de enrutamiento de esta sección, y los agentes se eligen en el selector de agentes del chat (`.github/agents/*.agent.md`).
+- **Monorepo**: si el workspace abierto es una subcarpeta, habilitar `chat.useCustomizationsInParentRepositories` para descubrir las customizaciones del repositorio padre (desactivado por defecto).
+- **Mecanismos nativos**: los agentes del kit respetan `permission`, los modos (`primary`/`subagent`/`all`) y las aprobaciones de herramientas de cada harness. El kit no los sobrescribe ni los relaja.
+- **Flujo idéntico en ambos arneses**: especificar → planificar → tareas → análisis → convergencia → implementar. Ningún arnés salta fases ni ejecuta implementación sin aprobación explícita del usuario.
+
+### Matriz de enrutamiento por tarea
+
+| Tipo de petición | Agente del kit |
+|---|---|
+| Duda, análisis, especificación, plan, tasks, convergencia | `pensador` |
+| Decisiones de arquitectura, ADRs, guardrails | `arquitecto` |
+| Consolidación documental, flujos, versionado | `documentador` |
+| Threat model, auditoría de seguridad | `security-auditor` |
+| Comandos Speckit y `.specify/` del proyecto | `Agent-SSD` |
+| Implementación de código, tests, configuración | `developer` |
+| Diagnóstico remoto por SSH | `solucionador` |
+| Nivelación del kit, MCPs, montaje | `plataformador` |
+| Branching, PRs, reverts | `gitflow` |
+| Investigación técnica, POCs | `analista_tecnico` |
+| Migraciones de versión de framework | `upgrade_framework` |
+<!-- KIT-BLOCK:END arranque-por-defecto -->
+
 ## Commands
 
 ```powershell

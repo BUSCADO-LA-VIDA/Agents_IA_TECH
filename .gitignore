@@ -44,3 +44,6 @@ graphify-out/
 .playwright-mcp/
 
 opencode.json.backup.*
+# 034: backups que generan el bootstrap y el sync-kit (formato .bak-<timestamp>)
+opencode.json.bak-*
+AGENTS.md.bak-*

@@ -975,6 +975,89 @@ function Ensure-OpenCodeConfig {
 }
 
 # =============================================================================
+# Ensure-OpenCodeDefaultAgent (034: arranque por defecto con agentes del kit)
+# =============================================================================
+# Garantiza que `opencode.json` declare `default_agent: "pensador"`, un agente del
+# kit con `mode: primary` en `.opencode/agents/pensador.md`. Sin ese ajuste (o con
+# el valor incorporado `build`) OpenCode arranca con el agente genérico y el flujo
+# del kit (especificar -> planificar -> tareas -> análisis -> convergencia ->
+# implementar) no se aplica.
+# Controles: solo lectura si el JSON es inválido (WARN y no escribe); backup
+# `opencode.json.bak-<yyyyMMdd-HHmmss>` antes de escribir; conserva el resto del
+# JSON (reemplazo quirúrgico de la línea cuando la clave ya existe); si el valor
+# es otro agente NO se pisa, solo se informa; -DryRun informa sin escribir.
+function Ensure-OpenCodeDefaultAgent {
+    param([string]$RootPath)
+
+    if (-not $RootPath) {
+        if (Get-Variable -Name ProjectRoot -Scope Script -ErrorAction SilentlyContinue) {
+            $RootPath = $script:ProjectRoot
+        } else {
+            $RootPath = (Split-Path -Parent $PSScriptRoot)
+        }
+    }
+
+    $opencodePath = Join-Path $RootPath "opencode.json"
+    $agenteEsperado = "pensador"
+
+    if (-not (Test-Path -LiteralPath $opencodePath)) {
+        Write-Warn "No existe opencode.json en $RootPath; se omite el arranque por defecto (default_agent)."
+        return
+    }
+
+    try {
+        $raw = Get-Content -LiteralPath $opencodePath -Raw -Encoding UTF8
+        $config = $raw | ConvertFrom-Json -ErrorAction Stop
+    } catch {
+        Write-Warn "opencode.json no es JSON válido ($($_.Exception.Message)); no se toca default_agent."
+        return
+    }
+
+    $tieneClave = (@($config.PSObject.Properties.Name) -contains 'default_agent')
+    $valorActual = if ($tieneClave) { ([string]$config.default_agent).Trim() } else { "" }
+
+    if ($tieneClave -and $valorActual -ne "" -and $valorActual -ne "build") {
+        Write-OK "opencode.json ya declara default_agent = '$valorActual'; se conserva (no se pisa un agente elegido)."
+        return
+    }
+
+    if ($DryRun) {
+        $detalle = if ($tieneClave) { "valor actual '$valorActual'" } else { "clave ausente" }
+        Write-Info "DryRun: fijaría default_agent = '$agenteEsperado' en opencode.json ($detalle)."
+        return
+    }
+
+    # Backup antes de escribir (nunca se sobreescribe un backup existente).
+    $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+    $backupPath = "$opencodePath.bak-$stamp"
+    try {
+        Copy-Item -LiteralPath $opencodePath -Destination $backupPath -Force -ErrorAction Stop
+    } catch {
+        Write-Warn "No se pudo crear el backup de opencode.json ($($_.Exception.Message)); no se modifica el archivo."
+        return
+    }
+
+    try {
+        if ($tieneClave) {
+            # Reemplazo quirúrgico: preserva claves, orden e indentación del resto.
+            $patron = [regex]::new('"default_agent"\s*:\s*"[^"]*"')
+            $nuevo = $patron.Replace($raw, ('"default_agent": "' + $agenteEsperado + '"'), 1)
+        } else {
+            # Clave ausente: se agrega sobre el objeto y se serializa.
+            $config | Add-Member -NotePropertyName "default_agent" -NotePropertyValue $agenteEsperado -Force
+            $nuevo = $config | ConvertTo-Json -Depth 20
+        }
+
+        # Validación previa a la escritura: el resultado debe seguir siendo JSON válido.
+        $nuevo | ConvertFrom-Json -ErrorAction Stop | Out-Null
+        Set-Content -LiteralPath $opencodePath -Value $nuevo -Encoding UTF8 -NoNewline
+        Write-OK "opencode.json: default_agent = '$agenteEsperado' (backup: $(Split-Path -Leaf $backupPath))."
+    } catch {
+        Write-Warn "No se pudo actualizar default_agent en opencode.json ($($_.Exception.Message)); backup en $(Split-Path -Leaf $backupPath)."
+    }
+}
+
+# =============================================================================
 # Ensure-PendientesImplementacion (017: archivo vivo por proyecto)
 # =============================================================================
 # Garantiza que cada app del proyecto tenga su `Documentacion/<App>/pendientes-
@@ -3014,6 +3097,8 @@ if ($inMasterCheckout) {
 Write-Step "4) Configurando MCPs para OpenCode..."
 Ensure-OpenCodeMcp $resolvedRoot
 Ensure-OpenCodeConfig -RootPath $resolvedRoot
+# [034] Arranque por defecto con agentes del kit (default_agent = pensador).
+Ensure-OpenCodeDefaultAgent -RootPath $resolvedRoot
 
 Write-Step "5) Resolviendo app activa (Resolve-ActiveApp)..."
 $activeApp = Resolve-ActiveApp -AppName $App -RootPath $resolvedRoot

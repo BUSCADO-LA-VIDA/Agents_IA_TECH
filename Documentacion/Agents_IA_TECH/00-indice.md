@@ -17,14 +17,18 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 - ~~009-mcp-update-lifecycle~~: **ARCHIVADA/FUSIONADA en `020-mcp-config-operativa` (fase D, spec 035)** — Script independiente de actualización de MCPs con auto-actualización diaria. El script `scripts/update-mcp.ps1` que definía ya existe en disco y 020 lo congeló como baseline; su converge quedó desactualizado. Movida a `specs/archived/009-mcp-update-lifecycle/`.
 - 010-secret-leak-remediation: Remediación de fuga de API key en historial Git y hardening de gitleaks
 - **011-bootstrap-invokes-upgrade-framework: Bootstrap delega sync dependencias externas en upgrade_framework (fail-open, no hardcoded URLs)**
-- **015‑MCP‑Integration‑Flow** – Flujo transversal de integración de MCP alineado con Spec 015. *Ubicación*: `specs/015-mcp-integration-flow/` (ACTIVA, operativa). *Estado*: Completado — flujo SSD completado, spec lista para producción y ACTIVA en `specs/`. `Cerrar` = completar flujo, NO archivar; `Archivar` (`specs/archived/`) solo al retirar del flujo.
+- **015‑MCP‑Integration‑Flow** – Flujo transversal de integración de MCP alineado con Spec 015. *Ubicación*: `specs/015-mcp-integration-flow/` (ACTIVA, operativa). *Estado*: Finalizado — flujo SSD finalizado, spec lista para producción y ACTIVA en `specs/`. `Cerrar` = finalizadar flujo, NO archivar; `Archivar` (`specs/archived/`) solo al retirar del flujo.
 - ~~**013‑MCP‑Integration‑Flow**~~ – **ARCHIVADA/FUSIONADA en `015-mcp-integration-flow` (fase D, spec 035)**. Integración del módulo ECC. Movida a `specs/archived/013-mcp-integration-flow/` con `NOTA-ARCHIVO.md`; sin contenido único que conservar (mismo flujo MCP/ECC que la canónica 015).
-- **017-pendientes-implementacion-por-app: Archivo vivo por proyecto con estado de tareas y responsables** — ✅ **Completado (T001-T016)**. Mecanismo implementado: `Ensure-PendientesImplementacion` en `scripts/plataformador-bootstrap.ps1` (crea el archivo desde plantilla si no existe + detecta obsoleto); sección obligatoria de actualización post-fase en `Agent-SSD` (`.github/` + `.opencode/`); plantilla en `Documentacion/templates/pendientes-implementacion-template.md`. **Regla de agregación multi-spec**: el archivo es un agregado del PROYECTO (consolida TODAS las `specs/*/tasks.md`), con IDs calificados `<spec-id>-T<nnn>` y sin auto-referencia del feature que implementa el mecanismo. Validado Art.VII/Art.IX (PASS).
-- **018-pendientes-estados-scrum: Estados Scrum por agente y whitelist Art-VII por tier** - **En proceso (T001-T007 cerradas, T008-T009 en curso)**. Reglas `## Rol Scrum` + marcador `MCP-ROLE-v1` en 16 `.github` + 16 `.opencode`; campo `tier:` declarado en frontmatter de los 32 agentes (6 Documental, 1 Documental extendido, 4 Implementador, 1 Tooling, 4 Plataforma); plantilla con columnas Estado/Asignado a. *Ubicacion*: `specs/018-pendientes-estados-scrum/`.
-- **020-mcp-config-operativa: Configuracion MCP operativa verificada en vivo (baseline)** - **Completado**. Congela `opencode.json` con 9 MCP hardcodeados (ADR-0009) + indices (codebase-memory ready 5.664 nodos, graphify 4.793 nodos 100%, context-mode 9 archivos) + procedimiento de verificacion viva y orden de diagnostico. *Ubicacion*: `specs/020-mcp-config-operativa/`.
-- **021-sync-kit-agents: Orquestador de sync por capas (Stage temporal + clean+replace + plataformar)** - Fases 1-3 completas y verificadas (docs, agents x3, kit-files, constitutions, src-structure, mcp install+lift; 10 capas). Pendiente fase 4 (indexing, externals, prueba en consumidor). *Ubicacion*: `specs/021-sync-kit-agents/`.
+## Especificación 017-pendientes-implementacion-por-app — Pendientes de implementación por proyecto
+- **Estado**: **En proceso / Especificada** — `tasks.md` tiene T001-T020; varias tareas pendientes (no todas marcadas como finalizadas). El índice lo marcó erróneamente. Estado real: espec definida y planificada, tareas en ejecución real.
+- **Ubicación**: specs/017-pendientes-implementacion-por-app/
+- **Objetivo**: Archivo vivo por proyecto con estado de tareas y responsables.
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
+- **018-pendientes-estados-scrum: Estados Scrum por agente y whitelist Art-VII por tier** - **En proceso (T001-T007 finalizadas, T008-T009 en curso)**. Reglas `## Rol Scrum` + marcador `MCP-ROLE-v1` en 16 `.github` + 16 `.opencode`; campo `tier:` declarado en frontmatter de los 32 agentes (6 Documental, 1 Documental extendido, 4 Implementador, 1 Tooling, 4 Plataforma); plantilla con columnas Estado/Asignado a. *Ubicacion*: `specs/018-pendientes-estados-scrum/`.
+- **020-mcp-config-operativa: Configuracion MCP operativa verificada en vivo (baseline)** - **Finalizado**. Congela `opencode.json` con 9 MCP hardcodeados (ADR-0009) + indices (codebase-memory ready 5.664 nodos, graphify 4.793 nodos 100%, context-mode 9 archivos) + procedimiento de verificacion viva y orden de diagnostico. *Ubicacion*: `specs/020-mcp-config-operativa/`.
+- **021-sync-kit-agents: Orquestador de sync por capas (Stage temporal + clean+replace + plataformar)** - Fases 1-3 finalizadas y verificadas (docs, agents x3, kit-files, constitutions, src-structure, mcp install+lift; 10 capas). Pendiente fase 4 (indexing, externals, prueba en consumidor). *Ubicacion*: `specs/021-sync-kit-agents/`.
 - **022-ecc-integration: Integracion ECC por copia con espejo por harness via script** - `sync/skills/sync-skills.ps1` verificado (76 fachadas integradas + espejo 76/76 + rules). *Ubicacion*: `specs/022-ecc-integration/`.
-- **023-ecc-workflows: Workflows CI propios derivados de ECC** - `validate-skills.yml` + `supply-chain-watch.yml`; 8 workflows ECC rechazados con dano documentado. *Ubicacion*: `specs/023-ecc-workflows/`.
+- **023-ecc-workflows: Workflows CI propios derivados de ECC** - `validate-skills.yml` + `supply-chain-watch.yml`; 8 workflows ECC rechazados con daño documentado. *Ubicación*: `specs/023-ecc-workflows/`. Estado real: **En proceso** — tareas pendientes. El índice lo marcó erróneamente.
 
 ## Especificaciones en proceso
 - **012-ecc-integration**: Integración selectiva de ECC como proyecto externo `proyect_ext/ECC`. Análisis comparativo y hoja de ruta en curso. Índice en `specs/012-ecc-indice.md`
@@ -40,7 +44,7 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 - `specs/012-ecc-indice.md` — Índice central de familia 012
 
 **Estado de tareas 012-ecc-integration** (según `pendientes-implementacion.md` actualizado 2026-10-04):
-- Completadas T001-T007:
+- Finalizadas T001-T007:
   - 012-T001 Clonar ECC en proyect_ext/ECC — `plataformador`
   - 012-T002 Inventariar carpetas clave ECC — `analista-tecnico`
   - 012-T003 Crear matriz de correspondencia ECC ↔ Agents_IA_TECH — `analista-tecnico`
@@ -130,7 +134,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - Acción inmediata: generar evidencias QA para T040-T058 y T060-T064 antes de cerrar seguridad 011
 
 ## Especificación 016 - Enforcement of SSD+Speckit Flow via Agents
-- **Estado**: Completada/Cerrada — flujo SSD completo, lista para producción, permanece ACTIVA en `specs/` (archivar solo al retirar del flujo). Fase C (spec 035): absorbida por **ADR-0005** (Agent-SSD orquestador del flujo SSD) → estado **CERRADA-POR-ABSORCION-ADR**; nota en `NOTA-CONSOLIDACION.md`.
+- **Estado**: Finalizada/Finalizada — flujo SSD completo, lista para producción, permanece ACTIVA en `specs/` (archivar solo al retirar del flujo). Fase C (spec 035): absorbida por **ADR-0005** (Agent-SSD orquestador del flujo SSD) → estado **FINALIZADA-POR-ABSORCION-ADR**; nota en `NOTA-CONSOLIDACION.md`.
 - **Ubicación**: specs/016-ssd-enforcement/ 
 - **Objetivo**: Forzar flujo SSD+Speckit mediante reglas obligatorias en agents y gatekeeper en pensador.
 - **Artefactos**: spec.md, plan.md, tasks.md, NOTA-CONSOLIDACION.md
@@ -148,13 +152,13 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
 
 ## Especificación 026 - Agente developer único
-- **Estado**: Especificada — ciclo Speckit completo (spec/plan/tasks/analyze/converge); **implementación NO ejecutada** (el `converge.md` dice "Converge completado, listo para implementación"). ⚠️ El índice marcaba "Completada" por error: el converge declara estado pre-implementación.
+- **Estado**: Especificada — ciclo Speckit completo (spec/plan/tasks/analyze/converge); **implementación NO ejecutada** (el `converge.md` dice "Converge finalizado, listo para implementación"). ⚠️ El índice marcaba "Finalizada" por error: el converge declara estado pre-implementación.
 - **Ubicación**: specs/026-agente-developer-unico/
 - **Objetivo**: Unificar implementadores en un agente developer con skills especializadas y context7
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
 
 ## Especificación 027 - Patrón estructura de proyecto
-- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados. **Decisión de dirección (fase D, spec 035, usuario 2026-11-01)**: `021-estructura-inicial-apps-nuevas` es la OPERATIVA (8 tasks pendientes de creación de apps); `027-patron-estructura-proyecto` se tratará como **patrón normativo** al que 021 referenciará (completar el patrón en iteración dedicada). En esta fase solo se registra la decisión de dirección; el patrón completo se implementa en otra iteración.
+- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados. **Decisión de dirección (fase D, spec 035, usuario 2026-11-01)**: `021-estructura-inicial-apps-nuevas` es la OPERATIVA (8 tasks pendientes de creación de apps); `027-patron-estructura-proyecto` se tratará como **patrón normativo** al que 021 referenciará (finalizadar el patrón en iteración dedicada). En esta fase solo se registra la decisión de dirección; el patrón completo se implementa en otra iteración.
 - **Ubicación**: specs/027-patron-estructura-proyecto/
 - **Objetivo**: Estructura canónica obligatoria Documentacion/<App>/ + src/<App>/ y validación
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
@@ -167,7 +171,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Decisión de dirección (fase D, spec 035)**: 021 es la OPERATIVA (8 tasks pendientes); `027-patron-estructura-proyecto` se tratará como patrón normativo al que 021 referenciará (ver entrada 027).
 
 ## Especificación plataforma-bootstrap-instalador-unico (no-numerada)
-- **Estado**: **Completada** — `scripts/plataformador-bootstrap.ps1` instalador/actualizador único del kit; base de ADR-0003. Contiene `Ensure-OpenCodeDefaultAgent`, `Ensure-OpenCodeMcp`, `Ensure-OpenCodeConfig`, `Ensure-McpEnvFile` y demás pasos del flujo de montaje del arnés.
+- **Estado**: **En proceso** — `scripts/plataformador-bootstrap.ps1` instalador/actualizador único del kit; base de ADR-0003. Contiene `Ensure-OpenCodeDefaultAgent`, `Ensure-OpenCodeMcp`, `Ensure-OpenCodeConfig`, `Ensure-McpEnvFile` y demás pasos del flujo de montaje del arnés.
 - **Ubicación**: specs/plataforma-bootstrap-instalador-unico/
 - **Objetivo**: Nivelar el kit transversal en cualquier proyecto: clonar maestro, sincronizar transversales (.github/, .opencode/, .doc_agents/, scripts/), sincronizar AGENTS.md y opencode.json (merge por claves), instalar MCPs, documentar proyecto, crear estructura base.
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, scripts/plataformador-bootstrap.ps1.
@@ -179,26 +183,26 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Relación**: complementa a la skill `docker-patterns`. `022-docker-patterns-metodologia` (borrador) → **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)**: sus 10 FR de metodología Docker transversal ya están cubiertos por la skill `docker-patterns` (existente, 665 líneas, incluye secret management, Docker secrets, `.env` nunca commit, security, hardening); redundante con la skill. Movida a `specs/archived/022-docker-patterns-metodologia/` con [NOTA-ARCHIVO.md](specs/archived/022-docker-patterns-metodologia/NOTA-ARCHIVO.md).
 
 ## Especificación 023-copilot-mcp-actualizaciones - Actualizaciones Copilot MCP / frontmatter
-- **Estado**: **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)** — el tema (frontmatter MCP de agentes, paridad `.github`/`.opencode`, mcp-servers por agente) ya está gestionado por la regla 1b de cobertura MCP + la spec 020 (config MCP operativa) y el mecanismo de paridad de agentes. Sus tasks estaban completadas; sin feature futura única. (Sin entrada previa en el índice; se registra en la fase F.)
-- **Ubicación**: `specs/archived/023-copilot-mcp-actualizaciones/` (movida con `git mv`).
-- **Objetivo**: Documentar cambios de GitHub Copilot en agentes y MCP, y adaptar los agentes del KIT (mcp-servers por agente, frontmatter, paridad).
-- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, [NOTA-ARCHIVO.md](specs/archived/023-copilot-mcp-actualizaciones/NOTA-ARCHIVO.md).
+- **Estado**: **En proceso** — El índice lo marcaba como "ARCHIVADA" por error. Estado real: tareas pendientes (T003 pendiente). No está finalizada.
+- **Ubicación**: `specs/023-copilot-mcp-actualizaciones/`
+- **Objetivo**: Documentar cambios recientes en GitHub Copilot para agentes y MCP, y adaptar los agentes del KIT a las nuevas capacidades de frontmatter mcp-servers, herramientas y model policy.
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md
 
 ## Especificación 028 - Public Docs Routing
-- **Estado**: Especificada — ciclo Speckit completo (spec/plan/tasks/analyze/converge) + ADR-0011 + skill public-documentation; **implementación NO ejecutada** (el `converge.md` dice "Lista para implementación vía speckit-implement"). ⚠️ El índice marcaba "Completada" por error.
+- **Estado**: Especificada — ciclo Speckit completo (spec/plan/tasks/analyze/converge) + ADR-0011 + skill public-documentation; **implementación NO ejecutada** (el `converge.md` dice "Lista para implementación vía speckit-implement"). ⚠️ El índice marcaba "Finalizada" por error.
 - **Ubicación**: specs/028-public-docs-routing/
 - **Objetivo**: Routing docs públicas a `src/<App>/docs/` y README a `src/<App>/README*.md`; delegación documentador→developer
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, ADR-0011-public-docs-routing.md, skill public-documentation
 
 ## Especificación 029 - Sync honesto: EOL normalizado y `-Force` efectivo
-- **Estado**: En proceso — implementación iniciada. 37 tasks en `tasks.md`; **2 cerradas** (T028, T030); 35 pendientes. T036 fue **revertida de `[x]` a `[ ]`** el 2026-10-29 (nota en `tasks.md` L123) porque se había marcado apoyándose en `tests/upgrade_framework.Tests.ps1`, que no compila (DD-08). T025 y T036 están bloqueadas por DD-08
+- **Estado**: **En proceso** — implementación iniciada. 37 tasks en `tasks.md`; 2 resueltas (T028, T030); 35 pendientes. T036 fue revertida de `[x]` a `[ ]` el 2026-10-29 porque se había marcado apoyándose en `tests/upgrade_framework.Tests.ps1`, que no compila (DD-08). T025 y T036 están bloqueadas por DD-08.
 - **Ubicación**: `specs/029-sync-eol-y-force-real/`
 - **Objetivo**: Que el sync distinga contenido igual / igual-salvo-EOL / distinto con mensajes observables, y que `-Force` y `-DryRun` sean flags explícitos de `Sync-TransversalKit` (sin dynamic scoping); escritura LF y bloque `mcp` local intacto
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, threat-model.md, checklists/requirements.md. Fases 1-8 de `tasks.md`; Fase 8 (T030..T037) derivada de Analyze el 2026-10-28. T038 descartada con evidencia
 - **Deudas abiertas** (registradas en `pendientes-implementacion.md`): **DD-08** (`tests/upgrade_framework.Tests.ps1` no compila: 4 errores de parseo, la suite del kit nunca corrió; bloquea T025, T036 y NFR-02 entero) y **DD-09** (NFR-02 se apoya en una suite que no toca el motor y no compila; hasta resolverlo NFR-02 es aspiración, no gate)
 
 ## Especificación 030 - Whitelist contextual por tipo de proyecto y agentes como orquestadores
-- **Estado**: Especificada — Analyze **PASS con observaciones** (`arquitecto` + `security-auditor`), **Converge completado** 2026-10-29. **NÚCLEO absorbido por ADR-0013** (whitelist de escritura por capa/tipo de proyecto y agentes como orquestadores delgados). **Implementación del RESTO NO iniciada**: 66 tasks en `tasks.md`, 0 ejecutadas. Nota de consolidación parcial en `NOTA-CONSOLIDACION.md`. ⚠️ **No se cierra por completo ni se archiva**: queda como PENDIENTE-REAL.
+- **Estado**: **Especificada** — Analyze PASS con observaciones (`arquitecto` + `security-auditor`), Converge finalizado 2026-10-29. **NÚCLEO absorbido por ADR-0013** (whitelist de escritura por capa/tipo de proyecto y agentes como orquestadores delgados). **Implementación del RESTO NO iniciada**: 66 tasks en `tasks.md`, 0 ejecutadas. Nota de consolidación parcial en `NOTA-CONSOLIDACION.md`. **No se cierra por completo ni se archiva**: queda como PENDIENTE-REAL.
 - **Ubicación**: `specs/030-whitelist-contextual-por-tipo-proyecto/`
 - **Objetivo**: Que la whitelist de escritura sea contextual al tipo de proyecto (`kit` | `consumidor`), determinista y sin fuga del kit hacia los consumidores; y replantear los agentes como orquestadores delgados con las capacidades de procedimiento en skills declaradas en el frontmatter
 - **Métricas**: 23 FR (FR-01..FR-11, FR-02b, FR-12..FR-22), 12 CA (CA-01..CA-12), 6 NFR, 66 tasks, cobertura verificada 23/23 FR y 12/12 CA
@@ -209,26 +213,26 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 ---
 
 ## Especificación 031 - Permisos, dominio y delegación de agentes
-- **Estado**: Cerrado — flujo SSD+Speckit completo (spec → plan → tasks → analyze → threat-model). CA-01..CA-12 todos cumplidos. Absorbe los borradores 034 (comportamiento), 035 (delegación) y 037 (permisos)
+- **Estado**: Finalizado — flujo SSD+Speckit completo (spec → plan → tasks → analyze → threat-model). CA-01..CA-12 todos cumplidos. Absorbe los borradores 034 (comportamiento), 035 (delegación) y 037 (permisos)
 - **Ubicación**: `specs/031-permisos-y-dominio-de-agentes/`
 - **Objetivo**: Que todo agente opere bajo un contrato único y verificable de dominio de escritura, prohibiciones absolutas, delegación y autorización de operaciones críticas (`[S]`/`[N]`/`[C]`), con sesión SSH única por servidor reutilizable y auditada
 - **Métricas**: 24 FR (FR-01..FR-24), 7 NFR, 7 historias de usuario, 12 CA (CA-01..CA-12), matriz de permisos por operación y por agente
 - **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `OK: 8 | WARN: 1 | FAIL: 0`, exit code 0, FAIL=0 WARN=52 (solo VAL-09, aviso por diseño). Suite `tests/validate-agents-skills.Tests.ps1`: 20/20 en verde. Test de contrato `tests/agents-parity.ps1`: exit code 0, fixture negativo detecta divergencia. `analyze.md` y `threat-model.md` verificados (sin placeholders, sin secciones vacías). CA-01..CA-12 todos cumplidos
 - **Paridad lograda**: los 13 agentes tienen cuerpo idéntico en `.github/agents/<n>.agent.md` y `.opencode/agents/<n>.md`; solo difiere el frontmatter nativo de cada arnés (`tools`/`user-invocable` vs `mode`/`temperature`/`permission`). `tier`, `description` y el conjunto de `skills` son iguales en ambos lados
-- **Artefactos de esta iteración**: skill `threat-modeling` creada en ambos arneses; `tier` corregido en `pensador`, `security-auditor` y `usuario-preferencias`; `testing` reemplazada por `tdd-workflow` + `verification-loop` en `developer`; `dominio_check` y protocolo de autorización con `[S]`/`[N]`/`[C]` en ambos arneses; `plataformador` restaurado a su versión completa (474 líneas, `5513d37`) con `Enfoque` y `Constraints`; 8 agentes nivelados a la estructura de Regla 2 (38 violaciones cerradas)
+- **Artefactos de esta iteración**: skill `threat-modeling` creada en ambos arneses; `tier` corregido en `pensador`, `security-auditor` y `usuario-preferencias`; `testing` reemplazada por `tdd-workflow` + `verification-loop` en `developer`; `dominio_check` y protocolo de autorización con `[S]`/`[N]`/`[C]` en ambos arneses; `plataformador` restaurado a su versión finalizada (474 líneas, `5513d37`) con `Enfoque` y `Constraints`; 8 agentes nivelados a la estructura de Regla 2 (38 violaciones finalizadas)
 - **Specs hermanos registrados**: 032 (actualización de Knowledge Base tras spec validada — ciclo SSD+Speckit completo, implementación parcial con limitaciones de herramientas MCP) y 033 (refresh de conocimiento e índices de MCP en la primera ejecución del día — ciclo SSD+Speckit completo, implementación T08-T10 pendiente de primera ejecución del día real)
 
 ## Especificación 034 - Arranque por defecto con agentes del kit
-- **Estado**: Cerrado — flujo SSD+Speckit completo (spec → plan → tasks → analyze → threat-model → converge). T01-T13 + mitad de propagación T14-T20 cerradas. Decisión del usuario (2026-11-01): `pensador` como `default_agent`, respetando mecanismos nativos del arnés y con flujo idéntico entre `.github/` y `.opencode/`. Ampliación FR-14..FR-19 / CA-12..CA-15: propagación del arranque por `scripts/sync-kit.ps1` (D-07..D-09, sección 19 de la spec)
+- **Estado**: Finalizado — flujo SSD+Speckit completo (spec → plan → tasks → analyze → threat-model → converge). T01-T13 + mitad de propagación T14-T20 finalizadas. Decisión del usuario (2026-11-01): `pensador` como `default_agent`, respetando mecanismos nativos del arnés y con flujo idéntico entre `.github/` y `.opencode/`. Ampliación FR-14..FR-19 / CA-12..CA-15: propagación del arranque por `scripts/sync-kit.ps1` (D-07..D-09, sección 19 de la spec)
 - **Ubicación**: `specs/034-arranque-agentes-por-defecto/`
 - **Objetivo**: Que al montar el kit cada arnés arranque con un agente del kit en lugar de su agente incorporado: `default_agent: pensador` en OpenCode y regla always-on de enrutamiento en `AGENTS.md` + `.github/copilot-instructions.md` para VS Code Copilot, que no expone agente por defecto para agentes custom
 - **Métricas**: 19 FR (FR-01..FR-19), 7 NFR, 4 historias de usuario, 15 CA (CA-01..CA-15), 9 decisiones (D-01..D-09), 20 tareas (T01-T20)
 - **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `10 chequeos | OK: 9 | WARN: 1 | FAIL: 0`, exit code 0 (incorpora `VAL-10 Arranque por defecto valido`, severidad FAIL). Test de contrato `tests/harness-default.ps1`: exit code 0, fixture negativo con `default_agent: build` detectado. Test de contrato de propagación `tests/kit-sync-merge.ps1`: `OK: 7 escenarios`, exit 0. Parseo `PARSE-OK` de `scripts/sync-kit.ps1` y `tests/kit-sync-merge.ps1`. Defectos B-01/B-02 corregidos con el comparador local `Compare-KitFileState`. `Get-CanonicalTiers` corregido para anclarse en la cabecera `| Tier | Agents |` (la matriz nueva de `AGENTS.md` había degradado `VAL-04` a ~35 tiers falsos manteniendo el `[OK]`). `git diff` sin cambios en bloques `permission`. 19/19 FR con evidencia, 15/15 CA verificados, Constitución 5/5 PASS
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, threat-model.md, converge.md, tests/harness-default.ps1, tests/kit-sync-merge.ps1; `opencode.json` L5, sección de arranque en `AGENTS.md` L117 envuelta en `KIT-BLOCK` (L117/L143), enrutamiento en `.github/copilot-instructions.md`, sección en `README.md`, `Ensure-OpenCodeDefaultAgent` en `scripts/plataformador-bootstrap.ps1`, `VAL-10` en `scripts/validate-agents-skills.ps1`, `Compare-KitFileState`/`Merge-OpenCodeConfig`/`Merge-KitBlock`/whitelist de tests en `scripts/sync-kit.ps1`, `.gitignore` con `opencode.json.bak-*` y `AGENTS.md.bak-*`, retiro de `.opencode/agents/pensador/spec.md`
-- **Riesgo residual abierto**: TM-04 cerrado por `.gitignore` (backups `opencode.json.bak-*` y `AGENTS.md.bak-*` fuera de git). Riesgos nuevos de propagación (TM-09 a TM-11) en residual Bajo. Sin residual Medio abierto
+- **Riesgo residual abierto**: TM-04 finalizado por `.gitignore` (backups `opencode.json.bak-*` y `AGENTS.md.bak-*` fuera de git). Riesgos nuevos de propagación (TM-09 a TM-11) en residual Bajo. Sin residual Medio abierto
 
 ## Especificación 033 - Refresh de conocimiento e índices de MCP en la primera ejecución del día
-- **Estado**: ⚠️ **Divergencia corregida (2026-11-01)** — el índice lo marcaba "En proceso, T01-T07 cerradas", pero en disco `tasks.md` tiene las 13 tareas en estado "Pendiente" (0 ejecutadas). Estado real: **Especificada / no iniciada en ejecución real** — ciclo SSD+Speckit completo en artefactos, pipeline definido (`pipeline-refresh-mcp.md`) pero sin tareas ejecutadas.
+- **Estado**: ⚠️ Divergencia corregida (2026-11-01) — el índice lo marcaba "En proceso, T01-T07 resueltas", pero en disco `tasks.md` tiene las 13 tareas en estado "Pendiente" (0 ejecutadas). Estado real: **Especificada / no iniciada en ejecución real** — ciclo SSD+Speckit completo en artefactos, pipeline definido (`pipeline-refresh-mcp.md`) pero sin tareas ejecutadas.
 - **Ubicación**: `specs/033-refresh-conocimiento-mcp/`
 - **Objetivo**: Que la primera ejecución del día dispare automáticamente el refresh de conocimiento e índices de todos los MCP del proyecto (`codebase-memory-mcp`, `graphify`, `context-mode`, `markitdown`, `tokenslayer`, `github`, `playwright`, `context7`), para que los agentes consulten información actualizada sin leer archivos directamente
 - **Métricas**: 12 FR (FR-01..FR-12), 7 NFR, 4 historias de usuario, 12 CA (CA-01..CA-12)
@@ -238,7 +242,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 
 
 ## Especificación 032 - Actualización de Knowledge Base tras spec validada
-- **Estado**: ⚠️ **Divergencia corregida (2026-11-01)** — la spec **NO está cerrada ni implementada**: en disco `tasks.md` tiene las 13 tareas en estado "Pendiente" (0 ejecutadas) y el "Estado general" dice "quedan por ejecutar". El índice lo marcaba "Cerrado" por error. Estado real: **En proceso / Especificada** — pipeline creado (`pipeline-kb.md`) pero sin ejecutar.
+- **Estado**: **En proceso / Especificada** — en disco `tasks.md` tiene las 13 tareas en estado "Pendiente" (0 ejecutadas) y el "Estado general" dice "quedan por ejecutar". Estado real: **En proceso / Especificada** — pipeline creado (`pipeline-kb.md`) pero sin ejecutar.
 - **Ubicación**: `specs/032-actualizacion-knowledge-base/`
 - **Objetivo**: Que el cierre de una spec dispare la actualización de CodeBase (codebase-memory-mcp), Context (context-mode) y Graphify (graphify), para que los agentes consulten el contenido de specs validadas vía MCPs sin leer archivos directamente
 - **Métricas**: 12 FR (FR-01..FR-12), 7 NFR, 4 historias de usuario, 12 CA (CA-01..CA-12)
@@ -249,27 +253,27 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 ---
 
 ## Especificación 014 - Manifest versionado y sincronización entre módulos
-- **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (1.357 B) con plan/analyze/converge/data-model/quickstart/research y `tasks.md` (8 tareas cerradas, 8/0), pero ausente del índice. Registrada por la fase B de la spec 035 (consolidación del backlog). No es absorbida por un ADR.
+- **Estado**: **Finalizada sin registro previo (CERRAR-FINALIZADA-SIN-REGISTRO)** — en disco `spec.md` (1.357 B) con plan/analyze/converge/data-model/quickstart/research y `tasks.md` (8 tareas finalizadas, 8/0), pero ausente del índice. Registrada por la fase B de la spec 035 (consolidación del backlog). No es absorbida por un ADR.
 - **Ubicación**: `specs/014-manifest-versionado-y-sincronizacion/`
 - **Objetivo**: Manifest de versionado y sincronización entre módulos del kit.
 - **Artefactos**: spec.md, plan.md, analyze.md, converge.md, data-model.md, quickstart.md, research.md, tasks.md.
 - **Nota de fase F**: candidata a revisión contra `sync-kit` (auditoría §5.4/§5.6); renumeración no ejecutada (pendiente decisión fase F del plan 035).
 
 ## Especificación 019 - Guard de lastupdate de update-mcp
-- **Estado**: **ARCHIVADA/FUSIONADA en `020-mcp-config-operativa` (fase D, spec 035)** — su guard (`lastupdate`) vive en `scripts/update-mcp.ps1`, el mismo que 020 congela como baseline. Sin contenido único pendiente. Movida a `specs/archived/019-update-mcp-lastupdate-guard/` con `NOTA-ARCHIVO.md`. (Previamente: Completada sin registro previo [CERRAR-COMPLETADA-SIN-REGISTRO], ausente del índice, registrada por la fase B de la spec 035.)
+- **Estado**: **ARCHIVADA/FUSIONADA en `020-mcp-config-operativa` (fase D, spec 035)** — su guard (`lastupdate`) vive en `scripts/update-mcp.ps1`, el mismo que 020 congela como baseline. Sin contenido único pendiente. Movida a `specs/archived/019-update-mcp-lastupdate-guard/` con `NOTA-ARCHIVO.md`. (Previamente: Finalizada sin registro previo [CERRAR-FINALIZADA-SIN-REGISTRO], ausente del índice, registrada por la fase B de la spec 035.)
 - **Ubicación**: `specs/archived/019-update-mcp-lastupdate-guard/`
 - **Objetivo**: Get-State de `update-mcp.ps1` con formas válidas para el guard de lastupdate.
 - **Artefactos**: spec.md, plan.md, tasks.md, NOTA-ARCHIVO.md.
 - **Nota de solapamiento**: solapa con `020-mcp-config-operativa`/`009-mcp-update-lifecycle` (misma entidad `update-mcp.ps1`); la fusión de contenido (fase D) se ejecutó el 2026-11-01 aprobada por el usuario, archivando 019 y 009 en favor de 020.
 
 ## Especificación kit-generico (no-numerada) - Blindaje `.git` y alcance quirúrgico del kit
-- **Estado**: **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)** — absorbida por la spec 021 (sync por capas): los guards de alcance quirúrgico y blindaje de `.git` que pedía (allowlist/denylist de `.git`, rutas destructivas con containment-check) ya están implementados en la spec 021 con guards equivalentes; sus tareas quedaron marcadas "superada". Sin contenido único pendiente. (Antes: CERRAR-COMPLETADA-SIN-REGISTRO por la fase B de la spec 035.)
+- **Estado**: **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)** — absorbida por la spec 021 (sync por capas): los guards de alcance quirúrgico y blindaje de `.git` que pedía (allowlist/denylist de `.git`, rutas destructivas con containment-check) ya están implementados en la spec 021 con guards equivalentes; sus tareas quedaron marcadas "superada". Sin contenido único pendiente. (Antes: CERRAR-FINALIZADA-SIN-REGISTRO por la fase B de la spec 035.)
 - **Ubicación**: `specs/archived/kit-generico/` (movida con `git mv`).
 - **Objetivo**: Blindaje de `.git` + alcance quirúrgico del kit (generización transversal).
 - **Artefactos**: spec.md, tasks.md, [NOTA-ARCHIVO.md](specs/archived/kit-generico/NOTA-ARCHIVO.md).
 
 ## Especificación solucion-generica (no-numerada) - Descontaminación del kit
-- **Estado**: **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)** — decisión de genericidad revertida parcialmente por ADR-0009 (hardcode) y órdenes del usuario; lo vigente (cero dominios concretos, cero rutas absolutas) ya está constitutionalizado en el constraint "Genericidad y Ausencia de Rutas Absolutas". Sin contenido único pendiente que no esté cubierto. (Antes: CERRAR-COMPLETADA-SIN-REGISTRO por la fase B de la spec 035.)
+- **Estado**: **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)** — decisión de genericidad revertida parcialmente por ADR-0009 (hardcode) y órdenes del usuario; lo vigente (cero dominios concretos, cero rutas absolutas) ya está constitutionalizado en el constraint "Genericidad y Ausencia de Rutas Absolutas". Sin contenido único pendiente que no esté cubierto. (Antes: CERRAR-FINALIZADA-SIN-REGISTRO por la fase B de la spec 035.)
 - **Ubicación**: `specs/archived/solucion-generica/` (movida con `git mv`).
 - **Objetivo**: Descontaminación del kit (solución genérica transversal).
 - **Artefactos**: spec.md, plan.md, tasks.md, [NOTA-ARCHIVO.md](specs/archived/solucion-generica/NOTA-ARCHIVO.md).
@@ -279,7 +283,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 ## Especificación 035 - Consolidación del Backlog de Specs
 - **Estado**: En proceso — ciclo SSD+Speckit en curso (specify + plan aprobado; fases B/C/E/H ejecutadas; D/F fusiones y renumeraciones aprobadas puntualmente por el usuario el 2026-11-01; fase F de archivados ejecutada).
 - **Ubicación**: `specs/035-consolidacion-backlog/`
-- **Objetivo**: Limpiar y consolidar el backlog de specs del KIT: archivar obsoletas, consolidar absorbidas por ADR, fusionar duplicadas, indexar completadas sin registro, y dejar un único punto de la verdad (índice + backlog coherentes con el disco, con gate automático `VAL-11`).
+- **Objetivo**: Limpiar y consolidar el backlog de specs del KIT: archivar obsoletas, consolidar absorbidas por ADR, fusionar duplicadas, indexar finalizadas sin registro, y dejar un único punto de la verdad (índice + backlog coherentes con el disco, con gate automático `VAL-11`).
 - **Origen**: Auditoría `auditoria-specs-backlog.md` (2026-11-01) que detectó ~29+8 huérfanas, duplicados de numeración y divergencias disco↔índice.
 - **Artefactos**: spec.md, plan.md, checklists/requirements.md (20/20 PASS), NOTA-CONSOLIDACION.md ×6, NOTA-ARCHIVO.md ×11 (7 fase E + 4 fase F), VAL-11 en `scripts/validate-agents-skills.ps1`.
 - **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `11 chequeos | OK: 9 | WARN: 1 | FAIL: 1` (VAL-11 reporta **1 huérfana**: `specs/plataforma-bootstrap-instalador-unico`, candidata a consolidación con ADR-0003 — decisión pendiente de fase F/iteración dedicada, fuera del alcance de las 4 archivadas de esta fase). Gate: las 4 archivadas de la fase F resolvieron sus huérfanas (7 → 1); queda 1 pendiente conocida.
@@ -312,21 +316,21 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **`kit-generico` → `021-sync-kit-agents`** — `specs/archived/kit-generico/`. Absorbida por la spec 021 (sync por capas): los guards de alcance quirúrgico y blindaje de `.git` que pedía (allowlist/denylist de `.git`, rutas destructivas con containment-check) ya están implementados en la spec 021 con guards equivalentes; sus tareas quedaron marcadas "superada". Sin contenido único pendiente. [NOTA-ARCHIVO](specs/archived/kit-generico/NOTA-ARCHIVO.md).
 - **`solucion-generica` → Constitution + ADR-0009** — `specs/archived/solucion-generica/`. Decisión de genericidad revertida parcialmente por ADR-0009 (hardcode) y órdenes del usuario; lo vigente (cero dominios concretos, cero rutas absolutas) ya está constitutionalizado en el constraint "Genericidad y Ausencia de Rutas Absolutas". Sin contenido único pendiente que no esté cubierto. [NOTA-ARCHIVO](specs/archived/solucion-generica/NOTA-ARCHIVO.md).
 - **`022-docker-patterns-metodologia` → skill `docker-patterns`** — `specs/archived/022-docker-patterns-metodologia/`. Borrador cuyos 10 FR de metodología Docker transversal ya están cubiertos por la skill `docker-patterns` (existente, 665 líneas, incluye secret management, Docker secrets, `.env` nunca commit, security, hardening). Redundante con la skill; se archiva. [NOTA-ARCHIVO](specs/archived/022-docker-patterns-metodologia/NOTA-ARCHIVO.md).
-- **`023-copilot-mcp-actualizaciones` → regla 1b + `020-mcp-config-operativa`** — `specs/archived/023-copilot-mcp-actualizaciones/`. Tema (frontmatter MCP de agentes, paridad `.github`/`.opencode`, mcp-servers por agente) ya gestionado por la regla 1b de cobertura MCP + la spec 020 (config MCP operativa) y el mecanismo de paridad de agentes. Sus tasks estaban completadas; sin feature futura única. [NOTA-ARCHIVO](specs/archived/023-copilot-mcp-actualizaciones/NOTA-ARCHIVO.md).
+- **`023-copilot-mcp-actualizaciones` → regla 1b + `020-mcp-config-operativa`** — `specs/archived/023-copilot-mcp-actualizaciones/`. Tema (frontmatter MCP de agentes, paridad `.github`/`.opencode`, mcp-servers por agente) ya gestionado por la regla 1b de cobertura MCP + la spec 020 (config MCP operativa) y el mecanismo de paridad de agentes. Sus tasks estaban finalizadas; sin feature futura única. [NOTA-ARCHIVO](specs/archived/023-copilot-mcp-actualizaciones/NOTA-ARCHIVO.md).
 
 ## Consolidación por ADR — specs absorbidas (fase C, spec 035)
 
-> La fuente de verdad de la «forma actual de trabajo» son los ADRs implementados (ADR-0003..0013). Las specs siguientes quedaron **absorbidas** por un ADR; se consolidan con `NOTA-CONSOLIDACION.md` dentro de cada carpeta y se marcan **CERRADA-POR-ABSORCION-ADR**. No se archivan (siguen en `specs/` con nota). Referencia: auditoría §5.1 y spec 035.
+> La fuente de verdad de la «forma actual de trabajo» son los ADRs implementados (ADR-0003..0013). Las specs siguientes quedaron **absorbidas** por un ADR; se consolidan con `NOTA-CONSOLIDACION.md` dentro de cada carpeta y se marcan **FINALIZADA-POR-ABSORCION-ADR**. No se archivan (siguen en `specs/` con nota). Referencia: auditoría §5.1 y spec 035.
 
 ### Contenido de `000-mcp-gobernanza` (sub-specs absorbidas)
-- **007-mcp-token-resolution** — `specs/000-mcp-gobernanza/007-mcp-token-resolution/` — **CERRADA-POR-ABSORCION-ADR (ADR-0006)**. Resolución de tokens MCP: absorbida por ADR-0006 (resolución de tokens + `.env.mcp` portable). Completada en disco (46/0) sin índice; ahora registrada y cerrada. Avísase si queda verificación pendiente de evidence de tokens según ADR.
-- **017-garantizar-mcp-activos** — `specs/000-mcp-gobernanza/017-garantizar-mcp-activos/` — **CERRADA-POR-ABSORCION-ADR (ADR-0006 + 020)**. Garantía de MCP activos: absorbida por ADR-0006 + `020-mcp-config-operativa` (baseline en vivo).
+- **007-mcp-token-resolution** — `specs/000-mcp-gobernanza/007-mcp-token-resolution/` — **FINALIZADA-POR-ABSORCION-ADR (ADR-0006)**. Resolución de tokens MCP: absorbida por ADR-0006 (resolución de tokens + `.env.mcp` portable). Finalizada en disco (46/0) sin índice; ahora registrada y finalizada. Avísase si queda verificación pendiente de evidence de tokens según ADR.
+- **017-garantizar-mcp-activos** — `specs/000-mcp-gobernanza/017-garantizar-mcp-activos/` — **FINALIZADA-POR-ABSORCION-ADR (ADR-0006 + 020)**. Garantía de MCP activos: absorbida por ADR-0006 + `020-mcp-config-operativa` (baseline en vivo).
 
 ### Specs absorbidas (registradas ahora)
-- **006-post-platforming-speckit** — `specs/006-post-platforming-speckit/` — **CERRADA-POR-ABSORCION-ADR (ADR-0004)**. Flujo post-plataformado→speckit (3 escenarios), re-indexación, Constitution por proyecto, memoria, graphify por app. Completada en disco (31/0) sin índice; ahora registrada y cerrada.
-- **010-mcp-env-file-guarantee** — `specs/010-mcp-env-file-guarantee/` — **CERRADA-POR-ABSORCION-ADR (ADR-0006)**. Garantía de `.env.mcp` portable.
-- **015-sync-kit-bootstrap** — `specs/015-sync-kit-bootstrap/` — **CERRADA-POR-ABSORCION-ADR (ADR-0003 + sync-kit)**. Bootstrap instalador/actualizador único. Completada en disco (10/0) sin índice; ahora registrada y cerrada.
-- **016-ssd-enforcement** — `specs/016-ssd-enforcement/` — **CERRADA-POR-ABSORCION-ADR (ADR-0005)**. Cumplimiento del flujo SSD+Speckit vía Agent-SSD. Entre Indexar y cerrar: la auditoría la tenía como ABSORBIDA-POR-ADR (§5.1) a la vez que el índice la marcaba Completada. Se registra como cerrada por absorción del ADR-0005.
+- **006-post-platforming-speckit** — `specs/006-post-platforming-speckit/` — **FINALIZADA-POR-ABSORCION-ADR (ADR-0004)**. Flujo post-plataformado→speckit (3 escenarios), re-indexación, Constitution por proyecto, memoria, graphify por app. Finalizada en disco (31/0) sin índice; ahora registrada y finalizada.
+- **010-mcp-env-file-guarantee** — `specs/010-mcp-env-file-guarantee/` — **FINALIZADA-POR-ABSORCION-ADR (ADR-0006)**. Garantía de `.env.mcp` portable.
+- **015-sync-kit-bootstrap** — `specs/015-sync-kit-bootstrap/` — **FINALIZADA-POR-ABSORCION-ADR (ADR-0003 + sync-kit)**. Bootstrap instalador/actualizador único. Finalizada en disco (10/0) sin índice; ahora registrada y finalizada.
+- **016-ssd-enforcement** — `specs/016-ssd-enforcement/` — **FINALIZADA-POR-ABSORCION-ADR (ADR-0005)**. Cumplimiento del flujo SSD+Speckit vía Agent-SSD. Entre Indexar y cerrar: la auditoría la tenía como ABSORBIDA-POR-ADR (§5.1) a la vez que el índice la marcaba Finalizada. Se registra como finalizada por absorción del ADR-0005.
 
 ---
 

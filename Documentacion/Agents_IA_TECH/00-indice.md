@@ -34,7 +34,7 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 
 **Specs relacionadas 012**:
 - `specs/012-ecc-integration/` — Especificación base, spec.md, plan.md, tasks.md, guía-integracion-selectiva.md
-- `specs/012-ecc-integration-lifecycle/` — Ciclo de vida install/update/validate/uninstall con `ecc-sync.ps1`
+- `specs/013-ecc-integration-lifecycle/` — Ciclo de vida install/update/validate/uninstall con `ecc-sync.ps1`
 - `specs/012-ecc-mcp-bridge/` — Puente ECC ↔ MCPs y contrato de intercambio
 - `specs/012-ecc-mcp-migration/` — Migración .env.mcp → mcp-configs/mcp-servers.json
 - `specs/012-ecc-indice.md` — Índice central de familia 012
@@ -166,6 +166,24 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Artefactos**: spec.md, plan.md, tasks.md, y 8 tasks pendientes de creación de apps.
 - **Decisión de dirección (fase D, spec 035)**: 021 es la OPERATIVA (8 tasks pendientes); `027-patron-estructura-proyecto` se tratará como patrón normativo al que 021 referenciará (ver entrada 027).
 
+## Especificación plataforma-bootstrap-instalador-unico (no-numerada)
+- **Estado**: **Completada** — `scripts/plataformador-bootstrap.ps1` instalador/actualizador único del kit; base de ADR-0003. Contiene `Ensure-OpenCodeDefaultAgent`, `Ensure-OpenCodeMcp`, `Ensure-OpenCodeConfig`, `Ensure-McpEnvFile` y demás pasos del flujo de montaje del arnés.
+- **Ubicación**: specs/plataforma-bootstrap-instalador-unico/
+- **Objetivo**: Nivelar el kit transversal en cualquier proyecto: clonar maestro, sincronizar transversales (.github/, .opencode/, .doc_agents/, scripts/), sincronizar AGENTS.md y opencode.json (merge por claves), instalar MCPs, documentar proyecto, crear estructura base.
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, scripts/plataformador-bootstrap.ps1.
+
+## Normativa 022-docker-standard (no spec)
+- **Estado**: **NORMATIVA obligatoria vigente** (no es una feature/spec) — `specs/022-docker-standard/standard.md` (351 líneas) define el estándar técnico Docker del kit: secretos como archivos en `secrets/` (nunca en `.env`), `.env` solo para configuración no sensible, Dockerfile multi-stage con usuario no root UID/GID 10001, `/healthz`, puertos, `.gitignore`/`.dockerignore`. Referencia: implementación real de `api_torniquetes`.
+- **Ubicación**: `specs/022-docker-standard/standard.md` (sin `spec.md`: es normativa técnica, no feature).
+- **Decisión (fase F, spec 035, usuario 2026-11-01)**: **se mantiene como NORMATIVA** — NO se archiva (es un estándar vigente y obligatorio del kit, no un duplicado). Se registra aquí para que deje de ser huérfana del VAL-11.
+- **Relación**: complementa a la skill `docker-patterns`. `022-docker-patterns-metodologia` (borrador) → **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)**: sus 10 FR de metodología Docker transversal ya están cubiertos por la skill `docker-patterns` (existente, 665 líneas, incluye secret management, Docker secrets, `.env` nunca commit, security, hardening); redundante con la skill. Movida a `specs/archived/022-docker-patterns-metodologia/` con [NOTA-ARCHIVO.md](specs/archived/022-docker-patterns-metodologia/NOTA-ARCHIVO.md).
+
+## Especificación 023-copilot-mcp-actualizaciones - Actualizaciones Copilot MCP / frontmatter
+- **Estado**: **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)** — el tema (frontmatter MCP de agentes, paridad `.github`/`.opencode`, mcp-servers por agente) ya está gestionado por la regla 1b de cobertura MCP + la spec 020 (config MCP operativa) y el mecanismo de paridad de agentes. Sus tasks estaban completadas; sin feature futura única. (Sin entrada previa en el índice; se registra en la fase F.)
+- **Ubicación**: `specs/archived/023-copilot-mcp-actualizaciones/` (movida con `git mv`).
+- **Objetivo**: Documentar cambios de GitHub Copilot en agentes y MCP, y adaptar los agentes del KIT (mcp-servers por agente, frontmatter, paridad).
+- **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, [NOTA-ARCHIVO.md](specs/archived/023-copilot-mcp-actualizaciones/NOTA-ARCHIVO.md).
+
 ## Especificación 028 - Public Docs Routing
 - **Estado**: Especificada — ciclo Speckit completo (spec/plan/tasks/analyze/converge) + ADR-0011 + skill public-documentation; **implementación NO ejecutada** (el `converge.md` dice "Lista para implementación vía speckit-implement"). ⚠️ El índice marcaba "Completada" por error.
 - **Ubicación**: specs/028-public-docs-routing/
@@ -245,28 +263,26 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Nota de solapamiento**: solapa con `020-mcp-config-operativa`/`009-mcp-update-lifecycle` (misma entidad `update-mcp.ps1`); la fusión de contenido (fase D) se ejecutó el 2026-11-01 aprobada por el usuario, archivando 019 y 009 en favor de 020.
 
 ## Especificación kit-generico (no-numerada) - Blindaje `.git` y alcance quirúrgico del kit
-- **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (6.869 B) y `tasks.md` (9 tareas cerradas, 9/0), ausente del índice. Registrada por la fase B de la spec 035.
-- **Ubicación**: `specs/kit-generico/`
+- **Estado**: **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)** — absorbida por la spec 021 (sync por capas): los guards de alcance quirúrgico y blindaje de `.git` que pedía (allowlist/denylist de `.git`, rutas destructivas con containment-check) ya están implementados en la spec 021 con guards equivalentes; sus tareas quedaron marcadas "superada". Sin contenido único pendiente. (Antes: CERRAR-COMPLETADA-SIN-REGISTRO por la fase B de la spec 035.)
+- **Ubicación**: `specs/archived/kit-generico/` (movida con `git mv`).
 - **Objetivo**: Blindaje de `.git` + alcance quirúrgico del kit (generización transversal).
-- **Artefactos**: spec.md, tasks.md.
-- **Nota de fase F**: quedó como MIGRAR en la auditoría (§5.4): numerar a spec transversal si aporta valor, o archivar. Decisión pendiente para la fase F (no ejecutada).
+- **Artefactos**: spec.md, tasks.md, [NOTA-ARCHIVO.md](specs/archived/kit-generico/NOTA-ARCHIVO.md).
 
 ## Especificación solucion-generica (no-numerada) - Descontaminación del kit
-- **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (6.802 B), `plan.md` y `tasks.md` (14 tareas cerradas, 14/0), ausente del índice. Registrada por la fase B de la spec 035.
-- **Ubicación**: `specs/solucion-generica/`
+- **Estado**: **ARCHIVADA (fase F, spec 035, usuario 2026-11-01)** — decisión de genericidad revertida parcialmente por ADR-0009 (hardcode) y órdenes del usuario; lo vigente (cero dominios concretos, cero rutas absolutas) ya está constitutionalizado en el constraint "Genericidad y Ausencia de Rutas Absolutas". Sin contenido único pendiente que no esté cubierto. (Antes: CERRAR-COMPLETADA-SIN-REGISTRO por la fase B de la spec 035.)
+- **Ubicación**: `specs/archived/solucion-generica/` (movida con `git mv`).
 - **Objetivo**: Descontaminación del kit (solución genérica transversal).
-- **Artefactos**: spec.md, plan.md, tasks.md.
-- **Nota de fase F**: quedó como MIGRAR en la auditoría (§5.4): numerar a spec transversal si sigue aplicando. Decisión pendiente para la fase F (no ejecutada).
+- **Artefactos**: spec.md, plan.md, tasks.md, [NOTA-ARCHIVO.md](specs/archived/solucion-generica/NOTA-ARCHIVO.md).
 
 ---
 
 ## Especificación 035 - Consolidación del Backlog de Specs
-- **Estado**: En proceso — ciclo SSD+Speckit en curso (specify + plan aprobado; fases B/C/E/H ejecutadas; D/F fusiones y renumeraciones pospuestas para aprobación puntual por spec).
+- **Estado**: En proceso — ciclo SSD+Speckit en curso (specify + plan aprobado; fases B/C/E/H ejecutadas; D/F fusiones y renumeraciones aprobadas puntualmente por el usuario el 2026-11-01; fase F de archivados ejecutada).
 - **Ubicación**: `specs/035-consolidacion-backlog/`
 - **Objetivo**: Limpiar y consolidar el backlog de specs del KIT: archivar obsoletas, consolidar absorbidas por ADR, fusionar duplicadas, indexar completadas sin registro, y dejar un único punto de la verdad (índice + backlog coherentes con el disco, con gate automático `VAL-11`).
 - **Origen**: Auditoría `auditoria-specs-backlog.md` (2026-11-01) que detectó ~29+8 huérfanas, duplicados de numeración y divergencias disco↔índice.
-- **Artefactos**: spec.md, plan.md, checklists/requirements.md (20/20 PASS), NOTA-CONSOLIDACION.md ×6, NOTA-ARCHIVO.md ×7, VAL-11 en `scripts/validate-agents-skills.ps1`.
-- **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `11 chequeos | OK: 9 | WARN: 1 | FAIL: 1` (VAL-11 reporta 7 huérfanas que corresponden a fusiones/migraciones pospuestas o la propia 035). Gate parcial: coherencia lograda en B/C/E; D/F pendientes.
+- **Artefactos**: spec.md, plan.md, checklists/requirements.md (20/20 PASS), NOTA-CONSOLIDACION.md ×6, NOTA-ARCHIVO.md ×11 (7 fase E + 4 fase F), VAL-11 en `scripts/validate-agents-skills.ps1`.
+- **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `11 chequeos | OK: 9 | WARN: 1 | FAIL: 1` (VAL-11 reporta **1 huérfana**: `specs/plataforma-bootstrap-instalador-unico`, candidata a consolidación con ADR-0003 — decisión pendiente de fase F/iteración dedicada, fuera del alcance de las 4 archivadas de esta fase). Gate: las 4 archivadas de la fase F resolvieron sus huérfanas (7 → 1); queda 1 pendiente conocida.
 
 ### Specs archivadas (fase E, spec 035)
 
@@ -289,6 +305,15 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **`019-update-mcp-lastupdate-guard` → `020-mcp-config-operativa`** — `specs/archived/019-update-mcp-lastupdate-guard/`. Su guard (`lastupdate`) vive en `scripts/update-mcp.ps1`, el mismo que 020 congela como baseline. Sin contenido único pendiente. [NOTA-ARCHIVO](specs/archived/019-update-mcp-lastupdate-guard/NOTA-ARCHIVO.md).
 - **`002-script-plataforming-sync-kit` → sync-kit / `021-sync-kit-agents`** — `specs/archived/002-script-plataforming-sync-kit/`. Precursora del motor de sync: el mecanismo actual (`scripts/sync-kit.ps1` + `scripts/sync/` con 10 subcarpetas + spec 021-sync-kit-agents) ya implementa lo que esta spec describía. Archivar como superada. [NOTA-ARCHIVO](specs/archived/002-script-plataforming-sync-kit/NOTA-ARCHIVO.md).
 
+### Fusiones de contenido (fase F, spec 035)
+
+> Las 4 specs siguientes quedaron **archivadas/fusionadas en su canónica** en la fase F de la spec 035 y se movieron a `specs/archived/` (sin borrar, con `NOTA-ARCHIVO.md` y motivo). Decisión aprobada por el usuario el 2026-11-01. Referencia: spec 035.
+
+- **`kit-generico` → `021-sync-kit-agents`** — `specs/archived/kit-generico/`. Absorbida por la spec 021 (sync por capas): los guards de alcance quirúrgico y blindaje de `.git` que pedía (allowlist/denylist de `.git`, rutas destructivas con containment-check) ya están implementados en la spec 021 con guards equivalentes; sus tareas quedaron marcadas "superada". Sin contenido único pendiente. [NOTA-ARCHIVO](specs/archived/kit-generico/NOTA-ARCHIVO.md).
+- **`solucion-generica` → Constitution + ADR-0009** — `specs/archived/solucion-generica/`. Decisión de genericidad revertida parcialmente por ADR-0009 (hardcode) y órdenes del usuario; lo vigente (cero dominios concretos, cero rutas absolutas) ya está constitutionalizado en el constraint "Genericidad y Ausencia de Rutas Absolutas". Sin contenido único pendiente que no esté cubierto. [NOTA-ARCHIVO](specs/archived/solucion-generica/NOTA-ARCHIVO.md).
+- **`022-docker-patterns-metodologia` → skill `docker-patterns`** — `specs/archived/022-docker-patterns-metodologia/`. Borrador cuyos 10 FR de metodología Docker transversal ya están cubiertos por la skill `docker-patterns` (existente, 665 líneas, incluye secret management, Docker secrets, `.env` nunca commit, security, hardening). Redundante con la skill; se archiva. [NOTA-ARCHIVO](specs/archived/022-docker-patterns-metodologia/NOTA-ARCHIVO.md).
+- **`023-copilot-mcp-actualizaciones` → regla 1b + `020-mcp-config-operativa`** — `specs/archived/023-copilot-mcp-actualizaciones/`. Tema (frontmatter MCP de agentes, paridad `.github`/`.opencode`, mcp-servers por agente) ya gestionado por la regla 1b de cobertura MCP + la spec 020 (config MCP operativa) y el mecanismo de paridad de agentes. Sus tasks estaban completadas; sin feature futura única. [NOTA-ARCHIVO](specs/archived/023-copilot-mcp-actualizaciones/NOTA-ARCHIVO.md).
+
 ## Consolidación por ADR — specs absorbidas (fase C, spec 035)
 
 > La fuente de verdad de la «forma actual de trabajo» son los ADRs implementados (ADR-0003..0013). Las specs siguientes quedaron **absorbidas** por un ADR; se consolidan con `NOTA-CONSOLIDACION.md` dentro de cada carpeta y se marcan **CERRADA-POR-ABSORCION-ADR**. No se archivan (siguen en `specs/` con nota). Referencia: auditoría §5.1 y spec 035.
@@ -305,5 +330,5 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 
 ---
 
-*Última actualización del índice: 2026-11-01 (fase D de la spec 035: fusionadas/archivadas 013→015, 009→020, 019→020, 002→sync-kit/021 con NOTA-ARCHIVO; registrada 021-estructura-inicial como OPERATIVA (8 tasks pendientes, resuelve una huérfana de VAL-11); registrada la decisión de dirección para 027 como patrón normativo al que 021 referenciará. Antes: corregidas divergencias 026/028/032/033; registradas 034 y 035; fases B/C/E de la spec 035: indexadas 014/019/kit-generico/solucion-generica, consolidadas absorciones por ADR, archivadas obsoletas a `specs/archived/`; VAL-11 en el validador).*
+*Última actualización del índice: 2026-11-01 (fase F de la spec 035: archivadas kit-generico, solucion-generica, 022-docker-patterns, 023-copilot con NOTA-ARCHIVO; 022-docker-standard mantenida como normativa; etiqueta 013-ecc corregida). Antes (fase D, spec 035): fusionadas/archivadas 013→015, 009→020, 019→020, 002→sync-kit/021 con NOTA-ARCHIVO; registrada 021-estructura-inicial como OPERATIVA (8 tasks pendientes, resuelve una huérfana de VAL-11); registrada la decisión de dirección para 027 como patrón normativo al que 021 referenciará. Antes: corregidas divergencias 026/028/032/033; registradas 034 y 035; fases B/C/E de la spec 035: indexadas 014/019/kit-generico/solucion-generica, consolidadas absorciones por ADR, archivadas obsoletas a `specs/archived/`; VAL-11 en el validador).*
 

@@ -1,11 +1,11 @@
 ﻿# Pendientes de implementación — Agents_IA_TECH
 
 ## Estado general del proyecto
-- **Última actualización:** 2026-10-27
+- **Última actualización:** 2026-11-01
 - **Fase actual:** implement
-- **Specs con tareas:** 14
-- **Total de tareas inventariadas:** 180
-- **Próxima tarea:** 029-T001 (spec 029, sync honesto: EOL normalizado y `-Force` efectivo). Plan aprobado el 2026-10-27.
+- **Specs con tareas:** 16 (+ 1 transversal)
+- **Total de tareas inventariadas:** 210
+- **Próxima tarea:** TRANS-001 (hacer obligatorio con gate que las fases Speckit actualicen `pendientes-implementacion.md` — es el segundo control del backlog). Luego 029-T001 (bloqueada por DD-08).
 
 ## Sin asignar
 
@@ -142,6 +142,36 @@
 | 029-T027 | 029 | Aplicar DD-06 (opcional, cosmetico) | Aplicar DD-06 (opcional, cosmetico): emitir `[MERGE] opencode.json` en lugar de `[FILE]` cuando la ruta del guard a... | `plataformador` | Pendiente | `plataformador` | Si |
 | 029-T028 | 029 | Registrar en `Documentacion/Agents_IA_TECH/pendientes-imple... | Registrar en `Documentacion/Agents_IA_TECH/pendientes-implementacion.md` las tasks T001..T027 con responsable y est... | `pensador` | `[x]` | `pensador` | Si |
 | 029-T029 | 029 | Commit con conventional commits via `gitflow` | Commit con conventional commits via `gitflow`: `fix(sync): compare transversal files with normalized EOL and make -... | `gitflow` | Pendiente | `gitflow` | Si |
+| 032-T01 | 032 | Nivelar `analista_tecnico` para pipeline de KB | Añadir paso pipeline markitdown → graphify → codebase-memory-mcp → context-mode a Enfoque; sección MCPs con los 4 MCPs. Criterio: VAL-08 = 0 en ambos arneses. | `analista_tecnico` | Pendiente | `analista_tecnico` | No |
+| 032-T02 | 032 | Nivelar `plataformador` para orquestación de KB | Añadir a Enfoque el paso de orquestar actualización de KB tras cierre de spec; Output incluye `00-indice.md`. Criterio: VAL-08 = 0. | `plataformador` | Pendiente | `plataformador` | No |
+| 032-T03 | 032 | Nivelar `pensador` para disparador de KB | Añadir sección de disparador: al confirmar cierre de spec, pensador autoriza a plataformador a iniciar actualización de KB. Criterio: presente en ambos arneses. | `pensador` | Pendiente | `pensador` | No |
+| 032-T04 | 032 | Nivelar `documentador` para registro de cierre | Añadir a Output el registro de cierre de spec en `00-indice.md` con timestamp, spec y MCPs actualizados. | `documentador` | Pendiente | `documentador` | No |
+| 032-T05 | 032 | Nivelar `security-auditor` para auditoría de KB | Añadir a Responsabilidades la auditoría de ausencia de secretos en índices de KB; Output incluye informe en `seguridad/`. | `security-auditor` | Pendiente | `security-auditor` | No |
+| 032-T06 | 032 | Documentar pipeline de actualización de KB | Crear `specs/032-actualizacion-knowledge-base/pipeline-kb.md` con comandos exactos del pipeline markitdown → graphify → codebase-memory-mcp → context-mode. | `analista_tecnico` | Pendiente | `analista_tecnico` | No |
+| 032-T07 | 032 | Test de paridad de índices de KB | Crear `tests/kb-parity.Tests.ps1` que verifique mismo contenido de índices KB en `.github/` y `.opencode/`; fixture negativo detecta divergencia. | `developer` | Pendiente | `developer` | No |
+| 032-T08 | 032 | Ejecutar actualización de KB para spec 031 | Ejecutar pipeline markitdown → graphify → codebase-memory-mcp → context-mode sobre `specs/031-permisos-y-dominio-de-agentes/`; registrar en `00-indice.md` y bitácora. Bloqueada: faltan herramientas MCP en catálogo. | `plataformador` | Pendiente | `plataformador` | No |
+| 032-T09 | 032 | Verificar idempotencia de KB | Reejecutar pipeline sobre spec 031 y verificar que el conteo de nodos no duplica; `00-indice.md` no se duplica. | `analista_tecnico` | Pendiente | `analista_tecnico` | No |
+| 032-T10 | 032 | Auditoría de seguridad de KB | Auditar que los índices de KB no contienen credenciales/tokens/secretos; informe en `seguridad/`. | `security-auditor` | Pendiente | `security-auditor` | No |
+| 032-T11 | 032 | Analyze cross-artifact (arquitecto) | `specs/032-actualizacion-knowledge-base/analyze.md` — consistencia spec ↔ plan ↔ tasks + Constitución; 12/12 FR y CA. | `arquitecto` | Pendiente | `arquitecto` | No |
+| 032-T12 | 032 | Threat model (security-auditor) | `specs/032-actualizacion-knowledge-base/threat-model.md` — DFD, STRIDE, registro de riesgos de KB. | `security-auditor` | Pendiente | `security-auditor` | No |
+| 032-T13 | 032 | Converge y cierre de 032 | Actualizar `00-indice.md` con cierre de 032; spec ACTIVA; sin placeholders. | `documentador` | Pendiente | `documentador` | No |
+| 033-T01 | 033 | Nivelar `analista_tecnico` para pipeline de refresh MCP | Añadir a Enfoque el pipeline de refresh MCP (codebase-memory-mcp → graphify → context-mode → tokenslayer); sección MCPs con los 8 MCP. Criterio: VAL-08 = 0. | `analista_tecnico` | Pendiente | `analista_tecnico` | No |
+| 033-T02 | 033 | Nivelar `plataformador` para orquestación de refresh MCP | Añadir a Enfoque el paso de orquestar el refresh MCP en primera ejecución del día; Output incluye `00-indice.md`. | `plataformador` | Pendiente | `plataformador` | No |
+| 033-T03 | 033 | Nivelar `pensador` para validador de primera ejecución del día | Añadir sección de validador: al iniciar primera sesión del día, pensador valida y autoriza a plataformador el refresh MCP. | `pensador` | Pendiente | `pensador` | No |
+| 033-T04 | 033 | Nivelar `documentador` para registro de refresh | Añadir a Output el registro del último refresh en `00-indice.md` con timestamp, hora, MCPs y resultado. | `documentador` | Pendiente | `documentador` | No |
+| 033-T05 | 033 | Nivelar `security-auditor` para auditoría de refresh MCP | Añadir a Responsabilidades la auditoría de ausencia de secretos en índices MCP tras cada refresh; informe en `seguridad/`. | `security-auditor` | Pendiente | `security-auditor` | No |
+| 033-T06 | 033 | Documentar pipeline de refresh MCP | Crear `specs/033-refresh-conocimiento-mcp/pipeline-refresh-mcp.md` con comandos exactos del pipeline codebase-memory-mcp → graphify → context-mode → tokenslayer. | `analista_tecnico` | Pendiente | `analista_tecnico` | No |
+| 033-T07 | 033 | Test de paridad de índices MCP | Crear `tests/mcp-refresh-parity.ps1` que verifique mismo contenido de índices MCP en `.github/` y `.opencode/`; fixture negativo detecta divergencia. | `developer` | Pendiente | `developer` | No |
+| 033-T08 | 033 | Ejecutar refresh MCP en primera ejecución del día | Ejecutar pipeline codebase-memory-mcp → graphify → context-mode → tokenslayer; registrar en `00-indice.md` y bitácora. Depende de primera ejecución del día real. | `plataformador` | Pendiente | `plataformador` | No |
+| 033-T09 | 033 | Verificar idempotencia de refresh MCP | Reejecutar refresh el mismo día y verificar que el conteo de nodos no duplica; `00-indice.md` no se duplica. | `analista_tecnico` | Pendiente | `analista_tecnico` | No |
+| 033-T10 | 033 | Auditoría de seguridad de refresh MCP | Auditar que los índices MCP no contienen credenciales/tokens/secretos; informe en `seguridad/`. | `security-auditor` | Pendiente | `security-auditor` | No |
+| 033-T11 | 033 | Analyze cross-artifact (arquitecto) | `specs/033-refresh-conocimiento-mcp/analyze.md` — consistencia spec ↔ plan ↔ tasks + Constitución; 12/12 FR y CA. | `arquitecto` | Pendiente | `arquitecto` | No |
+| 033-T12 | 033 | Threat model (security-auditor) | `specs/033-refresh-conocimiento-mcp/threat-model.md` — DFD, STRIDE, registro de riesgos de refresh MCP. | `security-auditor` | Pendiente | `security-auditor` | No |
+| 033-T13 | 033 | Converge y cierre de 033 | Actualizar `00-indice.md` con cierre de 033; spec ACTIVA; sin placeholders. | `documentador` | Pendiente | `documentador` | No |
+| 026-T12b | 026 | Implementar agente developer con skills especializadas | Ejecutar la implementación funcional del agente developer único (converge 026: "listo para implementación"): materializar research/data-model/quickstart en el agente `.github`/`.opencode` y verificar paridad + context7. | `developer` | Pendiente | `developer` | No |
+| 028-T05 | 028 | Implementar routing de docs públicas | Ejecutar la implementación funcional del public docs routing (converge 028: "lista para implementar"): aplicar el routing de docs públicas a `src/<App>/docs/` y README `src/<App>/README*.md` + delegación documentador→developer. | `developer` | Pendiente | `developer` | No |
+| TRANS-001 | Transversal | Hacer obligatorio (con gate) que las fases Speckit actualicen `pendientes-implementacion.md` | El error de raíz de la incoherencia del backlog: la regla está escrita en `Agent-SSD` (§ Actualización automática, feature 017) pero NO se cumple porque no hay verificación automática. Agregar un `VAL-XX` en `scripts/validate-agents-skills.ps1` que (a) exija que `Documentacion/<AppName>/pendientes-implementacion.md` exista y esté coherente con `specs/*/tasks.md` (estados derivados, sin placeholders, sin divergencias índice↔backlog), y (b) sirva de gate para abrir/cerrar cada fase Speckit. `pendientes-implementacion.md` es el segundo control del pensador: respaldo de Speckit + contenedor de procesos fuera del flujo. | `pensador` | Pendiente | `pensador` | No |
+| TRANS-002 | Transversal | Actualizar flujos de agentes documentales: futuro al backlog, nunca a specs | Regla de gobernanza (decisión usuario 2026-11-01): "NO agregues requerimientos o intenciones a los spec con criterio por si acaso. Lo que deseamos para el futuro son backlog, que deben ser refinados por speckits. Eso NO forma parte nunca de los specs." Editar `.github/agents/*.agent.md` y `.opencode/agents/*.md` de pensador, documentador, arquitecto, security-auditor y Agent-SSD (paridad) para que cualquier requerimiento/intención/mejora "por si acaso" o "para el futuro" se canalice a `pendientes-implementacion.md` como backlog a refinar por Speckit y NUNCA se agregue al `spec.md` en curso ni a specs cerradas. Cierra FR-011 / SC-006 de la spec 035. | `pensador` | Pendiente | `pensador` | No |
 
 ## En progreso
 
@@ -227,3 +257,20 @@
 
 **Tasks derivadas propuestas por Analyze, pendientes de decision del usuario** (no incorporadas a `tasks.md`):
 T030 guardarrail estatico de paridad Windows/Linux (CA-08) - T031 test del contrato de mensajes de los tres resultados - T032 politica explicita de `EolOnly` en el guard de `.opencode/.gitignore` - T033 reescribir la verificacion de CA-06 - T034 decision y test del fallback `NoLocalMcp` - T035 anclar T022 y T023 a secciones concretas - T036 cobertura base del motor - T037 resolver el drift documental del motor duplicado - T038 verificar la propagacion de `scripts/sync-kit-lib.ps1`.
+
+## Reglas de gobernanza del backlog (spec 035, fr-011 / sc-006)
+
+> Norma transversal (decision usuario 2026-11-01). Este archivo es el **backlog vivo** y el **segundo control** del `pensador`: respaldo de Speckit y contenedor de procesos fuera del flujo.
+
+### R1 — Futuro al backlog, nunca a specs
+
+- NO se agregan requerimientos ni intenciones a los `spec.md` con criterio "por si acaso" o "para el futuro".
+- Lo que se desea para el futuro es **backlog**: debe registrarse en este archivo para **refinarse por Speckit** (spec → plan → tasks → analyze → converge → implement) cuando corresponda.
+- Un requerimiento futuro **nunca forma parte de un spec** (ni del feature en curso ni de specs cerradas).
+- Todo item de backlog, para materializarse, pasa por un ciclo Speckit y recibe su propia especificación; solo entonces entra a un spec.
+
+### R2 — Aplicación
+
+- Aplica a TODOS los agentes documentales: `pensador`, `documentador`, `arquitecto`, `security-auditor`, `Agent-SSD`.
+- Cuando en una fase Speckit surja una mejora futura o un "por si acaso", se redirige aquí (con responsable y estado Pendiente), NO se edita el `spec.md`.
+- Recordatorio: los specs describen el **alcance presente**; el futuro vive en este archivo.

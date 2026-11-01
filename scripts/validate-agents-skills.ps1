@@ -84,6 +84,8 @@ $script:SkillsGithubDir    = Join-Path $RootPath '.github/skills'
 $script:SkillsOpencodeDir  = Join-Path $RootPath '.opencode/skills'
 $script:OpencodeConfigPath = Join-Path $RootPath 'opencode.json'
 $script:AgentsMdPath       = Join-Path $RootPath 'AGENTS.md'
+$script:SpecsDir           = Join-Path $RootPath 'Documentacion/Agents_IA_TECH/specs'
+$script:BacklogIndexPath   = Join-Path $RootPath 'Documentacion/Agents_IA_TECH/00-indice.md'
 
 # =============================================================================
 # 1. Utilidades generales
@@ -1067,6 +1069,148 @@ function Get-CanonicalTiers {
     return $fallback
 }
 
+function Test-BacklogCoherence {
+    <#
+        VAL-11: coherencia backlog <-> disco (spec 035). Compara las carpetas de
+        Documentacion/Agents_IA_TECH/specs/ que tienen spec.md contra el indice
+        00-indice.md:
+          - Orfanas: spec numerada/no-numerada en disco sin entrada en el indice
+            (ni '## Especificacion <NNN>' ni el slug) -> FAIL.
+          - Divergencia de estado: el bloque del indice declara 'Cerrado'/
+            'Completada'/'Completa' pero tasks.md (si existe) tiene tareas en
+            'Pendiente'/sin marcar '[ ]' -> WARN (listado, no rompe el gate).
+        Excluye specs/archived/ y los directorios sin spec.md.
+        Severidad: FAIL (orfanas) y WARN (divergencias de estado). Solo lectura.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$SpecsDir,
+        [Parameter(Mandatory)][string]$IndexPath
+    )
+
+    $id = 'VAL-11'
+    $name = 'Coherencia backlog-desc (spec 035)'
+    $rule = 'spec 035 (auditoria-specs-backlog.md): specs/ con spec.md debe tener entrada en 00-indice.md; estados Cerrado/Completada coherentes con tasks.md'
+
+    $failViolations = @()
+    $warnViolations = @()
+    $indexDisplay = Get-RelativeDisplayPath -BasePath $script:RootPath -FullPath $IndexPath
+
+    if (-not (Test-Path -LiteralPath $SpecsDir -PathType Container)) {
+        $failViolations += New-Violation -File $indexDisplay `
+            -Message "no existe el directorio Documentacion/Agents_IA_TECH/specs ($SpecsDir)"
+        return New-CheckOutcome -Id $id -Name $name -Rule $rule `
+            -ViolationSummary "no existe specs/: no se puede verificar coherencia" -Violations $failViolations
+    }
+
+    # Lectura del indice: lineas crudas (para fragmentos) y normalizadas (para busquedas).
+    $rawIndexLines = @()
+    if (Test-Path -LiteralPath $IndexPath -PathType Leaf) {
+        $rawIndexLines = @(Get-Content -LiteralPath $IndexPath)
+    }
+    else {
+        $failViolations += New-Violation -File $indexDisplay -Message 'no existe 00-indice.md'
+        return New-CheckOutcome -Id $id -Name $name -Rule $rule `
+            -ViolationSummary 'no existe 00-indice.md' -Violations $failViolations
+    }
+    $normIndexLines = @($rawIndexLines | ForEach-Object { ConvertTo-NormalizedText -Text $_ })
+    $normalizedIndex = ($normIndexLines -join "`n")
+    $normalizedIndexLineCount = $normIndexLines.Count
+
+    # Cabeceras del indice: '## especificacion <nombre>'.
+    $headers = @()
+    for ($i = 0; $i -lt $normIndexLines.Count; $i++) {
+        if ($normIndexLines[$i] -match '^## especificacion\s+(.+)$') {
+            $headers += [pscustomobject]@{ RetainedIndex = $i; Name = $Matches[1].Trim() }
+        }
+    }
+
+    $dirs = @(Get-ChildItem -LiteralPath $SpecsDir -Directory | Where-Object { $_.Name -ne 'archived' } | Sort-Object Name)
+    $specCount = 0
+    $orphanCount = 0
+    $warnCount = 0
+
+    foreach ($dir in $dirs) {
+        $specFile = Join-Path $dir.FullName 'spec.md'
+        if (-not (Test-Path -LiteralPath $specFile -PathType Leaf)) { continue }  # sin spec.md no aplica
+        $specCount++
+        $relative = Get-RelativeDisplayPath -BasePath $script:RootPath -FullPath $dir.FullName
+        $normalizedSlug = ConvertTo-NormalizedText -Text $dir.Name
+
+        # 1) Buscar cabecera en el indice: por numero (si el slug tiene prefijo numerico) o por slug.
+        $header = $null
+        if ($normalizedSlug -match '^(\d+)') {
+            $num = $Matches[1]
+            $header = $headers | Where-Object {
+                ($_.Name -match ('^' + [regex]::Escape($num) + '\b')) -or ($_.Name -match ('\b' + [regex]::Escape($num) + '\b'))
+            } | Select-Object -First 1
+        }
+        if ($null -eq $header) {
+            $header = $headers | Where-Object { $_.Name -match [regex]::Escape($normalizedSlug) -or $normalizedSlug -match [regex]::Escape($_.Name) } | Select-Object -First 1
+        }
+        # Fallback: el slug aparece en el cuerpo del indice (sin ser cabecera).
+        $slugInBody = $null -eq $header -and $normalizedIndex -match [regex]::Escape($normalizedSlug)
+
+        if ($null -eq $header -and -not $slugInBody) {
+            $orphanCount++
+            $failViolations += New-Violation -File $relative -Message 'spec en disco sin entrada en 00-indice.md (huerfana)'
+            continue
+        }
+
+        # 2) Divergencia de estado (WARN): bloque del indice declara Cerrado/Completada y tasks.md tiene pendientes.
+        $tasksPath = Join-Path $dir.FullName 'tasks.md'
+        if (-not (Test-Path -LiteralPath $tasksPath -PathType Leaf)) { continue }  # sin tasks.md no hay coherencia que evaluar
+
+        # Ventana del bloque de la spec en el indice: de su cabecera a la proxima cabecera (o limite 80 lineas).
+        $blockStart = if ($null -ne $header) { $header.RetainedIndex } else { 0 }
+        $blockEnd = [Math]::Min($blockStart + 80, $rawIndexLines.Count - 1)
+        if ($null -ne $header) {
+            $next = $headers | Where-Object { $_.RetainedIndex -gt $blockStart } | Select-Object -First 1
+            if ($null -ne $next) { $blockEnd = $next.RetainedIndex - 1 }
+        }
+        else {
+            # Sin cabecera exacta: buscar la linea donde aparece el slug en el cuerpo del indice.
+            for ($i = 0; $i -lt $normalizedIndexLineCount; $i++) {
+                if ($normIndexLines[$i] -match [regex]::Escape($normalizedSlug)) { $blockStart = $i; break }
+            }
+        }
+        if ($blockStart -lt 0) { $blockStart = 0 }
+        $blockNorm = ''
+        if ($blockStart -lt $rawIndexLines.Count) {
+            $slice = @($normIndexLines[$blockStart..$blockEnd])
+            $blockNorm = ($slice -join "`n")
+        }
+        else { $blockNorm = $normalizedIndex }
+
+        $declaresClosed = $blockNorm -match '\bcerrad[oa]s?\b' -or $blockNorm -match '\bcompletad[oa]s?\b' -or $blockNorm -match '\bcompleta\b'
+
+        $tasksText = (Get-Content -LiteralPath $tasksPath -Raw)
+        $hasPending = ($tasksText -match '- \[ \]') -or ($tasksText -match '\[ \]') -or ($tasksText -match '\bpendiente\b' -and $tasksText -notmatch 'sin pendientes')
+        if ($declaresClosed -and $hasPending) {
+            $warnCount++
+            $warnViolations += New-Violation -File $relative `
+                -Message "el indice declara Cerrado/Completada pero tasks.md tiene tareas Pendiente/sin marcar ([ ])"
+        }
+    }
+
+    if ($failViolations.Count -gt 0) {
+        $summary = "$orphanCount spec(s) huerfana(s) de $specCount con spec.md"
+        return New-CheckOutcome -Id $id -Name $name -Rule $rule -OkMessage '' `
+            -ViolationSummary $summary -Violations $failViolations
+    }
+
+    if ($warnViolations.Count -gt 0) {
+        $summary = "$warnCount divergencia(s) de estado (Cerrado/Completada con tasks pendientes)"
+        return New-CheckOutcome -Id $id -Name $name -Rule $rule -OkMessage `
+            "$specCount specs con entrada en el indice, sin huerfanas; $warnCount divergencia(s) de estado" `
+            -ViolationSeverity 'WARN' -ViolationSummary $summary -Violations $warnViolations
+    }
+
+    return New-CheckOutcome -Id $id -Name $name -Rule $rule `
+        -OkMessage "$specCount specs con spec.md, todas registradas en el indice y con estados coherentes" `
+        -Violations @()
+}
+
 # =============================================================================
 # 6. Ejecucion de los chequeos
 # =============================================================================
@@ -1086,6 +1230,7 @@ $checks += Test-McpCoverage -Documents $agentDocuments
 $checks += Test-AgentStructure -Documents $agentDocuments
 $checks += Test-OrphanSkills -Documents $agentDocuments
 $checks += Test-DefaultAgentBoot
+$checks += Test-BacklogCoherence -SpecsDir $script:SpecsDir -IndexPath $script:BacklogIndexPath
 
 $failChecks = @($checks | Where-Object { $_.Severity -eq 'FAIL' })
 $warnChecks = @($checks | Where-Object { $_.Severity -eq 'WARN' })

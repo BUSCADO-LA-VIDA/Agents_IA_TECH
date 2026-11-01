@@ -130,10 +130,10 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - Acción inmediata: generar evidencias QA para T040-T058 y T060-T064 antes de cerrar seguridad 011
 
 ## Especificación 016 - Enforcement of SSD+Speckit Flow via Agents
-- **Estado**: Completada/Cerrada — flujo SSD completo, lista para producción, permanece ACTIVA en `specs/` (archivar solo al retirar del flujo)
+- **Estado**: Completada/Cerrada — flujo SSD completo, lista para producción, permanece ACTIVA en `specs/` (archivar solo al retirar del flujo). Fase C (spec 035): absorbida por **ADR-0005** (Agent-SSD orquestador del flujo SSD) → estado **CERRADA-POR-ABSORCION-ADR**; nota en `NOTA-CONSOLIDACION.md`.
 - **Ubicación**: specs/016-ssd-enforcement/ 
 - **Objetivo**: Forzar flujo SSD+Speckit mediante reglas obligatorias en agents y gatekeeper en pensador.
-- **Artefactos**: spec.md, plan.md, tasks.md
+- **Artefactos**: spec.md, plan.md, tasks.md, NOTA-CONSOLIDACION.md
 
 ## Especificación 024 - Hooks de gobernanza y determinismo
 - **Estado**: En proceso — spec/plan/tasks/analyze/converge creados
@@ -148,7 +148,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
 
 ## Especificación 026 - Agente developer único
-- **Estado**: Completada — flujo Speckit completo spec/plan/tasks/analyze/converge, agentes obsoletos eliminados y Constitución actualizada
+- **Estado**: Especificada — ciclo Speckit completo (spec/plan/tasks/analyze/converge); **implementación NO ejecutada** (el `converge.md` dice "Converge completado, listo para implementación"). ⚠️ El índice marcaba "Completada" por error: el converge declara estado pre-implementación.
 - **Ubicación**: specs/026-agente-developer-unico/
 - **Objetivo**: Unificar implementadores en un agente developer con skills especializadas y context7
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
@@ -160,7 +160,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
 
 ## Especificación 028 - Public Docs Routing
-- **Estado**: Completada — flujo Speckit completo spec/plan/tasks/analyze/converge/implement
+- **Estado**: Especificada — ciclo Speckit completo (spec/plan/tasks/analyze/converge) + ADR-0011 + skill public-documentation; **implementación NO ejecutada** (el `converge.md` dice "Lista para implementación vía speckit-implement"). ⚠️ El índice marcaba "Completada" por error.
 - **Ubicación**: specs/028-public-docs-routing/
 - **Objetivo**: Routing docs públicas a `src/<App>/docs/` y README a `src/<App>/README*.md`; delegación documentador→developer
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, ADR-0011-public-docs-routing.md, skill public-documentation
@@ -173,7 +173,7 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Deudas abiertas** (registradas en `pendientes-implementacion.md`): **DD-08** (`tests/upgrade_framework.Tests.ps1` no compila: 4 errores de parseo, la suite del kit nunca corrió; bloquea T025, T036 y NFR-02 entero) y **DD-09** (NFR-02 se apoya en una suite que no toca el motor y no compila; hasta resolverlo NFR-02 es aspiración, no gate)
 
 ## Especificación 030 - Whitelist contextual por tipo de proyecto y agentes como orquestadores
-- **Estado**: Especificada — Analyze **PASS con observaciones** (`arquitecto` + `security-auditor`), **Converge completado** 2026-10-29. **Implementación NO iniciada**: 66 tasks en `tasks.md`, 0 ejecutadas
+- **Estado**: Especificada — Analyze **PASS con observaciones** (`arquitecto` + `security-auditor`), **Converge completado** 2026-10-29. **NÚCLEO absorbido por ADR-0013** (whitelist de escritura por capa/tipo de proyecto y agentes como orquestadores delgados). **Implementación del RESTO NO iniciada**: 66 tasks en `tasks.md`, 0 ejecutadas. Nota de consolidación parcial en `NOTA-CONSOLIDACION.md`. ⚠️ **No se cierra por completo ni se archiva**: queda como PENDIENTE-REAL.
 - **Ubicación**: `specs/030-whitelist-contextual-por-tipo-proyecto/`
 - **Objetivo**: Que la whitelist de escritura sea contextual al tipo de proyecto (`kit` | `consumidor`), determinista y sin fuga del kit hacia los consumidores; y replantear los agentes como orquestadores delgados con las capacidades de procedimiento en skills declaradas en el frontmatter
 - **Métricas**: 23 FR (FR-01..FR-11, FR-02b, FR-12..FR-22), 12 CA (CA-01..CA-12), 6 NFR, 66 tasks, cobertura verificada 23/23 FR y 12/12 CA
@@ -203,25 +203,91 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Riesgo residual abierto**: TM-04 cerrado por `.gitignore` (backups `opencode.json.bak-*` y `AGENTS.md.bak-*` fuera de git). Riesgos nuevos de propagación (TM-09 a TM-11) en residual Bajo. Sin residual Medio abierto
 
 ## Especificación 033 - Refresh de conocimiento e índices de MCP en la primera ejecución del día
-- **Estado**: En proceso — ciclo SSD+Speckit completo (spec → plan → tasks → analyze → threat-model → converge); implementación parcial: T01-T07 cerradas, T08-T10 pendientes de primera ejecución del día real
+- **Estado**: ⚠️ **Divergencia corregida (2026-11-01)** — el índice lo marcaba "En proceso, T01-T07 cerradas", pero en disco `tasks.md` tiene las 13 tareas en estado "Pendiente" (0 ejecutadas). Estado real: **Especificada / no iniciada en ejecución real** — ciclo SSD+Speckit completo en artefactos, pipeline definido (`pipeline-refresh-mcp.md`) pero sin tareas ejecutadas.
 - **Ubicación**: `specs/033-refresh-conocimiento-mcp/`
 - **Objetivo**: Que la primera ejecución del día dispare automáticamente el refresh de conocimiento e índices de todos los MCP del proyecto (`codebase-memory-mcp`, `graphify`, `context-mode`, `markitdown`, `tokenslayer`, `github`, `playwright`, `context7`), para que los agentes consulten información actualizada sin leer archivos directamente
 - **Métricas**: 12 FR (FR-01..FR-12), 7 NFR, 4 historias de usuario, 12 CA (CA-01..CA-12)
-- **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `OK: 8 | WARN: 1 | FAIL: 0`, exit code 0. Test de contrato `tests/mcp-refresh-parity.ps1`: exit code 0, fixture negativo detecta divergencia. CA-06 cumplido; CA-01..CA-05, CA-07..CA-12 pendientes de ejecución real del refresh MCP
+- **Estado de verificación**: Test de contrato `tests/mcp-refresh-parity.ps1`: exit code 0, fixture negativo detecta divergencia. Ejecución real del refresh (CA-01..CA-05, CA-07..CA-12) **pendiente** de primera ejecución del día
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, threat-model.md, converge.md, pipeline-refresh-mcp.md, tests/mcp-refresh-parity.ps1
-- **Limitación documentada**: T08-T10 no se pueden completar hasta la próxima primera ejecución del día real (dependencia operativa, no de especificación)
+- **Limitación documentada**: la ejecución real depende de la primera ejecución del día (dependencia operativa, no de especificación); ninguna tarea está marcada como ejecutada en `tasks.md`
 
 
 ## Especificación 032 - Actualización de Knowledge Base tras spec validada
-- **Estado**: Cerrado — flujo SSD+Speckit completo (spec → plan → tasks → analyze → threat-model → converge). Implementación parcial: T01-T07 cerradas, T08-T10 con limitaciones (faltan herramientas MCP `graphify.extract`, `context-mode.ctx_index`, `codebase-memory-mcp.search_graph`)
+- **Estado**: ⚠️ **Divergencia corregida (2026-11-01)** — la spec **NO está cerrada ni implementada**: en disco `tasks.md` tiene las 13 tareas en estado "Pendiente" (0 ejecutadas) y el "Estado general" dice "quedan por ejecutar". El índice lo marcaba "Cerrado" por error. Estado real: **En proceso / Especificada** — pipeline creado (`pipeline-kb.md`) pero sin ejecutar.
 - **Ubicación**: `specs/032-actualizacion-knowledge-base/`
 - **Objetivo**: Que el cierre de una spec dispare la actualización de CodeBase (codebase-memory-mcp), Context (context-mode) y Graphify (graphify), para que los agentes consulten el contenido de specs validadas vía MCPs sin leer archivos directamente
 - **Métricas**: 12 FR (FR-01..FR-12), 7 NFR, 4 historias de usuario, 12 CA (CA-01..CA-12)
-- **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `OK: 8 | WARN: 1 | FAIL: 0`, exit code 0. Test de contrato `tests/kb-parity.ps1`: exit code 0, fixture negativo detecta divergencia. CA-06 cumplido; CA-01..CA-05, CA-07..CA-12 pendientes de ejecución real de pipeline KB
+- **Estado de verificación**: Test de contrato `tests/kb-parity.ps1`: exit code 0, fixture negativo detecta divergencia. Ejecución del pipeline de KB (CA-01..CA-05, CA-07..CA-12) **pendiente**: faltan herramientas MCP `graphify.extract`, `context-mode.ctx_index`, `codebase-memory-mcp.search_graph` en el catálogo
 - **Artefactos**: spec.md, plan.md, tasks.md, pipeline-kb.md, analyze.md, threat-model.md, converge.md, tests/kb-parity.ps1
-- **Limitación documentada**: T08 no se completó al 100% por falta de herramientas MCP en el catálogo. El repositorio ya está indexado en codebase-memory-mcp (11,399 nodos) y graphify (4,973 nodos, 467 comunidades).
+- **Limitación documentada**: la ejecución real del pipeline KB está pendiente por falta de herramientas MCP en el catálogo (T08-T10). El repositorio ya está indexado en codebase-memory-mcp (11,399 nodos) y graphify (4,973 nodos, 467 comunidades).
 
 ---
 
-*Última actualización del índice: 2026-10-31 (registrada la spec 031; antes la última entrada era la 030).*
+## Especificación 014 - Manifest versionado y sincronización entre módulos
+- **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (1.357 B) con plan/analyze/converge/data-model/quickstart/research y `tasks.md` (8 tareas cerradas, 8/0), pero ausente del índice. Registrada por la fase B de la spec 035 (consolidación del backlog). No es absorbida por un ADR.
+- **Ubicación**: `specs/014-manifest-versionado-y-sincronizacion/`
+- **Objetivo**: Manifest de versionado y sincronización entre módulos del kit.
+- **Artefactos**: spec.md, plan.md, analyze.md, converge.md, data-model.md, quickstart.md, research.md, tasks.md.
+- **Nota de fase F**: candidata a revisión contra `sync-kit` (auditoría §5.4/§5.6); renumeración no ejecutada (pendiente decisión fase F del plan 035).
+
+## Especificación 019 - Guard de lastupdate de update-mcp
+- **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (9.128 B), `plan.md` y `tasks.md` (6 tareas cerradas, 6/0), ausente del índice. Registrada por la fase B de la spec 035. No es absorbida por un ADR (ver nota de solapamiento).
+- **Ubicación**: `specs/019-update-mcp-lastupdate-guard/`
+- **Objetivo**: Get-State de `update-mcp.ps1` con formas válidas para el guard de lastupdate.
+- **Artefactos**: spec.md, plan.md, tasks.md.
+- **Nota de solapamiento**: solapa con `020-mcp-config-operativa`/`009-mcp-update-lifecycle` (misma entidad `update-mcp.ps1`); la fusión de contenido (fase D) queda pendiente de aprobación puntual y no se ejecutó en esta iteración.
+
+## Especificación kit-generico (no-numerada) - Blindaje `.git` y alcance quirúrgico del kit
+- **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (6.869 B) y `tasks.md` (9 tareas cerradas, 9/0), ausente del índice. Registrada por la fase B de la spec 035.
+- **Ubicación**: `specs/kit-generico/`
+- **Objetivo**: Blindaje de `.git` + alcance quirúrgico del kit (generización transversal).
+- **Artefactos**: spec.md, tasks.md.
+- **Nota de fase F**: quedó como MIGRAR en la auditoría (§5.4): numerar a spec transversal si aporta valor, o archivar. Decisión pendiente para la fase F (no ejecutada).
+
+## Especificación solucion-generica (no-numerada) - Descontaminación del kit
+- **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (6.802 B), `plan.md` y `tasks.md` (14 tareas cerradas, 14/0), ausente del índice. Registrada por la fase B de la spec 035.
+- **Ubicación**: `specs/solucion-generica/`
+- **Objetivo**: Descontaminación del kit (solución genérica transversal).
+- **Artefactos**: spec.md, plan.md, tasks.md.
+- **Nota de fase F**: quedó como MIGRAR en la auditoría (§5.4): numerar a spec transversal si sigue aplicando. Decisión pendiente para la fase F (no ejecutada).
+
+---
+
+## Especificación 035 - Consolidación del Backlog de Specs
+- **Estado**: En proceso — ciclo SSD+Speckit en curso (specify + plan aprobado; fases B/C/E/H ejecutadas; D/F fusiones y renumeraciones pospuestas para aprobación puntual por spec).
+- **Ubicación**: `specs/035-consolidacion-backlog/`
+- **Objetivo**: Limpiar y consolidar el backlog de specs del KIT: archivar obsoletas, consolidar absorbidas por ADR, fusionar duplicadas, indexar completadas sin registro, y dejar un único punto de la verdad (índice + backlog coherentes con el disco, con gate automático `VAL-11`).
+- **Origen**: Auditoría `auditoria-specs-backlog.md` (2026-11-01) que detectó ~29+8 huérfanas, duplicados de numeración y divergencias disco↔índice.
+- **Artefactos**: spec.md, plan.md, checklists/requirements.md (20/20 PASS), NOTA-CONSOLIDACION.md ×6, NOTA-ARCHIVO.md ×7, VAL-11 en `scripts/validate-agents-skills.ps1`.
+- **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `11 chequeos | OK: 9 | WARN: 1 | FAIL: 1` (VAL-11 reporta 7 huérfanas que corresponden a fusiones/migraciones pospuestas o la propia 035). Gate parcial: coherencia lograda en B/C/E; D/F pendientes.
+
+### Specs archivadas (fase E, spec 035)
+
+> Estas specs quedaron **obsoletas** y se movieron a `specs/archived/` (sin borrar, con `NOTA-ARCHIVO.md` y motivo). Referencia: auditoría §5.2 y spec 035.
+
+- `000-mcp-integracion` (grupo de 8 sub-specs plantilla) → `specs/archived/000-mcp-integracion/` — absorbido por 020 + `opencode.json` real.
+- `000-mcp-integration-standard` → `specs/archived/000-mcp-integration-standard/` — estándar absorbido por 020.
+- `008-mcp-config-portable` → `specs/archived/008-mcp-config-portable/` — forma actual definida por ADR-0009/0010.
+- `009-mcp-path-normalization` → `specs/archived/009-mcp-path-normalization/` — absorbida por ADR-0009/0010.
+- `018-pensador-delegation-fix` → `specs/archived/018-pensador-delegation-fix/` — resuelto por 031; numeración duplicada.
+- `metodologia-ssd-speckit` → `specs/archived/metodologia-ssd-speckit/` — tema cubierto por ADR-0005.
+- `cambio-vision` → `specs/archived/cambio-vision/` — solo spec, sin numerar ni tasks.
+
+## Consolidación por ADR — specs absorbidas (fase C, spec 035)
+
+> La fuente de verdad de la «forma actual de trabajo» son los ADRs implementados (ADR-0003..0013). Las specs siguientes quedaron **absorbidas** por un ADR; se consolidan con `NOTA-CONSOLIDACION.md` dentro de cada carpeta y se marcan **CERRADA-POR-ABSORCION-ADR**. No se archivan (siguen en `specs/` con nota). Referencia: auditoría §5.1 y spec 035.
+
+### Contenido de `000-mcp-gobernanza` (sub-specs absorbidas)
+- **007-mcp-token-resolution** — `specs/000-mcp-gobernanza/007-mcp-token-resolution/` — **CERRADA-POR-ABSORCION-ADR (ADR-0006)**. Resolución de tokens MCP: absorbida por ADR-0006 (resolución de tokens + `.env.mcp` portable). Completada en disco (46/0) sin índice; ahora registrada y cerrada. Avísase si queda verificación pendiente de evidence de tokens según ADR.
+- **017-garantizar-mcp-activos** — `specs/000-mcp-gobernanza/017-garantizar-mcp-activos/` — **CERRADA-POR-ABSORCION-ADR (ADR-0006 + 020)**. Garantía de MCP activos: absorbida por ADR-0006 + `020-mcp-config-operativa` (baseline en vivo).
+
+### Specs absorbidas (registradas ahora)
+- **006-post-platforming-speckit** — `specs/006-post-platforming-speckit/` — **CERRADA-POR-ABSORCION-ADR (ADR-0004)**. Flujo post-plataformado→speckit (3 escenarios), re-indexación, Constitution por proyecto, memoria, graphify por app. Completada en disco (31/0) sin índice; ahora registrada y cerrada.
+- **010-mcp-env-file-guarantee** — `specs/010-mcp-env-file-guarantee/` — **CERRADA-POR-ABSORCION-ADR (ADR-0006)**. Garantía de `.env.mcp` portable.
+- **015-sync-kit-bootstrap** — `specs/015-sync-kit-bootstrap/` — **CERRADA-POR-ABSORCION-ADR (ADR-0003 + sync-kit)**. Bootstrap instalador/actualizador único. Completada en disco (10/0) sin índice; ahora registrada y cerrada.
+- **016-ssd-enforcement** — `specs/016-ssd-enforcement/` — **CERRADA-POR-ABSORCION-ADR (ADR-0005)**. Cumplimiento del flujo SSD+Speckit vía Agent-SSD. Entre Indexar y cerrar: la auditoría la tenía como ABSORBIDA-POR-ADR (§5.1) a la vez que el índice la marcaba Completada. Se registra como cerrada por absorción del ADR-0005.
+
+---
+
+*Última actualización del índice: 2026-11-01 (corregidas divergencias 026/028/032/033; registradas 034 y 035; fases B/C/E de la spec 035: indexadas 014/019/kit-generico/solucion-generica, consolidadas absorciones por ADR, archivadas obsoletas a `specs/archived/`; VAL-11 en el validador).*
 

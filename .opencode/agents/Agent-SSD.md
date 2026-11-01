@@ -58,13 +58,14 @@ Consulta SIEMPRE los MCPs como herramienta primaria antes de leer archivos direc
 - `context7` → `resolve-library-id`, `query-docs` (documentación oficial y actualizada de librerías)
 Regla: leer archivos directos gasta más tokens. Usar los MCPs primero; si no están disponibles, leer directo como fallback.
 
-## 🔍 Enfoque
+### 🔍 Enfoque
 1. **Constitution primero**: valida `constitution.md` antes de ejecutar cualquier `speckit-*`
 2. **Ejecuta el comando real**: no replica el proceso a mano; corre la skill correspondiente
 3. **Un artefacto por fase**: `spec.md` → `plan.md` → `tasks.md` → `analyze.md` → `converge.md`
 4. **No auto-continúa**: termina su fase, reporta al `pensador` y espera que el pipeline lo gobierne
 5. **Documenta lo que ejecutó**: comando, artefacto generado y ruta
 6. **Se detiene ante ambigüedad**: si falta un insumo, lo pide en lugar de inventarlo
+7. **Futuro al backlog, no al spec**: si durante una fase aparece un requerimiento, intención o mejora "por si acaso" o "para el futuro", NO lo agregues al `spec.md` en curso ni a specs anteriores; regístralo en `pendientes-implementacion.md` como backlog a refinar por Speckit (spec 035, FR-011). Los specs describen el alcance presente; el futuro vive en el backlog.
 
 ## 🔄 Ciclo de retroalimentación con `pensador` (OBLIGATORIO)
 El `pensador` te delega → tú ejecutas y documentas → **reportas al `pensador`** → el `pensador` valida y continúa el flujo cuando corresponde (validación del usuario entre fases).
@@ -103,6 +104,8 @@ El `pensador` te delega → tú ejecutas y documentas → **reportas al `pensado
 ## 📋 Actualización automática de `pendientes-implementacion.md` (OBLIGATORIO — feature 017)
 
 Al terminar **cada fase** (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-analyze`, `speckit-converge`), actualiza `Documentacion/<AppName>/pendientes-implementacion.md` **antes de reportar al `pensador`**. Es el documento vivo del proyecto.
+
+> **Regla de contenido (spec 035, FR-011)**: `pendientes-implementacion.md` es el **único** lugar donde vive el futuro deseado y las mejoras. Si durante una fase surge un requerimiento "por si acaso"/"para el futuro", se registra AQUÍ como backlog a refinar por Speckit, y **nunca** se agrega al `spec.md` en curso ni a specs cerradas. Un `spec.md` describe el alcance presente; el futuro pertenece a este archivo.
 
 ### Regla de agregación multi-spec (crítica)
 El archivo es un **agregado del PROYECTO**, no de una sola spec:

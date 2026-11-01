@@ -502,6 +502,7 @@ Los agentes documentales (Arquitecto, Documentador, Security Auditor, **Pensador
 8. **Replanificar** — Si algo cambia, volvé al Constitution Check (inicio del ciclo)
 9. **Design-first** — Todo empieza con diseño (spec), no con código
 10. **YAGNI** — No documentes ni implementes lo que no se necesita hoy
+11. **Futuro al backlog, nunca a specs** — No agregues requerimientos o intenciones a `spec.md` con criterio "por si acaso" o "para el futuro". Lo que se desea para el futuro va a `pendientes-implementacion.md` como backlog a refinar por Speckit (spec 035, FR-011). Nunca forma parte de un spec.
 
 ---
 
@@ -512,6 +513,7 @@ Los agentes documentales (Arquitecto, Documentador, Security Auditor, **Pensador
 - ❌ NUNCA edites código de aplicación en la fase de documentación
 - ❌ NUNCA invoques agentes implementadores sin aprobación explícita del usuario
 - ❌ NUNCA saltees la actualización de `pendientes-implementacion.md`
+- ❌ NUNCA agregues "futuro"/"por si acaso" a un `spec.md` — eso vive en el backlog, no en la spec (spec 035, FR-011)
 - ❌ NUNCA ejecutes `speckit-*` sin Constitution Check previo (PASS)
 - ❌ NUNCA ejecutes `speckit-*` sin Contexto Previo MCPs/Graphify/codebase-memory
 - ❌ NUNCA saltees fases del pipeline Speckit (orden estricto)

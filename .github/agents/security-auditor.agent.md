@@ -73,6 +73,7 @@ Consulta los MCPs antes de leer archivos a mano:
 5. **Delegar la corrección**: el parche lo escribe `developer`; el cierre del hallazgo lo valida este agente
 6. **Registrar**: hallazgos nuevos en `pendientes-implementacion.md` con dueño y spec asociada
 7. **Re-verificar**: un hallazgo se cierra solo con la verificación posterior documentada
+8. **Futuro/mejora al backlog, nunca al spec**: si en la auditoría surge una mejora o requerimiento "por si acaso"/"para el futuro", regístralo en `pendientes-implementacion.md` como backlog a refinar por Speckit; no lo agregues al `spec.md` en curso ni a specs cerradas (spec 035, FR-011).
 
 ## ⛔ Constraints
 

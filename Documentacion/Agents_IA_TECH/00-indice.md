@@ -14,11 +14,11 @@
 Asegurar que cada proyecto tenga su documentación, la estructura base y los MCPs listos antes de reorganizar archivos.
 
 ## Especificaciones activas
-- 009-mcp-update-lifecycle: Script independiente de actualización de MCPs con auto-actualización diaria
+- ~~009-mcp-update-lifecycle~~: **ARCHIVADA/FUSIONADA en `020-mcp-config-operativa` (fase D, spec 035)** — Script independiente de actualización de MCPs con auto-actualización diaria. El script `scripts/update-mcp.ps1` que definía ya existe en disco y 020 lo congeló como baseline; su converge quedó desactualizado. Movida a `specs/archived/009-mcp-update-lifecycle/`.
 - 010-secret-leak-remediation: Remediación de fuga de API key en historial Git y hardening de gitleaks
 - **011-bootstrap-invokes-upgrade-framework: Bootstrap delega sync dependencias externas en upgrade_framework (fail-open, no hardcoded URLs)**
 - **015‑MCP‑Integration‑Flow** – Flujo transversal de integración de MCP alineado con Spec 015. *Ubicación*: `specs/015-mcp-integration-flow/` (ACTIVA, operativa). *Estado*: Completado — flujo SSD completado, spec lista para producción y ACTIVA en `specs/`. `Cerrar` = completar flujo, NO archivar; `Archivar` (`specs/archived/`) solo al retirar del flujo.
-- **013‑MCP‑Integration‑Flow** – Integración del módulo ECC alineada con Spec 015. *Ubicación*: `specs/013-mcp-integration-flow/` (ACTIVA, operativa). *Estado*: Completado — T001–T008 ejecutadas, spec lista para producción y ACTIVA en `specs/`. `Cerrar` = completar flujo, NO archivar.
+- ~~**013‑MCP‑Integration‑Flow**~~ – **ARCHIVADA/FUSIONADA en `015-mcp-integration-flow` (fase D, spec 035)**. Integración del módulo ECC. Movida a `specs/archived/013-mcp-integration-flow/` con `NOTA-ARCHIVO.md`; sin contenido único que conservar (mismo flujo MCP/ECC que la canónica 015).
 - **017-pendientes-implementacion-por-app: Archivo vivo por proyecto con estado de tareas y responsables** — ✅ **Completado (T001-T016)**. Mecanismo implementado: `Ensure-PendientesImplementacion` en `scripts/plataformador-bootstrap.ps1` (crea el archivo desde plantilla si no existe + detecta obsoleto); sección obligatoria de actualización post-fase en `Agent-SSD` (`.github/` + `.opencode/`); plantilla en `Documentacion/templates/pendientes-implementacion-template.md`. **Regla de agregación multi-spec**: el archivo es un agregado del PROYECTO (consolida TODAS las `specs/*/tasks.md`), con IDs calificados `<spec-id>-T<nnn>` y sin auto-referencia del feature que implementa el mecanismo. Validado Art.VII/Art.IX (PASS).
 - **018-pendientes-estados-scrum: Estados Scrum por agente y whitelist Art-VII por tier** - **En proceso (T001-T007 cerradas, T008-T009 en curso)**. Reglas `## Rol Scrum` + marcador `MCP-ROLE-v1` en 16 `.github` + 16 `.opencode`; campo `tier:` declarado en frontmatter de los 32 agentes (6 Documental, 1 Documental extendido, 4 Implementador, 1 Tooling, 4 Plataforma); plantilla con columnas Estado/Asignado a. *Ubicacion*: `specs/018-pendientes-estados-scrum/`.
 - **020-mcp-config-operativa: Configuracion MCP operativa verificada en vivo (baseline)** - **Completado**. Congela `opencode.json` con 9 MCP hardcodeados (ADR-0009) + indices (codebase-memory ready 5.664 nodos, graphify 4.793 nodos 100%, context-mode 9 archivos) + procedimiento de verificacion viva y orden de diagnostico. *Ubicacion*: `specs/020-mcp-config-operativa/`.
@@ -154,10 +154,17 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
 
 ## Especificación 027 - Patrón estructura de proyecto
-- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados
+- **Estado**: En proceso — spec/plan/tasks/analyze/converge creados. **Decisión de dirección (fase D, spec 035, usuario 2026-11-01)**: `021-estructura-inicial-apps-nuevas` es la OPERATIVA (8 tasks pendientes de creación de apps); `027-patron-estructura-proyecto` se tratará como **patrón normativo** al que 021 referenciará (completar el patrón en iteración dedicada). En esta fase solo se registra la decisión de dirección; el patrón completo se implementa en otra iteración.
 - **Ubicación**: specs/027-patron-estructura-proyecto/
 - **Objetivo**: Estructura canónica obligatoria Documentacion/<App>/ + src/<App>/ y validación
 - **Artefactos**: spec.md, plan.md, tasks.md, analyze.md, converge.md, pendientes-implementacion.md
+
+## Especificación 021 - Estructura inicial de apps nuevas
+- **Estado**: **En proceso / operativa** — 8 tasks pendientes reales de creación de apps. **NO archivada** (fase D, spec 035, usuario 2026-11-01): queda operativa. Orfanada del índice previamente (reportada por VAL-11); registrada ahora con esta entrada.
+- **Ubicación**: specs/021-estructura-inicial-apps-nuevas/
+- **Objetivo**: Estructura inicial canónica para apps nuevas (creación de apps con baseline Documentacion/<App>/ + src/<App>/ + constitution).
+- **Artefactos**: spec.md, plan.md, tasks.md, y 8 tasks pendientes de creación de apps.
+- **Decisión de dirección (fase D, spec 035)**: 021 es la OPERATIVA (8 tasks pendientes); `027-patron-estructura-proyecto` se tratará como patrón normativo al que 021 referenciará (ver entrada 027).
 
 ## Especificación 028 - Public Docs Routing
 - **Estado**: Especificada — ciclo Speckit completo (spec/plan/tasks/analyze/converge) + ADR-0011 + skill public-documentation; **implementación NO ejecutada** (el `converge.md` dice "Lista para implementación vía speckit-implement"). ⚠️ El índice marcaba "Completada" por error.
@@ -231,11 +238,11 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Nota de fase F**: candidata a revisión contra `sync-kit` (auditoría §5.4/§5.6); renumeración no ejecutada (pendiente decisión fase F del plan 035).
 
 ## Especificación 019 - Guard de lastupdate de update-mcp
-- **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (9.128 B), `plan.md` y `tasks.md` (6 tareas cerradas, 6/0), ausente del índice. Registrada por la fase B de la spec 035. No es absorbida por un ADR (ver nota de solapamiento).
-- **Ubicación**: `specs/019-update-mcp-lastupdate-guard/`
+- **Estado**: **ARCHIVADA/FUSIONADA en `020-mcp-config-operativa` (fase D, spec 035)** — su guard (`lastupdate`) vive en `scripts/update-mcp.ps1`, el mismo que 020 congela como baseline. Sin contenido único pendiente. Movida a `specs/archived/019-update-mcp-lastupdate-guard/` con `NOTA-ARCHIVO.md`. (Previamente: Completada sin registro previo [CERRAR-COMPLETADA-SIN-REGISTRO], ausente del índice, registrada por la fase B de la spec 035.)
+- **Ubicación**: `specs/archived/019-update-mcp-lastupdate-guard/`
 - **Objetivo**: Get-State de `update-mcp.ps1` con formas válidas para el guard de lastupdate.
-- **Artefactos**: spec.md, plan.md, tasks.md.
-- **Nota de solapamiento**: solapa con `020-mcp-config-operativa`/`009-mcp-update-lifecycle` (misma entidad `update-mcp.ps1`); la fusión de contenido (fase D) queda pendiente de aprobación puntual y no se ejecutó en esta iteración.
+- **Artefactos**: spec.md, plan.md, tasks.md, NOTA-ARCHIVO.md.
+- **Nota de solapamiento**: solapa con `020-mcp-config-operativa`/`009-mcp-update-lifecycle` (misma entidad `update-mcp.ps1`); la fusión de contenido (fase D) se ejecutó el 2026-11-01 aprobada por el usuario, archivando 019 y 009 en favor de 020.
 
 ## Especificación kit-generico (no-numerada) - Blindaje `.git` y alcance quirúrgico del kit
 - **Estado**: **Completada sin registro previo (CERRAR-COMPLETADA-SIN-REGISTRO)** — en disco `spec.md` (6.869 B) y `tasks.md` (9 tareas cerradas, 9/0), ausente del índice. Registrada por la fase B de la spec 035.
@@ -273,6 +280,15 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - `metodologia-ssd-speckit` → `specs/archived/metodologia-ssd-speckit/` — tema cubierto por ADR-0005.
 - `cambio-vision` → `specs/archived/cambio-vision/` — solo spec, sin numerar ni tasks.
 
+### Fusiones de contenido (fase D, spec 035)
+
+> Estas specs quedaron **fusionadas** en su canónica y se movieron a `specs/archived/` (sin borrar, con `NOTA-ARCHIVO.md` y motivo). Decisión aprobada por el usuario el 2026-11-01 (fase D de la spec 035). Referencia: spec 035.
+
+- **`013-mcp-integration-flow` → `015-mcp-integration-flow` (canónica)** — `specs/archived/013-mcp-integration-flow/`. Ambas trataban el mismo flujo de integración MCP/ECC (ecc-orchestrator, sección MCP en agents, ci/ecc-pipeline, glosario). Sin contenido único que conservar. [NOTA-ARCHIVO](specs/archived/013-mcp-integration-flow/NOTA-ARCHIVO.md).
+- **`009-mcp-update-lifecycle` → `020-mcp-config-operativa`** — `specs/archived/009-mcp-update-lifecycle/`. Superada por 020: el script `scripts/update-mcp.ps1` que definía YA EXISTE en disco y 020 lo congeló como baseline operativo vivo (su converge quedó desactualizado al decir que el script no existía). [NOTA-ARCHIVO](specs/archived/009-mcp-update-lifecycle/NOTA-ARCHIVO.md).
+- **`019-update-mcp-lastupdate-guard` → `020-mcp-config-operativa`** — `specs/archived/019-update-mcp-lastupdate-guard/`. Su guard (`lastupdate`) vive en `scripts/update-mcp.ps1`, el mismo que 020 congela como baseline. Sin contenido único pendiente. [NOTA-ARCHIVO](specs/archived/019-update-mcp-lastupdate-guard/NOTA-ARCHIVO.md).
+- **`002-script-plataforming-sync-kit` → sync-kit / `021-sync-kit-agents`** — `specs/archived/002-script-plataforming-sync-kit/`. Precursora del motor de sync: el mecanismo actual (`scripts/sync-kit.ps1` + `scripts/sync/` con 10 subcarpetas + spec 021-sync-kit-agents) ya implementa lo que esta spec describía. Archivar como superada. [NOTA-ARCHIVO](specs/archived/002-script-plataforming-sync-kit/NOTA-ARCHIVO.md).
+
 ## Consolidación por ADR — specs absorbidas (fase C, spec 035)
 
 > La fuente de verdad de la «forma actual de trabajo» son los ADRs implementados (ADR-0003..0013). Las specs siguientes quedaron **absorbidas** por un ADR; se consolidan con `NOTA-CONSOLIDACION.md` dentro de cada carpeta y se marcan **CERRADA-POR-ABSORCION-ADR**. No se archivan (siguen en `specs/` con nota). Referencia: auditoría §5.1 y spec 035.
@@ -289,5 +305,5 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 
 ---
 
-*Última actualización del índice: 2026-11-01 (corregidas divergencias 026/028/032/033; registradas 034 y 035; fases B/C/E de la spec 035: indexadas 014/019/kit-generico/solucion-generica, consolidadas absorciones por ADR, archivadas obsoletas a `specs/archived/`; VAL-11 en el validador).*
+*Última actualización del índice: 2026-11-01 (fase D de la spec 035: fusionadas/archivadas 013→015, 009→020, 019→020, 002→sync-kit/021 con NOTA-ARCHIVO; registrada 021-estructura-inicial como OPERATIVA (8 tasks pendientes, resuelve una huérfana de VAL-11); registrada la decisión de dirección para 027 como patrón normativo al que 021 referenciará. Antes: corregidas divergencias 026/028/032/033; registradas 034 y 035; fases B/C/E de la spec 035: indexadas 014/019/kit-generico/solucion-generica, consolidadas absorciones por ADR, archivadas obsoletas a `specs/archived/`; VAL-11 en el validador).*
 

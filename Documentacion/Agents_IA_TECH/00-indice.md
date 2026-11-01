@@ -191,7 +191,16 @@ Implementación por `api-developer` / `devops` / `qa-senior` siguiendo orden de 
 - **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `OK: 8 | WARN: 1 | FAIL: 0`, exit code 0, FAIL=0 WARN=52 (solo VAL-09, aviso por diseño). Suite `tests/validate-agents-skills.Tests.ps1`: 20/20 en verde. Test de contrato `tests/agents-parity.ps1`: exit code 0, fixture negativo detecta divergencia. `analyze.md` y `threat-model.md` verificados (sin placeholders, sin secciones vacías). CA-01..CA-12 todos cumplidos
 - **Paridad lograda**: los 13 agentes tienen cuerpo idéntico en `.github/agents/<n>.agent.md` y `.opencode/agents/<n>.md`; solo difiere el frontmatter nativo de cada arnés (`tools`/`user-invocable` vs `mode`/`temperature`/`permission`). `tier`, `description` y el conjunto de `skills` son iguales en ambos lados
 - **Artefactos de esta iteración**: skill `threat-modeling` creada en ambos arneses; `tier` corregido en `pensador`, `security-auditor` y `usuario-preferencias`; `testing` reemplazada por `tdd-workflow` + `verification-loop` en `developer`; `dominio_check` y protocolo de autorización con `[S]`/`[N]`/`[C]` en ambos arneses; `plataformador` restaurado a su versión completa (474 líneas, `5513d37`) con `Enfoque` y `Constraints`; 8 agentes nivelados a la estructura de Regla 2 (38 violaciones cerradas)
-- **Specs hermanos registrados, no implementados**: 032 (actualización de Knowledge Base tras spec validada) y 033 (refresh de conocimiento e índices de MCP en la primera ejecución del día)
+- **Specs hermanos registrados**: 032 (actualización de Knowledge Base tras spec validada — ciclo SSD+Speckit completo, implementación parcial con limitaciones de herramientas MCP) y 033 (refresh de conocimiento e índices de MCP en la primera ejecución del día — sin spec.md, pendiente)
+
+## Especificación 032 - Actualización de Knowledge Base tras spec validada
+- **Estado**: Cerrado — flujo SSD+Speckit completo (spec → plan → tasks → analyze → threat-model → converge). Implementación parcial: T01-T07 cerradas, T08-T10 con limitaciones (faltan herramientas MCP `graphify.extract`, `context-mode.ctx_index`, `codebase-memory-mcp.search_graph`)
+- **Ubicación**: `specs/032-actualizacion-knowledge-base/`
+- **Objetivo**: Que el cierre de una spec dispare la actualización de CodeBase (codebase-memory-mcp), Context (context-mode) y Graphify (graphify), para que los agentes consulten el contenido de specs validadas vía MCPs sin leer archivos directamente
+- **Métricas**: 12 FR (FR-01..FR-12), 7 NFR, 4 historias de usuario, 12 CA (CA-01..CA-12)
+- **Estado de verificación**: `scripts/validate-agents-skills.ps1` → `OK: 8 | WARN: 1 | FAIL: 0`, exit code 0. Test de contrato `tests/kb-parity.ps1`: exit code 0, fixture negativo detecta divergencia. CA-06 cumplido; CA-01..CA-05, CA-07..CA-12 pendientes de ejecución real de pipeline KB
+- **Artefactos**: spec.md, plan.md, tasks.md, pipeline-kb.md, analyze.md, threat-model.md, converge.md, tests/kb-parity.ps1
+- **Limitación documentada**: T08 no se completó al 100% por falta de herramientas MCP en el catálogo. El repositorio ya está indexado en codebase-memory-mcp (11,399 nodos) y graphify (4,973 nodos, 467 comunidades).
 
 ---
 

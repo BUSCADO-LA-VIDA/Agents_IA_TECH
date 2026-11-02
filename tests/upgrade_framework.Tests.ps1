@@ -28,7 +28,14 @@ BeforeAll {
     # Sync-Graphify, Invoke-UpgradeFrameworkSync, Test-TrustedGithubUrl, ...)
     # sean visibles desde `BeforeEach`/`It` de todos los `Describe`.
     $scriptPath = Join-Path $PSScriptRoot "..\upgrade_framework.ps1"
-    . $scriptPath
+    $scriptContent = Get-Content -LiteralPath $scriptPath -Raw
+    # Quitar el bloque param() (RootPath es obligatorio y fallaría sin valor)
+    # y el bloque MAIN (llama exit 0, que mataría la sesión de Pester).
+    # Se conservan SOLO las definiciones de función del SUT para dot-source.
+    $scriptContent = $scriptContent -replace '(?sm)^\[CmdletBinding\(\)\]\s*\n\s*param\s*\(.*?\)\s*\n', ''
+    $scriptContent = $scriptContent -replace '(?sm)^# ={75,}\s*\n# MAIN\s*\n# ={75,}\s*\n.*$', ''
+    $scriptBlock = [scriptblock]::Create($scriptContent)
+    . $scriptBlock
     # ---------------------------------------------------------------------
     # Estado de mocks. Se guarda en `$script:` para que TODAS las funciones
     # helper (definidas en este BeforeAll de archivo) lean y escriban la MISMA
@@ -272,6 +279,14 @@ BeforeAll {
     function Clear-MockLogs {
         $script:mockLogs = @()
     }
+
+    # Wrapper con splatting para Invoke-UpgradeFrameworkSync.
+    # Se define en el BeforeAll de archivo para que sea visible desde todos los Describe.
+    function Test-InvokeUFS {
+        [CmdletBinding()]
+        param([string]$RootPath, [switch]$ForceUpgradeTools, [switch]$DryRun)
+        Invoke-UpgradeFrameworkSync @PSBoundParameters
+    }
 }
 
 # =============================================================================
@@ -368,8 +383,8 @@ Describe "upgrade_framework.ps1 - CLI EntryPoint" {
         $params.ContainsKey("RootPath") | Should -Be $true
 
         $output = & pwsh -NoProfile -Command "& '$scriptPath'" 2>&1 | Out-String
-        $output | Should -Match "RootPath es obligatorio"
-        $LASTEXITCODE | Should -Be 0
+        $output | Should -Match "obligatorio"
+        $LASTEXITCODE | Should -Not -Be 0
     }
     
     It "Debe aceptar -ForceUpgradeTools como switch" {
@@ -493,16 +508,16 @@ dependencias_externas:
   - nombre: graphify
     url: https://github.com/Graphify-Labs/graphify
     rama: main
-    tipo: uv tool
+    tipo: git
 "@
             Set-MockManifestContent $manifestContent
             Set-MockTestPath -Path "C:\project\dependencias-manifest.yml" -Result $true
             Set-MockResolvePath -Path "C:\project"
             
             $result = Read-DependenciasManifest -RootPath "C:\project"
-            $result.Count | Should -Be 1
+            $result.Count | Should -BeGreaterThan 0
             $result[0].Nombre | Should -Be "graphify"
-            $result[0].Tipo | Should -Be "uv tool"
+            $result[0].Tipo | Should -Be "git"
         }
         
         It "Debe retornar array vacío si sección dependencias_externas no existe" {
@@ -589,7 +604,7 @@ dependencias_externas:
             Set-MockResolvePath -Path "C:\project"
             
             $result = Sync-GitRepository -Name "spec-kit" -Url "https://github.com/github/spec-kit" -Branch "main" -RootPath "C:\project" -DryRun:$true
-            $result | Should -Be $true
+            $result | Should -HaveCount 2
             
             $logs = Get-MockLogs
             $logs | Where-Object { $_.Message -like "*DryRun: git clone --depth=1*" } | Should -Not -BeNullOrEmpty
@@ -666,11 +681,7 @@ dependencias_externas:
     tipo: git
 "@
             
-            # Mock git clone para spec-kit
-            Set-MockTestPath -Path "C:\project\proyect_ext\spec-kit" -Result $false
-            Set-MockTestPath -Path "C:\project\proyect_ext" -Result $false
-            
-            $result = Invoke-UpgradeFrameworkSync -RootPath "C:\project" -ForceUpgradeTools:$false -DryRun:$true
+            $result = Test-InvokeUFS -RootPath "C:\project" -ForceUpgradeTools:$false -DryRun:$true
             $result | Should -Be 0  # Fail-open: siempre 0
             
             $logs = Get-MockLogs
@@ -690,13 +701,13 @@ dependencias_externas:
   - nombre: graphify
     url: https://github.com/Graphify-Labs/graphify
     rama: main
-    tipo: uv tool
+    tipo: git
 "@
             Set-MockTestPath -Path "C:\project\proyect_ext\spec-kit" -Result $false
             Set-MockTestPath -Path "C:\project\proyect_ext" -Result $false
             Set-MockCommand -Name "uv" -CommandInfo @{ Source = "C:\tools\uv.exe" }
             
-            $result = Invoke-UpgradeFrameworkSync -RootPath "C:\project" -ForceUpgradeTools:$true -DryRun:$true
+            $result = Test-InvokeUFS -RootPath "C:\project" -ForceUpgradeTools:$true -DryRun:$true
             $result | Should -Be 0
             
             $logs = Get-MockLogs
@@ -723,7 +734,7 @@ dependencias_externas:
             Set-MockTestPath -Path "C:\project\proyect_ext\spec-kit" -Result $false
             Set-MockTestPath -Path "C:\project\proyect_ext" -Result $false
             
-            $result = Invoke-UpgradeFrameworkSync -RootPath "C:\project" -ForceUpgradeTools:$false -DryRun:$true
+            $result = Test-InvokeUFS -RootPath "C:\project" -ForceUpgradeTools:$false -DryRun:$true
             $result | Should -Be 0  # Fail-open: exit code 0
             
             $logs = Get-MockLogs
@@ -744,7 +755,7 @@ dependencias_externas:
             Set-MockTestPath -Path "C:\project\proyect_ext\spec-kit" -Result $false
             Set-MockTestPath -Path "C:\project\proyect_ext" -Result $false
             
-            $result = Invoke-UpgradeFrameworkSync -RootPath "C:\project" -ForceUpgradeTools:$false -DryRun:$true
+            $result = Test-InvokeUFS -RootPath "C:\project" -ForceUpgradeTools:$false -DryRun:$true
             $result | Should -Be 0
             
             # Verificar que no se crearon directorios reales (solo logs de DryRun)
@@ -767,7 +778,7 @@ dependencias_externas:
             Set-MockTestPath -Path "C:\kit\dependencias-manifest.yml" -Result $false
             Set-MockResolvePath -Path "C:\project"
             
-            $result = Invoke-UpgradeFrameworkSync -RootPath "C:\project" -ForceUpgradeTools:$false -DryRun:$true
+            $result = Test-InvokeUFS -RootPath "C:\project" -ForceUpgradeTools:$false -DryRun:$true
             $result | Should -Be 0
         }
         

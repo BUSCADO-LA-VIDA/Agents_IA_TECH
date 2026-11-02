@@ -157,5 +157,21 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 **Estado**: En proceso  
 **Ubicación**: specs/016-ssd-enforcement/
 
+## Especificación 012-ecc-integration
+**Estado**: En proceso  
+**Ubicación**: specs/012-ecc-integration/
+
+## Especificación 012-ecc-mcp-bridge
+**Estado**: En proceso  
+**Ubicación**: specs/012-ecc-mcp-bridge/
+
+## Especificación 012-ecc-mcp-migration
+**Estado**: En proceso  
+**Ubicación**: specs/012-ecc-mcp-migration/
+
+## Especificación 021-estructura-inicial-apps-nuevas
+**Estado**: En proceso  
+**Ubicación**: specs/021-estructura-inicial-apps-nuevas/
+
 ---
 *Última actualización: 2026-11-01 (fase F, spec 035)*

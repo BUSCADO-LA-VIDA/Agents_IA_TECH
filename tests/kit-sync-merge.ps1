@@ -4,6 +4,11 @@
 # Merge-KitBlock de scripts/sync-kit.ps1. PowerShell plano, sin Pester.
 #   exit 0 = todos los escenarios OK | exit 1 = al menos un fallo.
 #
+# [021-FIX] Escenarios 8-10: regresion del motor POR CAPAS. Verifican que
+# scripts/sync/kit-files/sync-kit-files.ps1 COMPLEMENTA AGENTS.md (en lugar de
+# sobrescribirlo) y que scripts/sync/mcp/lift-opencode.ps1 aplica default_agent
+# del maestro conservando las claves locales del proyecto.
+#
 # No se hace dot-source de scripts/sync-kit.ps1: eso ejecutaria el sync real
 # sobre esta maquina. Se parsea el archivo con el parser de PowerShell, se
 # extraen los FunctionDefinitionAst de las tres funciones y se evaluan en el
@@ -392,6 +397,93 @@ Texto propio final.
 
     Write-Case ([Convert]::ToBase64String($beforeBytes7) -eq [Convert]::ToBase64String($afterBytes7)) '7a corruptos: el archivo queda identico al original'
     Write-Case (-not (Test-Path -LiteralPath "$dst7.bak-")) '7b corruptos: no se genero backup (no se intento escribir)'
+
+    # =========================================================================
+    # Escenario 8: la capa kit-files COMPLEMENTA AGENTS.md, no lo sobrescribe
+    # [021-FIX] Regresion: antes hacia Copy-Item -Force y borraba el contenido
+    # propio del proyecto en cada sync del motor por capas.
+    # =========================================================================
+    $script:Scenarios++
+    $dir8 = New-CaseDir 'scenario8-kit-files-agents'
+    $stage8 = Join-Path $dir8 'stage'
+    New-Item -ItemType Directory -Path $stage8 -Force | Out-Null
+    Write-TextFile -Path (Join-Path $stage8 'AGENTS.md') -Text $master5Text
+    Write-TextFile -Path (Join-Path $stage8 'README.md') -Text "# README del kit (nuevo)`n"
+    $spec8Dir = Join-Path $stage8 '.specify/memory'
+    New-Item -ItemType Directory -Path $spec8Dir -Force | Out-Null
+    Write-TextFile -Path (Join-Path $spec8Dir 'constitution.md') -Text "# Constitucion del kit`n"
+    $stageScripts8 = Join-Path $stage8 'scripts'
+    New-Item -ItemType Directory -Path $stageScripts8 -Force | Out-Null
+    Write-TextFile -Path (Join-Path $stageScripts8 'sync-kit.ps1') -Text "# script del kit`n"
+
+    $root8 = Join-Path $dir8 'root'
+    New-Item -ItemType Directory -Path $root8 -Force | Out-Null
+    Write-TextFile -Path (Join-Path $root8 'AGENTS.md') -Text $local5Text
+    Write-TextFile -Path (Join-Path $root8 'README.md') -Text "# README viejo del proyecto`n"
+    $rootScripts8 = Join-Path $root8 'scripts'
+    New-Item -ItemType Directory -Path $rootScripts8 -Force | Out-Null
+    Write-TextFile -Path (Join-Path $rootScripts8 'local-propio.ps1') -Text "# script propio del proyecto`n"
+
+    $layerKitFiles = Join-Path $repoRoot 'scripts/sync/kit-files/sync-kit-files.ps1'
+    $out8 = (& pwsh -NoProfile -File $layerKitFiles -StageDir $stage8 -RootPath $root8 2>&1 | Out-String)
+    $agents8 = Get-TextFile (Join-Path $root8 'AGENTS.md')
+
+    Write-Case ($out8 -match 'RESULT:kit-files:ok') '8a kit-files: emite RESULT:kit-files:ok'
+    Write-Case ($agents8.Contains('# Mi Proyecto') -and $agents8.Contains('Texto propio de la app.') -and $agents8.Contains('Texto propio final.')) '8b kit-files: el contenido propio del proyecto SOBREVIVE'
+    Write-Case ($agents8.Contains('> Texto NUEVO del maestro.')) '8c kit-files: el bloque del kit se actualizo'
+    Write-Case ((-not $agents8.Contains('Texto VIEJO del proyecto.')) -and (-not $agents8.Contains('Subseccion vieja')) -and (-not $agents8.Contains('detalle viejo'))) '8d kit-files: la seccion vieja del bloque desaparecio'
+    Write-Case (([regex]::Matches($agents8, [regex]::Escape($start5))).Count -eq 1 -and ([regex]::Matches($agents8, [regex]::Escape($end5))).Count -eq 1) '8e kit-files: marcadores START/END unicos'
+    Write-Case ((Get-TextFile (Join-Path $root8 'README.md')).Contains('README del kit')) '8f kit-files: README.md si se reemplaza (es 100% del kit)'
+    Write-Case ((-not (Test-Path -LiteralPath (Join-Path $root8 'scripts/local-propio.ps1'))) -and (Test-Path -LiteralPath (Join-Path $root8 'scripts/sync-kit.ps1'))) '8g kit-files: scripts/ conserva clean+replace'
+    Write-Case (@(Get-ChildItem -LiteralPath $root8 -Filter 'AGENTS.md.bak-*' -File).Count -ge 1) '8h kit-files: se creo backup de AGENTS.md'
+
+    # =========================================================================
+    # Escenario 9: idempotencia de la capa kit-files
+    # =========================================================================
+    $script:Scenarios++
+    $bytes9Before = [System.IO.File]::ReadAllBytes((Join-Path $root8 'AGENTS.md'))
+    $out9 = (& pwsh -NoProfile -File $layerKitFiles -StageDir $stage8 -RootPath $root8 2>&1 | Out-String)
+    $bytes9After = [System.IO.File]::ReadAllBytes((Join-Path $root8 'AGENTS.md'))
+    Write-Case ([Convert]::ToBase64String($bytes9Before) -eq [Convert]::ToBase64String($bytes9After)) '9a idempotencia: AGENTS.md byte-identico en la segunda pasada'
+    Write-Case ($out9 -match 'RESULT:kit-files:sin-cambios') '9b idempotencia: RESULT:kit-files:sin-cambios'
+
+    # =========================================================================
+    # Escenario 10: mcp-lift-opencode aplica default_agent/$schema sin perder
+    # las claves locales del proyecto (model, mcp.graphify).
+    # =========================================================================
+    $script:Scenarios++
+    $dir10 = New-CaseDir 'scenario10-lift-default-agent'
+    $stage10 = Join-Path $dir10 'stage'
+    New-Item -ItemType Directory -Path $stage10 -Force | Out-Null
+    Write-JsonFile -Path (Join-Path $stage10 'opencode.json') -Object ([ordered]@{
+            '$schema'       = 'https://opencode.ai/config.json'
+            'default_agent' = 'pensador'
+            'instructions'  = @('AGENTS.md')
+            'mcp'           = [ordered]@{ servers = [ordered]@{
+                    'context-mode' = [ordered]@{ type = 'local'; command = @('npx'); enabled = $true }
+                }
+            }
+        })
+    $root10 = Join-Path $dir10 'root'
+    New-Item -ItemType Directory -Path $root10 -Force | Out-Null
+    Write-JsonFile -Path (Join-Path $root10 'opencode.json') -Object ([ordered]@{
+            'model'         = 'propio/modelo'
+            'default_agent' = 'build'
+            'mcp'           = [ordered]@{ servers = [ordered]@{
+                    'context-mode' = [ordered]@{ type = 'local'; command = @('npx'); enabled = $true }
+                    'graphify'     = [ordered]@{ type = 'local'; command = @('uv', 'tool', 'run', 'graphify') }
+                }
+            }
+        })
+
+    $layerLift = Join-Path $repoRoot 'scripts/sync/mcp/lift-opencode.ps1'
+    $out10 = (& pwsh -NoProfile -File $layerLift -StageDir $stage10 -RootPath $root10 2>&1 | Out-String)
+    $res10 = Read-JsonFile -Path (Join-Path $root10 'opencode.json')
+    Write-Case ($res10.default_agent -eq 'pensador') '10a lift: default_agent build -> pensador'
+    Write-Case ($res10.model -eq 'propio/modelo') '10b lift: model propio conservado'
+    Write-Case ($res10.'$schema' -eq 'https://opencode.ai/config.json') '10c lift: $schema aplicado desde el maestro'
+    Write-Case ($null -ne $res10.mcp.servers.graphify) '10d lift: la entrada local mcp.graphify se conserva'
+    Write-Case ($out10 -match 'RESULT:mcp-opencode:reparadas') '10e lift: RESULT:mcp-opencode:reparadas'
 }
 finally {
     if (Test-Path -LiteralPath $script:TmpRoot) {

@@ -19,6 +19,16 @@
 # [021] <Root>/.kit-backup/<timestamp>/ (patron fases 1-2). Respeta -DryRun
 # [021] (cero escrituras). Emite RESULT:mcp-opencode:<anadidas|reparadas|
 # [021] sin-cambios> (reparadas domina si hubo ambas).
+#
+# [021-FIX] Ademas del bloque `mcp`, aplica las claves GESTIONADAS de
+# [021-FIX] opencode.json desde el maestro: $schema, instructions y
+# [021-FIX] default_agent (reglas de Merge-OpenCodeConfig, spec 034):
+# [021-FIX]   - default_agent ausente -> se escribe el del maestro;
+# [021-FIX]   - default_agent == 'build' -> se corrige (fallback silencioso);
+# [021-FIX]   - default_agent de un agente del kit con mode: primary -> se respeta;
+# [021-FIX]   - default_agent desconocido -> se corrige;
+# [021-FIX]   - -Force fuerza el valor del maestro.
+# [021-FIX] Todo cambio en claves gestionadas cuenta como "reparadas" en el RESULT.
 # =============================================================================
 
 [CmdletBinding()]
@@ -180,16 +190,100 @@ if (-not $destExists -or $null -eq $dest.mcp) {
     }
 }
 
-if (($added -eq 0) -and ($repaired -eq 0)) {
+# =============================================================================
+# [021-FIX] Claves gestionadas de opencode.json: $schema, instructions y
+# default_agent. Antes NINGUNA capa las aplicaba: el destino quedaba con
+# default_agent="build" aunque el sync terminara en verde (fallback silencioso,
+# fallo de configuracion segun spec 034 seccion 19.3). Reglas equivalentes a
+# Merge-OpenCodeConfig de scripts/sync-kit.ps1.
+# Se aplican sobre el objeto (round-trip JSON); el resto de claves no se toca.
+# =============================================================================
+$managedChanges = 0
+
+function Test-KitAgentPrimary {
+    param([string]$Root, [string]$AgentName)
+    if (-not $AgentName) { return $false }
+    $p = Join-Path $Root (".opencode/agents/$AgentName.md")
+    if (-not (Test-Path -LiteralPath $p -PathType Leaf)) { return $false }
+    try {
+        $head = @(Get-Content -LiteralPath $p -TotalCount 25 -ErrorAction Stop) -join "`n"
+        return ($head -match '(?m)^mode:\s*primary\s*$')
+    } catch { return $false }
+}
+
+# --- $schema ---------------------------------------------------------------
+$masterSchema = ''
+if ($master.PSObject.Properties['$schema']) { $masterSchema = [string]$master.'$schema' }
+if ($masterSchema) {
+    $currentSchema = ''
+    if ($dest.PSObject.Properties['$schema']) { $currentSchema = [string]$dest.'$schema' }
+    if ($currentSchema -cne $masterSchema) {
+        $dest | Add-Member -NotePropertyName '$schema' -NotePropertyValue $masterSchema -Force
+        $managedChanges++
+        Write-OK "mcp-lift-opencode: `$schema aplicado desde el maestro."
+    }
+}
+
+# --- instructions ----------------------------------------------------------
+$masterInstr = $null
+if ($master.PSObject.Properties['instructions']) { $masterInstr = $master.instructions }
+$instrOk = $false
+if (($null -ne $masterInstr) -and ($masterInstr -isnot [string]) -and ($masterInstr -is [System.Collections.IEnumerable])) {
+    $instrOk = $true
+    foreach ($e in $masterInstr) { if ($e -isnot [string]) { $instrOk = $false; break } }
+}
+if ($instrOk) {
+    $masterInstrJson = @($masterInstr) | ConvertTo-Json -Compress
+    $currentInstrJson = ''
+    if ($dest.PSObject.Properties['instructions'] -and ($null -ne $dest.instructions)) {
+        $currentInstrJson = @($dest.instructions) | ConvertTo-Json -Compress
+    }
+    if ($currentInstrJson -cne $masterInstrJson) {
+        $dest | Add-Member -NotePropertyName 'instructions' -NotePropertyValue @($masterInstr) -Force
+        $managedChanges++
+        Write-OK "mcp-lift-opencode: instructions aplicado desde el maestro."
+    }
+}
+
+# --- default_agent ---------------------------------------------------------
+$masterDefault = ''
+if ($master.PSObject.Properties['default_agent']) { $masterDefault = ([string]$master.default_agent).Trim() }
+if ($masterDefault) {
+    $currentDefault = ''
+    if ($dest.PSObject.Properties['default_agent']) { $currentDefault = ([string]$dest.default_agent).Trim() }
+    $writeDefault = $false
+    if ($Force) {
+        $writeDefault = $true
+    } elseif (-not $currentDefault) {
+        $writeDefault = $true
+    } elseif ($currentDefault -ceq $masterDefault) {
+        $writeDefault = $false
+    } elseif ($currentDefault -ceq 'build') {
+        $writeDefault = $true
+        Write-Warn "mcp-lift-opencode: default_agent apuntaba a 'build' (fallback silencioso); se corrige a '$masterDefault'."
+    } elseif (Test-KitAgentPrimary -Root $RootPath -AgentName $currentDefault) {
+        Write-Info "mcp-lift-opencode: default_agent '$currentDefault' es un agente del kit con mode: primary; se respeta la eleccion del proyecto."
+    } else {
+        $writeDefault = $true
+        Write-Warn "mcp-lift-opencode: default_agent '$currentDefault' no es un agente del kit con mode: primary; se corrige a '$masterDefault'."
+    }
+    if ($writeDefault -and ($currentDefault -cne $masterDefault)) {
+        $dest | Add-Member -NotePropertyName 'default_agent' -NotePropertyValue $masterDefault -Force
+        $managedChanges++
+        Write-OK "mcp-lift-opencode: default_agent = '$masterDefault'."
+    }
+}
+
+if (($added -eq 0) -and ($repaired -eq 0) -and ($managedChanges -eq 0)) {
     Write-OK "mcp-lift-opencode: sin cambios (idempotente)."
     Write-Host "RESULT:mcp-opencode:sin-cambios"
     Show-ExecutionSummary -Title "mcp-lift-opencode"
     exit 0
 }
 
-$status = if ($repaired -gt 0) { "reparadas" } else { "anadidas" }
+$status = if (($repaired -gt 0) -or ($managedChanges -gt 0)) { "reparadas" } else { "anadidas" }
 if ($DryRun) {
-    Write-Info "DryRun: aplicaria $added anadida(s) + $repaired reparada(s) en $destPath (sin escribir)"
+    Write-Info "DryRun: aplicaria $added anadida(s) + $repaired reparada(s) + $managedChanges clave(s) gestionada(s) en $destPath (sin escribir)"
     Write-Host "RESULT:mcp-opencode:$status"
     Show-ExecutionSummary -Title "mcp-lift-opencode"
     exit 0

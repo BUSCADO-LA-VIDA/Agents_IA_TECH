@@ -105,3 +105,69 @@
 - **Solución**: Actualizado `sync-agents.ps1` para sincronizar SOLO kit transversal (`.github/`, `.opencode/`, `.doc_agents/`, `.specify/memory/constitution.md`, `AGENTS.md`, `opencode.json`, `README.md`, `sync-agents.ps1`). NUNCA toca `Documentacion/<AppName>/`.
 - **Archivos locales afectados**: `sync-agents.ps1`, `.doc_agents/sync-agents-template.ps1`
 - **Tags**: `sync`, `powershell`, `estructura`, `kit-transversal`
+
+### <2026-11-02> El sync del kit sobrescribe `AGENTS.md` y no corrige `default_agent`
+
+- **Síntomas**:
+  - Tras un sync con `scripts/sync-kit-agents.ps1`, el `AGENTS.md` del proyecto pierde todo su
+    contenido propio y queda idéntico al del maestro. Se detecta porque desaparecen secciones
+    locales (reglas del proyecto, comandos propios).
+  - `opencode.json` del destino queda con `"default_agent": "build"` aunque el sync termine en
+    verde (`RESULT:opencode:ok`, `ERRORs: 0`). OpenCode cae entonces al agente `build` con un
+    warning: es el **fallback silencioso** que la spec 034 §19.3 clasifica como fallo de
+    configuración.
+  - El backup tomado a mano antes del sync desaparece de `.kit-backup/` al terminar la corrida.
+- **Causa** (tres defectos independientes del motor por capas):
+  1. `scripts/sync/kit-files/sync-kit-files.ps1` trataba `AGENTS.md` con `Copy-Item -Force`,
+     igual que `README.md`. Pero `AGENTS.md` es un archivo **compartido** (reglas del kit +
+     contenido del proyecto), no exclusivo del kit.
+  2. Ninguna capa aplicaba `default_agent`, `$schema` ni `instructions`. `lift-opencode.ps1`
+     solo fusiona el bloque `mcp`. Por eso el sync podía terminar sin errores y dejar la config
+     rota.
+  3. `sync-kit-agents.ps1` poda `.kit-backup/` conservando solo las 2 carpetas más recientes
+     (`Select-Object -Skip 2` sobre orden descendente). Los backups creados durante la corrida
+     tienen timestamp posterior, así que el backup del operador siempre es candidato a poda.
+- **Solución**:
+  1. Nueva función compartida `Merge-KitBlockFile` en `scripts/sync/lib/common.ps1`: complementa
+     `AGENTS.md` por bloque delimitado `<!-- KIT-BLOCK:START <id> -->` / `END`, conservando todo
+     lo demás. Soporta múltiples bloques, preserva BOM y CRLF, es idempotente y **fail-closed**
+     ante marcadores corruptos (START sin END, duplicados, desordenados → no escribe).
+     Estados: `sin-cambios` | `ok` | `creado` | `omitido-item`.
+  2. En `sync-kit-files.ps1`, `AGENTS.md` pasa de `Invoke-KitSingleFile` a `Merge-KitBlockFile`.
+     `README.md` y `.specify/memory/constitution.md` siguen siendo 100 % del kit (clean+replace),
+     y `scripts/` conserva clean+replace con backup previo.
+  3. En `scripts/sync/mcp/lift-opencode.ps1`, añadir las claves gestionadas con las reglas de
+     `Merge-OpenCodeConfig` (spec 034 §19.3): `default_agent` ausente → escribir; `== 'build'` →
+     corregir con WARN; agente del kit con `mode: primary` → respetar la elección del proyecto;
+     desconocido → corregir; `-Force` → forzar. Igual para `$schema` e `instructions`.
+  4. Tests de regresión en `tests/kit-sync-merge.ps1` (escenarios 8-10): ejecutan la capa
+     `kit-files` real sobre fixtures temporales y verifican que el contenido propio sobrevive,
+     que `README.md` sí se reemplaza, que `scripts/` mantiene clean+replace, la idempotencia y
+     que `lift-opencode` aplica `default_agent` conservando `model` y `mcp.graphify`.
+- **Verificación**:
+  - `pwsh -NoProfile -File tests/kit-sync-merge.ps1` → **45 asserts PASS, 0 FAIL, 10 escenarios**,
+    exit 0. Parseo sintáctico limpio de los 4 archivos.
+  - Sync real con `-Only "kit-files,agents-github,agents-opencode,agents-vscode,mcp-lift-opencode,mcp-lift-vscode"`:
+    dry-run y real con exit 0 y `ERRORs: 0`.
+  - Divergencia maestro→destino **0** en skills (89+89), rules (16), prompts (6), agents (14+13),
+    commands (6), workflows (5) y `copilot-instructions.md`.
+  - `AGENTS.md` del destino: 1 START / 1 END, conserva `# AGENTS.md`, `REGLAS CRÍTICAS`,
+    `Core facts`, `## Commands`. `opencode.json`: `default_agent: pensador`.
+- **Comando de aplicación** (una sola pasada, desde el maestro):
+  ```powershell
+  pwsh -File C:\Proyectos\Agents_IA_TECH\scripts\sync-kit-agents.ps1 `
+    -RootPath <destino> -KitPath C:\Proyectos\Agents_IA_TECH `
+    -Only "kit-files,agents-github,agents-opencode,agents-vscode,mcp-lift-opencode,mcp-lift-vscode"
+  ```
+  Si el destino necesita además skills/rules/prompts/workflows/tests (defectos D2 y D4 abiertos),
+  completar con `pwsh -File scripts/sync-kit.ps1 -RootPath <destino> -KitPath <maestro> -OrphanAction Conservar` **sin `-Force`**.
+- **Rollback**: `AGENTS.md.bak-<timestamp>` y `opencode.json.bak-<timestamp>` junto al archivo;
+  backup completo en `.kit-backup-manual/<timestamp>/` (fuera de `.kit-backup/` para que la poda
+  no lo alcance).
+- **Archivos locales afectados**: `scripts/sync/lib/common.ps1`,
+  `scripts/sync/kit-files/sync-kit-files.ps1`, `scripts/sync/mcp/lift-opencode.ps1`,
+  `tests/kit-sync-merge.ps1`
+- **Tags**: `sync`, `kit-transversal`, `agents-md`, `opencode`, `default-agent`, `powershell`, `merge-por-bloque`
+- **Deuda relacionada** (no corregida aquí): D1 poda de `.kit-backup`; D2 no existe capa `skills`;
+  D3 `Test-AuditLogIntegrity` falso negativo; D4 `tests/` solo viaja por el motor deprecado;
+  D5 doble entrada `graphify` en `opencode.json`.

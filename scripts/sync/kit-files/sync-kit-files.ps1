@@ -7,7 +7,8 @@
 # [021] kit que no pertenecen a otra capa:
 # [021]   <Stage>/scripts/ (EXCLUYENDO scripts/sync/ para no auto-sobrescribirse
 # [021]     durante el sync) -> <Root>/scripts/
-# [021]   <Stage>/AGENTS.md -> <Root>/AGENTS.md
+# [021]   <Stage>/AGENTS.md -> <Root>/AGENTS.md  (COMPLEMENTADO, no sobrescrito:
+# [021]     ver [021-FIX] mas abajo)
 # [021]   <Stage>/README.md -> <Root>/README.md
 # [021]   <Stage>/.specify/memory/constitution.md
 # [021]     -> <Root>/.specify/memory/constitution.md (solo ese archivo; se crea
@@ -16,6 +17,13 @@
 # [021] <Root>/.kit-backup/<timestamp>/). Por archivo: sobrescribir siempre que
 # [021] difiera (con backup). Si el stage no trae un item -> WARN + omitir (no
 # [021] se borra el destino). Emite RESULT:kit-files:<estado> en stdout.
+#
+# [021-FIX] AGENTS.md es un archivo COMPARTIDO (reglas del kit + texto propio de
+# [021-FIX] cada proyecto). Antes se sobrescribia con Copy-Item -Force y eso
+# [021-FIX] borraba el contenido del proyecto en cada sync. Ahora se complementa
+# [021-FIX] por bloque delimitado KIT-BLOCK (Merge-KitBlockFile de common.ps1):
+# [021-FIX] solo se reemplaza el tramo entre marcadores; el resto del archivo se
+# [021-FIX] conserva. README.md y constitution.md siguen siendo 100% del kit.
 # =============================================================================
 
 [CmdletBinding()]
@@ -162,7 +170,12 @@ try {
             -BackupBase $backupBase -BackupSub "kit-files/scripts" `
             -ExcludeTop @("sync") -Simulate:$DryRun -Label "scripts/ (sin sync/)"
     }
-    foreach ($f in @("AGENTS.md", "README.md")) {
+    # [021-FIX] AGENTS.md se COMPLEMENTA, nunca se sobrescribe: es compartido
+    # entre el kit (bloques KIT-BLOCK) y el proyecto (todo lo demas).
+    $itemStatus += Merge-KitBlockFile -Source (Join-Path $StageDir "AGENTS.md") `
+        -Destination (Join-Path $RootPath "AGENTS.md") -Simulate:$DryRun
+    # [021] README.md es 100% del kit: se sobrescribe si difiere (con backup).
+    foreach ($f in @("README.md")) {
         $itemStatus += Invoke-KitSingleFile -SrcFile (Join-Path $StageDir $f) `
             -DstFile (Join-Path $RootPath $f) -BackupBase $backupBase `
             -BackupRel "kit-files/$f" -Simulate:$DryRun -Label $f

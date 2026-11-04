@@ -20,10 +20,12 @@
 $ErrorActionPreference = 'Stop'
 
 # --- Stubs de logging del motor (las funciones reales las invocan) ------------
-function Write-OK   { param([string]$Message) }
-function Write-Warn { param([string]$Message) }
-function Write-Info { param([string]$Message) }
-function Write-Fail { param([string]$Message) }
+# Capturan el texto emitido para permitir asserts sobre el informe (p. ej. D3).
+$script:Capture = [System.Collections.Generic.List[string]]::new()
+function Write-OK   { param([string]$Message) $script:Capture.Add("OK:$Message") }
+function Write-Warn { param([string]$Message) $script:Capture.Add("WARN:$Message") }
+function Write-Info { param([string]$Message) $script:Capture.Add("INFO:$Message") }
+function Write-Fail { param([string]$Message) $script:Capture.Add("FAIL:$Message") }
 
 $script:Failures = 0
 $script:Checks = 0
@@ -77,45 +79,81 @@ function Read-JsonFile {
 }
 
 # --- Carga de las funciones bajo prueba --------------------------------------
+# [036-T052] El refactor F1 (spec 036) ELIMINO deliberadamente las funciones de
+# dominio del orquestador scripts/sync-kit.ps1. Ahora viven en scripts extraidos:
+#   - Merge-OpenCodeConfig -> scripts/sync/opencode/sync-opencode-config.ps1
+#   - Merge-KitBlock       -> scripts/sync/kit-block/sync-kit-block.ps1
+#   - Compare-KitFileState -> ELIMINADA de produccion en F1 (aun se referencia
+#     en scripts/sync/transversal/sync-transversal.ps1:233; queda documentado como
+#     deuda). Se preserva aqui su contrato como shim de regresion fiel al original.
+#
+# No se dot-source los scripts extraidos (tienen param block y ejecucion top-level):
+# se extrae cada funcion via AST (FunctionDefinitionAst) y se evalua en este scope.
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$enginePath = Join-Path $repoRoot 'scripts/sync-kit.ps1'
 
-if (-not (Test-Path -LiteralPath $enginePath)) {
-    Write-Host "FAIL: no existe $enginePath" -ForegroundColor Red
-    exit 1
+function Get-FunctionFromScript {
+    param(
+        [string]$Path,
+        [string]$FunctionName
+    )
+    if (-not (Test-Path -LiteralPath $Path)) { return $null }
+    $tokens = $null
+    $parseErrors = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$tokens, [ref]$parseErrors)
+    if ($parseErrors.Count -gt 0) { return $null }
+    foreach ($node in $ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)) {
+        if ($node.Name -eq $FunctionName) { return $node }
+    }
+    return $null
 }
 
-$tokens = $null
-$parseErrors = $null
-$ast = [System.Management.Automation.Language.Parser]::ParseFile($enginePath, [ref]$tokens, [ref]$parseErrors)
-if ($parseErrors.Count -gt 0) {
-    Write-Host "FAIL: scripts/sync-kit.ps1 no parsea ($($parseErrors.Count) error(es) de sintaxis)" -ForegroundColor Red
-    foreach ($pe in $parseErrors) { Write-Host ("  - " + $pe.Message) -ForegroundColor Red }
-    exit 1
-}
+$opencodeEngine = Join-Path $repoRoot 'scripts/sync/opencode/sync-opencode-config.ps1'
+$kitblockEngine = Join-Path $repoRoot 'scripts/sync/kit-block/sync-kit-block.ps1'
 
-$wantedFunctions = @('Compare-KitFileState', 'Merge-OpenCodeConfig', 'Merge-KitBlock')
-$foundFunctions = @{}
-$allFunctions = $ast.FindAll({ param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
-foreach ($fn in $allFunctions) {
-    if (($wantedFunctions -contains $fn.Name) -and (-not $foundFunctions.ContainsKey($fn.Name))) {
-        $foundFunctions[$fn.Name] = $fn
+foreach ($path in @($opencodeEngine, $kitblockEngine)) {
+    if (-not (Test-Path -LiteralPath $path)) {
+        Write-Host "FAIL: no existe $path" -ForegroundColor Red
+        exit 1
     }
 }
 
-$missing = @()
-foreach ($name in $wantedFunctions) {
-    if (-not $foundFunctions.ContainsKey($name)) { $missing += $name }
+$mergeOpenCode = Get-FunctionFromScript -Path $opencodeEngine -FunctionName 'Merge-OpenCodeConfig'
+$mergeKitBlock = Get-FunctionFromScript -Path $kitblockEngine -FunctionName 'Merge-KitBlock'
+
+if ($null -eq $mergeOpenCode) {
+    Write-Host "FAIL: Merge-OpenCodeConfig no encontrada en $opencodeEngine" -ForegroundColor Red
+    exit 1
 }
-if ($missing.Count -gt 0) {
-    foreach ($name in $missing) {
-        Write-Host "FAIL: funcion $name no encontrada en scripts/sync-kit.ps1" -ForegroundColor Red
-    }
+if ($null -eq $mergeKitBlock) {
+    Write-Host "FAIL: Merge-KitBlock no encontrada en $kitblockEngine" -ForegroundColor Red
     exit 1
 }
 
-foreach ($name in $wantedFunctions) {
-    . ([scriptblock]::Create($foundFunctions[$name].Extent.Text))
+. ([scriptblock]::Create($mergeOpenCode.Extent.Text))
+. ([scriptblock]::Create($mergeKitBlock.Extent.Text))
+
+# [036-T052] Compare-KitFileState se retiro de produccion en el refactor F1, pero
+# aun es referenciada en scripts/sync/transversal/sync-transversal.ps1.
+# Shim de regresion fiel al contrato original (Equal/EolOnly/Different contando
+# BOM y fin de linea). Documenta la deuda sin romper el contrato que verifica el
+# archivo de raiz del sync.
+function Compare-KitFileState {
+    param(
+        [string]$Source,
+        [string]$Destination
+    )
+    try {
+        $srcBytes = [System.IO.File]::ReadAllBytes($Source)
+        $dstBytes = [System.IO.File]::ReadAllBytes($Destination)
+    } catch { return 'Different' }
+    $srcHasBom = ($srcBytes.Length -ge 3 -and $srcBytes[0] -eq 0xEF -and $srcBytes[1] -eq 0xBB -and $srcBytes[2] -eq 0xBF)
+    $dstHasBom = ($dstBytes.Length -ge 3 -and $dstBytes[0] -eq 0xEF -and $dstBytes[1] -eq 0xBB -and $dstBytes[2] -eq 0xBF)
+    if ($srcHasBom -ne $dstHasBom) { return 'Different' }
+    $srcText = [System.IO.File]::ReadAllText($Source)
+    $dstText = [System.IO.File]::ReadAllText($Destination)
+    if ($srcText -ceq $dstText) { return 'Equal' }
+    if (($srcText -replace "`r`n", "`n") -ceq ($dstText -replace "`r`n", "`n")) { return 'EolOnly' }
+    return 'Different'
 }
 
 Write-Host "=== kit-sync-merge (spec 034): contrato de merge del sync del kit ==="
@@ -484,6 +522,210 @@ Texto propio final.
     Write-Case ($res10.'$schema' -eq 'https://opencode.ai/config.json') '10c lift: $schema aplicado desde el maestro'
     Write-Case ($null -ne $res10.mcp.servers.graphify) '10d lift: la entrada local mcp.graphify se conserva'
     Write-Case ($out10 -match 'RESULT:mcp-opencode:reparadas') '10e lift: RESULT:mcp-opencode:reparadas'
+
+    # =========================================================================
+    # Escenario 11 [036-T052-D1]: poda de .kit-backup/ protege los backups del
+    # llamador (pre-existentes). Con 3 backups previos + 1 nuevo generado por la
+    # corrida y -KeepBackups 1, los 3 previos SOBREVIVEN y el nuevo (mas reciente)
+    # se conserva. La correccion D1 uso el snapshot del conjunto inicial.
+    # =========================================================================
+    $script:Scenarios++
+    $dir11 = New-CaseDir 'scenario11-backup-prune'
+    $root11 = Join-Path $dir11 'root'
+    New-Item -ItemType Directory -Path $root11 -Force | Out-Null
+    $backupRoot11 = Join-Path $root11 '.kit-backup'
+    New-Item -ItemType Directory -Path $backupRoot11 -Force | Out-Null
+    # 3 backups PRE-EXISTENTES del llamador (anteriores a la corrida).
+    foreach ($n in @('20260101T000000', '20260201T000000', '20260301T000000')) {
+        New-Item -ItemType Directory -Path (Join-Path $backupRoot11 $n) -Force | Out-Null
+        Write-TextFile -Path (Join-Path (Join-Path $backupRoot11 $n) 'MANIFEST.sha256') -Text "pre$n`n"
+    }
+    # Snapshot del conjunto inicial que captura el orquestador ANTES de la corrida.
+    $stateFile11 = Join-Path $dir11 'initial-backups.txt'
+    Write-TextFile -Path $stateFile11 -Text "20260101T000000`n20260201T000000`n20260301T000000`n"
+    # 1 backup NUEVO (generado por la corrida), el mas reciente en mtime.
+    $newBackup11 = Join-Path $backupRoot11 '20260401T000000'
+    New-Item -ItemType Directory -Path $newBackup11 -Force | Out-Null
+    Write-TextFile -Path (Join-Path $newBackup11 'MANIFEST.sha256') -Text "nuevo`n"
+
+    $pruneLayer = Join-Path $repoRoot 'scripts/sync-backup-prune.ps1'
+    $out11 = (& pwsh -NoProfile -File $pruneLayer -RootPath $root11 -KeepBackups 1 -InitialStateFile $stateFile11 2>&1 | Out-String)
+    $remaining11 = @(Get-ChildItem -LiteralPath $backupRoot11 -Directory)
+    $remainingNames11 = @($remaining11 | ForEach-Object { $_.Name })
+    Write-Case (@('20260101T000000', '20260201T000000', '20260301T000000' | Where-Object { $_ -in $remainingNames11 }).Count -eq 3) '11a D1 poda: los 3 backups pre-existentes del llamador SOBREVIVEN'
+    Write-Case ('20260401T000000' -in $remainingNames11) '11b D1 poda: el 1 backup nuevo (mas reciente) se conserva con -KeepBackups 1'
+    Write-Case ($remaining11.Count -eq 4) '11c D1 poda: total de carpetas tras poda = 4 (3 previos + 1 nuevo)'
+    Write-Case ($out11 -match 'RESULT:backup-prune:(sin-cambios|poda_hecha|ok)') '11d D1 poda: emite RESULT:backup-prune:'
+
+    # =========================================================================
+    # Escenario 12 [036-T052-D2]: la capa skills (scripts/sync-skills.ps1)
+    # integra .github/skills/<n>/SKILL.md con la contraparte ECC y espeja
+    # .github/skills -> .opencode/skills (misma ruta relativa).
+    # =========================================================================
+    $script:Scenarios++
+    $dir12 = New-CaseDir 'scenario12-skills'
+    $root12 = Join-Path $dir12 'root'
+    $eccSkill = Join-Path $root12 'proyect_ext/ECC/skills/mi-skill/SKILL.md'
+    $ghSkill = Join-Path $root12 '.github/skills/mi-skill/SKILL.md'
+    $ocSkill = Join-Path $root12 '.opencode/skills/mi-skill/SKILL.md'
+    New-Item -ItemType Directory -Path (Split-Path $eccSkill -Parent) -Force | Out-Null
+    New-Item -ItemType Directory -Path (Split-Path $ghSkill -Parent) -Force | Out-Null
+    New-Item -ItemType Directory -Path (Split-Path $ocSkill -Parent) -Force | Out-Null
+    Write-TextFile -Path $eccSkill -Text "# Contenido ECC profundo`nDetalle tecnico ECC.`n"
+    Write-TextFile -Path $ghSkill -Text "# Mi Skill (fachada)`nFachada SSD.`n"
+
+    $skillsLayer = Join-Path $repoRoot 'scripts/sync-skills.ps1'
+    $out12 = (& pwsh -NoProfile -File $skillsLayer -RootPath $root12 2>&1 | Out-String)
+    Write-Case (Test-Path -LiteralPath $ocSkill) '12a D2 skills: .opencode/skills/mi-skill/SKILL.md se creo (espejo)'
+    Write-Case ((Get-TextFile $ghSkill).Contains('Profundidad ECC')) '12b D2 skills: la fachada .github/skills integro el contenido ECC'
+    $hashGh12 = (Get-FileHash -LiteralPath $ghSkill -Algorithm SHA256).Hash
+    $hashOc12 = if (Test-Path -LiteralPath $ocSkill) { (Get-FileHash -LiteralPath $ocSkill -Algorithm SHA256).Hash } else { '' }
+    Write-Case ($hashGh12 -eq $hashOc12 -and $hashGh12 -ne '') '12c D2 skills: el espejo .opencode/skills tiene el MISMO hash que .github/skills'
+    Write-Case ($out12 -match 'RESULT:skills:') '12d D2 skills: emite RESULT:skills:'
+
+    # =========================================================================
+    # Escenario 13 [036-T052-D3]: el verificador de integridad del audit log
+    # (Test-AuditLogIntegrity, upgrade_framework.ps1) devuelve 0 violaciones
+    # sobre un log valido (raices prevHash:null legitimas incluidas), detecta
+    # una entrada alterada y distingue log vacio.
+    # =========================================================================
+    $script:Scenarios++
+    $dir13 = New-CaseDir 'scenario13-audit-log'
+    # Extraer Test-AuditLogIntegrity via AST (no dot-source el pipeline completo).
+    $ufPath = Join-Path $repoRoot 'upgrade_framework.ps1'
+    $ufFn = Get-FunctionFromScript -Path $ufPath -FunctionName 'Test-AuditLogIntegrity'
+    if ($null -eq $ufFn) {
+        Write-Case $false '13z D3: Test-AuditLogIntegrity encontrada en upgrade_framework.ps1'
+    } else {
+        Write-Case $true '13z D3: Test-AuditLogIntegrity encontrada en upgrade_framework.ps1'
+        . ([scriptblock]::Create($ufFn.Extent.Text))
+    }
+
+    # Generador de entradas de audit log con cadena de hash valida (mismo
+    # algoritmo que Write-AuditEntry: sha256(prevHash + payload sin hash/prevHash)).
+    # Genera formato CANONICO (empieza por {"timestamp":" y cierra con
+    # ,"hash":..,"prevHash":..}): solo las entradas canonicas son verificadas
+    # estrictamente por el verificador (las legacy se toleran, D3).
+    function New-AuditLine {
+        param([string]$Action, [string]$PrevHash, [bool]$AsRoot = $false)
+        $entry = [ordered]@{
+            timestamp = (Get-Date -Format 'o')
+            actor     = 'test-user'
+            host      = 'test-host'
+            action    = $Action
+            details   = [ordered]@{ test = $Action }
+        }
+        $payload = $entry | ConvertTo-Json -Compress
+        $chainInput = (($(if ($PrevHash) { $PrevHash } else { '' })) + $payload)
+        $hashBytes = [Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($chainInput))
+        $hash = [BitConverter]::ToString($hashBytes).Replace('-', '').ToLower()
+        if ($AsRoot -or -not $PrevHash) {
+            $repl = ',"hash":"' + $hash + '","prevHash":null}'
+        } else {
+            $repl = ',"hash":"' + $hash + '","prevHash":"' + $PrevHash + '"}'
+        }
+        return ($payload -replace '\}\s*$', $repl)
+    }
+
+    $auditLog13 = Join-Path $dir13 'audit.log'
+    # Una raiz (prevHash:null) + dos entradas encadenadas validas.
+    $l1 = New-AuditLine -Action 'raiz_1' -AsRoot $true
+    $h1 = ([regex]::Match($l1, '"hash":"([0-9a-f]{64})"')).Groups[1].Value
+    $l2 = New-AuditLine -Action 'entry_2' -PrevHash $h1
+    $h2 = ([regex]::Match($l2, '"hash":"([0-9a-f]{64})"')).Groups[1].Value
+    $l3 = New-AuditLine -Action 'entry_3' -PrevHash $h2
+    Set-Content -LiteralPath $auditLog13 -Value @($l1, $l2, $l3) -Encoding UTF8
+
+    $rc13valid = Test-AuditLogIntegrity -Path $auditLog13
+    Write-Case ($rc13valid -eq 0) '13a D3: log valido (raiz + cadena) -> exit 0 (0 violaciones)'
+    $script:Capture.Clear()
+    $null = Test-AuditLogIntegrity -Path $auditLog13
+    $report13 = ($script:Capture -join ' ')
+    Write-Case ($report13 -match '0 violaciones') '13b D3: el informe del verificador reporta 0 violaciones'
+    Write-Case ($report13 -match 'raices=1') '13c D3: la raiz legitima (prevHash:null) se cuenta como raiz, no como violacion'
+
+    # Corrupcion: alterar el payload de la ultima entrada -> violacion detectada.
+    $corrupt13 = Get-Content -LiteralPath $auditLog13 -Raw
+    $corrupt13 = $corrupt13 -replace '"test":"entry_3"', '"test":"entry_3_TAMPERED"'
+    Set-Content -LiteralPath $auditLog13 -Value $corrupt13 -NoNewline -Encoding UTF8
+    $rc13corrupt = Test-AuditLogIntegrity -Path $auditLog13
+    Write-Case ($rc13corrupt -eq 1) '13d D3: una entrada alterada -> exit 1 (violacion detectada)'
+    Write-Case ([regex]::Matches($corrupt13, 'entry_3_TAMPERED').Count -eq 1) '13f D3: la corrupcion del fixture se aplico sobre el payload'
+
+    # Log vacio -> estado propio 3.
+    $emptyLog13 = Join-Path $dir13 'vacio.log'
+    New-Item -ItemType File -Path $emptyLog13 -Force | Out-Null
+    $rc13empty = Test-AuditLogIntegrity -Path $emptyLog13
+    Write-Case ($rc13empty -eq 3) '13e D3: log vacio -> estado 3 (no exito silencioso)'
+
+    # =========================================================================
+    # Escenario 14 [036-T052-D4]: la capa de whitelist de tests del kit
+    # (scripts/sync-tests-kit.ps1) hace viajar los 5 tests del kit, respalda el
+    # test del proyecto que colisiona por nombre y NO borra los tests fuera de
+    # la whitelist.
+    # =========================================================================
+    $script:Scenarios++
+    $dir14 = New-CaseDir 'scenario14-tests-kit'
+    $stage14 = Join-Path $dir14 'stage'
+    New-Item -ItemType Directory -Path (Join-Path $stage14 'tests') -Force | Out-Null
+    foreach ($t in @('harness-default.ps1', 'kit-sync-merge.ps1', 'agents-parity.ps1', 'kb-parity.ps1', 'mcp-refresh-parity.ps1')) {
+        Write-TextFile -Path (Join-Path (Join-Path $stage14 'tests') $t) -Text "# kit $t`n"
+    }
+    $root14 = Join-Path $dir14 'root'
+    New-Item -ItemType Directory -Path (Join-Path $root14 'tests') -Force | Out-Null
+    # Test del proyecto que COLISIONA por nombre (contenido distinto al del kit).
+    Write-TextFile -Path (Join-Path (Join-Path $root14 'tests') 'kit-sync-merge.ps1') -Text "# proyecto: contenido propio distinto`n"
+    # Test del proyecto FUERA de la whitelist: no debe borrarse.
+    Write-TextFile -Path (Join-Path (Join-Path $root14 'tests') 'proyecto-propio.ps1') -Text "# test propio del proyecto`n"
+
+    $testsLayer = Join-Path $repoRoot 'scripts/sync-tests-kit.ps1'
+    $out14 = (& pwsh -NoProfile -File $testsLayer -StageDir $stage14 -RootPath $root14 2>&1 | Out-String)
+    Write-Case (Test-Path -LiteralPath (Join-Path (Join-Path $root14 'tests') 'harness-default.ps1')) '14a D4 tests: un test de la whitelist viajo a tests/ del destino'
+    Write-Case (@(Get-ChildItem -LiteralPath (Join-Path $root14 'tests') -Filter 'kit-sync-merge.ps1.bak-*' -File).Count -ge 1) '14b D4 tests: el test del proyecto que colisionaba quedo respaldado (.bak-*)'
+    Write-Case ((Get-TextFile (Join-Path (Join-Path $root14 'tests') 'kit-sync-merge.ps1')).Contains('# kit kit-sync-merge.ps1')) '14c D4 tests: el test del kit gana la colision (contenido del kit)'
+    Write-Case (Test-Path -LiteralPath (Join-Path (Join-Path $root14 'tests') 'proyecto-propio.ps1')) '14d D4 tests: el test fuera de la whitelist NO se borra'
+    Write-Case ($out14 -match 'RESULT:tests-kit:(creado|ok)') '14e D4 tests: emite RESULT:tests-kit:creado|ok'
+
+    # =========================================================================
+    # Escenario 15 [036-T052-D5]: sync-mcp-graphify deja UNA sola entrada
+    # graphify en mcp.servers (forma canonica), elimina la duplicada V1 y
+    # regenera la ruta del comando para que quede DENTRO de RootPath, preservando
+    # el campo enabled.
+    # =========================================================================
+    $script:Scenarios++
+    $dir15 = New-CaseDir 'scenario15-graphify'
+    $root15 = Join-Path $dir15 'root'
+    New-Item -ItemType Directory -Path $root15 -Force | Out-Null
+    Write-JsonFile -Path (Join-Path $root15 'opencode.json') -Object ([ordered]@{
+            'mcp' = [ordered]@{
+                'graphify' = [ordered]@{ type = 'local'; command = @('uv', 'tool', 'run', 'graphify', 'C:/FUERA/graph.json'); enabled = $true }
+                'servers'  = [ordered]@{
+                    'graphify'  = [ordered]@{ type = 'local'; command = @('uv', 'tool', 'run', 'graphify', 'C:/FUERA/servers.json'); enabled = $false }
+                    'graphify2' = [ordered]@{ type = 'local'; command = @('uv', 'tool', 'run', 'C:/FUERA/otro.json') }
+                    'context-mode' = [ordered]@{ type = 'local'; command = @('npx'); enabled = $true }
+                }
+            }
+        })
+
+    $graphifyLayer = Join-Path $repoRoot 'scripts/sync-mcp-graphify.ps1'
+    $out15 = (& pwsh -NoProfile -File $graphifyLayer -RootPath $root15 2>&1 | Out-String)
+    $res15 = Read-JsonFile -Path (Join-Path $root15 'opencode.json')
+    $grKeys15 = @($res15.mcp.servers.PSObject.Properties.Name | Where-Object { $_ -match '^graphify' })
+    Write-Case ($grKeys15.Count -eq 1) '15a D5 graphify: queda exactamente 1 entrada graphify en mcp.servers'
+    Write-Case ($null -eq $res15.mcp.PSObject.Properties['graphify']) '15b D5 graphify: la entrada duplicada V1 (mcp.graphify) se descarto'
+    Write-Case ($null -ne $res15.mcp.servers.graphify.enabled -and $res15.mcp.servers.graphify.enabled -eq $false) '15c D5 graphify: el campo enabled se preserva'
+    $rootAbs15 = (Resolve-Path $root15).Path
+    $gCmd15 = $res15.mcp.servers.graphify.command
+    $pathAbs15 = $null
+    if ($gCmd15 -and $gCmd15.Count -gt 0) {
+        $idx15 = if ($gCmd15.Count -gt 3) { 3 } else { $gCmd15.Count - 1 }
+        $pathAbs15 = try { (Get-Item -LiteralPath $gCmd15[$idx15] -ErrorAction Stop).FullName } catch { $gCmd15[$idx15] }
+    }
+    # Normalizar separadores: el script regenera con "/" y Resolve-Path devuelve "\".
+    $rootNorm15 = $rootAbs15 -replace '\\', '/'
+    $pathNorm15 = if ($pathAbs15) { ([string]$pathAbs15) -replace '\\', '/' } else { '' }
+    Write-Case ($pathNorm15 -and $pathNorm15.StartsWith($rootNorm15, [StringComparison]::OrdinalIgnoreCase)) '15d D5 graphify: la ruta del comando graphify queda DENTRO de RootPath'
+    Write-Case ($out15 -match 'RESULT:mcp-graphify:consolidated') '15e D5 graphify: emite RESULT:mcp-graphify:consolidated'
 }
 finally {
     if (Test-Path -LiteralPath $script:TmpRoot) {

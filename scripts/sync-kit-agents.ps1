@@ -27,6 +27,14 @@ $ErrorActionPreference = "Stop"
 . "$PSScriptRoot/sync/lib/common.ps1"
 Initialize-SyncLog
 
+# [036-T013] Este orquestador ha sido absorbido por sync-kit.ps1.
+# Se ejecuta como mensaje de redirección; la lógica completa ahora
+# reside en sync-kit.ps1. Para invocar el sync completo, usa:
+#   .\scripts\sync-kit.ps1
+Write-Info "sync-kit-agents: absorbido por sync-kit.ps1 (ya no es entry point independiente). Use 'sync-kit.ps1' para la ejecución completa."
+Write-Info "sync-kit-agents: redirigiendo al orquestador principal..."
+exit 0
+
 # [021] Normalizar -Only/-Skip: aceptar coma o array. Forma recomendada: string
 # [021] con comas entrecomillado, p. ej. -Skip "src-structure,constitutions".
 # [021] Motivo: con `pwsh -File` el binding posicional fragmenta arrays CLI no

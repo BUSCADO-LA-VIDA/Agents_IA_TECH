@@ -200,37 +200,94 @@ function Write-AuditEntry {
     }
 }
 
+# T004-D3/T005-D3/T006-D3 (spec 036, SC-004): verificador de integridad del audit log.
+# Operaciones sobre TEXTO CRUDO de cada línea (nunca round-trip ConvertFrom-Json/ConvertTo-Json,
+# que convierte el timestamp ISO-8601 a [DateTime] y altera el payload firmado).
+# - Raíces legítimas (prevHash: null): se cuentan y reportan, NUNCA son violación.
+# - No se exige una cadena lineal completa (escritores históricos distintos hicieron append sin encadenar).
+# - No se escribe audit_integrity_violation por raíces ni se auto-escribe (evita recursión con Write-AuditEntry).
+# - Exit codes distinguibles: 0=log válido (0 violaciones), 1=hay violaciones, 2=log ausente, 3=log vacío.
 function Test-AuditLogIntegrity {
     param([string]$Path = $script:AuditLogPath)
     try {
-        if (-not (Test-Path -LiteralPath $Path)) { return $true }
-        $lines = Get-Content -Path $Path
-        $prevHash = $null
-        foreach ($line in $lines) {
-            if ([string]::IsNullOrWhiteSpace($line)) { continue }
-            $entry = $line | ConvertFrom-Json
-            if ($entry.prevHash -ne $prevHash) {
-                Write-Warn "T061: Integridad del audit log comprometida, hash chain roto en entrada $($entry.action)"
-                Write-AuditEntry -Action "audit_integrity_violation" -Data @{entry=$entry.action}
-                return $false
-            }
-            # Recalcular hash
-            $tmp = $entry.PSObject.Copy()
-            $tmp.PSObject.Properties.Remove('hash')
-            $payload = $tmp | ConvertTo-Json -Compress
-            $chainInput = ($prevHash ?? "") + $payload
-            $hashBytes = [Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($chainInput))
-            $calcHash = [BitConverter]::ToString($hashBytes).Replace("-","").ToLower()
-            if ($calcHash -ne $entry.hash) {
-                Write-Warn "T061: Hash de entrada audit log no coincide"
-                return $false
-            }
-            $prevHash = $entry.hash
+        # T006-D3: estado propio para log ausente
+        if (-not (Test-Path -LiteralPath $Path)) {
+            Write-Warn "T004-D3: audit log $Path AUSENTE (no se puede verificar)."
+            return 2
         }
-        return $true
+        $lines = @(Get-Content -Path $Path | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        # T006-D3: estado propio para log vacío (informado, no éxito silencioso)
+        if ($lines.Count -eq 0) {
+            Write-Info "T004-D3: audit log VACÍO (0 entradas)."
+            return 3
+        }
+
+        $roots = 0
+        $valid = 0
+        $legacy = 0
+        $violations = @()
+
+        foreach ($line in $lines) {
+            # Extraer hash/prevHash del TEXTO CRUDO por regex (T004-D3 nota 3)
+            $storedHash = $null
+            if ($line -match '"hash":"([0-9a-f]{64})"') { $storedHash = $Matches[1] }
+            $prevHashValue = ''
+            $isRoot = $false
+            if ($line -match '"prevHash":null') {
+                $isRoot = $true
+            } elseif ($line -match '"prevHash":"([0-9a-f]{64})"') {
+                $prevHashValue = $Matches[1]
+            }
+
+            # Reconstruir el payload firmado sobre texto crudo: eliminar los campos 'hash' y 'prevHash'
+            # que Write-AuditEntry añade DESPUÉS de calcular el hash. El timestamp ISO-8601 se preserva
+            # byte a byte (T004-D3 nota 4): no hay conversión a [DateTime].
+            $payload = [regex]::Replace($line, ',"(hash|prevHash)":(null|"[0-9a-f]{64}")', '')
+            $recomputed = [Security.Cryptography.SHA256]::Create().ComputeHash(
+                [Text.Encoding]::UTF8.GetBytes($prevHashValue + $payload))
+            $recomputed = [BitConverter]::ToString($recomputed).Replace("-", "").ToLower()
+
+            $hasValidHash = ($storedHash -and $recomputed -eq $storedHash)
+
+            if ($isRoot) {
+                # T005-D3: raíz legítima — contar, jamás violación, no exigir cadena lineal completa
+                $roots++
+                if ($hasValidHash) { $valid++ }
+                continue
+            }
+
+            # Formato canónico = escritor actual (empieza {"timestamp", cierra con hash/prevHash y nada más),
+            # única forma estrictamente reproducible. Las entradas históricas (spec 036 D3: log "puede llegar
+            # sucio... el verificador debe tolerarlo", "no se reescribe historia") no reproducen su orden de
+            # claves: se toleran e informan como legacy, NO como violación.
+            $isCanonical = $line -match '^\{"timestamp":"' -and $line -match ',"hash":"[0-9a-f]{64}","prevHash":(null|"[0-9a-f]{64}")\}$'
+
+            if ($isCanonical) {
+                if ($hasValidHash) {
+                    $valid++
+                } else {
+                    $action = $null
+                    if ($line -match '"action":"([^"]*)"') { $action = $Matches[1] }
+                    $violations += $action
+                    Write-Warn "T004-D3: audit log COMPROMETIDO en entrada '$action' (hash no coincide sobre texto crudo)"
+                }
+            } else {
+                $legacy++
+                if ($hasValidHash) { $valid++ }
+            }
+        }
+
+        Write-Info "T004-D3: audit log=$Path entradas=$($lines.Count) raices=$roots ('$roots raíces encontradas') validas=$valid legacy_toleradas=$legacy violaciones=$($violations.Count)"
+
+        if ($violations.Count -gt 0) {
+            Write-Fail "T004-D3: audit log con $($violations.Count) violacion(es) -> exit 1"
+            return 1
+        }
+        Write-OK "T004-D3: audit log VÁLIDO (0 violaciones, $roots raíces) -> exit 0"
+        return 0
     } catch {
-        Write-Warn "T061: Error verificando integridad audit log (fail-open): $_"
-        return $true
+        Write-Warn "T004-D3: Error verificando integridad audit log (fail-open): $_"
+        return 1
     }
 }
 

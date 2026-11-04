@@ -4,11 +4,14 @@
     Validador de solo lectura de agentes y skills del kit Agents_IA_TECH.
 
 .DESCRIPTION
-    Ejecuta diez chequeos (VAL-01 .. VAL-10) que verifican la coherencia entre los
+    Ejecuta doce chequeos (VAL-01 .. VAL-12) que verifican la coherencia entre los
     dos arneses del kit (.github/ para GitHub Copilot y .opencode/ para OpenCode),
     la estructura minima de cada agente exigida por AGENTS.md (Regla 2), la
     cobertura de MCPs exigida por AGENTS.md (Regla 1b) y el arranque por defecto
-    del arnes declarado en opencode.json (spec 034).
+    del arnes declarado en opencode.json (spec 034). VAL-12 es el gate mecanico
+    del backlog (TRANS-001): exige que pendientes-implementacion.md exista, no
+    tenga placeholders y sea coherente con specs/*/tasks.md, de modo que la
+    aprobacion del plan dispare la actualizacion obligatoria del backlog.
 
     El script es de SOLO LECTURA: no crea, modifica ni elimina archivos del repo.
     Reporta [OK] / [WARN] / [FAIL] por chequeo y detalla cada violacion con el
@@ -86,6 +89,7 @@ $script:OpencodeConfigPath = Join-Path $RootPath 'opencode.json'
 $script:AgentsMdPath       = Join-Path $RootPath 'AGENTS.md'
 $script:SpecsDir           = Join-Path $RootPath 'Documentacion/Agents_IA_TECH/specs'
 $script:BacklogIndexPath   = Join-Path $RootPath 'Documentacion/Agents_IA_TECH/00-indice.md'
+$script:BacklogFilePath    = Join-Path $RootPath 'Documentacion/Agents_IA_TECH/pendientes-implementacion.md'
 
 # =============================================================================
 # 1. Utilidades generales
@@ -1211,6 +1215,159 @@ function Test-BacklogCoherence {
         -Violations @()
 }
 
+function Get-TaskStateMap {
+    <#
+        Devuelve un mapa: taskId (mayusculas, normalizado) -> { State, Line, File }.
+        Parsea las filas de tabla de un archivo de tareas/backlog extrayendo la
+        primera columna (ID) y la columna de estado. Se usa tanto para
+        specs/*/tasks.md como para pendientes-implementacion.md.
+        Estado = las primeras palabras apoyadas por el kit; se conserva el texto
+        crudo normalizado para decidir si es 'cerrado' o 'pendiente'.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [int]$IdColumn = 1,
+        [int]$StateColumn = 6
+    )
+
+    $map = @{}
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $map }
+    $i = 0
+    foreach ($line in (Get-Content -LiteralPath $Path)) {
+        $i++
+        if ($line -notmatch '^\s*\|.*\|.*\|') { continue }
+        $cells = @($line.Trim().Trim('|') -split '\|' | ForEach-Object { $_.Trim() })
+        if ($cells.Count -lt ($StateColumn + 1)) { continue }
+        $idRaw = $cells[$IdColumn]
+        if ($idRaw -match '^\s*[-: ]+\s*$') { continue }   # fila separadora |---|---|
+        if ($idRaw -cmatch '^\s*ID\s*$') { continue }      # cabecera
+        $idNorm = ConvertTo-NormalizedText -Text $idRaw
+        if ([string]::IsNullOrWhiteSpace($idNorm)) { continue }
+        # Solo IDs de tarea reales (prefijo de spec + sufijo T.. / TRANS- / [x]).
+        if ($idNorm -notmatch '^(t\d+|[a-z0-9]+\-t\d+[a-z0-9\-]*|trans\-\d+|t0|t\d{2}\-[a-z]\d+(\-[a-z]\d+)?)') { continue }
+        $state = $cells[$StateColumn]
+        $map[$idNorm] = [pscustomobject]@{
+            Id      = $idRaw
+            State   = $state
+            StateNorm = (ConvertTo-NormalizedText -Text $state)
+            Line    = $i
+            File    = $Path
+        }
+    }
+    return $map
+}
+
+function Test-BacklogGate {
+    <#
+        VAL-12: gate mecanico del backlog (TRANS-001 / feature 017). Hace
+        obligatorio que Documentacion/Agents_IA_TECH/pendientes-implementacion.md
+        exista y este coherente con los tasks.md de cada spec, de modo que una
+        fase Speckit no pueda abrirse/cerrarse sin mantener el backlog al dia.
+          (a) Existencia: el archivo debe existir. FAIL si falta.
+          (b) Placeholders: sin TBD/TODO/XXX/Lorem/pendiente de informacion/
+              por definir/etc. FAIL si aparece alguno.
+          (c) Divergencia critica: una tarea 'Cerrado' en tasks.md NO debe estar
+              'Pendiente' (ni '[ ]') en el backlog de la misma spec. FAIL.
+        Solo la divergencia critica del punto (c) rompe el gate; la direccion
+        inversa (backlog mas avanzado que tasks.md, tipica de una spec recien
+        implementada) se tolera para no generar falso FAIL (los estados del
+        backlog reflejan lo ya implementado).
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$BacklogPath,
+        [Parameter(Mandatory)][string]$SpecsDir
+    )
+
+    $id = 'VAL-12'
+    $name = 'Gate del backlog pendientes-implementacion (TRANS-001)'
+    $rule = 'spec 035 (fr-011/sc-006) + feature 017: pendientes-implementacion.md debe existir, sin placeholders y coherente con specs/*/tasks.md (Cerrado en tasks.md nunca Pendiente en backlog)'
+
+    $violations = @()
+    $backlogDisplay = Get-RelativeDisplayPath -BasePath $script:RootPath -FullPath $BacklogPath
+
+    # ---------------------------------------------------------------- (a) exista
+    if (-not (Test-Path -LiteralPath $BacklogPath -PathType Leaf)) {
+        $violations += New-Violation -File $backlogDisplay `
+            -Message 'no existe Documentacion/Agents_IA_TECH/pendientes-implementacion.md: el gate de backlog no puede operar'
+        return New-CheckOutcome -Id $id -Name $name -Rule $rule -OkMessage '' `
+            -ViolationSummary 'no existe pendientes-implementacion.md' -Violations $violations
+    }
+
+    $rawBacklogLines = @(Get-Content -LiteralPath $BacklogPath)
+    $normBacklog = (ConvertTo-NormalizedText -Text ($rawBacklogLines -join "`n"))
+
+    # ------------------------------------------------------- (b) placeholders
+    # Placeholder canonizados (AGENTS.md). Dos clases:
+    #   - Marcadores ASCII en minuscula/ingles (TBD, TODO, XXX, Lorem) y frases
+    #     en espanol se detectan sobre texto normalizado con limites de palabra.
+    #     Se omite deliberadamente 'todo' suelto (es espanol legitimo: "todo item")
+    #     y 'N/A' (en este archivo significa "no aplica", no falta de contenido).
+    #   Se evalua el texto crudo para distinguir 'pendiente' (estado legitimo) de
+    #     la frase 'pendiente de informacion'.
+    $placeholderPatterns = @(
+        '\btbd\b',
+        '\btbd\-\w+',
+        '\btodo\b(?![a-z\s])',
+        '\bxxx+\b',
+        '\blorem\b',
+        'pendiente\s+de\s+informacion',
+        'por\s+definir',
+        'por\s+completar',
+        'completar\s+aqui',
+        'por\s+rellenar',
+        'a\s+rellenar'
+    )
+    foreach ($lineNum in 0..($rawBacklogLines.Count - 1)) {
+        $normLine = ConvertTo-NormalizedText -Text $rawBacklogLines[$lineNum]
+        if ([string]::IsNullOrWhiteSpace($normLine)) { continue }
+        foreach ($pattern in $placeholderPatterns) {
+            if ($normLine -match $pattern) {
+                $violations += New-Violation -File $backlogDisplay -Line ($lineNum + 1) `
+                    -Message "placeholder detectado: patron '/$pattern/' en la linea"
+                break
+            }
+        }
+    }
+
+    # ------------------------------------------- (c) divergencia critica
+    # Mapa de estados del backlog: columna de estado en posicion 6 (ID=1, Estado=6).
+    $backlogMap = Get-TaskStateMap -Path $BacklogPath -IdColumn 1 -StateColumn 6
+
+    if (Test-Path -LiteralPath $SpecsDir -PathType Container) {
+        $dirs = @(Get-ChildItem -LiteralPath $SpecsDir -Directory | Where-Object { $_.Name -ne 'archived' })
+        foreach ($dir in $dirs) {
+            $tasksPath = Join-Path $dir.FullName 'tasks.md'
+            if (-not (Test-Path -LiteralPath $tasksPath -PathType Leaf)) { continue }
+            # Spec 036 usa Estado en columna 8 (con columna Fase); el resto en 6.
+            $stateCol = if ($dir.Name -like '036*') { 8 } else { 6 }
+            $tasksMap = Get-TaskStateMap -Path $tasksPath -IdColumn 1 -StateColumn $stateCol
+            foreach ($key in $tasksMap.Keys) {
+                $task = $tasksMap[$key]
+                $taskState = $task.StateNorm
+                # Solo interesa la direccion critica: tasks.md = Cerrado.
+                if ($taskState -notmatch 'cerrad') { continue }
+                if (-not $backlogMap.ContainsKey($key)) {
+                    $violations += New-Violation -File $dir.Name -Message "tarea '$($task.Id)' Cerrado en tasks.md pero ausente en pendientes-implementacion.md"
+                    continue
+                }
+                $back = $backlogMap[$key]
+                $backState = $back.StateNorm
+                # Pendiente = estado Pendiente explicito o checklist '[ ]' sin marcar.
+                $isPending = ($backState -match 'pendiente') -or ($backState -match '\[ \]')
+                if ($isPending) {
+                    $violations += New-Violation -File ($backlogDisplay + ":$($back.Line)") `
+                        -Message "divergencia critica: '$($task.Id)' esta Cerrado en $($dir.Name)/tasks.md pero Pendiente/$($back.State) en el backlog"
+                }
+            }
+        }
+    }
+
+    $okMessage = "pendientes-implementacion.md existente, sin placeholders y sin divergencias criticas con specs/*/tasks.md"
+    return New-CheckOutcome -Id $id -Name $name -Rule $rule -OkMessage $okMessage `
+        -ViolationSummary "$($violations.Count) hallazgo(s) en el gate del backlog" -Violations $violations
+}
+
 # =============================================================================
 # 6. Ejecucion de los chequeos
 # =============================================================================
@@ -1231,6 +1388,7 @@ $checks += Test-AgentStructure -Documents $agentDocuments
 $checks += Test-OrphanSkills -Documents $agentDocuments
 $checks += Test-DefaultAgentBoot
 $checks += Test-BacklogCoherence -SpecsDir $script:SpecsDir -IndexPath $script:BacklogIndexPath
+$checks += Test-BacklogGate -BacklogPath $script:BacklogFilePath -SpecsDir $script:SpecsDir
 
 $failChecks = @($checks | Where-Object { $_.Severity -eq 'FAIL' })
 $warnChecks = @($checks | Where-Object { $_.Severity -eq 'WARN' })

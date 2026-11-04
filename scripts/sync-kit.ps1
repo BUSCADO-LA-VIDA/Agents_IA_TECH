@@ -17,6 +17,7 @@
 param(
     [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
     [string]$RootPath = "",
+    [string]$KitPath = "",
     [string]$OrphanAction = "Preguntar",
     [switch]$DryRun,
     [switch]$Force,
@@ -33,75 +34,75 @@ param(
 $script:Layers = @(
     @{
         Name = "kit-files"
-        Script = Join-Path $PSScriptRoot "sync-kit-files.ps1"
+        Script = Join-Path $PSScriptRoot "sync/kit-files/sync-kit-files.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "agents-github"
-        Script = Join-Path $PSScriptRoot "sync-opencode-config.ps1"
+        Script = Join-Path $PSScriptRoot "sync/agents/sync-agents-github.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "agents-opencode"
-        Script = Join-Path $PSScriptRoot "sync-kit-block.ps1"
+        Script = Join-Path $PSScriptRoot "sync/agents/sync-agents-opencode.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "agents-vscode"
-        Script = Join-Path $PSScriptRoot "sync-orphans.ps1"
+        Script = Join-Path $PSScriptRoot "sync/agents/sync-agents-vscode.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "docs"
-        Script = Join-Path $PSScriptRoot "sync-transversal.ps1"
+        Script = Join-Path $PSScriptRoot "sync/docs/sync-docs.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "constitutions"
-        Script = Join-Path $PSScriptRoot "sync-constitutions.ps1"
+        Script = Join-Path $PSScriptRoot "sync/constitutions/sync-constitutions.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "src-structure"
-        Script = Join-Path $PSScriptRoot "sync-src-structure.ps1"
+        Script = Join-Path $PSScriptRoot "sync/src-structure/sync-src-structure.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "mcp-install"
-        Script = Join-Path $PSScriptRoot "sync-mcp-install.ps1"
+        Script = Join-Path $PSScriptRoot "sync/mcp/install.ps1"
         AcceptsForce = $true
-        NoStage = $false
+        NoStage = $true
     }
     @{
         Name = "mcp-lift-opencode"
-        Script = Join-Path $PSScriptRoot "sync-mcp-lift-opencode.ps1"
+        Script = Join-Path $PSScriptRoot "sync/mcp/lift-opencode.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "mcp-lift-vscode"
-        Script = Join-Path $PSScriptRoot "sync-mcp-lift-vscode.ps1"
+        Script = Join-Path $PSScriptRoot "sync/mcp/lift-vscode.ps1"
         AcceptsForce = $true
         NoStage = $false
     }
     @{
         Name = "indexing"
-        Script = Join-Path $PSScriptRoot "sync-indexing.ps1"
+        Script = Join-Path $PSScriptRoot "sync/indexing/run-indexing.ps1"
         AcceptsForce = $false
         NoStage = $true
     }
     @{
         Name = "externals"
-        Script = Join-Path $PSScriptRoot "sync-externals.ps1"
+        Script = Join-Path $PSScriptRoot "sync/externals/resolve-externals.ps1"
         AcceptsForce = $true
-        NoStage = $false
+        NoStage = $true
     }
     @{
         Name = "skills"
@@ -200,12 +201,64 @@ function Show-ExecutionSummary {
     Write-Host "===============================================================" -ForegroundColor Yellow
 }
 
+# --- Seguridad de RepoUrl (Defecto C, F1-STAGE) ---
+# Fail-closed: solo https://github.com/<owner en allowlist>/<repo>. Definida localmente
+# (misma semántica que plataformador-bootstrap.ps1) para que el orquestador valide
+# la URL antes de clonar el maestro sin depender de otros scripts.
+$script:TrustedOwners = @('BUSCADO-LA-VIDA')
+
+function Test-TrustedGithubUrl {
+    param([string]$Url)
+    # Fail-closed hacia arriba: sin URL -> no permitida
+    if ([string]::IsNullOrWhiteSpace($Url)) { return $false }
+    if ($Url -notmatch '^https://github\.com/([^/]+)/([^/]+?)(\.git)?/?$') {
+        return $false
+    }
+    $owner = $matches[1]
+    return $script:TrustedOwners -contains $owner
+}
+
+# --- Funciones auxiliares de invocación de capas ---
+# Refactor [SC-002]: el orquestador invoca cada capa como proceso hijo vía
+# cadena + Invoke-Expression. Estas helpers centralizan esa lógica para que
+# las capas que requieren parámetros ad hoc (ej. github-extras con -Kind)
+# reaprovechen el mismo patrón sin duplicar el try/catch de captura.
+
+function WriteStep-Capa {
+    param([string]$LayerName, [string]$Kind = "")
+    if ($Kind) {
+        Write-Step "Ejecutando capa: $LayerName (Kind=$Kind)"
+    } else {
+        Write-Step "Ejecutando capa: $LayerName"
+    }
+}
+
+function Invoke-CapaHija {
+    param($Layer, [string[]]$ArgList)
+    if (-not (Test-Path -LiteralPath $Layer.Script -PathType Leaf)) {
+        Write-Warn "Script de capa no encontrado: $($Layer.Script), se omite."
+        return @()
+    }
+    $cmd = "& $($Layer.Script) $($ArgList -join ' ') *>&1"
+    try {
+        $output = Invoke-Expression -Command $cmd 2>&1
+        if ($output) {
+            return @($output)
+        }
+    } catch {
+        Write-Warn "Capa $($Layer.Name) falló con error: $_"
+        $script:Errors.Add("Capa $($Layer.Name) falló: $_") | Out-Null
+    }
+    return @()
+}
+
 # --- Función principal (punto de entrada) ---
 
 function Main-sync-kit {
     param(
         [string]$RepoUrl = "https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH",
         [string]$RootPath = "",
+        [string]$KitPath = "",
         [string]$OrphanAction = "Preguntar",
         [switch]$DryRun,
         [switch]$Force,
@@ -284,9 +337,62 @@ function Main-sync-kit {
     }
     Write-OK "Total de capas: $($script:Layers.Count) ($($activeLayers.Count) disponibles)"
 
+    # [SC-002-Defecto C - F1-STAGE] Preparar el StageDir con una copia REAL del repo
+    # maestro antes de invocar las capas. Las capas con stage reciben este directorio;
+    # si está vacío no pueden sincronizar. Se clona shallow el maestro a -RepoUrl,
+    # o se usa el checkout local pasado por -KitPath (sin clonar ni borrar el del usuario).
+    $tempDir = Join-Path $env:TEMP "agents-sync-temp"
+    $stagePrepFailed = $false
+
+    if ($KitPath) {
+        # Fuente LOCAL: usar el checkout del propio maestro como stage. NO se clona,
+        # NO se borra el checkout local del usuario (guardrail en la limpieza).
+        Write-Info "Sync-kit: StageDir = checkout local del maestro (-KitPath): $KitPath"
+        if (-not (Test-Path -LiteralPath $KitPath -PathType Container)) {
+            Write-Fail "-KitPath no existe o no es un directorio: $KitPath"
+            $stagePrepFailed = $true
+        } else {
+            $tempDir = $KitPath
+        }
+    } else {
+        # Fuente REMOTA: validar $RepoUrl contra allowlist (fail-closed) y clonar shallow.
+        # Seguridad [SC-002]: solo https://github.com/ (Test-TrustedGithubUrl si existe
+        # en el contexto; como mínimo se exige el prefijo https://github.com/).
+        if (-not (Test-TrustedGithubUrl $RepoUrl)) {
+            Write-Fail "[SECURITY] RepoUrl no permitida (fail-closed): $RepoUrl (solo https://github.com/<owner en allowlist>/<repo>)"
+            $script:Errors.Add("RepoUrl no permitida: $RepoUrl") | Out-Null
+            $stagePrepFailed = $true
+        } elseif ($DryRun -and (-not $RepoUrl)) {
+            Write-Info "[DRY-RUN] Sin RepoUrl y sin KitPath: no hay stage real; se continúa."
+        } elseif (-not $DryRun) {
+            Write-Info "Sync-kit: clonando shallow del repo maestro desde $RepoUrl a $tempDir"
+            if (Test-Path -LiteralPath $tempDir) {
+                Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+            try {
+                $cloneOutput = git clone --depth 1 $RepoUrl $tempDir 2>&1
+                if ($LASTEXITCODE -ne 0 -and (Test-Path -LiteralPath $tempDir)) {
+                    Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+                }
+            } catch {
+                Write-Fail "Fallo el clon del repo maestro: $_"
+                $script:Errors.Add("Fallo el clon del repo maestro: $_") | Out-Null
+                $stagePrepFailed = $true
+            }
+        } else {
+            # DryRun sin KitPath: no clonar, solo reportar el plan.
+            Write-Info "[DRY-RUN] No se clona el maestro en dry-run (StageDir se deja vacío)."
+        }
+    }
+
+    if ($stagePrepFailed) {
+        Write-Fail "STAGE (F1) no completado; se aborta la sincronización."
+        return $false
+    }
+
     # d. Invoca cada capa activa como proceso hijo
     $resultLines = @()
-    $tempDir = Join-Path $env:TEMP "agents-sync-temp"
 
     # [036-T003-D1] Snapshoteo del conjunto inicial de .kit-backup/ ANTES de invocar
     # las capas (las capas crean backups durante la corrida). Este snapshot es la
@@ -340,17 +446,21 @@ function Main-sync-kit {
             $args += @("-InitialStateFile", $initialBackupFile)
         }
 
-        # Ejecutar el script de la capa como proceso hijo y capturar salida
-        $cmd = "& $($layer.Script) $args *>&1"
-        try {
-            $output = Invoke-Expression -Command $cmd 2>&1
-            if ($output) {
-                $resultLines += $output
+        # [SC-002-Defecto B] La capa github-extras (sync-github-extras.ps1) exige el
+        # parámetro obligatorio -Kind (ValidateSet rules|prompts|workflows|copilot).
+        # "todo" no es un valor válido, así que se invoca UNA VEZ POR CADA kind,
+        # recolectando la salida de cada invocación.
+        if ($layer.Name -eq "github-extras") {
+            foreach ($kind in @('rules','prompts','workflows','copilot')) {
+                WriteStep-Capa -LayerName $layer.Name -Kind $kind
+                $kindArgs = $args + @("-Kind", $kind)
+                $resultLines += @(Invoke-CapaHija -Layer $layer -ArgList $kindArgs)
             }
-        } catch {
-            Write-Warn "Capa $($layer.Name) falló con error: $_"
-            $script:Errors.Add("Capa $($layer.Name) falló: $_") | Out-Null
+            continue
         }
+
+        # Ejecutar el script de la capa como proceso hijo y capturar salida
+        $resultLines += @(Invoke-CapaHija -Layer $layer -ArgList $args)
     }
 
     # e. Ejecuta Show-ExecutionSummary mostrando WARNs y ERRORs contados
@@ -379,8 +489,39 @@ function Main-sync-kit {
     Write-Host "---------------------------------------------------------------"
     Write-Host " WARNs emitidos: $($uniqueWarns.Count) | ERRORs capturados: $($uniqueErrors.Count)"
 
+    # [SC-002-Defecto C - F4-VERIFY] Escribir manifiesto .kit-last-sync.json en el
+    # root del destino (si no es dry-run) con el resumen de la corrida: herramienta,
+    # commit del maestro, fecha, capas activas y líneas RESULT de las capas.
+    if (-not $DryRun) {
+        try {
+            $commit = ""
+            if ($tempDir -and (Test-Path -LiteralPath $tempDir)) {
+                $commitLine = git -C $tempDir rev-parse --short HEAD 2>$null
+                if ($commitLine) {
+                    $commit = (($commitLine | Select-Object -First 1) | Out-String).Trim()
+                }
+            }
+            if (-not $commit) { $commit = "desconocido" }
+            $manifest = [ordered]@{
+                tool    = "sync-kit"
+                commit  = $commit
+                date    = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
+                KitPath = if ($KitPath) { [IO.Path]::GetFullPath($KitPath) } else { "" }
+                layers  = @($activeLayers)
+                results = @($resultLines)
+            }
+            $manifestPath = Join-Path $RootPath ".kit-last-sync.json"
+            $manifest | ConvertTo-Json -Depth 5 | Out-File -FilePath $manifestPath -Encoding utf8 -Force
+            Write-OK "Manifiesto escrito: $manifestPath"
+        } catch {
+            Write-Warn "No se pudo escribir .kit-last-sync.json: $_"
+        }
+    }
+
     # f. Limpieza básica del temp
-    if (Test-Path $tempDir) {
+    # Guardrail [SC-002]: si se usó -KitPath, $tempDir apunta al checkout LOCAL del
+    # usuario (maestro) y NO debe borrarse. Solo se limpia el clon temporal.
+    if (-not $KitPath -and (Test-Path $tempDir)) {
         Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
     }
     if ($initialBackupFile -and (Test-Path -LiteralPath $initialBackupFile)) {
@@ -391,5 +532,5 @@ function Main-sync-kit {
 }
 
 # Ejecutar la función principal y salir con código de salida 0
-Main-sync-kit -RepoUrl $RepoUrl -RootPath $RootPath -OrphanAction $OrphanAction -DryRun:$DryRun -Force:$Force -KeepBackups $KeepBackups -NoPrune:$NoPrune
+Main-sync-kit -RepoUrl $RepoUrl -RootPath $RootPath -KitPath $KitPath -OrphanAction $OrphanAction -DryRun:$DryRun -Force:$Force -KeepBackups $KeepBackups -NoPrune:$NoPrune
 exit 0

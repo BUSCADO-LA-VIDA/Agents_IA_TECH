@@ -60,4 +60,4 @@
 ## Pendientes derivados
 1. T037-005: integrar la invocación en la fase F4-VERIFY de `sync-kit.ps1` (opcional).
 2. `tests/agents-parity.ps1` reporta divergencia preexistente en `Agent-SSD` entre `.github/` y `.opencode/` (archivos sin cambios locales): asignar al `plataformador`.
-3. Commit de los cambios de la spec 037 (no realizado; el script nunca commitea).
+3. Commit de los cambios de la spec 037: **realizado** el 2026-11-05 en `master` (`7689d03` feat script+spec+docs, `d0edd68` chore mode de `developer`, `16971e5` chore audit log). El script nunca commitea por sí mismo; el commit fue ordenado explícitamente por el usuario. Sin push.

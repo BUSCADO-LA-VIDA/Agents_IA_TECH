@@ -1,5 +1,6 @@
 ---
 tier: Implementador
+mode: all
 description: "Developer unificado - Implementa tareas backend, frontend, devops y QA con skills especializadas. Único agente que escribe código de aplicación. Usa playwright para validar en navegador."
 tools: [read, edit, terminal, execute]
 skills:

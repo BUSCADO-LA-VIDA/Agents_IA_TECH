@@ -7,3 +7,8 @@ feature.json
 
 # Per-machine extension config overrides.
 extensions/*/local-config.yml
+
+#-----------------------------------------------------------------------------
+# 4. Caches de herramientas del kit (graphify) - se regeneran con graphify update
+#-----------------------------------------------------------------------------
+graphify-out/*

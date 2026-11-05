@@ -1,11 +1,11 @@
 ﻿# Pendientes de implementación — Agents_IA_TECH
 
 ## Estado general del proyecto
-- **Última actualización:** 2026-11-04
-- **Fase actual:** post-implement (spec 036 lista para verificación de paridad y commit)
-- **Specs con tareas:** 18 (incl. 036) + 1 transversal
-- **Total de tareas inventariadas:** 243 (216 base + 27 de spec 036)
-- **Próxima tarea:** verificación de paridad maestro→destino de spec 036 (SC-002) + commit con gitflow + TRANS-001 (gate mecánico, pendiente de `pensador`).
+- **Última actualización:** 2026-11-05
+- **Fase actual:** post-implement (spec 036 lista para verificación de paridad y commit; spec 037 implementada y cerrada)
+- **Specs con tareas:** 19 (incl. 036 y 037) + 1 transversal
+- **Total de tareas inventariadas:** 251 (216 base + 27 de spec 036 + 8 de spec 037)
+- **Próxima tarea:** verificación de paridad maestro→destino de spec 036 (SC-002) + commit con gitflow + TRANS-001 (gate mecánico, pendiente de `pensador`); y decidir la integración opcional de spec 037 (T037-005) en el orquestador `sync-kit.ps1`.
 
 ## Sin asignar
 
@@ -34,6 +34,14 @@
 | 036-T052 | 036 | Agregar asserts de regresión D1-D5 | Agregar al menos 1 assert nuevo por defecto (D1-D5) en `tests/kit-sync-merge.ps1` o `tests/sync-layers.ps1`, sobre fixtures temporales, sin escribir en el repositorio. | `plataformador` | Cerrado | `plataformador` | Sí |
 | 036-T053 | 036 | Verificar dry-run reporta números concretos | El dry-run del orquestador reporte, para cada capa nueva, cuántos archivos cambiarían (número concreto, no "se sincronizarían") y no escriba ningún archivo. | `plataformador` | Cerrado | `plataformador` | Sí |
 | 036-T054 | 036 | Verificar frontera de escritura | Confirmar que ninguna corrida toca `Documentacion/<AppName>/`, `src/` ni `.opencode/config.json` (mtimes sin cambios antes/después). | `plataformador` | Cerrado | `plataformador` | Sí |
+| 037-T001 | 037 | Crear `scripts/sync-gitignore.ps1` | Catálogo de 6 bloques con detección por cabecera, exclusiones duras (`node_modules`, `.git`, `.venv`, `vendor`, caches, backups), selección por raíces de proyecto y parámetros `-Path`/`-Sets`/`-WhatIf`/`-RemoveBlock`/`-PruneRules`/`-OnlyExcluded`/`-AllGitignore`. | `developer` | Cerrado | `developer` | Sí |
+| 037-T002 | 037 | Crear `tests/sync-gitignore.Tests.ps1` | Contrato sin Pester con 14 asserts: existencia, catálogo completo, preservación del contenido propio, idempotencia, exclusiones, ausencia de `.gitignore`, reversión de formato nuevo y legacy, filtro por `-Sets`. Resultado `PASS=14 FAIL=0`. | `developer` | Cerrado | `developer` | Sí |
+| 037-T003 | 037 | Aplicar y verificar en el maestro | `.gitignore` raíz de `Agents_IA_TECH` con los bloques; segunda corrida = 0 cambios. | `developer` | Cerrado | `developer` | Sí |
+| 037-T004 | 037 | Aplicar y verificar en `Generator_IA_Projects` | 13 raíces de proyecto actualizadas (raíz + `Documentacion/` + 11 apps), 0 archivos de terceros; segunda corrida = 0 cambios. | `developer` | Cerrado | `developer` | Sí |
+| 037-T005 | 037 | Integrar invocación en `sync-kit.ps1` (F4-VERIFY) | Opcional y fuera de alcance de la spec 037; queda como backlog explícito. | `developer` | Pendiente | `developer` | No |
+| 037-T006 | 037 | Actualizar índice y pendientes | Sección 037 en `00-indice.md` y filas T037 en este archivo, más bitácora de la intervención. | `pensador` | Cerrado | `pensador` | Sí |
+| 037-T007 | 037 | Revertir overreach en rutas de terceros | 196 `.gitignore` de `vendor/`, `.venv/`, `.pytest_cache/`, `node_modules/`, `.git/` y backups del kit limpiados en el destino, incluidos restos huérfanos (`-PruneRules`). | `developer` | Cerrado | `developer` | Sí |
+| 037-T008 | 037 | Corregir regresión `*.log` | `*.log` habría ignorado `.bootstrap-audit.log` (versionado por gobernanza); se agregó `!.bootstrap-audit.log` y se refrescó el bloque en ambos repos. | `developer` | Cerrado | `developer` | Sí |
 | 013-T001 | 013 | Crear rama feature/ecc-integration | Rama git | `pensador` | Pendiente | `pensador` | No |
 | 020-T010 | 020 | Verificar lift preserva forma V2 | `scripts/sync/mcp/lift-opencode.ps1` debe preservar `mcp.servers` y `mcp.timeout` al fusionar contra un destino, y no reintroducir servidores sueltos bajo `mcp` (forma V1). Riesgo registrado en ADR-0010. | `plataformador` | Pendiente | `plataformador` | No |
 | 020-T011 | 020 | Decidir commit y replicacion de opencode.json | El archivo quedo sin commitear a pedido del usuario. Definir si entra al repo y si se propaga a los proyectos consumidores por `sync-kit-agents.ps1`. | `pensador` | Pendiente | `pensador` | No |

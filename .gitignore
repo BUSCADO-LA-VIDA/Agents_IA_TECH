@@ -47,3 +47,51 @@ opencode.json.backup.*
 # 034: backups que generan el bootstrap y el sync-kit (formato .bak-<timestamp>)
 opencode.json.bak-*
 AGENTS.md.bak-*
+
+#-----------------------------------------------------------------------------
+# 1. Dependencias y entornos virtuales (se reinstalan con el gestor de paquetes)
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+vendor/
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# 2. Artefactos de build (se regeneran con el build)
+dist/
+build/
+out/
+coverage/
+*.tsbuildinfo
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# 3. Backups y temporales del kit (se regeneran con bootstrap/sync)
+.kit-backup/
+.kit-backup-manual/
+.kit-sync-temp/
+opencode.json.bak-*
+AGENTS.md.bak-*
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# 6. Sistema y editor
+Thumbs.db
+.DS_Store
+.idea/
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# 5. Logs y temporales (no se versionan)
+*.log
+!.bootstrap-audit.log
+logs/
+tmp/
+temp/
+#-----------------------------------------------------------------------------

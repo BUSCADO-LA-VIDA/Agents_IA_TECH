@@ -10,3 +10,8 @@ lib/
 bin/
 # Blocklist local de dominio del proyecto (nunca versionar — contiene nombres de apps del usuario)
 local-domain-blocklist.txt
+
+#-----------------------------------------------------------------------------
+# 4. Caches de herramientas del kit (graphify) - se regeneran con graphify update
+#-----------------------------------------------------------------------------
+graphify-out/*

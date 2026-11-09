@@ -11,6 +11,71 @@
 
 ---
 
+## 🚀 Instalación rápida en un proyecto nuevo
+
+> **Resumen:** El kit se descarga **una vez** en tu máquina (como plantilla), y luego se **instala en cada proyecto** donde lo quieras usar. No se clona dentro del proyecto; se sincronizan solo los archivos transversales.
+
+### Opción A — Proyecto vacío (primera vez, sin código previo)
+
+```powershell
+# 1. Crear directorio del proyecto y entrar
+New-Item -ItemType Directory -Path "C:\Proyectos\MiProyecto" -Force
+cd C:\Proyectos\MiProyecto
+
+# 2. Descargar SOLO el instalador desde el repo maestro (sparse checkout)
+#    (usa Git Credential Manager para autenticar en repo privado)
+New-Item -ItemType Directory -Path "proyect_ext" -Force | Out-Null
+git clone --depth 1 --filter=blob:none --sparse https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH.git proyect_ext\agents-temp
+git -C proyect_ext\agents-temp sparse-checkout set --no-cone scripts/plataformador-bootstrap.ps1 sync-agents.ps1
+New-Item -ItemType Directory -Path "scripts" -Force | Out-Null
+Copy-Item "proyect_ext\agents-temp\scripts\plataformador-bootstrap.ps1" -Destination "scripts\plataformador-bootstrap.ps1" -Force
+Copy-Item "proyect_ext\agents-temp\sync-agents.ps1" -Destination "sync-agents.ps1" -Force
+Remove-Item proyect_ext\agents-temp -Recurse -Force
+
+# 3. Previsualizar (recomendado)
+.\scripts\plataformador-bootstrap.ps1 -DryRun
+
+# 4. Instalar el kit completo (estructura, MCPs, índices, spec-kit, apps)
+.\scripts\plataformador-bootstrap.ps1
+
+# 5. Clonar tu app en src/<AppName>
+git clone https://github.com/tu-org/tu-app.git src\TuApp
+
+# 6. Verificar: abre en VS Code → Copilot Chat → / → verás plan, tdd, security-review, etc.
+```
+
+> **Alternativa sin red (misma máquina):** si ya tienes el kit en `C:\Proyectos\Agents_IA_TECH`, solo copia los scripts:
+> ```powershell
+> Copy-Item "C:\Proyectos\Agents_IA_TECH\scripts\plataformador-bootstrap.ps1" -Destination "scripts\"
+> Copy-Item "C:\Proyectos\Agents_IA_TECH\sync-agents.ps1" -Destination "."
+> ```
+
+---
+
+### Opción B — Proyecto existente con código en la raíz (nivelar a `src/<App>`)
+
+```powershell
+# 1. Mismo paso 2 de arriba (descargar instalador)
+
+# 2. Instalar kit transversal (no toca src/ ni Documentacion/)
+.\scripts\plataformador-bootstrap.ps1
+
+# 3. Mover apps a src/ (script standalone, con confirmación obligatoria)
+.\scripts\relocate-apps-to-src.ps1 -AppDirs @("MiApp","OtraApp") -DryRun   # previsualizar
+.\scripts\relocate-apps-to-src.ps1 -AppDirs @("MiApp","OtraApp")              # mover
+```
+
+---
+
+### Opción C — Solo sincronizar el kit transversal (ya tienes estructura)
+
+```powershell
+.\sync-agents.ps1 -DryRun   # ver qué cambiaría
+.\sync-agents.ps1           # sincronizar
+```
+
+---
+
 ## ⚙️ Qué hace la instalación
 
 El kit es una **capa transversal portable** (no una aplicación): agentes, skills, prompts, reglas base, configuración de MCPs e índices. Se copia/sincroniza entre proyectos. La documentación y el código de cada aplicación viven fuera del kit y nunca se pisan.

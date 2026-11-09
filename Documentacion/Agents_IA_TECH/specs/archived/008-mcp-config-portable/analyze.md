@@ -149,7 +149,7 @@ El plan D7 pide confirmar que `.gitignore` cubre `.env.mcp` y `.opencode/config.
 #### `security-risk: SEC-04` — `opencode auth login` como mecanismo de secrets (🟠 MEDIA — validar asunción)
 **Descripción**: la spec asume (Assumptions) que `opencode auth login` ofrece memoria segura y que `{env:NVIDIA_API_KEY}` / `{env:DEEPINFRA_API_KEY}` se resuelven desde esa memoria. **Sin embargo**, el ADR-0006 establece que `{env:...}` se resuelve desde el **entorno del proceso**, no necesariamente desde el keychain de `opencode auth`. Si `opencode auth login` guarda en un keychain que **no** se exporta como variable de entorno del proceso, entonces `{env:NVIDIA_API_KEY}` podría seguir resolviéndose a string vacío → provider roto.
 
-**Impacto**: la asunción de la spec (que la eliminación de `.opencode/config.json` no rompe la resolución de `{env:...}` porque "se resuelven desde la memoria segura") **puede ser incorrecta**. Es una brecha entre "memoria segura de opencode" y "variables de entorno del proceso".
+**Impacto**: la asunción de la spec (que la eliminación de `.opencode/config.json` no rompe la resolución de `{env:...}` porque "se resuelven desde la memoria segura") **puede ser incorrecta**. Es una diferencia entre "memoria segura de opencode" y "variables de entorno del proceso".
 
 **Mitigación**: **validar en Fase 0 (Research)** cómo `opencode auth login` expone las keys al proceso (¿exporta variables de entorno? ¿las inyecta opencode al resolver `{env:...}`?). Si no las expone, la feature 008 debe documentar el mecanismo real (p. ej. setear las variables en el entorno del proceso, o usar el campo `environment` del provider). **No asumir** que la memoria segura resuelve `{env:...}` automáticamente.
 

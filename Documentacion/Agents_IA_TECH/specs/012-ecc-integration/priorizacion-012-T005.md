@@ -6,7 +6,7 @@
 
 ## Criterios de evaluación
 
-- **Impacto:** Capacidad de cerrar brecha operativa / seguridad / DX. Escala: Muy Alto / Alto / Medio / Bajo
+- **Impacto:** Capacidad de cubrir un faltante operativo, de seguridad o de DX. Escala: Muy Alto / Alto / Medio / Bajo
 - **Riesgo:** Complejidad de integración, duplicación de orquestador, acoplamiento, superficie de seguridad. Escala: Bajo / Medio / Alto / Crítico
 - **Esfuerzo:** Tiempo de adaptación, namespace, pruebas. Escala: Bajo / Medio / Alto
 

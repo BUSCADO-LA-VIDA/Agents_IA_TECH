@@ -33,6 +33,7 @@ Las definiciones de agentes son **simetricas en los dos harnesses**: `.github/ag
 - **`.specify/`**: especifico de cada proyecto (tipicamente `<proyecto>/.specify/memory/constitution.md`).
 - **`Documentacion/<AppName>/`**: propia de cada app y **nunca se copia** entre proyectos. El kit transversal (`.github/`, `.opencode/`, `.doc_agents/`) si se sincroniza, mediante `sync-agents.ps1`.
 - **`agents/`**: espejo de agente compartido entre harnesses.
+- **Configuracion de arneses generada (v2.1.0)**: `opencode.json` y `.vscode/mcp.json` **no se versionan**. Se generan desde `dependencias-manifest.yml` + `.opencode/mcp-state.json` con una plantilla versionada y un generador por arnes; la paridad entre ambos se verifica, no se asume (ADR-0014). La forma canonica de los servidores es `mcp.servers.<nombre>` (ADR-0010) y una diferencia de capacidad no declarada es FAIL.
 
 ### V. Observability and Monitoring
 All agent interactions, decisions, and errors must be fully observable. Structured logging, tracing, and monitoring are non-negotiable. Every agent must emit traceable events for its lifecycle events, decisions, and errors.
@@ -96,9 +97,32 @@ Ninguna clonacion, descarga o build de dependencia externa ocurre sin estos cont
 - **Allowlist de origenes**: solo URLs de la allowlist, con verificacion de firma y checksum
 - **Clone superficial**: `--depth=1`, `--no-recurse-submodules`
 - **Limites**: tamano maximo de descarga, profundidad maxima y timeout estricto con kill en exceso
-- **Containment**: realpath verificado, sin symlinks, sin `..`, salida obligatoria de `<root>/proyect_ext/`
+- **Containment**: realpath verificado, sin symlinks, sin `..`, y salida obligatoria del directorio de dependencias externas declarado en el manifest, **fuera de la raiz del workspace** (ADR-0014). Ningun archivo del clon se copia al kit por la via de actualizacion: la integracion es controlada (spec 039)
 - **Cero secrets en el manifest**: las credenciales van por variables de entorno o secret manager, nunca en el YAML
 - **Sanitizacion del output de build**: se filtran tokens de stdout/stderr antes de loguearlos
+
+#### Aprovisionamiento por tipo y verificacion declaracion-contra-realidad (v2.1.0)
+
+Toda dependencia externa declara `tipo_provisionamiento`, y su estado se verifica contra la realidad, no contra otra declaracion. **Capacidad declarada no es capacidad instalada.**
+
+| Tipo | Que es | Autoridad de version |
+|---|---|---|
+| `kit-integrado` | Codigo de terceros que se integra de forma controlada dentro del kit | branch head (`git ls-remote`) |
+| `kit-fuente` | Codigo de terceros que se consume como fuente o CLI | branch head (`git ls-remote`) |
+| `mcp-workspace` | Servidor MCP instalado por workspace | registro del gestor de paquetes |
+| `mcp-build-local` | Servidor MCP compilado desde un clon local | release + artefacto compilado |
+| `entorno` | Runtime o herramienta base | gestor del sistema |
+
+Reglas no negociables:
+
+1. Tipo ausente o desconocido es FAIL; no se infiere por ruta ni por extension.
+2. `git status` no es sonda de actualizacion: se consulta el remoto o el registro.
+3. El estado por workspace vive en `.opencode/mcp-state.json`, no versionado, con escritura atomica.
+4. Los verbos estan separados: `validate` (solo lectura, exit code), `apply` (explicito, fail-open a `degraded`), `generate` (escritura de configuracion).
+5. `generate` emite solo entradas cuyo binario resuelve en esta maquina; nunca afirma una capacidad inexistente.
+6. La configuracion de arneses se genera desde la plantilla y no se versiona; ver Art. IV.
+7. Toda diferencia verificada entre lo que el kit declara o asume y lo que el arnes confirma es una **inconsistencia**, y se declara en `capacidades-por-harness.md` con estado de la capacidad, fuente, version, prueba y `spec_responsable`. Inconsistencia no declarada es FAIL; fila sin `spec_responsable` es WARN.
+8. Una spec declara las inconsistencias que encuentra; no las corrige. Cada una se atiende en su propia spec.
 
 ### Beneficios de esta Estructura
 - **Reproducibilidad**: Al clonar el repositorio principal, el manifest indica exactamente qué proyectos externos descargar
@@ -240,7 +264,18 @@ Un cambio de principio exige ademas **ADR** en `Documentacion/<AppName>/arquitec
 
 Este documento se genera y revisa mediante el **Constitution Wizard**, que funciona como **cuestionario interactivo**: el agente pregunta bloque por bloque, el usuario responde, y la constitution se arma con esas respuestas.
 
-**Version**: 2.0.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-10-03
+**Version**: 2.1.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-11-07
+
+### Registro de cambios — v2.1.0 (2026-11-07)
+
+**MINOR** — ADR-0014. Cuatro cambios:
+
+1. **Art. IV**: la configuracion de arneses (`opencode.json`, `.vscode/mcp.json`) es **generada y no versionada**; se versionan plantilla y generador, y la paridad se verifica.
+2. **Art. VI**: el containment de clones exige salida del directorio de dependencias externas **fuera de la raiz del workspace**; actualizar un clon no integra archivos.
+3. **Art. VI**: seccion nueva de aprovisionamiento por tipo, con cinco tipos, autoridad de version por tipo, verbos separados y la regla "capacidad declarada no es capacidad instalada".
+4. **Art. VI**: toda diferencia verificada entre lo declarado y lo real se registra con fuente, version, prueba y `spec_responsable`; una spec declara inconsistencias, no las corrige.
+
+**Sin cambio de principios**: no se elimina ni redefine ningun articulo; los nueve siguen vigentes. Por eso el incremento es MINOR y no MAJOR.
 
 ### Registro de cambios — v2.0.0 (2026-10-03)
 

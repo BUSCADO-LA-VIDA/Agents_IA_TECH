@@ -1,6 +1,6 @@
 # Índice de ADRs — Agents_IA_TECH
 
-> **Última actualización**: 2026-10-29  
+> **Última actualización**: 2026-11-07  
 > **Mantenido por**: `arquitecto` (fase Analyze de cada spec)
 
 ---
@@ -22,6 +22,7 @@
 | **ADR-0011** | **Public Docs Routing (docs públicas a `src/<App>/docs/`, README públicos a `src/<App>/README*.md`)** | **Aceptado (MADR incompleto)** | **2026-10-27** | **`028-public-docs-routing`** |
 | **ADR-0012** | **Comparación de transversales por EOL normalizado con veredicto de tres estados (`Equal` / `EolOnly` / `Different`)** | **Aceptado** | **2026-10-27** | **`029-sync-eol-y-force-real`** |
 | **ADR-0013** | **Agentes como orquestadores delgados (capacidades de procedimiento a skills) y whitelist de escritura resuelta por `(tier ∩ capa, tipo de proyecto)`** | **Aceptado** | **2026-10-29** | **`030-whitelist-contextual-por-tipo-proyecto`** |
+| **ADR-0014** | **Configuración de arneses generada (plantilla + generador dual) y aprovisionamiento externo por tipo con verificación declaración-contra-realidad** | **Aceptado** | **2026-11-07** | **`038-provisionamiento-externo-y-config-generada`** |
 
 > **Estado real de ADR-0011**: el archivo existe y su decisión está aceptada, pero mide 453 bytes / 16 líneas y le faltan las secciones Alternativas consideradas, Guardrails, Spec linking, Diagramas y Plan de implementación que exige la convención de este índice. Se registra como hallazgo abierto del `arquitecto` (analyze de la spec 029, sección 11.3); no se corrigió en esa fase porque su contenido pertenece a la spec 028, ya cerrada.
 >
@@ -65,6 +66,7 @@
 | **028** | **public-docs-routing** | **ADR-0011** |
 | **029** | **sync-eol-y-force-real** | **ADR-0012** |
 | **030** | **whitelist-contextual-por-tipo-proyecto** | **ADR-0013** |
+| **038** | **provisionamiento-externo-y-config-generada** | **ADR-0014** |
 
 ---
 

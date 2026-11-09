@@ -133,7 +133,7 @@ Cada FR del `spec.md` cruzado contra el cambio `C-NN` de `plan.md` y las tasks d
 | **H-10** | 21 skills duplicadas entre harnesses contradicen Art. IV | Media | ✅ **Cubierto** — T048 resuelve la duplicación | T048 |
 | **H-11** | `speckit-implement` vs `speckit-constitution` en la prosa de `Agent-SSD` | Media | ✅ **Cubierto** — T049 alinea la lista | T049 |
 
-**Síntesis**: 9 de 11 huecos quedaron cubiertos por task; H-07 quedó parcialmente cubierto (T047 + esta convergencia); H-08 es la única brecha de proceso que persiste (FR-11 sin `C-NN`, aunque sí tiene task).
+**Síntesis**: 9 de 11 huecos quedaron cubiertos por task; H-07 quedó parcialmente cubierto (T047 + esta convergencia); H-08 es el único pendiente de proceso que persiste (FR-11 sin `C-NN`, aunque sí tiene task).
 
 ### 4.2 Amenazas de `threat-model.md` (SR-01..SR-10)
 

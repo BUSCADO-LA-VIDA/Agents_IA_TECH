@@ -139,7 +139,7 @@ NO toca (crea solo si no existe):
 | `speckit-por-app` | ✅ Definida | Resolución de app activa `Resolve-ActiveApp` (`-App` > `cwd` > `root`); `.specify` activo + `Documentacion/<AppName>/specs/` por app. Nunca inferencia ambigua. |
 | `huerfanos` | ✅ Definida | Detección en `Sync-TransversalKit` + pregunta borrar/conservar; default seguro conservar con respaldo `revisar_manualmente\yyyymmdd\`; nunca auto-borrar ni tocar `Documentacion/<AppName>/` |
 | `relocate` | 🟡 Pendiente de script | `scripts/relocate-apps-to-src.ps1` (standalone): reubicación a `src\<App>` con confirmación siempre obligatoria; el script crea la estructura al aprobar; `.venv` se reporta "a recrear". Tarea `[RELOCATE]` en curso. |
-| `verificacion-pre-post` | ✅ Definida | El agente propone antes (auditoría + brecha + preguntas) y verifica después (esperado vs real, imports/paths, tests sugeridos). |
+| `verificacion-pre-post` | ✅ Definida | El agente propone antes (auditoría + faltantes + preguntas) y verifica después (esperado vs real, imports/paths, tests sugeridos). |
 | `optimizacion-ia` | ✅ Definida | El script hace el trabajo pesado sin IA; el agente solo propone y verifica (MCPs primero, `-DryRun` previo, no re-analizar reportes). |
 
 ---

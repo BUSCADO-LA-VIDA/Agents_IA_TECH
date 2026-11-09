@@ -1,8 +1,8 @@
 ---
-agent: agent
+name: plan
 description: Create a phased implementation plan before writing any code
+disable-model-invocation: true
 ---
-
 # Implementation Planner
 
 Before writing any code for this feature/task, produce a structured plan.

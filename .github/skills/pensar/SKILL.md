@@ -1,7 +1,7 @@
 ---
+name: pensar
 description: "🧠 Pensador — Evalúa dudas de diseño, documenta, y pregunta si querés implementar"
-argumentHint: "<tu duda o pregunta de diseño>"
-agent: pensador
+disable-model-invocation: true
 ---
 El usuario tiene una duda sobre cómo debería funcionar algo o qué enfoque es el correcto. Tu trabajo como Pensador:
 

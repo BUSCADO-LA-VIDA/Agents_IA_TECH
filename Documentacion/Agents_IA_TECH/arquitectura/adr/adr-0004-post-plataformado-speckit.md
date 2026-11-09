@@ -10,7 +10,7 @@
 
 ## Contexto y problema
 
-El bootstrap (`plataformador-bootstrap.ps1`, ADR-0003) plataforma un proyecto y termina con "Flujo del instalador/actualizador único completado". Sin embargo quedan **cuatro brechas sin resolver**:
+El bootstrap (`plataformador-bootstrap.ps1`, ADR-0003) plataforma un proyecto y termina con "Flujo del instalador/actualizador único completado". Sin embargo quedan **cuatro faltantes sin resolver**:
 
 1. **No hay puente hacia speckit.** Una vez plataformado, no existe un flujo que lleve el proyecto al pipeline speckit (`specify → plan → tasks → analyze → converge → implement`) según su estado. No hay detección de si es un proyecto nuevo, uno con documentación previa a migrar, o uno con código sin docs.
 2. **Índices stale.** Los MCPs (context-mode, codebase-memory) quedan indexados al momento del bootstrap. Los cambios posteriores a docs/specs no re-indexan → los índices se vuelven obsoletos y el contexto que la IA consulta no refleja el estado real.
@@ -72,7 +72,7 @@ Si la re-indexación automática falla, se reporta como **WARN** en el cuadro re
 
 ### Positivas
 
-- **Puente completo**: el flujo post-plataformado → speckit cierra la brecha entre el bootstrap y el pipeline; el `pensador` guía cualquier proyecto según su estado real.
+- **Puente completo**: el flujo post-plataformado → speckit cubre lo que faltaba entre el bootstrap y el pipeline; el `pensador` guía cualquier proyecto según su estado real.
 - **Contexto siempre fresco**: la re-indexación automática + memoria auto/manual eliminan los índices stale.
 - **Constitution por proyecto**: cada app tiene su constitution específica, no la plantilla genérica; el pipeline speckit se ejecuta sobre una base válida.
 - **Preservación de originales**: los documentos previos se mantienen como fuente de verdad (requisito explícito del usuario), con vista markitdown indexada para la IA.

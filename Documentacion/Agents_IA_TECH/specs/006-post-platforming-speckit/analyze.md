@@ -11,7 +11,7 @@
 
 La spec `[POST-PLATAFORMADO]` define el **puente que faltaba** entre el bootstrap (`plataformador-bootstrap.ps1`, ADR-0003) y el pipeline speckit. No agrega código de aplicación: es un **flujo de orquestación del `pensador`** que normaliza el estado de cualquier proyecto recién plataformado hacia el ciclo `specify → plan → tasks → analyze → converge → implement`.
 
-Arquitectónicamente el feature resuelve cuatro brechas detectadas en modo real:
+Arquitectónicamente el feature resuelve cuatro faltantes detectados en modo real:
 
 1. **Sin puente post-bootstrap** — el bootstrap termina en "Flujo completado" pero no hay camino hacia speckit. La detección de escenario (A/B/C) se convierte en el enrutador de entrada.
 2. **Índices stale** — los MCPs (context-mode, codebase-memory) quedan indexados al momento del bootstrap; los cambios posteriores de docs/specs no re-indexan. Se introduce re-indexación automática al aprobar artefactos + memoria auto/manual con regla de frescura diaria.

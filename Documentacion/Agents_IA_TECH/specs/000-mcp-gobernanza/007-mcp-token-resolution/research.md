@@ -49,7 +49,7 @@ La interpolación `{env:VAR}` sustituye variables del **entorno del proceso** (s
 
 **Decision**: Sí, es un riesgo real (RF-06 punto 4). Mitigar con `-SkipSync` en el kit y tratando `opencode.json` en `Sync-TransversalKit`.
 
-**Rationale**: Verificado en `Sync-TransversalKit` (L1801-1900+): `$transversalFiles` (L1851-1857) incluye `opencode.json`, y `$transversalItems` (L1873-1883) lo copia del clon a `$RootPath` (`Type = "File"`). Esto pisa lo resuelto en runtime. El script `plataformador-bootstrap.ps1` **NO** está en esa lista (brecha que cubre `Update-Self`).
+**Rationale**: Verificado en `Sync-TransversalKit` (L1801-1900+): `$transversalFiles` (L1851-1857) incluye `opencode.json`, y `$transversalItems` (L1873-1883) lo copia del clon a `$RootPath` (`Type = "File"`). Esto pisa lo resuelto en runtime. El script `plataformador-bootstrap.ps1` **NO** está en esa lista (faltante que cubre `Update-Self`).
 
 **Alternatives considered**:
 1. Excluir `opencode.json` del sync — rompe la propagación de la plantilla base. 

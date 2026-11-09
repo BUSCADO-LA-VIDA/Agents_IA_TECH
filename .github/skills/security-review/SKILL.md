@@ -1,8 +1,8 @@
 ---
-agent: agent
-description: Deep security analysis — OWASP Top 10, secrets, auth, injection, and dependency risks
+name: security-review
+description: "Deep security analysis — OWASP Top 10, secrets, auth, injection, and dependency risks"
+disable-model-invocation: true
 ---
-
 # Security Review
 
 Perform a thorough security analysis of the selected code or current branch changes.

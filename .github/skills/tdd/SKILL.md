@@ -1,8 +1,8 @@
 ---
-agent: agent
-description: Test-driven development cycle — write the test first, then implement
+name: tdd
+description: "Test-driven development cycle — write the test first, then implement"
+disable-model-invocation: true
 ---
-
 # TDD Workflow
 
 Follow the RED → GREEN → IMPROVE cycle strictly. Do not write implementation code before a failing test exists.

@@ -1,11 +1,11 @@
 ﻿# Pendientes de implementación — Agents_IA_TECH
 
 ## Estado general del proyecto
-- **Última actualización:** 2026-11-05
-- **Fase actual:** post-implement (spec 036 lista para verificación de paridad y commit; spec 037 implementada y cerrada)
-- **Specs con tareas:** 19 (incl. 036 y 037) + 1 transversal
-- **Total de tareas inventariadas:** 251 (216 base + 27 de spec 036 + 8 de spec 037)
-- **Próxima tarea:** verificación de paridad maestro→destino de spec 036 (SC-002) + commit con gitflow + TRANS-001 (gate mecánico, pendiente de `pensador`); y decidir la integración opcional de spec 037 (T037-005) en el orquestador `sync-kit.ps1`.
+- **Última actualización:** 2026-11-07
+- **Fase actual:** spec 038 en fase de especificación (`spec.md` + checklist escritos, pendiente aprobación para `plan.md`); spec 036 pendiente de verificación de paridad y commit; spec 037 implementada y cerrada
+- **Specs con tareas:** 19 (incl. 036 y 037) + 1 transversal. La spec 038 aún no tiene `tasks.md`
+- **Total de tareas inventariadas:** 251 (216 base + 27 de spec 036 + 8 de spec 037); las tareas de 038 se suman al aprobarse `tasks.md`
+- **Próxima tarea:** `plataformador` aplica la enmienda v2.1.0 desde `arquitectura/constitution-v2.1.0-enmienda.md` (el tier documental tiene `edit` denegado sobre `.specify/`); después `Agent-SSD` ejecuta `speckit-plan` de 038. En paralelo sigue abierta la verificación de paridad maestro→destino de spec 036 (SC-002) + commit con gitflow + TRANS-001
 
 ## Sin asignar
 
@@ -61,6 +61,9 @@
 
 | ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a | Aprobación del plan |
 |----|------|-------|-------------|-------------|--------|------------|---------------------|
+| 038-DOC-03 | 038 | Aplicar la enmienda MINOR de la constitution (v2.0.0 → v2.1.0) | Texto exacto redactado en `arquitectura/constitution-v2.1.0-enmienda.md` (4 parches: Art. IV, Art. VI containment, sección nueva de aprovisionamiento por tipo, versión y registro). **Aplicada y verificada**: `.specify/memory/constitution.md` versión 2.1.0, Last Amended 2026-11-07, parches presentes, vocabulario "brecha" reemplazado en `.doc_agents/capacidad-base.md` y `scripts/plataformador-bootstrap.ps1`. Replicación nivel 2 verificada. | `plataformador` | Cerrado | `plataformador` | Sí |
+| 038-DOC-04 | 038 | Aclarar Art. VI Containment con proyect_ext/ | El usuario requiere que la descarga de proyectos externos se realice en `proyect_ext/` y que la integración al KIT sea controlada. Actualizar Art. VI Containment en `.specify/memory/constitution.md` para explicitar `proyect_ext/` como directorio de dependencias externas declarado en el manifest. Los clones se descargan en `proyect_ext/` cuando sea necesario y desde allí se integran al KIT de forma controlada. Ningún archivo del clon se copia al KIT por la vía de actualización. Mantener uso de término “brecha” únicamente en contextos completos de seguridad, por ejemplo “brecha de seguridad”. | `developer` | Pendiente | `developer` | No |
+| 038-PLAN-01 | 038 | Ejecutar `speckit-plan` de 038 | Generar `plan.md` desde la `spec.md` aprobada: contratos de `validate`/`apply`/`generate`, esquema de `dependencias-manifest.yml` y `.opencode/mcp-state.json`, estrategia de paridad de arneses y migración de la forma plana `mcp.<nombre>`. | `Agent-SSD` | Pendiente | `Agent-SSD` | No |
 | 000-mcp-semgrep-integracion-T01 | 000‑mcp‑semgrep‑integracion | T01 Habilitar MCP en plantilla | Habilitar MCP semgrep en plantilla con configuración stdio. Verificado 2026‑10‑10: entrada stdio + `{env:SEMGREP_MCP_CMD}` + resolver + WARN degradado en vivo. | `documentador` | `[x]` | `documentador` | Sí |
 | 000-mcp-semgrep-integracion-T02 | 000-mcp-semgrep-integracion | T02 Instalar binario y registrar ruta | CLI semgrep 1.180.0 + servidor `semgrep mcp`; pivot por deprecacion upstream (ADR-0009). | `plataformador` | `[x]` | `plataformador` | Si |
 | 000-mcp-semgrep-integracion-T03 | 000-mcp-semgrep-integracion | T03 Fallback fail-open | WARN si binario ausente. | `plataformador` | `[x]` | `plataformador` | Si |
@@ -245,6 +248,9 @@
 
 | ID | Spec | Tarea | Descripción | Responsable | Estado | Asignado a |
 |----|------|-------|-------------|-------------|--------|------------|
+| 038-DOC-01 | 038 | Redactar `spec.md` de aprovisionamiento externo y configuración generada | `spec.md` con problema y evidencia verificada, glosario de 5 tipos, 5 historias de usuario con prueba independiente, FR-01..FR-17, NFR-01..NFR-08, 12 criterios de éxito y 12 casos borde. Sin placeholders. | `pensador` | Cerrado | `pensador` |
+| 038-DOC-02 | 038 | Redactar `checklists/requirements.md` y validar la spec | 25 ítems (calidad de contenido, completitud, coherencia con el proyecto), todos conformes; sin bloqueantes salvo la dependencia de gobernanza declarada. | `pensador` | Cerrado | `pensador` |
+| 038-DOC-04 | 038 | Redactar ADR-0014 y la propuesta de enmienda constitucional | ADR aceptado en `arquitectura/adr/adr-0014-configuracion-generada-y-provisionamiento-por-tipo.md` con R1–R12, 4 alternativas, guardrails, diagrama, spec linking y plan. Índice de ADRs actualizado (fila 0014 + referencia cruzada 038). Enmienda v2.1.0 redactada en `arquitectura/constitution-v2.1.0-enmienda.md`. Redactado por `pensador` por indisponibilidad de `arquitecto` en el runtime; su revisión corresponde a la fase `analyze`. | `arquitecto` | Cerrado | `pensador` |
 | 012-T011 | 012 | Congelar spec | ... | `pensador` | Cerrado | `pensador` |
 | 028-T01 | 028 | Crear ADR-0011 public docs routing | ADR-0011 aceptada con routing src/<App>/docs/ y README*.md | `arquitecto` | Cerrado | `arquitecto` |
 | 028-T02 | 028 | Actualizar Constitution Art.VII | Whitelist actualizada con routing docs públicas | `pensador` | Cerrado | `pensador` |
@@ -263,6 +269,23 @@
 | 026-T11 | 026 | Verificar compliance Constitución y sincronía harnesses | QA compliance Constitución y sincronía | `developer` | Cerrado | `developer` |
 | 026-T12 | 026 | Cerrar spec 026 en pendientes-implementacion.md | Cierre formal spec 026 | `pensador` | Cerrado | `pensador` |
 
+
+## Backlog (futuro, sin spec)
+
+> Regla R1: lo que se desea para el futuro vive aquí y se refina por Speckit cuando corresponda. No entra a ningún `spec.md`.
+
+| ID | Ítem | Origen / motivo | Estado |
+|----|------|-----------------|--------|
+| B-001 | **Evaluación con respuestas reales del LLM** | Decisión del usuario (2026-11-07): será la próxima spec después de 038. Medir el comportamiento de los agentes con respuestas reales, no solo la estructura de sus archivos | Pendiente |
+| B-002 | **Spec 039 — Integración asistida de `kit-integrado`** | La integración de ECC no es copia: es integración asistida por IA con inventario diferencial, evaluación caso por caso, libro mayor, lista negra de importación y verificación. Separada de 038 por tener gobernanza y threat model propios | Pendiente |
+| B-003 | Versionado semántico por release tag | Decisión del usuario (2026-11-07): hoy no agrega valor frente a branch head. Se implementa junto con el instalador del KIT; incluye tags firmados y comparación por release | Pendiente |
+| B-004 | Instalador único del KIT | Ya existe el borrador `plataforma-bootstrap-instalador-unico`; el versionado semántico (B-003) y la distribución de dependencias se cuelgan de ese trabajo | Pendiente |
+| B-005 | **Spec 040 — Delegación anidada en OpenCode** | `subagent_depth` default 1; issue #8114 registrado en el spec archivado `018-pensador-delegation-fix`: en ciertas versiones ningún subagente puede invocar otro. El kit asume delegación de un solo nivel (Pensador → todos). Es límite del tool: corregirlo exige cambiar el modelo de delegación, no la configuración del arnés. Declarado en 038 como `soportado-con-limite` | Pendiente |
+| B-006 | **Spec 041 — Hooks de sesión en `.github/hooks/`** | Capacidad declarada y nunca instalada: `MCPs/context-mode.md` §4.2 documenta `.github/hooks/context-mode.json`, `specs/012-ecc-integration/matriz-comparacion.md` dice "Sin hooks de sesión" y el directorio no existe en disco. Instalarlos cambia gobernanza, permisos y contrato de sesión. Declarado en 038 como `no-soportado` en el kit | Pendiente |
+| B-007 | **Spec 042 — Superficie de subagentes en el runtime** | El `subagent` de esta sesión expone solo `explore` y `general` (bitácora del 2026-11-05). Es la superficie del tool en este runtime, no el modelo de agentes: en OpenCode real `developer` sí es delegable porque `mode` sin declarar vale `all`. Declarado en 038 como `equivalente-distinto` | Pendiente |
+| B-008 | **Spec 043 — Paridad de frontmatter con Copilot** | Copilot no tiene `mode: primary/subagent` ni `permission` con globs: la paridad de frontmatter es imposible. Exige definir la paridad a nivel de capacidad y reescribir el frontmatter de los 14 agentes. Declarado en 038 como `equivalente-distinto` / `no-soportado` por clave | Pendiente |
+
+**Criterio de corte (decisión del usuario, 2026-11-07)**: cada inconsistencia se atiende en una spec propia, con un error de diseño o de implementación por spec. 038 declara las cuatro en la matriz y las valida; no modifica ninguna.
 
 ## Deuda tecnica abierta
 

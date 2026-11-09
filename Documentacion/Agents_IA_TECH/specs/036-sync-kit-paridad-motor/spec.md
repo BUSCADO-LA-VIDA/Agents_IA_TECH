@@ -77,7 +77,7 @@ La arquitectura objetivo **no** es "un motor nuevo que reemplace a uno viejo". E
 **Diagnóstico**: la división en capas se ejecutó **a medias**. La duplicación actual no es "motor
 viejo contra motor nuevo", sino **orquestador desconectado** (`sync-kit-agents.ps1`, correcto en
 forma pero sin invocador) y **lógica de dominio viviendo dentro del script que el bootstrap sí
-llama** (`sync-kit.ps1`). Esta spec cierra esa brecha en la dirección que el usuario pidió: el
+llama** (`sync-kit.ps1`). Esta spec completa esa división pendiente en la dirección que el usuario pidió: el
 orquestador es `sync-kit.ps1`, las capas se invocan desde ahí, y todo lo que hoy es función interna
 del orquestador se extrae a su script de dominio.
 

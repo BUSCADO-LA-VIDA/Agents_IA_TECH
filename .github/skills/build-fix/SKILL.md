@@ -1,8 +1,8 @@
 ---
-agent: agent
-description: Systematically diagnose and fix build errors, type errors, or failing CI
+name: build-fix
+description: "Systematically diagnose and fix build errors, type errors, or failing CI"
+disable-model-invocation: true
 ---
-
 # Build Error Resolution
 
 Work through the error systematically. Fix root causes — do not suppress warnings or skip checks.

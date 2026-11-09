@@ -1,8 +1,8 @@
 ---
-agent: agent
-description: Clean up dead code, reduce duplication, and simplify structure without changing behavior
+name: refactor
+description: "Clean up dead code, reduce duplication, and simplify structure without changing behavior"
+disable-model-invocation: true
 ---
-
 # Refactor & Cleanup
 
 Improve the internal structure of the selected code without changing its observable behavior. All tests must pass before and after.

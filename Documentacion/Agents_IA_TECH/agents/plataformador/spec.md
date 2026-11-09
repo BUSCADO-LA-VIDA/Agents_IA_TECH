@@ -12,7 +12,7 @@
 3. Resolver la app activa (`-App` > `cwd` > `root`) — nunca inferir de forma ambigua
 4. Auditar proyecto actual contra capacidad-base (archivos, agentes, docs, skills, MCP, apps fuera de `src\`, huérfanos)
 5. **Si proyecto nuevo/sin Documentacion/ → preguntar datos**: nombre, stack, idioma, rama principal, etc.
-6. Generar informe de brecha (qué falta, qué sobra, qué difiere — incluye app activa, huérfanos y relocate pendiente)
+6. Generar informe de faltantes (qué falta, qué sobra, qué difiere — incluye app activa, huérfanos y relocate pendiente)
 7. Proponer nivelación y **preguntar antes de ejecutar** (qué script, con qué flags; relocate exige confirmación sin bypass)
 8. Delegar la mecánica en el script aprobado (`-DryRun` primero)
 9. **Verificar después**: archivos esperados vs reales, imports/paths/configs evidentes, tests sugeridos
@@ -115,7 +115,7 @@ Archivos que existen en local (`.github/`, `.opencode/`, `.doc_agents/`) pero ya
 
 ## Relocate (reubicación a `src\<App>`)
 
-Lo ejecuta **`scripts/relocate-apps-to-src.ps1`** (standalone, separado del bootstrap hasta validación OK). **Confirmación siempre obligatoria, sin bypass** (`[S]/[N]/[T]/[C]` interactivo; no-interactivo no mueve; `-DryRun` previsualiza). **El script crea la estructura al aprobar**: `src\<App>`, `.specify` por app, `Documentacion/<App>/specs|adr|bitacoras`. `.venv` se mueve pero se reporta "a recrear" (paths absolutos rotos). `proyect_ext/` no se mueve. El agente **propone antes** (brecha + pre-chequeos + preguntas) y **verifica después** (esperado vs real, imports/paths/configs, tests sugeridos, rollback documentado). Si el script aún no existe: registrar pendiente `[RELOCATE]`, no improvisar.
+Lo ejecuta **`scripts/relocate-apps-to-src.ps1`** (standalone, separado del bootstrap hasta validación OK). **Confirmación siempre obligatoria, sin bypass** (`[S]/[N]/[T]/[C]` interactivo; no-interactivo no mueve; `-DryRun` previsualiza). **El script crea la estructura al aprobar**: `src\<App>`, `.specify` por app, `Documentacion/<App>/specs|adr|bitacoras`. `.venv` se mueve pero se reporta "a recrear" (paths absolutos rotos). `proyect_ext/` no se mueve. El agente **propone antes** (faltantes + pre-chequeos + preguntas) y **verifica después** (esperado vs real, imports/paths/configs, tests sugeridos, rollback documentado). Si el script aún no existe: registrar pendiente `[RELOCATE]`, no improvisar.
 
 ## Regla de optimización de IA (obligatoria)
 

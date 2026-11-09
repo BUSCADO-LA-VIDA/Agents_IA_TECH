@@ -1929,7 +1929,7 @@ function Reload-ProjectWindow {
 
 # [SELF-UPDATE] ADR-0005 relacionado: el bootstrap se auto-actualiza desde el maestro
 # antes de ejecutarse (fail-open, auto-omitido en el checkout maestro). El sync
-# del paso 3 actualiza el kit transversal pero NO este script; aquí se corrige esa brecha.
+# del paso 3 actualiza el kit transversal pero NO este script; aquí se cubre esa omisión.
 function Update-Self {
     param(
         [string]$RootPath = "",

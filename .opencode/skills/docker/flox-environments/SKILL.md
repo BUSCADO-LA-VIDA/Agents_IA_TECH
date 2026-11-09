@@ -324,9 +324,9 @@ common = """
 ### Absolute Paths
 
 ```toml
-# BAD — breaks on other machines
+# BAD — breaks on other machines (use generic placeholder, not literal paths)
 [vars]
-PROJECT_DIR = "/home/alice/projects/myapp"
+PROJECT_DIR = "/path/to/your/project"
 
 # GOOD — use Flox environment variables
 [vars]

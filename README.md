@@ -18,19 +18,27 @@
 ### Opción A — Proyecto vacío (primera vez, sin código previo)
 
 ```powershell
-# 1. Crear directorio del proyecto y entrar
-New-Item -ItemType Directory -Path "C:\Proyectos\MiProyecto" -Force
-cd C:\Proyectos\MiProyecto
+# 1. Crear directorio del proyecto y entrar (ajusta la ruta a tu workspace)
+$ProjectRoot = ".\MiProyecto"   # <- cambia esto a tu ruta (relativa o absoluta)
+New-Item -ItemType Directory -Path $ProjectRoot -Force
+cd $ProjectRoot
 
-# 2. Descargar SOLO el instalador desde el repo maestro (sparse checkout)
+# 2. Descargar el directorio scripts COMPLETO desde el repo maestro
 #    (usa Git Credential Manager para autenticar en repo privado)
+#    Opción A1: sparse checkout del directorio scripts/ + sync-agents.ps1 (recomendado, ligero)
 New-Item -ItemType Directory -Path "proyect_ext" -Force | Out-Null
 git clone --depth 1 --filter=blob:none --sparse https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH.git proyect_ext\agents-temp
-git -C proyect_ext\agents-temp sparse-checkout set --no-cone scripts/plataformador-bootstrap.ps1 sync-agents.ps1
-New-Item -ItemType Directory -Path "scripts" -Force | Out-Null
-Copy-Item "proyect_ext\agents-temp\scripts\plataformador-bootstrap.ps1" -Destination "scripts\plataformador-bootstrap.ps1" -Force
+# En --no-cone: scripts/* = contenido del directorio; sync-agents.ps1 = archivo en raíz
+git -C proyect_ext\agents-temp sparse-checkout set --no-cone "scripts/*" "sync-agents.ps1"
+Copy-Item "proyect_ext\agents-temp\scripts" -Destination "scripts" -Recurse -Force
 Copy-Item "proyect_ext\agents-temp\sync-agents.ps1" -Destination "sync-agents.ps1" -Force
 Remove-Item proyect_ext\agents-temp -Recurse -Force
+
+#    Opción A2: clonar todo el repo en temporal y copiar (más simple, más pesado)
+# git clone --depth 1 https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH.git proyect_ext\agents-kit
+# Copy-Item "proyect_ext\agents-kit\scripts" -Destination "scripts" -Recurse -Force
+# Copy-Item "proyect_ext\agents-kit\sync-agents.ps1" -Destination "sync-agents.ps1" -Force
+# Remove-Item proyect_ext\agents-kit -Recurse -Force
 
 # 3. Previsualizar (recomendado)
 .\scripts\plataformador-bootstrap.ps1 -DryRun
@@ -40,14 +48,20 @@ Remove-Item proyect_ext\agents-temp -Recurse -Force
 
 # 5. Clonar tu app en src/<AppName>
 git clone https://github.com/tu-org/tu-app.git src\TuApp
-
-# 6. Verificar: abre en VS Code → Copilot Chat → / → verás plan, tdd, security-review, etc.
 ```
 
-> **Alternativa sin red (misma máquina):** si ya tienes el kit en `C:\Proyectos\Agents_IA_TECH`, solo copia los scripts:
+### Verificación (tras instalar)
+
+```powershell
+# 6. Abre en VS Code → Copilot Chat → / → verás plan, tdd, security-review, etc.
+#    En OpenCode: `opencode` → el agente por defecto es `pensador`
+```
+
+> **Alternativa sin red (misma máquina):** si ya tienes el kit clonado localmente en otra ruta (ej. `../Agents_IA_TECH`), copia **todo el directorio scripts**:
 > ```powershell
-> Copy-Item "C:\Proyectos\Agents_IA_TECH\scripts\plataformador-bootstrap.ps1" -Destination "scripts\"
-> Copy-Item "C:\Proyectos\Agents_IA_TECH\sync-agents.ps1" -Destination "."
+> $KitPath = "..\Agents_IA_TECH"   # <- ajusta a la ruta donde tengas el kit
+> Copy-Item "$KitPath\scripts" -Destination "scripts" -Recurse -Force
+> Copy-Item "$KitPath\sync-agents.ps1" -Destination "."
 > ```
 
 ---
@@ -242,7 +256,8 @@ Variantes (interfaz simplificada, Spec 002 — sin parámetros / `-DryRun` / `-F
 .\sync-agents.ps1 -Force
 
 # Sincronizar desde tu checkout local del kit (rama + cambios sin pushear incluidos)
-pwsh scripts/sync-kit.ps1 -KitPath C:\Proyectos\Agents_IA_TECH -RootPath . -Force
+$KitPath = "..\Agents_IA_TECH"   # <- ajusta a la ruta donde tengas el kit
+pwsh scripts/sync-kit.ps1 -KitPath $KitPath -RootPath . -Force
 ```
 
 > Huérfanos (archivos locales que ya no están en el maestro): en interactivo pregunta; en no interactivo se conservan en `revisar_manualmente/` por seguridad.

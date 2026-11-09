@@ -16,6 +16,7 @@
 #   .\scripts\plataformador-bootstrap.ps1           # todo el flujo (13 pasos): estructura, MCPs, sync kit, Spec-kit, apps, Graphify, indices, verificacion
 #   .\scripts\plataformador-bootstrap.ps1 -DryRun   # demo/prueba: informa sin escribir nada
 #   .\scripts\plataformador-bootstrap.ps1 -Force    # todo + sobrescribe archivos que difieren + incluye upgrade de herramientas externas
+#   .\scripts\plataformador-bootstrap.ps1 -CheckHardcodedPaths  # valida rutas absolutas en docs del proyecto destino
 # Nota: sin parametros NO se sobrescriben archivos que difieren (se conservan; avisa que uses -Force).
 #   El upgrade de dependencias externas tambien corre directo: pwsh upgrade_framework.ps1 -RootPath <proyecto> -ForceUpgradeTools
 #   Sync solo-transversales directo (motor): pwsh scripts/sync-kit.ps1 -RootPath <proyecto> [-Force] [-DryRun]
@@ -30,7 +31,11 @@ param(
     # -Force: sobrescribe archivos que difieren + incluye upgrade de
     # herramientas externas (npm/pip/uv + build tokenslayer). Sin -Force los
     # archivos que difieren se conservan (avisa) y no se tocan herramientas.
-    [switch]$Force
+    [switch]$Force,
+    # -CheckHardcodedPaths: escanea la documentación del proyecto destino
+    # buscando rutas absolutas hardcodeadas (C:\Proyectos, D:\, /home/, /Users/)
+    # y reporta advertencias con archivo:línea. No falla el bootstrap, solo advierte.
+    [switch]$CheckHardcodedPaths
 )
 
 # [002-SIMPLE] Interfaz simplificada (Spec 002): el bootstrap solo acepta
@@ -3193,6 +3198,39 @@ Reload-ProjectWindow -RootPath $resolvedRoot
 
 # [BOOTSTRAP-FIXES] F5: cuadro resumen de la ejecución (WARNs/ERRORs únicos).
 Show-ExecutionSummary
+
+# [RF-06] Validación opcional de rutas hardcodeadas en documentación del proyecto destino
+if ($CheckHardcodedPaths) {
+    Write-Step "Validando rutas hardcodeadas en documentación del proyecto destino (-CheckHardcodedPaths)..."
+    $targetDocPaths = @(
+        "Documentacion\**\*.md",
+        ".github\**\*.md",
+        ".opencode\**\*.md",
+        ".doc_agents\*.md"
+    )
+    $hardcodedPaths = @()
+    $forbiddenPatterns = @("C:\\Proyectos", "D:\\", "/home/", "/Users/")
+    foreach ($pattern in $targetDocPaths) {
+        $matches = Get-ChildItem -Path $resolvedRoot -Recurse -Filter $pattern -ErrorAction SilentlyContinue |
+                   Select-String -Pattern ($forbiddenPatterns -join '|') -ErrorAction SilentlyContinue
+        if ($matches) {
+            foreach ($match in $matches) {
+                $lineText = $match.Line.Trim()
+                # Excepción: líneas de comentario que contienen $KitPath o $ProjectRoot
+                if (-not ($lineText.StartsWith("#") -and ($lineText -like '*$KitPath*' -or $lineText -like '*$ProjectRoot*'))) {
+                    $hardcodedPaths += "$($match.Path):$($match.LineNumber)  →  $lineText"
+                }
+            }
+        }
+    }
+    if ($hardcodedPaths) {
+        Write-Warn "ADVERTENCIA: Se detectaron rutas absolutas hardcodeadas en el proyecto destino:"
+        $hardcodedPaths | ForEach-Object { Write-Warn "  $_" }
+        Write-Warn "Acción recomendada: Reemplace por variables `$KitPath/`$ProjectRoot con comentario '# <- ajusta a tu ruta'"
+    } else {
+        Write-OK "Validación -CheckHardcodedPaths: No se detectaron rutas absolutas en documentación del proyecto destino."
+    }
+}
 
 Write-Host "" 
 Write-Host "===============================================================" -ForegroundColor Green

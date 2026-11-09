@@ -236,3 +236,18 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 - **Artefactos actuales**: `spec.md`, `checklists/requirements.md`; `arquitectura/adr/adr-0014-configuracion-generada-y-provisionamiento-por-tipo.md`; `arquitectura/constitution-v2.1.0-enmienda.md` (propuesta, pendiente de aplicar).
 - **Preparación de las specs 040–043**: la matriz registra en cada capacidad su estado (`soportado`, `equivalente-distinto`, `soportado-con-limite`, `no-soportado`), su `spec_responsable` y su `prueba`. `validate-parity` devuelve FAIL si un agente usa una capacidad no declarada, y WARN si una fila no tiene `spec_responsable`. 038 no corrige ninguna de esas inconsistencias.
 - **Próximo paso**: `plataformador` aplica la enmienda v2.1.0 (el tier documental tiene `edit` denegado sobre `.specify/`), y después `Agent-SSD` ejecuta `speckit-plan`.
+
+### 039-eliminar-rutas-hardcoded-documentacion
+- **Estado**: **Aprobada — v1.0.0** (2026-11-09) — Ciclo Speckit completo (spec → plan → tasks → analyze → converge). Converge aprobado para implementación.
+- **Ubicación**: `specs/039-eliminar-rutas-hardcoded-documentacion/`
+- **Objetivo**: Eliminar todas las rutas absolutas hardcodeadas (`C:\Proyectos\Agents_IA_TECH`, `C:\Proyectos\opencode`) de la documentación (`README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`), scripts (`sync-agents.ps1`, `scripts/*.ps1`), y artefactos generados; reemplazarlas por variables con comentarios explicativos (`$KitPath`, `$ProjectRoot` + `# <- ajusta a tu ruta`), rutas relativas, o parámetros de línea de comandos (`-RootPath`, `-KitPath`, `-CheckHardcodedPaths`); agregar validación en el bootstrap; limpiar artefactos de prueba con rutas locales; y agregar test de regresión automatizado.
+- **Métricas**: 8 RF (RF-01..RF-08), 3 NFR, 5 AC, 35 tareas, 1 ADR (ADR-039), 1 Threat Model. Cobertura 100% RFs y ACs.
+- **Artefactos**: spec.md (1.0.0), plan.md (1.0.0), tasks.md (1.0.0), analyze.md (1.0.0), converge.md (1.0.0), adr-039-rutas-portables.md (1.0), threat-model-039-hardcoded-paths.md (1.0), quickstart.md (1.0.0).
+- **Patrones clave (ADR-039)**:
+  1. **Documentación**: `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` / `$ProjectRoot = "C:\Proyectos\MiProyecto"  # <- ajusta a tu ruta`
+  2. **Scripts PowerShell**: `$PSScriptRoot` + parámetros `-RootPath`/`-KitPath` (defaults seguros)
+  3. **Scripts Bash**: `$SCRIPT_DIR` / `dirname "$SCRIPT_DIR"` para raíz del kit
+  4. **Bootstrap**: `param([string]$RootPath = ".", [string]$KitPath = $PSScriptRoot, [switch]$CheckHardcodedPaths)`
+- **Validación**: Test Pester `tests/validate-no-hardcoded-paths.Tests.ps1` (patrones: `C:\\Proyectos`, `D:\\`, `/home/`, `/Users/`; excepción: comentarios `#` con `$KitPath`/`$ProjectRoot`); bootstrap flag `-CheckHardcodedPaths` escanea proyecto destino.
+- **Limpieza externa (one-time)**: Eliminar `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md`.
+- **Próximo paso**: `/speckit-implement` (delegado a `Agent-SSD` bajo orquestación `pensador`): `documentador` → README.md + AGENTS.md; `plataformador` → scripts + bootstrap + limpieza; `qa-senior` → test Pester + CI.

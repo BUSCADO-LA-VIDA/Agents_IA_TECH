@@ -1,4 +1,4 @@
-﻿# Índice de Agents_IA_TECH
+# Índice de Agents_IA_TECH
 
 > Proyecto base de agentes y herramientas del ecosistema.
 > Generado por plataformador-bootstrap.ps1.
@@ -240,14 +240,45 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 ### 039-eliminar-rutas-hardcoded-documentacion
 - **Estado**: **Aprobada — v1.0.0** (2026-11-09) — Ciclo Speckit completo (spec → plan → tasks → analyze → converge). Converge aprobado para implementación.
 - **Ubicación**: `specs/039-eliminar-rutas-hardcoded-documentacion/`
-- **Objetivo**: Eliminar todas las rutas absolutas hardcodeadas (`C:\Proyectos\Agents_IA_TECH`, `C:\Proyectos\opencode`) de la documentación (`README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`), scripts (`sync-agents.ps1`, `scripts/*.ps1`), y artefactos generados; reemplazarlas por variables con comentarios explicativos (`$KitPath`, `$ProjectRoot` + `# <- ajusta a tu ruta`), rutas relativas, o parámetros de línea de comandos (`-RootPath`, `-KitPath`, `-CheckHardcodedPaths`); agregar validación en el bootstrap; limpiar artefactos de prueba con rutas locales; y agregar test de regresión automatizado.
+- **Objetivo**: Eliminar todas las rutas absolutas hardcodeadas (`$KitPath`, `C:<sep>Proyectos\opencode`) de la documentación (`README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`), scripts (`sync-agents.ps1`, `scripts/*.ps1`), y artefactos generados; reemplazarlas por variables con comentarios explicativos (`$KitPath`, `$ProjectRoot` + `# <- ajusta a tu ruta`), rutas relativas, o parámetros de línea de comandos (`-RootPath`, `-KitPath`, `-CheckHardcodedPaths`); agregar validación en el bootstrap; limpiar artefactos de prueba con rutas locales; y agregar test de regresión automatizado.
 - **Métricas**: 8 RF (RF-01..RF-08), 3 NFR, 5 AC, 35 tareas, 1 ADR (ADR-039), 1 Threat Model. Cobertura 100% RFs y ACs.
 - **Artefactos**: spec.md (1.0.0), plan.md (1.0.0), tasks.md (1.0.0), analyze.md (1.0.0), converge.md (1.0.0), adr-039-rutas-portables.md (1.0), threat-model-039-hardcoded-paths.md (1.0), quickstart.md (1.0.0).
 - **Patrones clave (ADR-039)**:
-  1. **Documentación**: `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` / `$ProjectRoot = "C:\Proyectos\MiProyecto"  # <- ajusta a tu ruta`
+  1. **Documentación**: `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` / `$ProjectRoot = "C:<sep>Proyectos\MiProyecto"  # <- ajusta a tu ruta`
   2. **Scripts PowerShell**: `$PSScriptRoot` + parámetros `-RootPath`/`-KitPath` (defaults seguros)
   3. **Scripts Bash**: `$SCRIPT_DIR` / `dirname "$SCRIPT_DIR"` para raíz del kit
   4. **Bootstrap**: `param([string]$RootPath = ".", [string]$KitPath = $PSScriptRoot, [switch]$CheckHardcodedPaths)`
-- **Validación**: Test Pester `tests/validate-no-hardcoded-paths.Tests.ps1` (patrones: `C:\\Proyectos`, `D:\\`, `/home/`, `/Users/`; excepción: comentarios `#` con `$KitPath`/`$ProjectRoot`); bootstrap flag `-CheckHardcodedPaths` escanea proyecto destino.
-- **Limpieza externa (one-time)**: Eliminar `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md`.
+- **Validación**: Test Pester `tests/validate-no-hardcoded-paths.Tests.ps1` (patrones: `C:<sep>Proyectos`, `D:<sep>`, `/<home>/`, `/<Users>/`; excepción: comentarios `#` con `$KitPath`/`$ProjectRoot`); bootstrap flag `-CheckHardcodedPaths` escanea proyecto destino.
+- **Limpieza externa (one-time)**: Eliminar `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md`.
 - **Próximo paso**: `/speckit-implement` (delegado a `Agent-SSD` bajo orquestación `pensador`): `documentador` → README.md + AGENTS.md; `plataformador` → scripts + bootstrap + limpieza; `qa-senior` → test Pester + CI.
+### 044-portabilidad-validacion-sin-exclusiones
+- **Estado**: **Implementada — v1.0.0** (2026-11-09) — spec, plan, tasks y analyze completos; implementación aplicada y validacion automatica en verde (16/16 Pester); AC-7, AC-8 y AC-9 pendientes de ejecucion manual; sin commit.
+- **Ubicación**: `specs/044-portabilidad-validacion-sin-exclusiones/`
+- **Objetivo**: sustituir el validador de portabilidad basado en una allowlist de directorios por uno fail-closed cuyo universo es `git ls-files` (todo archivo versionado), y remediar las 236 coincidencias en 34 archivos que la Spec 039 dejó pasar.
+- **Causa raíz**: el validador de la 039 decidía su propio universo. Cualquier lista de rutas es fail-open: cada directorio nuevo nace fuera de cobertura, y el test se autoexcluía para poder pasar.
+- **Métricas**: 12 RF (RF-01..RF-12), 5 NFR, 6 decisiones (D1-D6), 10 AC (AC-1..AC-10), 28 tareas (T001..T028), 8 hallazgos de analyze.
+- **Artefactos**: `spec.md`, `plan.md`, `tasks.md`, `analyze.md`, `tests/fixtures/portabilidad-baseline-044.md`.
+- **Patrones prohibidos (definición final)**: raíz de proyectos, perfil de usuario, intérprete Python y runtime Node de la máquina del autor, unidad ajena completa y prefijos de home POSIX. No se prohíbe toda ruta con letra de unidad: los ejemplos genéricos de las skills son documentación legítima y no filtran el layout.
+- **Validación**: `tests/validate-no-hardcoded-paths.Tests.ps1` (universo `git ls-files`, 14 grupos + 2 meta, auto-inclusión) y `scripts/plataformador-bootstrap.ps1 -CheckHardcodedPaths` (fail-closed, exit 1). CI: `.github/workflows/portability.yml`.
+- **Relación con la 039**: la 039 sigue activa; la 044 amplía su criterio de aceptación (el universo pasa de lista de directorios a conjunto versionado). No se archiva ninguna.
+- **Fuera de alcance (separado por decisión del usuario, 2026-11-09)**: el hook `context-mode` → spec **045**; la generación portable de `opencode.json` (G1-G4) → spec **046**. La 044 se limita a validador, patrones, remediación y CI.
+
+### 045-hook-context-mode-lecturas-bloqueadas
+- **Estado**: **Implementada (hotfix) — v1.0.0** (2026-11-09). AC-4 pendiente de confirmar tras recargar el arnés.
+- **Ubicación**: `specs/045-hook-context-mode-lecturas-bloqueadas/`
+- **Problema**: `PreToolUse` de `context-mode` devolvía `permissionDecision: "deny"` para cualquier archivo de más de 16 384 bytes (constante interna `q = 16384`, sin variable de entorno). En este kit, specs y bitácoras superan ese tamaño, así que el agente reportaba "todas las herramientas rechazadas".
+- **Evidencia**: `Read` de 39 590 bytes → deny; `Edit`, `Bash` y `mcp__github__list_workflows` → allow. El bloqueo nunca afectó a GitHub Actions.
+- **Solución**: se retira solo `PreToolUse` del registro `.github/hooks/context-mode.json`; se conservan `SessionStart` y `PostToolUse`. Respaldo `.github/hooks/context-mode.json.bak-20261109`.
+- **Artefactos**: `spec.md`, bitácora `bitacoras/2026-11-09-hook-context-mode-bloqueo-read.md`.
+- **Rollback**: `Copy-Item .github/hooks/context-mode.json.bak-20261109 .github/hooks/context-mode.json -Force`.
+- **Seguimiento**: re-habilitar `PreToolUse` solo si el umbral pasa a ser configurable o supera el tamaño máximo de la documentación.
+
+### 046-generacion-portable-opencode-json
+- **Estado**: **Borrador** (2026-11-09) — pendiente de aprobación para `plan.md`.
+- **Ubicación**: `specs/046-generacion-portable-opencode-json/`
+- **Validado**: la generación de `opencode.json` existe y funciona (`scripts/sync/mcp/lift-opencode.ps1`, capa `mcp-lift-opencode` de `sync-kit-agents.ps1`, modo individual y bootstrap). En un destino vacío crea el archivo con `default_agent: pensador` y 8 entradas `mcp.servers`.
+- **Defectos (G1-G4)**: el generado hereda las rutas absolutas del maestro; `graphify` no se regenera al destino; `tokenslayer` apunta al kit; el bootstrap no crea el archivo si falta y no hay plantilla.
+- **Alcance**: maestro = `opencode.template.json`; regeneración de `graphify` con `$RootPath`; `tokenslayer` relativo o degradado con WARN; generación desde plantilla en el bootstrap; backup y `-DryRun` obligatorios.
+- **Relación**: ejecuta la parte pendiente de 038 D2 y resuelve 020-T016 y 036 D5.
+
+

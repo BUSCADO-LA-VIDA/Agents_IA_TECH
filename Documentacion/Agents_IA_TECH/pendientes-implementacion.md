@@ -1,11 +1,35 @@
 ﻿# Pendientes de implementación — Agents_IA_TECH
 
 ## Estado general del proyecto
-- **Última actualización:** 2026-11-07
-- **Fase actual:** spec 038 en fase de especificación (`spec.md` + checklist escritos, pendiente aprobación para `plan.md`); spec 036 pendiente de verificación de paridad y commit; spec 037 implementada y cerrada
-- **Specs con tareas:** 19 (incl. 036 y 037) + 1 transversal. La spec 038 aún no tiene `tasks.md`
-- **Total de tareas inventariadas:** 251 (216 base + 27 de spec 036 + 8 de spec 037); las tareas de 038 se suman al aprobarse `tasks.md`
-- **Próxima tarea:** `plataformador` aplica la enmienda v2.1.0 desde `arquitectura/constitution-v2.1.0-enmienda.md` (el tier documental tiene `edit` denegado sobre `.specify/`); después `Agent-SSD` ejecuta `speckit-plan` de 038. En paralelo sigue abierta la verificación de paridad maestro→destino de spec 036 (SC-002) + commit con gitflow + TRANS-001
+- **Última actualización:** 2026-11-09
+- **Fase actual:** Spec 044 implementada con validación automática en verde (16/16 Pester); AC manuales y commit pendientes. Spec 045 (hook `context-mode`) aplicada como hotfix. Spec 046 (generación portable de `opencode.json`) en borrador. Spec 039 activa, con su criterio de aceptación ampliado por la 044.
+- **Specs con tareas:** 21 (incl. 036, 037, 039, 044, 045 y 046)
+- **Total de tareas inventariadas:** 251 base + 28 de la spec 044 + 5 de la 045 (RF) + 7 de la 046
+- **Próxima tarea:** cerrar la 044 (AC manuales T009/T026/T027, `converge.md`, commit); después aprobar la 046 y ejecutar su `plan.md`
+
+## Specs 039–046 — estado para retomar
+
+| Spec | Estado | Qué falta | Dónde está | Cómo se retoma |
+|---|---|---|---|---|
+| **039** | Activa — implementada v1.0.0; AC-1/AC-2 superados por la 044 | Nada dentro de su alcance original. Decidir si se cierra formalmente o queda como antecedente | `specs/039-eliminar-rutas-hardcoded-documentacion/` | revisar `converge.md` y marcar cierre en este archivo |
+| **044** | Implementada — validación automática 16/16 (764 archivos), sin `converge.md` ni commit | T009 señuelo, T014 mapeo de tokens, T016 arranque del arnés, T017 rollback, T026 bootstrap en proyecto limpio, T027 regresión de 5 suites, T028 commit | `specs/044-portabilidad-validacion-sin-exclusiones/` | `Invoke-Pester tests\validate-no-hardcoded-paths.Tests.ps1` |
+| **045** | Implementada (hotfix) v1.0.0 | AC-4: confirmar tras recargar el arnés que las lecturas > 16 KB ya no se deniegan | `specs/045-hook-context-mode-lecturas-bloqueadas/` | recargar VS Code y abrir un `.md` grande |
+| **046** | Borrador | Aprobar y pasar a `plan.md`; corregir G1 (maestro portable), G2 (`graphify` por destino), G3 (`tokenslayer` relativo), G4 (bootstrap sin plantilla) | `specs/046-generacion-portable-opencode-json/` | `speckit-plan` de 046 |
+
+### Tareas pendientes de la Spec 044
+
+| ID | Tarea | Responsable | Estado | Criterio de done |
+|---|---|---|---|---|
+| 044-T009 | Señuelo: archivo temporal con ruta literal → detección y `exit 1`; luego borrarlo | `qa-senior` | Pendiente | salida con `archivo:línea` y exit code 1 |
+| 044-T014 | Mapear cada `{env:<VAR>}` de la plantilla a su clave de `.env.mcp` | `plataformador` | Pendiente | tabla VAR → clave verificada |
+| 044-T016 | Verificar arranque del arnés con la configuración resuelta | `plataformador` | Pendiente | 8 MCP activos tras reinicio |
+| 044-T017 | Documentar rollback de las dos configuraciones | `plataformador` | Pendiente | sección en bitácora |
+| 044-T026 | Bootstrap `-CheckHardcodedPaths` en proyecto limpio | `plataformador` | Pendiente | `[OK] 0/N` |
+| 044-T027 | Regresión de las 5 suites (`harness-default`, `kit-sync-merge`, `agents-parity`, `kb-parity`, `mcp-refresh-parity`) | `qa-senior` | Pendiente | exit 0 (o divergencia preexistente documentada) |
+| 044-T028 | `converge.md` + commit conventional | `documentador` + `gitflow` | Pendiente | `git log -1` y `converge.md` presente |
+| 044-DEC-01 | Decidir el destino de `.bootstrap-audit.log` (fuera del índice, en disco) | usuario | Pendiente | decisión registrada |
+
+
 
 ## Sin asignar
 

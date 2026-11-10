@@ -4,6 +4,45 @@
 
 ---
 
+## [1.2.0] - 2026-11-09 - Spec 045: hook `context-mode` bloqueaba lecturas
+
+### Corregido
+- **Lecturas denegadas por el hook**: `PreToolUse` de `context-mode` devolvía `permissionDecision: "deny"` para cualquier archivo de más de 16 384 bytes (constante interna, sin variable de entorno para ajustarla). En este kit —specs y bitácoras de decenas de KB— bloqueaba el trabajo y se reportaba como caída total de herramientas.
+- **Alcance real del bloqueo**: se verificó con payloads que `Edit`, `Bash` y las consultas MCP a GitHub **no** estaban bloqueadas; solo `Read` de archivos grandes.
+
+### Cambiado
+- `.github/hooks/context-mode.json`: se retira la etapa `PreToolUse`; se conservan `SessionStart` y `PostToolUse`. Respaldo en `.github/hooks/context-mode.json.bak-20261109`.
+- Requiere recargar la ventana del arnés para releer los hooks.
+
+### Documentación
+- Bitácora `Documentacion/Agents_IA_TECH/bitacoras/2026-11-09-hook-context-mode-bloqueo-read.md`.
+- Spec `Documentacion/Agents_IA_TECH/specs/045-hook-context-mode-lecturas-bloqueadas/spec.md`.
+
+## [1.1.0] - 2026-11-09 - Spec 044: portabilidad con validación sin exclusiones
+
+### Corregido
+- **Falso negativo del validador (Spec 039)**: el test declaraba su universo con una allowlist de directorios y dejaba fuera `tests/`, `.specify/`, `.mcp.json`, `opencode.json` y `.bootstrap-audit.log`. Se cerró la 039 con 34 archivos versionados todavía contaminados.
+- **`upgrade_framework.ps1`**: cinco rutas fijas de la máquina del autor (audit log, allowlist-rotation, opencode.schema, upgrade_framework.sha256 y los ejemplos de cabecera) sustituidas por `Join-Path $PSScriptRoot ...`. El script ya no depende de una ruta concreta.
+- **`scripts/sync-mcp-graphify.ps1`**: el default de `-RootPath` apuntaba a la ruta del autor; ahora se deriva de la ubicación del script.
+- **`scripts/sync/transversal/sync-transversal.ps1`**, **`scripts/sync-gitignore.ps1`**, **`scripts/sync/mcp/install.ps1`**: mensajes y comentarios con rutas del autor reemplazados por tokens.
+
+### Cambiado
+- **Validador de portabilidad reescrito**: universo = `git ls-files` (sin allowlist de directorios ni de archivos, fail-closed); patrones construidos por concatenación de fragmentos, de modo que el propio validador se incluye en el universo y se autovalida.
+- **`-CheckHardcodedPaths` del bootstrap**: escanea todo el proyecto destino (git-first, fallback recursivo sin exclusiones), reporta `archivo:línea -> contenido` y sale con código 1 si hay coincidencias (antes solo advertía y su universo era una lista de carpetas).
+- **`opencode.json` deja de versionarse**: se versiona `opencode.template.json` (tokens `{env:...}` + `enabled: false`); el bootstrap lo copia y resuelve las rutas locales. Ejecuta la spec 038 D2.
+- **`.mcp.json` portable**: comandos por nombre en `PATH`, `npx -y` para los paquetes npm y `${workspaceFolder}` para el grafo.
+- **CI**: nuevo workflow `.github/workflows/portability.yml` (matriz Linux/Windows) que falla el build ante cualquier coincidencia.
+
+### Seguridad
+- **`.bootstrap-audit.log` deja de versionarse**: contenía `host`, `actor` y 87 rutas reales. No se reescribe (cadena de hashes append-only); sigue escribiéndose en local.
+- **Redacción de 60 archivos de documentación** (bitácoras, specs cerradas, ADRs, threat models, skills): solo se sustituyen literales de ruta por tokens (`$KitPath`, `<HOME>`, `<PROJECT_ROOT>`, `<PYTHON_HOME>`, `<NODE_HOME>`). No se alteran conclusiones, métricas ni hashes.
+Ninguno en esta entrada. La retirada de `PreToolUse` del hook `context-mode` se registra en la 1.2.0 (Spec 045).
+
+### Documentación
+- Nuevo paquete de spec: `spec.md`, `plan.md`, `tasks.md`, `analyze.md` en `Documentacion/Agents_IA_TECH/specs/044-portabilidad-validacion-sin-exclusiones/`.
+- `tests/fixtures/portabilidad-baseline-044.md`: evidencia del antes (34 archivos / 236 coincidencias) y del después (16/16 en verde sobre 764 archivos).
+- Bitácora `Documentacion/Agents_IA_TECH/bitacoras/2026-11-09-hook-context-mode-bloqueo-read.md`.
+
 ## [1.0.0] — 2026-11-09 — Spec 039: Eliminar rutas hardcoded y portabilidad del kit
 
 ### Added
@@ -11,19 +50,19 @@
   1. **Documentación**: Variables `$KitPath` / `$ProjectRoot` con comentario obligatorio `# <- ajusta a tu ruta`
   2. **Scripts PowerShell**: `$PSScriptRoot` + parámetros `-RootPath` / `-KitPath` con defaults seguros
   3. **Bootstrap/CLI**: Parámetros con defaults derivados de `$PSScriptRoot`, incluyendo nuevo flag `-CheckHardcodedPaths`
-- **Validación automatizada**: Test Pester `tests/validate-no-hardcoded-paths.Tests.ps1` que escanea patrones prohibidos (`C:\Proyectos`, `D:\`, `/home/`, `/Users/`) en todos los archivos distribuibles con excepción para comentarios documentando variables.
+- **Validación automatizada**: Test Pester `tests/validate-no-hardcoded-paths.Tests.ps1` que escanea patrones prohibidos (`C:<sep>Proyectos`, `D:<sep>`, `/<home>/`, `/<Users>/`) en todos los archivos distribuibles con excepción para comentarios documentando variables.
 - **Bootstrap flag `-CheckHardcodedPaths`**: Escanea proyecto destino (`Documentacion/`, `.github/`, `.opencode/`, `.doc_agents/`) y reporta rutas absolutas con archivo:línea y contenido ofensivo.
 - **Plantillas de referencia**: Headers estándar para scripts PowerShell/Bash, bloques de variables en README, parameter blocks para bootstrap.
 - **Comandos de validación**: Reference card con grep/Select-String manuales, CI workflow YAML, y uso del bootstrap con validación.
 
 ### Changed
-- **README.md**: Sección "sync-kit local" actualizada para usar `$KitPath` variable en lugar de `C:\Proyectos\Agents_IA_TECH` hardcodeado. Verificación completa de cero rutas absolutas.
-- **AGENTS.md**: Eliminadas referencias a `C:\Proyectos\Agents_IA_TECH` y `C:\Proyectos\opencode`; reemplazadas por `$KitPath` y rutas relativas `./.github/agents/`, `./.opencode/agents/`.
+- **README.md**: Sección "sync-kit local" actualizada para usar `$KitPath` variable en lugar de `$KitPath` hardcodeado. Verificación completa de cero rutas absolutas.
+- **AGENTS.md**: Eliminadas referencias a `$KitPath` y `C:<sep>Proyectos\opencode`; reemplazadas por `$KitPath` y rutas relativas `./.github/agents/`, `./.opencode/agents/`.
 - **Scripts del kit** (`sync-agents.ps1`, `scripts/*.ps1`): Reemplazadas rutas hardcodeadas por `$PSScriptRoot` / parámetros; agregado header comment estándar `# $KitPath = $PSScriptRoot`.
 - **plataformador-bootstrap.ps1**: Agregado parámetro `[switch]$CheckHardcodedPaths` con lógica de escaneo y reporte; logging estructurado de parámetros usados (SEC-05); validación de subtree paths (SEC-03); detección de ejecución como Administrador (SEC-04).
 
 ### Removed
-- **Artefactos de desarrollo externos**: Eliminados `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md` (contenían rutas de máquina de desarrollo, no distribuibles).
+- **Artefactos de desarrollo externos**: Eliminados `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md` (contenían rutas de máquina de desarrollo, no distribuibles).
 
 ### Security
 - **SEC-01**: Cero rutas absolutas en archivos distribuibles (validado por test Pester)

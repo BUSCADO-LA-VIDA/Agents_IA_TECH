@@ -15,7 +15,7 @@
 | Criterios automáticos (AC-1..AC-5) | **PASS** |
 | Criterio de detección (AC-8) | **PASS** (`exit 1` con señuelo) |
 | Regresión (AC-9) | **PASS** 4/5 suites; 1 divergencia preexistente documentada |
-| Criterio de proyecto limpio (AC-7) | **NO CONCLUYENTE** (ver §5, H4) |
+| Criterio de proyecto limpio (AC-7) | **PASS** — 0 coincidencias en 136 archivos versionados (tras `push` del kit) |
 | Arranque del arnés (AC-6) | Pendiente de reinicio del arnés |
 | CI (AC-10) | Workflow creado; no ejecutado en remoto |
 
@@ -36,7 +36,7 @@
 |---|---|---|---|
 | RF-01 universo `git ls-files` | T003, T005, T006 | AC-1, AC-2, AC-3 | Cumplido |
 | RF-02 patrones por fragmentos | T004 | AC-1 | Cumplido |
-| RF-03 bootstrap sobre todo el proyecto | T008 | AC-7, AC-8 | Cumplido en código; AC-7 no concluyente |
+| RF-03 bootstrap sobre todo el proyecto | T008 | AC-7, AC-8 | Cumplido (AC-7 PASS tras push) |
 | RF-04 audit log fuera de versionado | T010, T012 | AC-5 | Cumplido |
 | RF-05 `.specify/mcp-validation-*` redactados y conservados | T011 | AC-4 | Cumplido (corregido: no se eliminan) |
 | RF-06 `opencode.json` fuera del índice + plantilla | T013 | AC-6 | Cumplido; verificación de arranque pendiente |
@@ -57,7 +57,7 @@
 | AC-4 | mismo test (grupos 1-12) | **PASS** — 0 rutas de la máquina del autor |
 | AC-5 | `git ls-files .bootstrap-audit.log` → vacío; `Test-Path` → True | **PASS** — fuera del índice, en disco |
 | AC-6 | arranque con `opencode.json` resuelto | **PENDIENTE** — requiere reiniciar el arnés |
-| AC-7 | bootstrap `-CheckHardcodedPaths` en proyecto limpio | **NO CONCLUYENTE** — ver H4 |
+| AC-7 | bootstrap `-CheckHardcodedPaths` en proyecto limpio | **PASS** — `0 coincidencias en 136 archivos versionados`, 73 artefactos de runtime omitidos, `exit=0` |
 | AC-8 | señuelo en directorio temporal + bootstrap sin `-DryRun` | **PASS** — detecta y sale con código 1 |
 | AC-9 | 5 suites (`harness-default`, `kit-sync-merge`, `agents-parity`, `kb-parity`, `mcp-refresh-parity`) | **PASS** 4/5 exit 0; `agents-parity` exit 1 por divergencia preexistente de `Agent-SSD` |
 | AC-10 | workflow `portability.yml` | **Creado**; sin ejecución en remoto |
@@ -69,7 +69,8 @@
 | H1 | **HIGH** | El validador comparaba con `Ordinal` (sensible a mayúsculas). `scripts/init-pensador.ps1` tenía una ruta con la unidad en minúsculas y **pasaba el test** | Comparación `OrdinalIgnoreCase` para rutas Windows; default del script sustituido por `$PSScriptRoot`; 2 documentos en minúsculas redactados |
 | H2 | MEDIUM | Al hacer todo case-insensitive, `/<Users>/` producía falsos positivos en endpoints de API (`/api/v1/users/{id}`) | Comparación partida: Windows sin distinguir, POSIX distinguiendo |
 | H3 | **HIGH** | `cleanup-legacy-docs.ps1` (versionado) tenía rutas de la máquina y ejecutaba `Remove-Item -Recurse -Force` sin confirmación | Reescrito: raíz desde `$PSScriptRoot`, dry-run por defecto, `-Confirm` para aplicar |
-| H4 | MEDIUM | AC-7 no es concluyente antes de commit/push: el bootstrap de un proyecto limpio **sincroniza el kit publicado**, así que valida el remoto (versión antigua) y no el working tree | AC-7 se re-ejecuta después del commit; queda registrado como pendiente con causa |
+| H4 | MEDIUM | AC-7 no era concluyente antes de commit/push: el bootstrap de un proyecto limpio **sincroniza el kit publicado**, así que valida el remoto y no el working tree | **Resuelto**: tras `push` (`e48c8c0..6f6fbf3`), AC-7 se ejecutó sobre el kit publicado: `exit=0`, 0 coincidencias |
+| H7 | **HIGH** | El check contaba sus propios artefactos de runtime (`.env.mcp`, `opencode.json`, `.vscode/mcp.json`, `.bootstrap-audit.log`, `.kit-backup/`, `graphify-out/`, salidas de validación) y además no normalizaba separadores (`\` vs `/`), por lo que el filtro nunca aplicaba en Windows | Filtro por clase de artefacto con normalización de separadores; se informa cuántos se omiten (`73` en la corrida final). Resultado: 15 → 0 líneas |
 | H5 | LOW | El inventario §2.6 del spec (24 archivos) era incompleto: la pasada real tocó 62 `.md` | Asumido: el universo lo fija el validador, no una lista escrita a mano |
 | H6 | MEDIUM | El universo es `git ls-files`: un documento **no versionado todavía** no se valida. La primera corrida "16/16" fue sobre un universo sin los specs 044/045/046 (aún untracked) | Tras `git add`, aparecieron 6 grupos rojos en los propios artefactos de la 044; redactados y verificado 16/16 con 781 archivos versionados. Regla operativa: validar **después** de `git add` |
 
@@ -91,12 +92,12 @@
 | T014 | Pendiente | Requiere validar el mapeo VAR → clave de `.env.mcp` en una corrida real del resolvedor |
 | T016 | Pendiente | Requiere reinicio del arnés para releer `opencode.json` |
 | T017 | Pendiente | Documentar rollback de ambas configuraciones en bitácora |
-| T026 | **Bloqueada por H4** | Re-ejecutar después del commit |
+| T026 | **Completada** | `0 coincidencias en 136 archivos versionados`, 73 artefactos de runtime omitidos, `exit=0` |
 | T027 | **Completada** | 5 suites ejecutadas; 4 en verde + 1 divergencia preexistente |
 | T028 | Parcial | `converge.md` escrito; commit pendiente de aprobación |
 
 ## 8. Veredicto
 
-**Portabilidad del repo: cumplida y verificada.** El validador es fail-closed, no tiene allowlist y ahora también detecta rutas en minúsculas. Quedan dos verificaciones que no dependen de código: AC-6 (reinicio del arnés) y AC-7 (post-commit).
+**Portabilidad del repo: cumplida y verificada.** El validador es fail-closed, no tiene allowlist, detecta rutas en minúsculas y el check del bootstrap distingue artefactos de runtime de archivos distribuibles. AC-1..AC-5, AC-7, AC-8 y AC-9 verificados con evidencia.
 
-**No se cierra la spec** hasta ejecutar AC-6 y AC-7 y registrar el commit. Los cambios de las specs 045 y 046 quedan fuera de este cierre.
+Queda una sola verificación que no depende de código: **AC-6** (arranque del arnés tras reinicio). Los cambios de las specs 045 y 046 quedan fuera de este cierre.

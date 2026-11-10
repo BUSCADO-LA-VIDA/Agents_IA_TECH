@@ -32,7 +32,7 @@
 ## Fase 3 — Configuracion de arnes portable
 
 - [x] T013 [RF-06, D2] `opencode.json` fuera del indice (`git rm --cached` + `.gitignore`); `opencode.template.json` versionado con `{env:<VAR>}` + `enabled: false` y los invariantes (`default_agent`, `permission`, `provider`, `plugin`, `model`, `theme`, `region`) | verificar: `git ls-files` no lista `opencode.json` y `ConvertFrom-Json` parsea la plantilla
-- [ ] T014 [RF-06] Mapear cada `<VAR>` a una clave existente de `.env.mcp` para que la re-resolucion del bootstrap funcione | verificar: tabla VAR -> clave en la bitacora
+- [x] T014 [RF-06] Mapear cada `<VAR>` a una clave existente de `.env.mcp` para que la re-resolucion del bootstrap funcione | verificar: tabla VAR -> clave en la bitacora. **Ejecutado 2026-11-10**: 9/9 variables de `opencode.template.json` existen en `.env.mcp` y no hay claves sin uso (`CODEBASE_MEMORY_CMD`, `CONTEXT_MODE_CMD`, `CONTEXT7_CMD`, `GITHUB_MCP_CMD`, `GRAPHIFY_CMD`, `MARKITDOWN_CMD`, `PLAYWRIGHT_MCP_CMD`, `SEMGREP_MCP_CMD`, `TOKENSLAYER_CMD`)
 - [x] T015 [RF-07] `.mcp.json`: nombres en `PATH`, `npx -y` para context7/playwright, `${workspaceFolder}` para el grafo | verificar: `ConvertFrom-Json` y revision de cada entrada
 - [ ] T016 [AC-6] Verificar arranque del arnes con la configuracion portable; si un MCP no resuelve, dejarlo `enabled: false` + WARN y registrarlo | verificar: bitacora con el resultado por MCP
 - [ ] T017 [RF-06] Rollback documentado para ambas configs | verificar: seccion en la bitacora
@@ -53,7 +53,7 @@
 
 - [x] T024 [RF-11, AC-10] `.github/workflows/portability.yml`: ejecutar el test en push y PR; fallar en rojo | verificar: YAML valido + run en verde
 - [x] T025 [AC-1..AC-5] Validacion final de los criterios automaticos | verificar: salida del test + `git grep` vacio
-- [ ] T026 [AC-7] Bootstrap en proyecto limpio | verificar: `[OK] 0/N`
+- [x] T026 [AC-7] Bootstrap en proyecto limpio | verificar: `[OK] 0/N`. **Ejecutado 2026-11-10** tras push del kit: `[OK] Validacion -CheckHardcodedPaths: 0 coincidencias en 136 archivos versionados` (73 artefactos de runtime omitidos, `exit=0`)
 - [x] T027 [AC-9] Regresion: 5 suites existentes | verificar: exit 0 en cada una. **Ejecutado 2026-11-09**: `harness-default` 0, `kit-sync-merge` 0, `kb-parity` 0, `mcp-refresh-parity` 0; `agents-parity` 1 por divergencia preexistente de `Agent-SSD` (documentada en el baseline 036)
 - [ ] T028 [T15] Bitacora de la intervencion y commit conventional | verificar: `git log -1`
 

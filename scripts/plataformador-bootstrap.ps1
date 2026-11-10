@@ -1593,7 +1593,7 @@ function Ensure-MemoryIndex {
 > Fecha: $(Get-Date -Format "yyyy-MM-dd")
 
 ## Estado
-- Proyecto: $RootPath
+- Proyecto: . (raiz del proyecto; no se registra la ruta absoluta)
 - Preparación del entorno: completada o pendiente según el flujo
 - ReIndexación: listo antes de mover archivos o consultar documentación
 "@
@@ -3172,7 +3172,7 @@ $indexContent = @"
 > Este archivo se usa antes de mover archivos para ordenar el proyecto.
 
 ## Información del proyecto
-- Ruta: $resolvedRoot
+- Ruta: . (raiz del proyecto; no se registra la ruta absoluta)
 - Fecha: $(Get-Date -Format "yyyy-MM-dd")
 
 ## Validaciones pendientes
@@ -3283,6 +3283,23 @@ if ($CheckHardcodedPaths) {
         )
     }
 
+    # Artefactos de runtime del destino: por definicion contienen rutas de la maquina
+    # (env resuelto, config de arnes, log de auditoria, backups y salidas de validacion).
+    # No son distribuibles, asi que no se evaluan; se informa cuantos se omitieron.
+    $runtimePatterns = @(
+        '^\.env(\..*)?$',
+        '^opencode\.json$',
+        '^\.bootstrap-audit\.log$',
+        '^\.kit-backup/',
+        '^\.vscode/mcp\.json$',
+        '(^|/)graphify-out/',
+        '/\.specify/mcp-validation-[^/]+\.md$'
+    )
+    $portableSkipped = @($portableFiles | Where-Object { $relNorm = ($_ -replace '\\', '/'); @($runtimePatterns | Where-Object { $relNorm -match $_ }).Count -gt 0 })
+    if ($portableSkipped.Count -gt 0) {
+        Write-Info ("-CheckHardcodedPaths: {0} artefacto(s) de runtime omitido(s) (no distribuibles)." -f $portableSkipped.Count)
+        $portableFiles = @($portableFiles | Where-Object { $portableSkipped -notcontains $_ })
+    }
     $portableHits = [System.Collections.Generic.List[string]]::new()
     foreach ($rel in $portableFiles) {
         $full = Join-Path $resolvedRoot $rel

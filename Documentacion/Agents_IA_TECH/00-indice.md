@@ -274,7 +274,7 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 - **Seguimiento**: re-habilitar `PreToolUse` solo si el umbral pasa a ser configurable o supera el tamaño máximo de la documentación.
 
 ### 046-generacion-portable-opencode-json
-- **Estado**: **Borrador** (2026-11-09) — pendiente de aprobación para `plan.md`.
+- **Estado**: **Borrador con plan** (2026-11-10) — `spec.md` y `plan.md` escritos; pendiente `tasks.md` e implementación.
 - **Ubicación**: `specs/046-generacion-portable-opencode-json/`
 - **Validado**: la generación de `opencode.json` existe y funciona (`scripts/sync/mcp/lift-opencode.ps1`, capa `mcp-lift-opencode` de `sync-kit-agents.ps1`, modo individual y bootstrap). En un destino vacío crea el archivo con `default_agent: pensador` y 8 entradas `mcp.servers`.
 - **Defectos (G1-G4)**: el generado hereda las rutas absolutas del maestro; `graphify` no se regenera al destino; `tokenslayer` apunta al kit; el bootstrap no crea el archivo si falta y no hay plantilla.

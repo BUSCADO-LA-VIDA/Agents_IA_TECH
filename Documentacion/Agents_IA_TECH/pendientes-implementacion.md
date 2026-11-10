@@ -14,7 +14,7 @@
 | **039** | Activa — implementada v1.0.0; AC-1/AC-2 superados por la 044 | Nada dentro de su alcance original. Decidir si se cierra formalmente o queda como antecedente | `specs/039-eliminar-rutas-hardcoded-documentacion/` | revisar `converge.md` y marcar cierre en este archivo |
 | **044** | Implementada — validación automática 16/16 (764 archivos), sin `converge.md` ni commit | T009 señuelo, T014 mapeo de tokens, T016 arranque del arnés, T017 rollback, T026 bootstrap en proyecto limpio, T027 regresión de 5 suites, T028 commit | `specs/044-portabilidad-validacion-sin-exclusiones/` | `Invoke-Pester tests\validate-no-hardcoded-paths.Tests.ps1` |
 | **045** | Implementada (hotfix) v1.0.0 | AC-4: confirmar tras recargar el arnés que las lecturas > 16 KB ya no se deniegan | `specs/045-hook-context-mode-lecturas-bloqueadas/` | recargar VS Code y abrir un `.md` grande |
-| **046** | Borrador | Aprobar y pasar a `plan.md`; corregir G1 (maestro portable), G2 (`graphify` por destino), G3 (`tokenslayer` relativo), G4 (bootstrap sin plantilla) | `specs/046-generacion-portable-opencode-json/` | `speckit-plan` de 046 |
+| **046** | Borrador con plan | Generar `tasks.md` e implementar G1 (maestro portable), G2 (`graphify` por destino), G3 (`tokenslayer` relativo), G4 (bootstrap sin plantilla) | `specs/046-generacion-portable-opencode-json/` | `speckit-tasks` de 046 |
 
 ### Tareas pendientes de la Spec 044
 

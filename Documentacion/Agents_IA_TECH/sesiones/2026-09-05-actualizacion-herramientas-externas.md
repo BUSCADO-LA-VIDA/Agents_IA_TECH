@@ -40,7 +40,7 @@
 
 **Archivos clave**:
 - `dependencias-manifest.yml` - Manifest de dependencias externas
-- `c:\Proyectos\Agents_IA_TECH\.github\agents\upgrade_framework.agent.md` - Agente para GitHub Copilot
-- `c:\Proyectos\Agents_IA_TECH\.opencode\agents\upgrade_framework.md` - Agente para OpenCode
+- `$KitPath\.github\agents\upgrade_framework.agent.md` - Agente para GitHub Copilot
+- `$KitPath\.opencode\agents\upgrade_framework.md` - Agente para OpenCode
 - `Documentacion/Agents_IA_TECH/agents/upgrade_framework/spec.md` - Especificación del agente
 - `Documentacion/Agents_IA_TECH/Documentacion/Agents_IA_TECH/sesiones/` - Directorio de sesiones

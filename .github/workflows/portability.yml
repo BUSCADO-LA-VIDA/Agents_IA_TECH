@@ -1,0 +1,47 @@
+name: portability
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  validate-portability:
+    name: Sin rutas absolutas en archivos versionados
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar PowerShell 7
+        uses: PSModule/install-pwsh@v1
+        with:
+          pwsh-version: '7.4.x'
+
+      - name: Instalar Pester
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Ejecutar validador de portabilidad
+        shell: pwsh
+        run: |
+          $result = Invoke-Pester -Path ./tests/validate-no-hardcoded-paths.Tests.ps1 -Output Detailed -PassThru
+          if ($result.FailedCount -gt 0) {
+            Write-Error ("Fallo de portabilidad: {0} grupo(s) de rutas absolutas detectados. Revisa la salida anterior (archivo:linea)." -f $result.FailedCount)
+            exit 1
+          }
+          Write-Host ("OK: {0} comprobaciones en verde sobre {1} archivos." -f $result.PassedCount, (git ls-files | Measure-Object -Line).Lines)
+
+      - name: Regresion (solo Linux, sin dependencias de Windows)
+        if: runner.os == 'Linux'
+        shell: pwsh
+        run: |
+          if (Test-Path ./tests/harness-default.ps1) { pwsh -File ./tests/harness-default.ps1; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
+          if (Test-Path ./tests/kb-parity.ps1) { pwsh -File ./tests/kb-parity.ps1; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }

@@ -30,7 +30,7 @@ graph TD
 | Asset | Tipo | Sensibilidad | Descripción |
 |-------|------|--------------|-------------|
 | Kit source code | Código | Baja (público) | Repositorio Git público/privado |
-| Rutas absolutas en docs | Información | **Media** | Fuga de estructura interna del autor (`C:\Proyectos\...`) |
+| Rutas absolutas en docs | Información | **Media** | Fuga de estructura interna del autor (`C:<sep>Proyectos\...`) |
 | Scripts de bootstrap | Código | Baja | Automatización de instalación |
 | Artefactos `.specify/` | Configuración | **Media** | Contienen rutas de máquina de desarrollo si no limpiados |
 | Proyecto destino del usuario | Código usuario | **Alta** | Código propietario del usuario; no debe contaminarse con rutas del kit |
@@ -50,9 +50,9 @@ graph TD
 
 | ID | Threat | Description | Likelihood | Impact | Mitigation | Status |
 |----|--------|-------------|------------|--------|------------|--------|
-| S-01 | **security-risk:S-01** Rutas absolutas revelan estructura de directorios del autor | `C:\Proyectos\Agents_IA_TECH` en README/AGENTS.md expone convención de nombres, profundidad de carpetas, posible nombre de usuario (`C:\Users\tomas\...`) | **High** — Ya presente en repo actual | **Medium** — Reconocimiento para ataques dirigidos (spear-phishing, supply chain) | Eliminar rutas absolutas; usar variables genéricas (`$KitPath`, `$ProjectRoot`) | **Mitigated by Spec 039** |
-| S-02 | **security-risk:S-02** Scripts con rutas hardcodeadas ejecutan en contexto equivocado | `sync-agents.ps1` usa `C:\Proyectos\Agents_IA_TECH` como fuente → copia archivos desde ubicación inexistente en máquina víctima → fallo silencioso o sobreeescritura accidental | **Medium** — Si usuario ejecuta sin leer | **High** — Pérdida de datos, corrupción de proyecto destino | Usar `$PSScriptRoot` / parámetros `-KitPath`/`-RootPath`; validar existencia antes de copiar | **Mitigated by Spec 039 RF-05** |
-| S-03 | Artefactos `.specify/` con rutas de dev machine se distribuyen accidentalmente | `mcp-validation-plan.md` contiene `C:\Proyectos\opencode\...` → si se committean, exponen infraestructura interna | **Low** — Fuera de repo Git, pero riesgo en zip/artifact | **Medium** — Fuga de paths internos | Limpieza obligatoria (RF-07); `.gitignore` en `.specify/` runtime | **Mitigated by Spec 039 RF-07** |
+| S-01 | **security-risk:S-01** Rutas absolutas revelan estructura de directorios del autor | `$KitPath` en README/AGENTS.md expone convención de nombres, profundidad de carpetas, posible nombre de usuario (`<HOME>\...`) | **High** — Ya presente en repo actual | **Medium** — Reconocimiento para ataques dirigidos (spear-phishing, supply chain) | Eliminar rutas absolutas; usar variables genéricas (`$KitPath`, `$ProjectRoot`) | **Mitigated by Spec 039** |
+| S-02 | **security-risk:S-02** Scripts con rutas hardcodeadas ejecutan en contexto equivocado | `sync-agents.ps1` usa `$KitPath` como fuente → copia archivos desde ubicación inexistente en máquina víctima → fallo silencioso o sobreeescritura accidental | **Medium** — Si usuario ejecuta sin leer | **High** — Pérdida de datos, corrupción de proyecto destino | Usar `$PSScriptRoot` / parámetros `-KitPath`/`-RootPath`; validar existencia antes de copiar | **Mitigated by Spec 039 RF-05** |
+| S-03 | Artefactos `.specify/` con rutas de dev machine se distribuyen accidentalmente | `mcp-validation-plan.md` contiene `C:<sep>Proyectos\opencode\...` → si se committean, exponen infraestructura interna | **Low** — Fuera de repo Git, pero riesgo en zip/artifact | **Medium** — Fuga de paths internos | Limpieza obligatoria (RF-07); `.gitignore` en `.specify/` runtime | **Mitigated by Spec 039 RF-07** |
 
 ### T — Tampering (Manipulación)
 
@@ -73,15 +73,15 @@ graph TD
 
 | ID | Threat | Description | Likelihood | Impact | Mitigation | Status |
 |----|--------|-------------|------------|--------|------------|--------|
-| I-01 | **security-risk:I-01** Rutas absolutas en documentación filtran topología interna | `C:\Proyectos\Agents_IA_TECH` revela: unidad `C:`, carpeta `Proyectos`, nombre de proyecto, posible username si `C:\Users\tomas\Proyectos\...` | **High** — Ya en repo | **Medium** — Reconocimiento, correlación con otros leaks | **Eliminar completamente** (Spec 039 objetivo principal) | **Mitigated by Spec 039** |
-| I-02 | **security-risk:I-02** Artefactos `.specify/mcp-validation-*.md` contienen rutas de CI/CD interno | Archivos generados en `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\` revelan: estructura de repo opencode, uso de MCP, nombres de validaciones | **Medium** — Si se distribuyen por error | **Medium** — Fuga de arquitectura interna, nombres de herramientas | **Eliminar archivos** (RF-07); agregar `.gitignore` para `.specify/` generado | **Mitigated by Spec 039 RF-07** |
-| I-03 | **security-risk:I-03** Bootstrap `-CheckHardcodedPaths` escanea proyecto destino y muestra rutas en output | Output: `Documentacion/MiApp/specs/001-xyz/spec.md:15 → $ProjectRoot = "C:\Proyectos\MiApp"` → revela rutas del proyecto usuario en consola/logs | **High** — Feature diseñado para esto | **Low** — Solo visible para usuario que ejecuta; no se persiste | Documentar: "Output solo en consola del usuario; no se envía a telemetría"; opción `-Quiet` para suprimir | **Accepted Risk — By Design** |
+| I-01 | **security-risk:I-01** Rutas absolutas en documentación filtran topología interna | `$KitPath` revela: unidad `C:`, carpeta `Proyectos`, nombre de proyecto, posible username si `<HOME>\Proyectos\...` | **High** — Ya en repo | **Medium** — Reconocimiento, correlación con otros leaks | **Eliminar completamente** (Spec 039 objetivo principal) | **Mitigated by Spec 039** |
+| I-02 | **security-risk:I-02** Artefactos `.specify/mcp-validation-*.md` contienen rutas de CI/CD interno | Archivos generados en `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\` revelan: estructura de repo opencode, uso de MCP, nombres de validaciones | **Medium** — Si se distribuyen por error | **Medium** — Fuga de arquitectura interna, nombres de herramientas | **Eliminar archivos** (RF-07); agregar `.gitignore` para `.specify/` generado | **Mitigated by Spec 039 RF-07** |
+| I-03 | **security-risk:I-03** Bootstrap `-CheckHardcodedPaths` escanea proyecto destino y muestra rutas en output | Output: `Documentacion/MiApp/specs/001-xyz/spec.md:15 → $ProjectRoot = "C:<sep>Proyectos\MiApp"` → revela rutas del proyecto usuario en consola/logs | **High** — Feature diseñado para esto | **Low** — Solo visible para usuario que ejecuta; no se persiste | Documentar: "Output solo en consola del usuario; no se envía a telemetría"; opción `-Quiet` para suprimir | **Accepted Risk — By Design** |
 
 ### D — Denial of Service (Denegación de Servicio)
 
 | ID | Threat | Description | Likelihood | Impact | Mitigation | Status |
 |----|--------|-------------|------------|--------|------------|--------|
-| D-01 | **security-risk:D-01** Rutas hardcodeadas rotas causan fallo de bootstrap | `sync-agents.ps1` busca en `C:\Proyectos\Agents_IA_TECH` que no existe → `Copy-Item` falla → bootstrap aborta → usuario no puede instalar kit | **High** — Probable en cualquier máquina distinta a la del autor | **High** — Bloquea adopción completa del kit | Eliminar rutas hardcoded; usar `$PSScriptRoot`; validar existencia con mensaje claro | **Mitigated by Spec 039 RF-05** |
+| D-01 | **security-risk:D-01** Rutas hardcodeadas rotas causan fallo de bootstrap | `sync-agents.ps1` busca en `$KitPath` que no existe → `Copy-Item` falla → bootstrap aborta → usuario no puede instalar kit | **High** — Probable en cualquier máquina distinta a la del autor | **High** — Bloquea adopción completa del kit | Eliminar rutas hardcoded; usar `$PSScriptRoot`; validar existencia con mensaje claro | **Mitigated by Spec 039 RF-05** |
 | D-02 | **security-risk:D-02** Test de regresión escanea recursivamente directorios grandes | `Get-ChildItem -Recurse` en `Documentacion/` con miles de archivos → timeout, consumo CPU/memoria | **Low** — Kit pequeño (~500 archivos) | **Low** — Solo en CI/local | Limitar profundidad (`-Depth`); excluir `node_modules`, `.git`, `bin`, `obj`; timeout en Pester | **Mitigated — Test scopes to known dirs** |
 | D-03 | Bootstrap `-CheckHardcodedPaths` escanea proyecto destino masivo | Usuario ejecuta en monorepo con 50k archivos .md → lentitud, timeout | **Medium** — Proyectos grandes | **Medium** — Experiencia usuario degradada | Opción `-MaxFiles` / `-Timeout`; paralelizar con `ForEach-Object -Parallel` (PS7+); documentar limitación | **Recommended — Add to T020** |
 
@@ -116,13 +116,13 @@ graph TD
 
 | Req ID | Description | Source Threat | Implementation |
 |--------|-------------|---------------|----------------|
-| **SEC-01** | Cero rutas absolutas (`C:\`, `D:\`, `/home/`, `/Users/`) en archivos distribuibles | I-01, S-01 | Test `validate-no-hardcoded-paths.Tests.ps1` (RF-08) |
+| **SEC-01** | Cero rutas absolutas (`C:\`, `D:<sep>`, `/<home>/`, `/<Users>/`) en archivos distribuibles | I-01, S-01 | Test `validate-no-hardcoded-paths.Tests.ps1` (RF-08) |
 | **SEC-02** | Scripts usan `$PSScriptRoot`/parámetros, nunca rutas literales | S-02, D-01 | RF-05 + header comment convention (T018) |
 | **SEC-03** | Bootstrap valida que `$KitPath` y `$RootPath` son directorios locales existentes y seguros (subtree check) | E-01, T-03 | Add to `plataformador-bootstrap.ps1` param validation (T019/T020) |
 | **SEC-04** | Bootstrap detecta y advierte si se ejecuta con privilegios de Administrador | E-02 | Add admin check at start of bootstrap (T019) |
 | **SEC-05** | Bootstrap emite log estructurado con parámetros usados (auditoría) | R-01 | Add `Write-Host "[BOOTSTRAP] ..."` (T019) |
 | **SEC-06** | Test de regresión emite lista de archivos escaneados (verbose) | R-02 | Pester `-Output Detailed` already covers; ensure test lists files |
-| **SEC-07** | Artefactos de desarrollo en `C:\Proyectos\opencode\...` eliminados y no distribuidos | I-02, E-03 | RF-07 (T022–T024) + `.gitignore` for `.specify/` runtime |
+| **SEC-07** | Artefactos de desarrollo en `C:<sep>Proyectos\opencode\...` eliminados y no distribuidos | I-02, E-03 | RF-07 (T022–T024) + `.gitignore` for `.specify/` runtime |
 | **SEC-08** | `-CheckHardcodedPaths` tiene límites de rendimiento (timeout, max files, exclusiones) | D-03 | Add `-MaxFiles`, `-Timeout`, exclude patterns to T020 |
 
 ---
@@ -156,12 +156,12 @@ graph TD
 
 | Test Case | Threat Covered | Expected Result |
 |-----------|----------------|-----------------|
-| TC-01: `grep -r "C:\\\\Proyectos" README.md AGENTS.md scripts/` | I-01, S-01, D-01 | 0 results (except `# $KitPath` comments) |
+| TC-01: `grep -r "C:<sep>Proyectos" README.md AGENTS.md scripts/` | I-01, S-01, D-01 | 0 results (except `# $KitPath` comments) |
 | TC-02: `plataformador-bootstrap.ps1 -KitPath "C:\Windows\System32"` | E-01 | Error: "KitPath must be under kit root or current directory" |
 | TC-03: `plataformador-bootstrap.ps1` run as Admin | E-02 | Warning: "Running as Administrator not recommended" |
 | TC-04: `Invoke-Pester tests/validate-no-hardcoded-paths.Tests.ps1` | SEC-01, SEC-06 | All tests pass; verbose output lists scanned files |
 | TC-05: Bootstrap copies files, then verify no hardcoded paths in destination | SEC-03, I-03 | Destination docs clean; `-CheckHardcodedPaths` reports 0 |
-| TC-06: `Test-Path "C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-*.md"` | I-02, E-03 | Both return `False` |
+| TC-06: `Test-Path "C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-*.md"` | I-02, E-03 | Both return `False` |
 
 ---
 
@@ -206,9 +206,9 @@ All findings tagged with `security-risk:` for traceability:
 
 ```mermaid
 graph TD
-    A[Information Disclosure: Rutas absolutas en docs] --> B[README.md expone C:\Proyectos\Agents_IA_TECH]
-    A --> C[AGENTS.md expone C:\Proyectos\opencode]
-    A --> D[Artefactos .specify\ exponen C:\Proyectos\opencode\src\...]
+    A[Information Disclosure: Rutas absolutas en docs] --> B[README.md expone $KitPath]
+    A --> C[AGENTS.md expone C:<sep>Proyectos\opencode]
+    A --> D[Artefactos .specify\ exponen C:<sep>Proyectos\opencode\src\...]
     B --> E[Attacker conoce: unidad C:, carpeta Proyectos, nombre kit]
     C --> F[Attacker conoce: herramienta opencode, estructura src/]
     D --> G[Attacker conoce: MCP validation, Speckit usage, paths internos]
@@ -216,7 +216,7 @@ graph TD
     F --> H
     G --> H
     H --> I[Supply chain attack: typosquatting Agents_IA_TECH]
-    H --> J[Social engineering: "Hola, vi tu estructura C:\Proyectos\..."]
+    H --> J[Social engineering: "Hola, vi tu estructura C:<sep>Proyectos\..."]
 ```
 
 ---

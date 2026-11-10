@@ -19,9 +19,9 @@
 | **Bootstrap** | Compatible: solo re-resuelve tokens `__TOKENS__` si existieran; las rutas reales las conserva intactas. |
 
 **Rutas globales commiteadas** (opencode.json):
-- `context-mode` → `C:\Users\tomas\AppData\Roaming\npm\context-mode.cmd`
-- `codebase-memory-mcp` → `C:\Users\tomas\.local\bin\codebase-memory-mcp.exe`
-- `markitdown` → `C:\Python314\Scripts\markitdown.exe`
+- `context-mode` → `<HOME>\AppData\Roaming\npm\context-mode.cmd`
+- `codebase-memory-mcp` → `<HOME>\.local\bin\codebase-memory-mcp.exe`
+- `markitdown` → `<PYTHON_HOME>\Scripts\markitdown.exe`
 
 **Nota**: si cambias de máquina o las rutas cambian, re-resolver manualmente en `opencode.json` (o restaurar desde `opencode.json.backup` y re-ejecutar el bootstrap).
 
@@ -45,7 +45,7 @@ Indexa el repo completo en el grafo de conocimiento del código.
 
 ```powershell
 # Indexar / re-indexar el proyecto — USAR --mode fast (ver nota crítica abajo)
-codebase-memory-mcp cli index_repository --repo-path "C:/Proyectos/Agents_IA_TECH" --mode fast
+codebase-memory-mcp cli index_repository --repo-path "$KitPath" --mode fast
 
 # Verificar estado
 codebase-memory-mcp cli index_status --project "C-Proyectos-Agents_IA_TECH"
@@ -72,10 +72,10 @@ Indexa `Documentacion/` en la base FTS5 para búsquedas BM25.
 
 ```powershell
 # Indexar la documentación del proyecto
-context-mode index "C:\Proyectos\Agents_IA_TECH\Documentacion" --project "C:\Proyectos\Agents_IA_TECH"
+context-mode index "$KitPath\Documentacion" --project "$KitPath"
 
 # Verificar (búsqueda de prueba)
-context-mode search "post-plataformado" --project "C:\Proyectos\Agents_IA_TECH" --limit 3
+context-mode search "post-plataformado" --project "$KitPath" --limit 3
 
 # Diagnóstico
 context-mode doctor
@@ -98,22 +98,22 @@ Grafo de conocimiento del proyecto (god nodes, communities). **Estructura-first*
 
 ```powershell
 # 1) Sin grafo previo -> extracción estructural (sin IA, sin secrets)
-graphify extract "C:\Proyectos\Agents_IA_TECH" --code-only
+graphify extract "$KitPath" --code-only
 
 # 2) Grafo existente -> actualización incremental (sin LLM)
-graphify update "C:\Proyectos\Agents_IA_TECH"
+graphify update "$KitPath"
 
 # 3) Semántica con LLM (solo bajo demanda, requiere backend configurado)
-graphify extract "C:\Proyectos\Agents_IA_TECH" --mode deep
+graphify extract "$KitPath" --mode deep
 ```
 
 > ⚠️ **`graphify` solo tiene `--mode deep`** (no existe `--mode fast` — ese flag es de `codebase-memory-mcp`). Flags reales de `graphify extract`: `--code-only`, `--mode deep`, `--force`, `--no-cluster`, `--backend`, `--max-workers`, `--token-budget`, `--out`. Verificar siempre con `graphify --help`.
 
 **Consultas**:
 ```powershell
-graphify query "como funciona el pipeline speckit" --graph "C:\Proyectos\Agents_IA_TECH\graphify-out\graph.json"
-graphify god-nodes --top 10 --graph "C:\Proyectos\Agents_IA_TECH\graphify-out\graph.json"
-graphify explain "pensador" --graph "C:\Proyectos\Agents_IA_TECH\graphify-out\graph.json"
+graphify query "como funciona el pipeline speckit" --graph "$KitPath\graphify-out\graph.json"
+graphify god-nodes --top 10 --graph "$KitPath\graphify-out\graph.json"
+graphify explain "pensador" --graph "$KitPath\graphify-out\graph.json"
 ```
 
 **Cuándo ejecutar**: tras cambios estructurales grandes (nuevos agentes/skills, reorganización).
@@ -125,22 +125,22 @@ graphify explain "pensador" --graph "C:\Proyectos\Agents_IA_TECH\graphify-out\gr
 ## 5. Secuencia completa de mantenimiento
 
 ```powershell
-# Desde C:\Proyectos\Agents_IA_TECH
+# Desde $KitPath
 
 # 1. Código (--mode fast: evita el crash del worker con proyect_ext/spec-kit)
-codebase-memory-mcp cli index_repository --repo-path "C:/Proyectos/Agents_IA_TECH" --mode fast
+codebase-memory-mcp cli index_repository --repo-path "$KitPath" --mode fast
 
 # 2. Documentación
-context-mode index "C:\Proyectos\Agents_IA_TECH\Documentacion" --project "C:\Proyectos\Agents_IA_TECH"
+context-mode index "$KitPath\Documentacion" --project "$KitPath"
 
 # 3. Grafo (primera vez: extract; siguientes: update)
-graphify extract "C:\Proyectos\Agents_IA_TECH" --code-only
+graphify extract "$KitPath" --code-only
 # o, si graphify-out/graph.json ya existe:
-graphify update "C:\Proyectos\Agents_IA_TECH"
+graphify update "$KitPath"
 # 4. Verificación
 codebase-memory-mcp cli index_status --project "C-Proyectos-Agents_IA_TECH"
-context-mode search "speckit" --project "C:\Proyectos\Agents_IA_TECH" --limit 3
-graphify god-nodes --top 5 --graph "C:\Proyectos\Agents_IA_TECH\graphify-out\graph.json"
+context-mode search "speckit" --project "$KitPath" --limit 3
+graphify god-nodes --top 5 --graph "$KitPath\graphify-out\graph.json"
 ```
 
 ---
@@ -170,7 +170,7 @@ El log del worker (`~\.cache\codebase-memory-mcp\logs\.worker-*.log`) está **va
 
 **Solución**: usar `--mode fast`:
 ```powershell
-codebase-memory-mcp cli index_repository --repo-path "C:/Proyectos/Agents_IA_TECH" --mode fast
+codebase-memory-mcp cli index_repository --repo-path "$KitPath" --mode fast
 ```
 
 **Modos disponibles**:
@@ -192,8 +192,8 @@ codebase-memory-mcp cli index_repository --repo-path "C:/Proyectos/Agents_IA_TEC
 
 Verificar que la indexación se ejecutó con el `--project` correcto (debe coincidir con el cwd o la ruta absoluta del proyecto):
 ```powershell
-context-mode index "C:\Proyectos\Agents_IA_TECH\Documentacion" --project "C:\Proyectos\Agents_IA_TECH"
-context-mode search "speckit" --project "C:\Proyectos\Agents_IA_TECH" --limit 3
+context-mode index "$KitPath\Documentacion" --project "$KitPath"
+context-mode search "speckit" --project "$KitPath" --limit 3
 ```
 
 ---

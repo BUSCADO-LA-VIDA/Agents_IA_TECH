@@ -87,30 +87,30 @@ PARSE-OK tests/kit-sync-merge.ps1
 
 ### Verificación end-to-end de CA-14 (2026-11-01)
 
-**Destino real (consumidor del kit):** `C:\Proyectos\Generator_IA_Projects`. Checkout válido del kit (presenta `scripts/`, `.github/`, `.opencode/`, `AGENTS.md`; también `sync-agents.ps1`, `opencode.json`, `Documentacion/`, `src/`).
+**Destino real (consumidor del kit):** `<PROJECT_ROOT>`. Checkout válido del kit (presenta `scripts/`, `.github/`, `.opencode/`, `AGENTS.md`; también `sync-agents.ps1`, `opencode.json`, `Documentacion/`, `src/`).
 
 **Comando ejecutado** (dry-run del motor con `-KitPath` = fuente local del kit para incluir los cambios sin pushear de la iteración 034; NO clona GitHub, NO escribe en el consumidor):
 
 ```powershell
-pwsh -NoProfile -File C:\Proyectos\Agents_IA_TECH\scripts\sync-kit.ps1 -DryRun -RootPath C:\Proyectos\Generator_IA_Projects -KitPath C:\Proyectos\Agents_IA_TECH -OrphanAction Conservar
+pwsh -NoProfile -File $KitPath\scripts\sync-kit.ps1 -DryRun -RootPath <PROJECT_ROOT> -KitPath $KitPath -OrphanAction Conservar
 ```
 
 **Salida literal completa (exit code 0):**
 
 ```text
-[STEP] sync-kit: sincronizando kit transversal en C:\Proyectos\Generator_IA_Projects
+[STEP] sync-kit: sincronizando kit transversal en <PROJECT_ROOT>
 [STEP] Sincronizando kit transversal desde https://github.com/BUSCADO-LA-VIDA/Agents_IA_TECH...
-[INFO] DryRun: fuente LOCAL del kit: C:\Proyectos\Agents_IA_TECH (sin clonar GitHub; incluye rama y cambios locales sin pushear)
-[INFO] DryRun: copiaria .github/ -> C:\Proyectos\Generator_IA_Projects\.github\
-[INFO] DryRun: copiaria .opencode/ -> C:\Proyectos\Generator_IA_Projects\.opencode\
-[INFO] DryRun: copiaria .doc_agents/ -> C:\Proyectos\Generator_IA_Projects\.doc_agents\
-[INFO] DryRun: copiaria scripts/ -> C:\Proyectos\Generator_IA_Projects\scripts\
-[INFO] DryRun: copiaria .specify/memory/constitution.md -> C:\Proyectos\Generator_IA_Projects\.specify\memory\constitution.md
-[INFO] DryRun: copiaria AGENTS.md -> C:\Proyectos\Generator_IA_Projects\AGENTS.md
-[INFO] DryRun: copiaria opencode.json -> C:\Proyectos\Generator_IA_Projects\opencode.json
-[INFO] DryRun: copiaria README.md -> C:\Proyectos\Generator_IA_Projects\README.md
-[INFO] DryRun: copiaria sync-agents.ps1 -> C:\Proyectos\Generator_IA_Projects\sync-agents.ps1
-[INFO] DryRun: copiaria upgrade_framework.ps1 -> C:\Proyectos\Generator_IA_Projects\upgrade_framework.ps1
+[INFO] DryRun: fuente LOCAL del kit: $KitPath (sin clonar GitHub; incluye rama y cambios locales sin pushear)
+[INFO] DryRun: copiaria .github/ -> <PROJECT_ROOT>\.github\
+[INFO] DryRun: copiaria .opencode/ -> <PROJECT_ROOT>\.opencode\
+[INFO] DryRun: copiaria .doc_agents/ -> <PROJECT_ROOT>\.doc_agents\
+[INFO] DryRun: copiaria scripts/ -> <PROJECT_ROOT>\scripts\
+[INFO] DryRun: copiaria .specify/memory/constitution.md -> <PROJECT_ROOT>\.specify\memory\constitution.md
+[INFO] DryRun: copiaria AGENTS.md -> <PROJECT_ROOT>\AGENTS.md
+[INFO] DryRun: copiaria opencode.json -> <PROJECT_ROOT>\opencode.json
+[INFO] DryRun: copiaria README.md -> <PROJECT_ROOT>\README.md
+[INFO] DryRun: copiaria sync-agents.ps1 -> <PROJECT_ROOT>\sync-agents.ps1
+[INFO] DryRun: copiaria upgrade_framework.ps1 -> <PROJECT_ROOT>\upgrade_framework.ps1
 [INFO] DryRun: excluiria .opencode/config.json (posibles credenciales, nunca se copia)
 [INFO] DryRun: hash-guard .opencode/.gitignore: si el local existe y difiere del maestro se CONSERVA el local (fail-closed); solo -Force sobrescribe
 [INFO] DryRun: NUNCA tocaria Documentacion/<AppName>/ (frontera kit <-> app)
@@ -163,7 +163,7 @@ Junto con la corrección: los enganches `[MERGE]` de `opencode.json` y `AGENTS.m
 | El fix de `Get-CanonicalTiers` no tiene caso en la suite Pester | La suite `tests/validate-agents-skills.Tests.ps1` no cubre esa función | Prevención de regresión futura | Verificación manual con 5 casos; deuda registrada en `analyze.md` §6 |
 | El `pensador` no puede ejecutar comandos arbitrarios | Su `permission.bash` solo permite `git status/log/diff` y `scripts/validate-*` | Ejecución directa de los tests de contrato (`harness-default.ps1`, `kit-sync-merge.ps1`) | Delegación al developer/QA a través de la sesión heredada, con salida literal reportada y verificada por lectura |
 | `tests/kit-sync-merge.ps1` (T20) fuera del dominio del pensador | Es un ejecutable del developer/QA; el análisis documenta el diseño pero no puede correrlo | Verificación de la mitad de propagación | El developer ejecutó el test en esta iteración: `OK: 7 escenarios`, exit 0, y `git status` tras ejecutar sin cambios (no escribe en el repo) |
-| ~~No se ejecutó `sync-agents.ps1 -DryRun` completo contra un proyecto consumidor~~ **Satisfecha** | Requería un destino consumidor real; el usuario confirmó `C:\Proyectos\Generator_IA_Projects` como consumidor del kit. Ejecutado el dry-run con el motor del kit local (`-KitPath`) para incluir los cambios sin pushear de la iteración 034 | Verificación de CA-14 de punta a punta | Dry-run ejecutado el 2026-11-01 sobre `C:\Proyectos\Generator_IA_Projects` con el motor `C:\Proyectos\Agents_IA_TECH\scripts\sync-kit.ps1 -DryRun -RootPath <consumidor> -KitPath <kit> -OrphanAction Conservar`, exit 0 con 0 WARN / 0 ERROR. La salida confirma la whitelist de 5 tests del kit y que `opencode.json` / `AGENTS.md` viajan en el set transversal (detalle completo en §3, bloque "Verificación end-to-end de CA-14"). Nota: el bloque dry-run del motor (L903-L921) retorna antes de la iteración por ítem, por lo que la confirmación del merge por claves/bloque es por lectura de la rama `[MERGE]` (L1052-L1064) y de `Merge-OpenCodeConfig`/`Merge-KitBlock`; sin errores ni fallos en el dry-run |
+| ~~No se ejecutó `sync-agents.ps1 -DryRun` completo contra un proyecto consumidor~~ **Satisfecha** | Requería un destino consumidor real; el usuario confirmó `<PROJECT_ROOT>` como consumidor del kit. Ejecutado el dry-run con el motor del kit local (`-KitPath`) para incluir los cambios sin pushear de la iteración 034 | Verificación de CA-14 de punta a punta | Dry-run ejecutado el 2026-11-01 sobre `<PROJECT_ROOT>` con el motor `$KitPath\scripts\sync-kit.ps1 -DryRun -RootPath <consumidor> -KitPath <kit> -OrphanAction Conservar`, exit 0 con 0 WARN / 0 ERROR. La salida confirma la whitelist de 5 tests del kit y que `opencode.json` / `AGENTS.md` viajan en el set transversal (detalle completo en §3, bloque "Verificación end-to-end de CA-14"). Nota: el bloque dry-run del motor (L903-L921) retorna antes de la iteración por ítem, por lo que la confirmación del merge por claves/bloque es por lectura de la rama `[MERGE]` (L1052-L1064) y de `Merge-OpenCodeConfig`/`Merge-KitBlock`; sin errores ni fallos en el dry-run |
 
 ## 6. Riesgo residual abierto
 
@@ -188,5 +188,5 @@ No se archiva: la spec permanece activa, según el ciclo de vida vigente del kit
 1. ~~Agregar la regla `opencode.json.bak-*` a `.gitignore`~~ **hecho en T19** (también `AGENTS.md.bak-*`); cierra TM-04.
 2. Incorporar a `tests/validate-agents-skills.Tests.ps1` un caso que fije `Get-CanonicalTiers` frente a tablas ajenas (cierra la deuda de `analyze.md` §6).
 3. Ejecutar el bootstrap completo en un proyecto de prueba y verificar el estado final de `opencode.json` (cierra la limitación de verificación de FR-07).
-4. ~~Ejecutar `sync-agents.ps1 -DryRun` contra un proyecto consumidor para confirmar CA-14 de punta a punta (whitelist de tests + merge por claves/bloque en un destino real)~~ **hecho** el 2026-11-01 sobre `C:\Proyectos\Generator_IA_Projects` (ver bloque "Verificación end-to-end de CA-14" en §3). El dry-run del motor del kit local terminó con exit 0 y confirmó la whitelist de 5 tests en el set transversal; el merge por claves/bloque quedó confirmado por lectura de la rama `[MERGE]` (el bloque dry-run retorna antes de iterar por ítem). No se ejecutó un sync real (no modificador) sobre el consumidor por ser otra app: el merge se valida via test `kit-sync-merge.ps1` + lectura del motor.
+4. ~~Ejecutar `sync-agents.ps1 -DryRun` contra un proyecto consumidor para confirmar CA-14 de punta a punta (whitelist de tests + merge por claves/bloque en un destino real)~~ **hecho** el 2026-11-01 sobre `<PROJECT_ROOT>` (ver bloque "Verificación end-to-end de CA-14" en §3). El dry-run del motor del kit local terminó con exit 0 y confirmó la whitelist de 5 tests en el set transversal; el merge por claves/bloque quedó confirmado por lectura de la rama `[MERGE]` (el bloque dry-run retorna antes de iterar por ítem). No se ejecutó un sync real (no modificador) sobre el consumidor por ser otra app: el merge se valida via test `kit-sync-merge.ps1` + lectura del motor.
 5. Revisar el estado de las specs 029 y 030, que siguen abiertas según `00-indice.md`.

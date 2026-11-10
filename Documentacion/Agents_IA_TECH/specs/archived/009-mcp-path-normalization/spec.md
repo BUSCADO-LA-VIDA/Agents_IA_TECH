@@ -6,7 +6,7 @@ El error `InvalidEscapeCharacter` en `opencode.json` ocurre cuando las rutas MCP
 Ejemplo de error:
 ```
 InvalidEscapeCharacter at line 95, column 9
-"command": ["C:\Users\tomas\AppData\Roaming\npm\context-mode.ps1"]
+"command": ["<HOME>\AppData\Roaming\npm\context-mode.ps1"]
 ```
 
 ## Problema

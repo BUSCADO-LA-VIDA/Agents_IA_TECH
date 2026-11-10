@@ -148,7 +148,7 @@ Copy-Item "proyect_ext\ECC\hooks\hooks.json" ".github\hooks\ecc\"
 Copy-Item "proyect_ext\ECC\hooks\hooks.metadata.json" ".github\hooks\ecc\"
 Copy-Item "proyect_ext\ECC\hooks\memory-persistence" ".github\hooks\ecc\" -Recurse
 ```
-Adaptar comandos internos para apuntar a `proyect_ext/ECC/scripts/hooks/` sin modificar origen ECC, usando variables de entorno `ECC_ROOT=C:\Proyectos\Agents_IA_TECH\proyect_ext\ECC`.
+Adaptar comandos internos para apuntar a `proyect_ext/ECC/scripts/hooks/` sin modificar origen ECC, usando variables de entorno `ECC_ROOT=$KitPath\proyect_ext\ECC`.
 
 Crear archivo de configuración local `.github/hooks/ecc-local.json` con:
 ```json

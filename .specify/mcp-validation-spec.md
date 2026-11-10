@@ -14,16 +14,16 @@ Validate and synchronize the MCP (Model Context Protocol) configuration across t
 1. **markitdown** - `markitdown-mcp` - stdio
 2. **codebase-memory-mcp** - `codebase-memory-mcp` - stdio
 3. **context-mode** - `context-mode` - stdio
-4. **graphify** - `C:/Python314/python.exe -m graphify.serve C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json` - stdio
-5. **github** - `C:/Users/tomas/.local/bin/github-mcp-server.exe` - stdio
-6. **playwright** - `C:/Users/tomas/AppData/Roaming/npm/playwright-mcp.ps1` - stdio
-7. **semgrep** - `C:/Users/tomas/.local/bin/semgrep.exe mcp` - stdio
-8. **context7** - `C:/Users/tomas/AppData/Roaming/npm/context7-mcp.ps1 --stdio` - stdio
+4. **graphify** - `<PYTHON_HOME>/python.exe -m graphify.serve $KitPath/graphify-out/graph.json` - stdio
+5. **github** - `<HOME>/.local/bin/github-mcp-server.exe` - stdio
+6. **playwright** - `<HOME>/AppData/Roaming/npm/playwright-mcp.ps1` - stdio
+7. **semgrep** - `<HOME>/.local/bin/semgrep.exe mcp` - stdio
+8. **context7** - `<HOME>/AppData/Roaming/npm/context7-mcp.ps1 --stdio` - stdio
 
 ### Known Issues
 - **4 commands not verified in runtime**: testsprite, sentry, pieces, perplexity (from Copilot migration report)
 - **8th server context7** added (not in original 7-server report)
-- **All routes hardcoded** to `C:/Users/tomas/` - machine-specific
+- **All routes hardcoded** to `<HOME>/` - machine-specific
 - **No `.mcp.json` in root** - project uses `.vscode\mcp.json` exclusively
 - **Backups preserved** from Copilot migration in `customizationMigrations\d98daa8a-...`
 
@@ -45,7 +45,7 @@ Validate and synchronize the MCP (Model Context Protocol) configuration across t
 - Mantener respaldo antes de cualquier escritura
 
 ### FR-004: Documentar rutas machine-specific
-- Identificar todas las rutas hardcodeadas a `C:/Users/tomas/...`
+- Identificar todas las rutas hardcodeadas a `<HOME>/...`
 - Proporcionar estrategia de normalización para sincronización multi-máquina
 - Documentar en `.env.mcp` o documentación asociada
 
@@ -94,7 +94,7 @@ Validate and synchronize the MCP (Model Context Protocol) configuration across t
 ## Assumptions
 - El archivo `.vscode\mcp.json` es la fuente de verdad para la configuración MCP del proyecto
 - Los scripts `scripts/sync/mcp/` son la vía oficial de sincronización
-- Rutas hardcodeadas a `C:/Users/tomas/` son específicas de la máquina actual y requerirán normalización para sincronización multi-máquina
+- Rutas hardcodeadas a `<HOME>/` son específicas de la máquina actual y requerirán normalización para sincronización multi-máquina
 - Backups de migración Copilot ya existen y deben preservarse
 - PowerShell 7.0+ está disponible en máquinas objetivo para ejecutar scripts de sincronización
 

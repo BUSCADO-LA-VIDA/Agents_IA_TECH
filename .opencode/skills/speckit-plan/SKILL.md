@@ -18,6 +18,11 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Pre-Execution Checks
 
+**Documentation First Validation**:
+- Before any write operation, verify the target path starts with `Documentacion/<AppName>/`
+- If not, abort with error: "Ruta inválida: los artefactos Speckit deben escribirse en Documentacion/<AppName>/, no en src/ ni en la raíz del repo"
+- This ensures all spec files (spec.md, plan.md, tasks.md, etc.) are created under the Documentation directory as per the kit's structure requirements
+
 **Check for extension hooks (before planning)**:
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_plan` key

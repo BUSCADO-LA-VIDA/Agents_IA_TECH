@@ -441,26 +441,26 @@ Describe "upgrade_framework.ps1 - CLI EntryPoint" {
     # -------------------------------------------------------------------------
     Context "Test-ProyectExtContainment (verificación de containment)" {
         It "Debe retornar $true para ruta dentro de proyect_ext/" {
-            $root = "C:\Proyectos\test"
-            $path = "C:\Proyectos\test\proyect_ext\spec-kit"
+            $root = "Z:\test"
+            $path = "Z:\test\proyect_ext\spec-kit"
             Test-ProyectExtContainment -Path $path -RootPath $root | Should -Be $true
         }
         
         It "Debe retornar $true para subdirectorio profundo en proyect_ext/" {
-            $root = "C:\Proyectos\test"
-            $path = "C:\Proyectos\test\proyect_ext\tokenslayer\mcp-server"
+            $root = "Z:\test"
+            $path = "Z:\test\proyect_ext\tokenslayer\mcp-server"
             Test-ProyectExtContainment -Path $path -RootPath $root | Should -Be $true
         }
         
         It "Debe retornar $false para ruta fuera de proyect_ext/" {
-            $root = "C:\Proyectos\test"
-            $path = "C:\Proyectos\test\src\app"
+            $root = "Z:\test"
+            $path = "Z:\test\src\app"
             Test-ProyectExtContainment -Path $path -RootPath $root | Should -Be $false
         }
         
         It "Debe retornar $false para ruta con traversia (..)" {
-            $root = "C:\Proyectos\test"
-            $path = "C:\Proyectos\test\proyect_ext\..\..\Windows"
+            $root = "Z:\test"
+            $path = "Z:\test\proyect_ext\..\..\Windows"
             Test-ProyectExtContainment -Path $path -RootPath $root | Should -Be $false
         }
     }

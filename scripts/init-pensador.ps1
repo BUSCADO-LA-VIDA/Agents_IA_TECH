@@ -3,9 +3,12 @@
 # Este script asegura que la validación de documentación y el orden sagrado estén en lugar
 
 param(
-    [string]$SourceProject = "c:\Proyectos\Agents_IA_TECH",
+    [string]$SourceProject = "",
     [string]$TargetProject = ""
 )
+
+# [044-RF-08] Sin default de la maquina del autor: la raiz del kit se deriva de la ubicacion del script.
+if (-not $SourceProject) { $SourceProject = Split-Path -Parent $PSScriptRoot }
 
 Write-Host "=== Inicialización del Agente Pensador ===`n" -ForegroundColor Cyan
 

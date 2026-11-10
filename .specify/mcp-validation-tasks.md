@@ -48,7 +48,7 @@ Tasks organized by user story priority. Each user story gets its own phase. All 
 |---------|------------------|-----|-------|
 | T009 | [ ] T009 Decidir si ejecutar `install.ps1` - instalación portable por máquina | | |
 | **Opciones**: | | | |
-| - yes: Ejecutar `.\scripts\sync\mcp\install.ps1 -RootPath "C:\Proyectos\Agents_IA_TECH"` | | |
+| - yes: Ejecutar `.\scripts\sync\mcp\install.ps1 -RootPath "$KitPath"` | | |
 | - no: Saltar a T011 | | |
 | - dry-run: Ejecutar con `-DryRun` primero para reportar resultados | | |
 | **Test Criteria**: Decisión registrada (yes/no/dry-run) y resultado documentado | | |
@@ -58,7 +58,7 @@ Tasks organized by user story priority. Each user story gets its own phase. All 
 |---------|------------------|-----|-------|
 | T010 | [ ] T010 Decidir si ejecutar `lift-vscode.ps1` - actualizar `.vscode\mcp.json` desde maestro | | |
 | **Opciones**: | | | |
-| - yes: Ejecutar `.\scripts\sync\mcp\lift-vscode.ps1 -StageDir "C:\Proyectos\Agents_IA_TECH" -Force` | | |
+| - yes: Ejecutar `.\scripts\sync\mcp\lift-vscode.ps1 -StageDir "$KitPath" -Force` | | |
 | - no: Saltar a validación post-sync | | |
 | - dry-run: Ejecutar con `-WhatIf` o revisar reglas de fusión sin escribir | | |
 | **Test Criteria**: Decisión registrada y resultados esperados documentados | | |
@@ -68,7 +68,7 @@ Tasks organized by user story priority. Each user story gets its own phase. All 
 |---------|------------------|-----|-------|
 | T011 | [ ] T011 Decidir si ejecutar `lift-opencode.ps1` - actualizar bloque mcp de `opencode.json` | | |
 | **Opciones**: | | | |
-| - yes: Ejecutar `.\scripts\sync\mcp\lift-opencode.ps1 -StageDir "C:\Proyectos\Agents_IA_TECH" -Force` | | |
+| - yes: Ejecutar `.\scripts\sync\mcp\lift-opencode.ps1 -StageDir "$KitPath" -Force` | | |
 | - no: Continuar sin actualizar opencode.json | | |
 | - dry-run: Reglas de fusión sin escribir cambios | | |
 | **Test Criteria**: Decisión registrada y resultados esperados documentados | | |
@@ -86,7 +86,7 @@ Tasks organized by user story priority. Each user story gets its own phase. All 
 |---------|------------------|-----|-------|
 | T012 | [ ] T012 Ejecutar `install.ps1` si T009 fue yes (instalación portable) | | |
 | **Comando**: | | | |
-| `.\scripts\sync\mcp\install.ps1 -RootPath "C:\Proyectos\Agents_IA_TECH"` | | |
+| `.\scripts\sync\mcp\install.ps1 -RootPath "$KitPath"` | | |
 | **Resultado esperado**: Emite `RESULT:mcp-install:<herramienta>:ok|instalado|ausente-warn|sin-cambios>` por cada herramienta verificada | | |
 | **Test Criteria**: Todos los RESULT: mcp-install:... emitidos y registrados | | |
 | **Files Modified**: `.env.mcp` (append idempotente), regla `.env.mcp` en `.gitignore` | | |
@@ -95,7 +95,7 @@ Tasks organized by user story priority. Each user story gets its own phase. All 
 |---------|------------------|-----|-------|
 | T013 | [ ] T013 Ejecutar `lift-vscode.ps1` si T010 fue yes (fusionar MCP a VS Code) | | |
 | **Comando**: | | | |
-| `.\scripts\sync\mcp\lift-vscode.ps1 -StageDir "C:\Proyectos\Agents_IA_TECH" -Force` | | |
+| `.\scripts\sync\mcp\lift-vscode.ps1 -StageDir "$KitPath" -Force` | | |
 | **Resultado esperado**: `RESULT:mcp-vscode:anadidas|reparadas|sin-cambios` | | |
 | **Test Criteria**: Resultado lift-vscode registrado y `.vscode\mcp.json` actualizado consistente | | |
 | **Files Modified**: `.vscode\mcp.json` (actualizado), `.kit-backup\<timestamp>\` (backup creado) | | |
@@ -104,7 +104,7 @@ Tasks organized by user story priority. Each user story gets its own phase. All 
 |---------|------------------|-----|-------|
 | T014 | [ ] T014 Ejecutar `lift-opencode.ps1` si T011 fue yes (fusionar MCP a OpenCode) | | |
 | **Comando**: | | | |
-| `.\scripts\sync\mcp\lift-opencode.ps1 -StageDir "C:\Proyectos\Agents_IA_TECH" -Force` | | |
+| `.\scripts\sync\mcp\lift-opencode.ps1 -StageDir "$KitPath" -Force` | | |
 | **Resultado esperado**: `RESULT:mcp-opencode:anadidas|reparadas|sin-cambios` | | |
 | **Test Criteria**: Resultado lift-opencode registrado y `opencode.json` bloque mcp actualizado | | |
 | **Files Modified**: `opencode.json` (bloque mcp actualizado), `.kit-backup\<timestamp>\` (backup creado) | | |
@@ -126,14 +126,14 @@ Tasks organized by user story priority. Each user story gets its own phase. All 
 |---------|------------------|-----|
 | T016 | [ ] T016 Verificar resultados post-sync revisando `.kit-last-sync.json` | |
 | **Comando**: | | |
-| `Get-Content "C:\Proyectos\Agents_IA_TECH\.kit-last-sync.json" | ConvertFrom-Json` | |
+| `Get-Content "$KitPath\.kit-last-sync.json" | ConvertFrom-Json` | |
 | **Test Criteria**: Archivo existe y contiene fases, layers y results | | |
 
 | Task ID | Task Description | [P] |
 |---------|------------------|-----|
 | T017 | [ ] T017 Gestionar flag `.kit-restart-required` si aplica | |
 | **Comando**: | | |
-| `Test-Path "C:\Proyectos\Agents_IA_TECH\.kit-restart-required"` | | |
+| `Test-Path "$KitPath\.kit-restart-required"` | | |
 | **Test Criteria**: Determinar si flag existe y qué acción tomar (reiniciar VS Code / continuar) | | |
 
 | Task ID | Task Description | [P] |

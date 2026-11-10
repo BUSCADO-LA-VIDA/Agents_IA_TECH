@@ -35,7 +35,7 @@ Se normalizaron todas las rutas MCP a forward slashes `/` en `scripts/plataforma
 - Rutas en `.env.mcp` mantienen valores resueltos normalizados.
 
 ## Archivos modificados
-- `C:\Proyectos\Agents_IA_TECH\scripts\plataformador-bootstrap.ps1`
+- `$KitPath\scripts\plataformador-bootstrap.ps1`
 
 ## Tareas completadas
 - T001 Identificar puntos de asignación

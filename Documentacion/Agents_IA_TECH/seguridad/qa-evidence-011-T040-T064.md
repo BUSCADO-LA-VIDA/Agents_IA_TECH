@@ -6,7 +6,7 @@
 
 ## Evidencia de implementación
 
-Las siguientes tareas fueron verificadas en `C:\Proyectos\Agents_IA_TECH\upgrade_framework.ps1`:
+Las siguientes tareas fueron verificadas en `$KitPath\upgrade_framework.ps1`:
 
 ### T040 Allowlist de URLs confiables + verificación de firma
 - `Test-TrustedGithubUrl` implementado líneas 106-114

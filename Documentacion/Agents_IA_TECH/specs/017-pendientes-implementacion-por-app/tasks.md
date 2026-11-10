@@ -49,7 +49,7 @@
 - **Dependencias**: T001. La estructura base debe existir antes de documentar.
 
 ### T008 — Verificar que no hay routes absolutas en el template
-- **Descripción**: Revisar el template de `pendientes-implementacion.md` para asegurar que no hay rutas absolutas (ej. `C:\Users\tomas\...`) versionadas. Las rutas deben ser relativas o tokens que se re-resuelvan en runtime. Verificar también que los comandos MCP se guardan como plantilla con tokens (`__CONTEXT_MODE_CMD__`) y el bootstrap los re-resuelve en runtime.
+- **Descripción**: Revisar el template de `pendientes-implementacion.md` para asegurar que no hay rutas absolutas (ej. `<HOME>\...`) versionadas. Las rutas deben ser relativas o tokens que se re-resuelvan en runtime. Verificar también que los comandos MCP se guardan como plantilla con tokens (`__CONTEXT_MODE_CMD__`) y el bootstrap los re-resuelve en runtime.
 - **Responsable**: `pensador` (órchestrator, valida)
 - **Hecho cuándo**: El template usa solo rutas relativas o tokens MCP, sin rutas absolutas de usuario. Se confirma con `git check-ignore` que los paths de `proyect_ext/` no se versionan.
 - **Dependencias**: T004. El template debe existir antes de verificar rutas.

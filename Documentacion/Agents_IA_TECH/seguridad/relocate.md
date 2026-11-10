@@ -84,7 +84,7 @@ Si `-AppDirs` acepta `..\otra-carpeta`, rutas absolutas (`C:\...`) o un symlink/
 
 ### 1.9 Riesgo de fuga por log / informe (secret o ruta privada en consola)
 
-El log (`origen → destino + fecha`) y el informe post-movido (tamaños, estado git, comandos de recreación del `.venv`) pueden volcar **rutas absolutas con nombre de usuario** (`C:\Users\<nombre>\...`) o variables de entorno con secrets si se copian tal cual al log o a `pendientes-implementacion.md`.
+El log (`origen → destino + fecha`) y el informe post-movido (tamaños, estado git, comandos de recreación del `.venv`) pueden volcar **rutas absolutas con nombre de usuario** (`<HOME>\<nombre>\...`) o variables de entorno con secrets si se copian tal cual al log o a `pendientes-implementacion.md`.
 
 **Puntos de validación:**
 - Logs e informes con **rutas relativas al `<ProjectRoot>` + metadatos** (tamaño, fecha); nunca contenido de archivos ni secrets.

@@ -3,7 +3,7 @@
 ## Instalacion
 - Release oficial `github/github-mcp-server v2.0.2` (2026-10-08), asset `Windows_x86_64.zip` (~9 MB).
 - SHA256 verificado contra el publicado (`4ae64087...b8c4bd99DF`): coincide.
-- Instalado en `C:/Users/tomas/.local/bin/github-mcp-server.exe` (28.6 MB). `--help` responde (`stdio`, `http`, `list-scopes`).
+- Instalado en `<HOME>/.local/bin/github-mcp-server.exe` (28.6 MB). `--help` responde (`stdio`, `http`, `list-scopes`).
 
 ## Registro (ADR-0009, sin tokens)
 - `opencode.json`: entrada `github` type local, command hardcodeado + `stdio`, enabled true. 0 `{env:}` en commands.

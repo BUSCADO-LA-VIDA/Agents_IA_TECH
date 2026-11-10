@@ -2,7 +2,7 @@
 
 ## 1. Fecha de ejecucion
 
-2026-11-04 (ejecutado por plataformador sobre C:\Proyectos\Agents_IA_TECH)
+2026-11-04 (ejecutado por plataformador sobre $KitPath)
 
 ## 2. Exit codes de las suites de prueba
 
@@ -20,7 +20,7 @@ Suite con fallo: tests/agents-parity.ps1 (exit 1). Resto: exit 0.
 
 ## 3. Conteo del audit log (.bootstrap-audit.log)
 
-Archivo analizado: C:\Proyectos\Agents_IA_TECH\.bootstrap-audit.log
+Archivo analizado: $KitPath\.bootstrap-audit.log
 
 | Metrica | Valor |
 |---|---:|

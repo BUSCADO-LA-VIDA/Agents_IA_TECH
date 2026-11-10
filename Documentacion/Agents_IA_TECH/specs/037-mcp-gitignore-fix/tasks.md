@@ -13,8 +13,8 @@
 |----|-------|-------------|------|------------|--------|
 | T037-001 | 037 | Crear `scripts/sync-gitignore.ps1`: catálogo de 6 bloques, detección por cabecera, exclusiones duras, `-Path`/`-Sets`/`-WhatIf`/`-RemoveBlock`/`-PruneRules`. | Script nuevo | `developer` | Cerrado |
 | T037-002 | 037 | Crear `tests/sync-gitignore.Tests.ps1`: contrato sin Pester, 14 asserts (existencia, catálogo, preservación, idempotencia, exclusiones, ausencia, reversión, filtro). | Test | `developer` | Cerrado |
-| T037-003 | 037 | Ejecutar sobre `C:\Proyectos\Agents_IA_TECH`, verificar `.gitignore` raíz e idempotencia. | Verificación | `developer` | Cerrado |
-| T037-004 | 037 | Ejecutar sobre `C:\Proyectos\Generator_IA_Projects`, verificar raíces de proyecto (13 archivos). | Verificación | `developer` | Cerrado |
+| T037-003 | 037 | Ejecutar sobre `$KitPath`, verificar `.gitignore` raíz e idempotencia. | Verificación | `developer` | Cerrado |
+| T037-004 | 037 | Ejecutar sobre `<PROJECT_ROOT>`, verificar raíces de proyecto (13 archivos). | Verificación | `developer` | Cerrado |
 | T037-005 | 037 | Integrar invocación en fase F4-VERIFY de `scripts/sync-kit.ps1`. | Modificación orquestador | `developer` | Pendiente (opcional, fuera de alcance) |
 | T037-006 | 037 | Actualizar `00-indice.md` (sección 037) y `pendientes-implementacion.md`. | Documentación | `pensador` | Cerrado |
 | T037-007 | 037 | Revertir overreach: 196 `.gitignore` en rutas de terceros del destino, incluidos restos huérfanos. | Corrección | `developer` | Cerrado |

@@ -12,7 +12,7 @@
 #
 # Uso:
 #   .\scripts\sync-gitignore.ps1                                  # raíces de proyecto de .
-#   .\scripts\sync-gitignore.ps1 -Path "C:\Proyectos\X" -WhatIf   # simulación
+#   .\scripts\sync-gitignore.ps1 -Path "<RUTA>\X" -WhatIf   # simulación
 #   .\scripts\sync-gitignore.ps1 -Sets graphify,deps              # solo esos bloques
 #   .\scripts\sync-gitignore.ps1 -AllGitignore                    # todo .gitignore, no solo raíces
 #   .\scripts\sync-gitignore.ps1 -RemoveBlock -OnlyExcluded       # rollback de rutas excluidas

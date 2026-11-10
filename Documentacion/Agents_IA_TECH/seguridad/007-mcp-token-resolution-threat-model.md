@@ -117,7 +117,7 @@ Todo fallo degrada con **WARN** y deja traza (alineado con Principio V, Observab
 ## 8. Checklist de verificación de seguridad (para el cierre de la feature)
 
 - [ ] `git check-ignore .env.mcp` → exit 0 (CN-1).
-- [ ] `Select-String -Pattern 'C:\\|/Users/'` sobre la plantilla `opencode.json` → sin coincidencias (CN-2).
+- [ ] `Select-String -Pattern 'C:\\|/<Users>/'` sobre la plantilla `opencode.json` → sin coincidencias (CN-2).
 - [ ] Bloque `mcp` tras 2 corridas consecutivas: equivalente, 0 tokens `__*_CMD__`, 0 `{env:...}` irresoluble (CN-3, CN-9).
 - [ ] Con `-ForceUpgradeTools` sin red: WARN por herramienta y bootstrap continúa (CN-4, CN-5).
 - [ ] `Update-Self` con repo/URL no allowlisted: no clona (CN-6); con `-SkipSelfUpdate` o en el kit: no intenta (CN-7).

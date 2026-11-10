@@ -269,7 +269,7 @@ Remove-Item $sb -Recurse -Force -ErrorAction SilentlyContinue
 
 # 1) destino con opencode.json en CRLF e identico en contenido
 # 2) DryRun: hashes del sandbox antes/despues deben coincidir  -> CA-05
-.\scripts\sync-kit.ps1 -RootPath $sb -KitPath C:\Proyectos\Agents_IA_TECH -DryRun
+.\scripts\sync-kit.ps1 -RootPath $sb -KitPath $KitPath -DryRun
 # 3) sin -Force:            -> "[OK] opencode.json - sin cambios (solo difiere el fin de linea...)"  CA-01
 # 4) clave nueva en destino -> "[SKIP] ... contenido distinto"                                         CA-02
 # 5) con -Force + mcp local -> "[GUARD] bloque mcp local PRESERVADO" + 0 CRLF + mcp intacto           CA-03, CA-06

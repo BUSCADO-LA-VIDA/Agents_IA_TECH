@@ -60,7 +60,7 @@
 | A4 — revert único `8787bea` | **PASS** | `git revert` de `4a13718`, **aislado a 1 archivo** (`opencode.json`, +7/-8). |
 | A5 — `{env}` vacío = no resuelto | **PASS** | Sustitución obligatoria verificada. |
 | CN-1 — `.env.mcp`/`config.json` gitignored | **PASS** | `.gitignore` con `.env.mcp` + `.opencode`; `git check-ignore .env.mcp` → **exit 0**. |
-| CN-2 — plantilla sin rutas absolutas | **PASS** | Sin `C:\`/`/Users/`; sin `__*_CMD__`. |
+| CN-2 — plantilla sin rutas absolutas | **PASS** | Sin `C:\`/`/<Users>/`; sin `__*_CMD__`. |
 | CN-3 — sin token irresoluble | **FAIL parcial** | Se cumple en path PSCustomObject; **violado** en creación fresca (BUG-1: queda `{env:...}` + `enabled:false`). |
 | CN-4/CN-5 — fuentes exactas + fail-open | **PASS (estático)** | Nombres oficiales exactos; `try/catch`. |
 | CN-6/CN-7 — allowlist + skip | **PASS (estático)** | `Test-TrustedGithubUrl`; auto-skip kit; `-SkipSelfUpdate`. |
@@ -122,7 +122,7 @@
 | **T-01** | Idempotencia (bloque `mcp` estable en 2 corridas) | **PASS** | Creación fresca (fixture `{"model":"m"}` sin `mcp`): `RUN1==RUN2 → True`. `enabled` de las 3 entradas = `true` en RUN1 y RUN2. |
 | **T-05** | `-Force` no deja tokens | **PASS** | Creación fresca: `sin __*_CMD__: True`; las 3 entradas quedan `enabled=true` (ya no `enabled:false`). |
 | **T-10** | Reporte final | **PASS** | Lista las **3 entradas reales** (`context-mode`, `codebase-memory-mcp`, `markitdown`) con `enabled=True`; **ninguna** meta-propiedad (`Count`/`Keys`/`Values`/`IsReadOnly`/`IsFixedSize`/`SyncRoot`/`IsSynchronized` ausentes del output). |
-| **T-03b (A5)** | `{env:VAR}` vacío/ausente → no resuelto | **PASS** | Fixture con `mcp` en `{env:...}` + `.env.mcp` con `CONTEXT_MODE_CMD=` (vacío) → `command[0]=C:\Users\tomas\AppData\Roaming\npm\context-mode.ps1` (ruta real), `enabled=True`, `0 {env:}` irresoluble. |
+| **T-03b (A5)** | `{env:VAR}` vacío/ausente → no resuelto | **PASS** | Fixture con `mcp` en `{env:...}` + `.env.mcp` con `CONTEXT_MODE_CMD=` (vacío) → `command[0]=<HOME>\AppData\Roaming\npm\context-mode.ps1` (ruta real), `enabled=True`, `0 {env:}` irresoluble. |
 | **T-107** | Parseo sin errores | **PASS** | `pwsh -NoProfile -Command '[Parser]::ParseFile("scripts/plataformador-bootstrap.ps1",[ref]$t,[ref]$e); $e.Count'` → **0 errores**. |
 | **CN-1** | `.env.mcp`/`config.json` gitignored | **PASS** | `git check-ignore .env.mcp` → **exit 0**; `git check-ignore .opencode/config.json` → **exit 0**. |
 | **CN-3** | Sin token irresoluble | **PASS** | Tras crear en frío, todo `{env:...}` remanente está respaldado por `.env.mcp` (valor no vacío) → resoluble. **0 tokens irresolubles**. |
@@ -137,8 +137,8 @@
 RUN1==RUN2: True
 RUN1 enabled all true: True
 .env.mcp → CONTEXT_MODE_CMD=C:\...\npm\context-mode.ps1
-           CODEBASE_MEMORY_CMD=C:\Users\tomas\.local\bin\codebase-memory-mcp.exe
-           MARKITDOWN_CMD=C:\Python314\Scripts\markitdown.exe
+           CODEBASE_MEMORY_CMD=<HOME>\.local\bin\codebase-memory-mcp.exe
+           MARKITDOWN_CMD=<PYTHON_HOME>\Scripts\markitdown.exe
 {env:CONTEXT_MODE_CMD} -> .env.mcp value "C:\\...\\context-mode.ps1" resolvable=true
 {env:CODEBASE_MEMORY_CMD} -> ... resolvable=true
 {env:MARKITDOWN_CMD} -> ... resolvable=true
@@ -148,7 +148,7 @@ ALL {env:} resolvable via .env.mcp: true
 
 **T-03b / A5** (`.env.mcp` con var vacía):
 ```
-context-mode command[0]=C:\Users\tomas\AppData\Roaming\npm\context-mode.ps1
+context-mode command[0]=<HOME>\AppData\Roaming\npm\context-mode.ps1
 context-mode enabled=True
 A5 command resolved to real path: True
 ```

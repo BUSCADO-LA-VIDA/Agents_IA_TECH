@@ -44,8 +44,8 @@ Resolver "quién ejecuta esta task" requiere saber **quién es dueño de la ruta
 El audit log registra al consumidor `Generator_IA_Projects` recibiendo escrituras que no le corresponden:
 
 ```json
-{"action":"manifest_not_immutable","details":{"path":"C:\\Proyectos\\Generator_IA_Projects\\dependencias-manifest.yml"}}
-{"action":"opencode_schema_missing_props","details":{"path":"C:\\Proyectos\\Generator_IA_Projects\\opencode.json"}}
+{"action":"manifest_not_immutable","details":{"path":"C:<sep>Proyectos\\Generator_IA_Projects\\dependencias-manifest.yml"}}
+{"action":"opencode_schema_missing_props","details":{"path":"C:<sep>Proyectos\\Generator_IA_Projects\\opencode.json"}}
 ```
 
 Si la whitelist expandida del kit se escribiera en `developer.md`, ese archivo **se propaga por el sync** y el consumidor heredaría el permiso ampliado. El límite debe vivir donde no viaje.

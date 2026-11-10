@@ -9,7 +9,7 @@
 
 ## Resumen Ejecutivo
 
-Este converge consolida todos los artefactos del ciclo Speckit (spec → plan → tasks → analyze → ADR → threat-model) para la Spec 039, que aborda la **portabilidad real del kit** eliminando rutas absolutas hardcodeadas (`C:\Proyectos\Agents_IA_TECH`, `C:\Proyectos\opencode`) de la documentación, scripts y artefactos generados.
+Este converge consolida todos los artefactos del ciclo Speckit (spec → plan → tasks → analyze → ADR → threat-model) para la Spec 039, que aborda la **portabilidad real del kit** eliminando rutas absolutas hardcodeadas (`$KitPath`, `C:<sep>Proyectos\opencode`) de la documentación, scripts y artefactos generados.
 
 **Resultado**: Todos los artefactos están alineados, cobertura 100% de requisitos funcionales, 0 issues críticos, 1 HIGH resuelto en tasks.md (T004/T005 de "verify only" → active replacement), 3 MEDIUM documentados con acciones, 2 LOW aceptados. **El spec está aprobado para implementación (v1.0.0)**.
 
@@ -25,21 +25,21 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 | **RF-02** | `README.md`: sección "Alternativa sin red" usa `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` | **Must** | T005, T009 (documentador) |
 | **RF-03** | `README.md`: sección "sync-kit local" usa variable `$KitPath` | **Must** | T006, T010 (documentador) |
 | **RF-04** | `AGENTS.md`: revisar y eliminar rutas absolutas | **Must** | T011–T013 (documentador) |
-| **RF-05** | Scripts del kit (`scripts/*.ps1`): sin hardcodear `C:\Proyectos\Agents_IA_TECH`; usar `$PSScriptRoot` o parámetros | **Must** | T014–T018 (plataformador) |
+| **RF-05** | Scripts del kit (`scripts/*.ps1`): sin hardcodear `$KitPath`; usar `$PSScriptRoot` o parámetros | **Must** | T014–T018 (plataformador) |
 | **RF-06** | Bootstrap: validación `-CheckHardcodedPaths` que escanee proyecto destino | **Should** | T019–T021 (plataformador) |
-| **RF-07** | Limpiar artefactos `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-*.md` | **Must** | T022–T024 (plataformador) |
+| **RF-07** | Limpiar artefactos `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-*.md` | **Must** | T022–T024 (plataformador) |
 | **RF-08** | Test regresión `tests/validate-no-hardcoded-paths.Tests.ps1` (Pester) | **Should** | T025–T030 (qa-senior) |
 
 **NFR Claves**:
-- **NFR-01**: Kit clonable en cualquier ruta (`/home/user/kits/...`, `D:\Kits\...`, `C:\Users\X\...`) → docs válidas sin editar
+- **NFR-01**: Kit clonable en cualquier ruta (`/<home>/user/kits/...`, `<KIT_PARENT>\...`, `<HOME>\X\...`) → docs válidas sin editar
 - **NFR-02**: README copiable/pegable, usuario solo cambia variables marcadas `# <- ajusta...`
 - **NFR-03**: No romper bootstrap ni sync-kit existente
 
 **Criterios de Aceptación (AC)**:
-1. `grep -r "C:\\Proyectos" README.md AGENTS.md scripts/` → 0 resultados (salvo comentarios con variable)
-2. `grep -r "C:\\Proyectos" .github/ .opencode/ .doc_agents/ Documentacion/` → 0 resultados
-3. README funciona copiado a `/home/user/mi-proyecto` o `D:\Proyectos\mi-proyecto` cambiando solo variables marcadas
-4. Artefactos `.specify/mcp-validation-*.md` en `C:\Proyectos\opencode\...` no existen
+1. `grep -r "C:<sep>Proyectos" README.md AGENTS.md scripts/` → 0 resultados (salvo comentarios con variable)
+2. `grep -r "C:<sep>Proyectos" .github/ .opencode/ .doc_agents/ Documentacion/` → 0 resultados
+3. README funciona copiado a `<HOME>/mi-proyecto` o `<PROJECT_ROOT>` cambiando solo variables marcadas
+4. Artefactos `.specify/mcp-validation-*.md` en `C:<sep>Proyectos\opencode\...` no existen
 5. Test Pester pasa en CI
 
 ---
@@ -47,9 +47,9 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 ### 2. Plan.md — Enfoque Técnico y Decisiones
 
 **Approach**: 4 pilares
-1. **Escaneo y reemplazo sistemático** — Buscar `C:\\Proyectos` en todos los archivos distribuibles (`.md`, `.ps1`, `.sh` en `README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`, `scripts/`) y reemplazar por variables `$KitPath`, `$ProjectRoot`, `$PSScriptRoot` con comentarios `# <- ajusta a tu ruta`, o rutas relativas (`..\Agents_IA_TECH`, `./scripts`).
+1. **Escaneo y reemplazo sistemático** — Buscar `C:<sep>Proyectos` en todos los archivos distribuibles (`.md`, `.ps1`, `.sh` en `README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`, `scripts/`) y reemplazar por variables `$KitPath`, `$ProjectRoot`, `$PSScriptRoot` con comentarios `# <- ajusta a tu ruta`, o rutas relativas (`..\Agents_IA_TECH`, `./scripts`).
 2. **Validación en bootstrap** — Extender `plataformador-bootstrap.ps1` con `-CheckHardcodedPaths` que escanee proyecto destino y reporte rutas absolutas sospechosas.
-3. **Limpieza de artefactos** — Eliminar 2 archivos en `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\` (fuera del repo, limpieza one-time en máquina dev).
+3. **Limpieza de artefactos** — Eliminar 2 archivos en `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\` (fuera del repo, limpieza one-time en máquina dev).
 4. **Test de regresión** — Pester test que valide 0 rutas absolutas en archivos del kit.
 
 **Patrones Obligatorios (formalizados en ADR-039)**:
@@ -62,8 +62,8 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 | **Bootstrap/CLI** | Parámetros con defaults seguros | `param([string]$RootPath = ".", [string]$KitPath = $PSScriptRoot, [switch]$CheckHardcodedPaths)` |
 
 **Patrones Prohibidos**:
-- Rutas absolutas Windows: `C:\Proyectos\...`, `D:\...`
-- Rutas absolutas Linux/macOS: `/home/...`, `/Users/...`
+- Rutas absolutas Windows: `C:<sep>Proyectos\...`, `D:<sep>...`
+- Rutas absolutas Linux/macOS: `/<home>/...`, `/<Users>/...`
 - Variables sin comentario `# <- ajusta a tu ruta`
 
 ---
@@ -78,7 +78,7 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 | **RF-04** | **T011–T013** | **documentador** | `AGENTS.md` |
 | **RF-05** | **T014–T018** | **plataformador** | `sync-agents.ps1`, `scripts/*.ps1` |
 | **RF-06** | **T019–T021** | **plataformador** | `scripts/plataformador-bootstrap.ps1` |
-| **RF-07** | **T022–T024** | **plataformador** | Externos: `C:\Proyectos\opencode\...` |
+| **RF-07** | **T022–T024** | **plataformador** | Externos: `C:<sep>Proyectos\opencode\...` |
 | **RF-08** | **T025–T030** | **qa-senior** | `tests/validate-no-hardcoded-paths.Tests.ps1` |
 | **AC Validation** | **T031–T035** | (all) | Todos los archivos distribuibles |
 
@@ -114,7 +114,7 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 
 1. **Variables con Comentario Explicativo** (Documentación: `README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`)
    ```markdown
-   $ProjectRoot = "C:\Proyectos\MiProyecto"  # <- ajusta a tu ruta
+   $ProjectRoot = "C:<sep>Proyectos\MiProyecto"  # <- ajusta a tu ruta
    $KitPath = "..\Agents_IA_TECH"             # <- ajusta a tu ruta
    ```
    - Regla: Toda variable ruta configurable **debe** llevar `# <- ajusta a tu ruta`
@@ -142,7 +142,7 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
    - Documentar en comment-based help (`.PARAMETER`)
 
 **Validación Automatizada**:
-- Test Pester: `tests/validate-no-hardcoded-paths.Tests.ps1` (patrones: `C:\\Proyectos`, `D:\\`, `/home/`, `/Users/`)
+- Test Pester: `tests/validate-no-hardcoded-paths.Tests.ps1` (patrones: `C:<sep>Proyectos`, `D:<sep>`, `/<home>/`, `/<Users>/`)
 - Bootstrap flag: `plataformador-bootstrap.ps1 -RootPath . -KitPath ..\Agents_IA_TECH -CheckHardcodedPaths`
 
 ---
@@ -179,7 +179,7 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 
 | Req | Tasks | AC | Test |
 |-----|-------|----|------|
-| RF-01 | T004–T010 | AC-1, AC-3 | T031, T033, Pester pattern `C:\\Proyectos` |
+| RF-01 | T004–T010 | AC-1, AC-3 | T031, T033, Pester pattern `C:<sep>Proyectos` |
 | RF-02 | T005, T009 | AC-1, AC-3 | T031, T033 |
 | RF-03 | T006, T010 | AC-1, AC-3 | T031, T033 |
 | RF-04 | T011–T013 | AC-1, AC-2 | T031, T032 |
@@ -201,12 +201,12 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 
 | Archivo | Agente | Cambio Principal |
 |---------|--------|------------------|
-| `README.md` | documentador | Reemplazar `C:\Proyectos\Agents_IA_TECH` en "sync-kit local" por `$KitPath`; verificar L22 y "Alternativa sin red"; full scan |
-| `AGENTS.md` | documentador | Eliminar cualquier `C:\Proyectos\Agents_IA_TECH` / `C:\Proyectos\opencode`; usar `$KitPath` + rutas relativas `./.github/agents/` |
+| `README.md` | documentador | Reemplazar `$KitPath` en "sync-kit local" por `$KitPath`; verificar L22 y "Alternativa sin red"; full scan |
+| `AGENTS.md` | documentador | Eliminar cualquier `$KitPath` / `C:<sep>Proyectos\opencode`; usar `$KitPath` + rutas relativas `./.github/agents/` |
 | `sync-agents.ps1` | plataformador | Reemplazar rutas hardcodeadas por `$PSScriptRoot` / `-KitPath` param |
 | `scripts/plataformador-bootstrap.ps1` | plataformador | Verificar sin rutas fijas; agregar `-CheckHardcodedPaths` param + lógica |
 | `scripts/*.ps1` (todos) | plataformador | Scan y reemplazo; agregar header comment `# $KitPath = $PSScriptRoot` |
-| `scripts/*.sh` (si existen) | plataformador | Scan para `/home/`, `/Users/` → `$SCRIPT_DIR` |
+| `scripts/*.sh` (si existen) | plataformador | Scan para `/<home>/`, `/<Users>/` → `$SCRIPT_DIR` |
 
 ### Archivos a Crear
 
@@ -219,8 +219,8 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 
 | Archivo | Acción |
 |---------|--------|
-| `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` | **ELIMINAR** |
-| `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md` | **ELIMINAR** |
+| `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` | **ELIMINAR** |
+| `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md` | **ELIMINAR** |
 
 ---
 
@@ -230,19 +230,19 @@ Este converge consolida todos los artefactos del ciclo Speckit (spec → plan �
 
 ```powershell
 # AC-1: README, AGENTS.md, scripts
-Select-String -Pattern "C:\\\\Proyectos|D:\\\\|/home/|/Users/" -Path README.md, AGENTS.md, scripts\*.ps1
+Select-String -Pattern "C:<sep>Proyectos|D:<sep>|/<home>/|/<Users>/" -Path README.md, AGENTS.md, scripts\*.ps1
 
 # AC-2: Directorios de configuración
-Select-String -Pattern "C:\\\\Proyectos|D:\\\\|/home/|/Users/" -Path .github\**\*.md, .opencode\**\*.md, .doc_agents\*.md, Documentacion\**\*.md -Recurse
+Select-String -Pattern "C:<sep>Proyectos|D:<sep>|/<home>/|/<Users>/" -Path .github\**\*.md, .opencode\**\*.md, .doc_agents\*.md, Documentacion\**\*.md -Recurse
 
 # AC-3: Test portabilidad README (copiar a proyecto test, cambiar vars, verificar comandos)
-Copy-Item README.md D:\TestProyecto\README.md
+Copy-Item README.md <PROJECT_ROOT>\README.md
 # Editar solo líneas con "# <- ajusta a tu ruta"
 # Verificar: .\scripts\plataformador-bootstrap.ps1 -DryRun funciona
 
 # AC-4: Verificar limpieza externa
-Test-Path "C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md"   # Debe ser False
-Test-Path "C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md"  # Debe ser False
+Test-Path "C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md"   # Debe ser False
+Test-Path "C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md"  # Debe ser False
 
 # AC-5: Test automatizado
 Invoke-Pester tests/validate-no-hardcoded-paths.Tests.ps1 -Output Detailed
@@ -279,8 +279,8 @@ cd <proyecto-destino>
 
 # Output esperado si hay rutas hardcoded en proyecto destino:
 # ⚠️  ADVERTENCIA: Se detectaron rutas absolutas hardcodeadas en:
-#    Documentacion/MiApp/specs/001-xyz/spec.md:15  →  $ProjectRoot = "C:\Proyectos\MiApp"
-#    .github/agents/mi-agente.agent.md:42           →  C:\Proyectos\Agents_IA_TECH
+#    Documentacion/MiApp/specs/001-xyz/spec.md:15  →  $ProjectRoot = "C:<sep>Proyectos\MiApp"
+#    .github/agents/mi-agente.agent.md:42           →  $KitPath
 # Acción recomendada: Reemplace por variables $KitPath/$ProjectRoot con comentario "# <- ajusta a tu ruta"
 ```
 
@@ -294,7 +294,7 @@ cd <proyecto-destino>
 ## Variables de Configuración — AJUSTA A TU ENTORNO
 
 # Raíz de tu proyecto destino (donde se instalará el kit)
-$ProjectRoot = "C:\Proyectos\MiProyecto"  # <- ajusta a tu ruta (relativa o absoluta)
+$ProjectRoot = "C:<sep>Proyectos\MiProyecto"  # <- ajusta a tu ruta (relativa o absoluta)
 
 # Raíz del kit Agents_IA_TECH (donde está clonado el kit maestro)
 $KitPath = "..\Agents_IA_TECH"             # <- ajusta a tu ruta (relativa al proyecto)

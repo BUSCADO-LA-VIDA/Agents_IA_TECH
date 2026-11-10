@@ -47,5 +47,5 @@ Particularidades por MCP (aprendidas 2026-10-11):
 
 ## Risks
 
-- La config congelada es máquina-específica (`C:/Users/tomas/...`): en otro equipo hay que re-resolver rutas (salida: corrección de #5299 → volver a tokens).
+- La config congelada es máquina-específica (`<HOME>/...`): en otro equipo hay que re-resolver rutas (salida: corrección de #5299 → volver a tokens).
 - Deriva futura: cualquier cambio manual a `opencode.json` invalida este baseline hasta re-verificar.

@@ -1,7 +1,7 @@
 # Bitácora: 2026-11-05 — Spec 037: `.gitignore` sincronizado y diagnóstico de escritura/delegación
 
 **Invocado por**: usuario
-**Servidor**: local (repo maestro `C:\Proyectos\Agents_IA_TECH` y destino `C:\Proyectos\Generator_IA_Projects`)
+**Servidor**: local (repo maestro `$KitPath` y destino `<PROJECT_ROOT>`)
 **Problema**: (1) `graphify-out/` se subía a Git al actualizar la estructura de un proyecto; (2) el usuario pidió extenderlo a "todas las carpetas que no deben versionarse"; (3) diagnóstico solicitado: "no escribe o delega".
 
 ## Diagnóstico

@@ -4,7 +4,7 @@
 > Fecha: 2026-09-25
 
 ## Estado
-- Proyecto: C:\Proyectos\Agents_IA_TECH
+- Proyecto: $KitPath
 - Preparación del entorno: completada
 - ReIndexación: completada tras converge spec #011
 

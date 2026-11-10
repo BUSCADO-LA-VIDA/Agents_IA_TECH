@@ -11,7 +11,7 @@
 ## Contexto
 
 Entre el 2026-10-27 y el 2026-11-02 se sincronizó el kit transversal del maestro
-`C:\Proyectos\Agents_IA_TECH` hacia `C:\Proyectos\Generator_IA_Projects`. La intervención se
+`$KitPath` hacia `<PROJECT_ROOT>`. La intervención se
 registró en la bitácora
 `Documentacion/Agents_IA_TECH/bitacoras/2026-11-02-sync-kit-generator-y-parche-kit-files.md`
 y en `.bootstrap-audit.log` (entradas 205 `sync_kit_transversal_executed` y 206
@@ -42,7 +42,7 @@ no es vigente: es un wrapper.
 | **D2** | No existe capa `skills` (ni capa para el resto de `.github/`) | La lista `$script:Layers` declara 12 capas y ninguna es `skills`; `scripts/sync/skills/sync-skills.ps1` existe en disco pero solo aparece en un comentario de la L277. Consecuencia: `.github/skills` (89) y `.opencode/skills` (89) nunca se sincronizan desde el orquestador, y `.github/rules` (16), `.github/prompts` (6), `.github/workflows` (5) y `.github/copilot-instructions.md` tampoco tienen capa. |
 | **D3** | `Test-AuditLogIntegrity` da falso negativo siempre | `upgrade_framework.ps1` L203-229: al recalcular el hash copia la entrada y elimina **solo** `hash`, dejando `prevHash` dentro del payload; el escritor (`Write-AuditEntry`, L166-201) calcula el hash sobre un payload que aún no tenía `hash` **ni** `prevHash`. Nunca puede coincidir, ni con sus propias entradas. Además exige una cadena lineal cuando 136 de las 204 entradas históricas tienen `prevHash: null` (escritores distintos hicieron append sin encadenar), y opera por round-trip `ConvertFrom-Json`/`ConvertTo-Json`, que convierte el `timestamp` ISO-8601 a `[DateTime]` y cambia el formato al re-serializar. |
 | **D4** | Los tests del kit solo viajan por el motor deprecado | La whitelist de 5 tests (`tests/harness-default.ps1`, `kit-sync-merge.ps1`, `agents-parity.ps1`, `kb-parity.ps1`, `mcp-refresh-parity.ps1`) está en `sync-kit.ps1`; el orquestador por capas no tiene capa de tests. En el destino quedaron 5 de 8 archivos de `tests/` (los 3 restantes fuera de whitelist, por diseño) y hubo que crearlos con el motor viejo. |
-| **D5** | `opencode.json` con dos entradas `graphify` contradictorias | El destino tiene `mcp.servers.graphify` (forma V2) apuntando al grafo del **maestro** (`C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json`) y `mcp.graphify` (forma V1) apuntando al grafo del **destino**. Dos servidores con el mismo nombre lógico y grafos distintos: el primero sirve el conocimiento del proyecto equivocado. `lift-opencode.ps1` solo regenera la ruta cuando `command[0]` no existe en disco, así que una ruta existente pero ajena nunca se corrige. |
+| **D5** | `opencode.json` con dos entradas `graphify` contradictorias | El destino tiene `mcp.servers.graphify` (forma V2) apuntando al grafo del **maestro** (`$KitPath/graphify-out/graph.json`) y `mcp.graphify` (forma V1) apuntando al grafo del **destino**. Dos servidores con el mismo nombre lógico y grafos distintos: el primero sirve el conocimiento del proyecto equivocado. `lift-opencode.ps1` solo regenera la ruta cuando `command[0]` no existe en disco, así que una ruta existente pero ajena nunca se corrige. |
 
 ## Decisión de arquitectura (usuario, 2026-11-03)
 

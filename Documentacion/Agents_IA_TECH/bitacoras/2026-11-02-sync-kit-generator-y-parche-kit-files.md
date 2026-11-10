@@ -3,8 +3,8 @@
 **Invocado por**: usuario (opción `[1] Sincronizar kit transversal — Quiero actualizar todo`)
 **Agente**: `solucionador`
 **Servidor / máquina**: TECH03 (local, no remoto)
-**Origen**: `C:\Proyectos\Agents_IA_TECH` (repo maestro, commit `d0b89b9`)
-**Destino**: `C:\Proyectos\Generator_IA_Projects` (raíz **sin git**: sin rollback por VCS)
+**Origen**: `$KitPath` (repo maestro, commit `d0b89b9`)
+**Destino**: `<PROJECT_ROOT>` (raíz **sin git**: sin rollback por VCS)
 
 ---
 
@@ -197,7 +197,7 @@ VS Code Copilot y OpenCode para que carguen los agentes nuevos.
 ## 5. Reflejo local
 
 - [x] Completado — el parche se aplicó directamente en el repo maestro
-      (`C:\Proyectos\Agents_IA_TECH`), que es la fuente del kit; no hubo copia divergente que reconciliar.
+      (`$KitPath`), que es la fuente del kit; no hubo copia divergente que reconciliar.
 - Archivos locales modificados:
   - `scripts/sync/lib/common.ps1`
   - `scripts/sync/kit-files/sync-kit-files.ps1`
@@ -245,7 +245,7 @@ entradas.
 | D2 | No existe capa `skills` en el orquestador | `.github/skills` y `.opencode/skills` nunca se sincronizan (78 archivos quedaron obsoletos hasta el workaround) | Añadir `@{ Name="skills"; Script="sync/skills/sync-skills.ps1"; AcceptsForce=$true }` y cubrir `.github/rules`, `.github/prompts`, `copilot-instructions.md` en una capa `github-extras` |
 | D3 | `Test-AuditLogIntegrity` de `upgrade_framework.ps1` | Falso negativo permanente + entradas `audit_integrity_violation` espurias | Eliminar también `prevHash` del payload al recalcular, y validar por entrada en vez de exigir cadena lineal |
 | D4 | `tests/` del kit solo viaja por el motor deprecado (`sync-kit.ps1`) | El motor vigente no propaga los 5 tests de contrato | Mover la whitelist de tests a su propia capa |
-| D5 | `opencode.json` tiene **dos** entradas graphify: `mcp.servers.graphify` (apunta al grafo del **maestro**: `C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json`) y `mcp.graphify` (apunta al destino correcto) | Configuración duplicada y contradictoria; la primera sirve el grafo equivocado | Unificar en una sola entrada y hacer que la capa regenere la ruta siempre, no solo cuando `command[0]` no existe |
+| D5 | `opencode.json` tiene **dos** entradas graphify: `mcp.servers.graphify` (apunta al grafo del **maestro**: `$KitPath/graphify-out/graph.json`) y `mcp.graphify` (apunta al destino correcto) | Configuración duplicada y contradictoria; la primera sirve el grafo equivocado | Unificar en una sola entrada y hacer que la capa regenere la ruta siempre, no solo cuando `command[0]` no existe |
 
 ---
 

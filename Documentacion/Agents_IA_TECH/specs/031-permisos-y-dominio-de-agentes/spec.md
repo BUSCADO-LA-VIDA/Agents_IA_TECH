@@ -286,7 +286,7 @@ Que todo agente opere bajo un **contrato único, versionado y verificable** que 
 | ID | Requisito |
 |---|---|
 | **NFR-01** | **Determinismo**: el contrato vive en archivos versionados; dos ejecuciones del validador sobre el mismo árbol dan el mismo resultado. |
-| **NFR-02** | **Portabilidad**: funciona en cualquier máquina y en cualquier proyecto consumidor; no depende de rutas absolutas ni de `C:\Proyectos\...`. |
+| **NFR-02** | **Portabilidad**: funciona en cualquier máquina y en cualquier proyecto consumidor; no depende de rutas absolutas ni de `C:<sep>Proyectos\...`. |
 | **NFR-03** | **Idempotencia**: aplicar el contrato dos veces no cambia el resultado. |
 | **NFR-04** | **Trazabilidad**: toda operación crítica deja registro con timestamp, agente, operación, alcance y resultado. |
 | **NFR-05** | **Fail-closed**: ante error de verificación o registro ausente, se bloquea. |

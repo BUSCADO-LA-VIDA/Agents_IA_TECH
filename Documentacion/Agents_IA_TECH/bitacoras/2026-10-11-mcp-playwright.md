@@ -2,7 +2,7 @@
 
 ## Instalacion
 - `npm i -g @playwright/mcp` (Microsoft, v1.64.0). Browsers ya presentes (`ms-playwright`).
-- Shim: `C:/Users/tomas/AppData/Roaming/npm/playwright-mcp.ps1`; binario real `node_modules/@playwright/mcp/cli.js`.
+- Shim: `<HOME>/AppData/Roaming/npm/playwright-mcp.ps1`; binario real `node_modules/@playwright/mcp/cli.js`.
 
 ## Registro (ADR-0009)
 - `opencode.json`: entrada `playwright` hardcodeada (shim .ps1, igual que context-mode que funciona). `.vscode/mcp.json`: paridad. `.env.mcp`: ruta sin secreto.

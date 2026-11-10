@@ -5,7 +5,7 @@
 
 Guía de validación end-to-end. Prerrequisito: PowerShell 7+ (`pwsh`) y `git` en el PATH. Ejecutar desde la raíz del proyecto (o del kit).
 
-> Sustituir `<root>` por la ruta del proyecto bajo prueba. En el kit maestro, `<root>` = `C:\Proyectos\Agents_IA_TECH`.
+> Sustituir `<root>` por la ruta del proyecto bajo prueba. En el kit maestro, `<root>` = `$KitPath`.
 
 ---
 

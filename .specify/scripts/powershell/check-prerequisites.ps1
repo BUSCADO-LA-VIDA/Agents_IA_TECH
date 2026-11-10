@@ -90,6 +90,13 @@ if ($PathsOnly) {
     exit 0
 }
 
+# Validate FEATURE_DIR is under Documentacion/<AppName>/specs/ (Documentation First)
+$docFeatureDir = Join-Path $RepoRoot "Documentacion" $AppName "specs"
+if (-not $featureDir.StartsWith($docFeatureDir)) {
+    Write-Error "ERROR: FEATURE_DIRECTORY ($featureDir) debe estar bajo Documentacion/$AppName/specs/. Actual: $featureDir"
+    exit 1
+}
+
 # Validate required directories and files in proper cycle order:
 # 1. FEATURE_DIR must exist
 # 2. SPECS must exist and be validated (speckit-analyze)

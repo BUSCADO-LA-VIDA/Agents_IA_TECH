@@ -68,7 +68,7 @@ catch {
 |-----------|-------------------|
 | `scripts/plataformador-bootstrap.ps1` | Add `Invoke-UpgradeFramework` function + call it in Step 3 (`-ForceUpgradeTools` block) before tokenslayer build |
 | `upgrade_framework` agent | Ensure it exposes a CLI entrypoint (`upgrade_framework.ps1` or similar) invocable from PowerShell with `-RootPath`, `-ForceUpgradeTools`, `-DryRun` |
-| `dependencias-manifest.yml` (kit master) | Template at repo root (`c:\Proyectos\Agents_IA_TECH\dependencias-manifest.yml`) — copied to project root on first run if missing |
+| `dependencias-manifest.yml` (kit master) | Template at repo root (`$KitPath\dependencias-manifest.yml`) — copied to project root on first run if missing |
 
 ### 3.1 `upgrade_framework` CLI Requirements
 
@@ -86,7 +86,7 @@ Invoke-UpgradeFramework -RootPath $RootPath -ForceUpgradeTools:$ForceUpgradeTool
 
 ### 3.2 Manifest Template Location
 
-- **Master template**: `c:\Proyectos\Agents_IA_TECH\dependencias-manifest.yml` (already exists)
+- **Master template**: `$KitPath\dependencias-manifest.yml` (already exists)
 - **Project copy**: `$RootPath\dependencias-manifest.yml` (created by bootstrap on first run)
 
 ---
@@ -138,7 +138,7 @@ Invoke-UpgradeFramework -RootPath $RootPath -ForceUpgradeTools:$ForceUpgradeTool
 | Dependency | Source | Notes |
 |------------|--------|-------|
 | `upgrade_framework` agent | `.github/agents/upgrade_framework/` | Must exist and be invocable from PS |
-| `dependencias-manifest.yml` (master) | Repo root (`c:\Proyectos\Agents_IA_TECH\dependencias-manifest.yml`) | Template for project copy |
+| `dependencias-manifest.yml` (master) | Repo root (`$KitPath\dependencias-manifest.yml`) | Template for project copy |
 | `git` | System PATH | Required for cloning; fail-open if missing |
 | `npm` | System PATH | Required for tokenslayer build; fail-open if missing |
 | `uv` | System PATH | Required for graphify install; fail-open if missing |

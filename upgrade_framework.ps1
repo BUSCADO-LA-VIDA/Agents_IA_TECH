@@ -8,8 +8,8 @@
 # clona/actualiza repositorios en proyect_ext/ y registra herramientas (graphify via uv).
 #
 # Uso:
-#   & "C:\Proyectos\Agents_IA_TECH\upgrade_framework.ps1" -RootPath "C:\Proyectos\trading_bot" -ForceUpgradeTools -DryRun
-#   & "C:\Proyectos\Agents_IA_TECH\upgrade_framework.ps1" -RootPath "C:\Proyectos\trading_bot"
+#   & "<ruta-al-kit>\upgrade_framework.ps1" -RootPath "<ruta-al-proyecto>" -ForceUpgradeTools -DryRun
+#   & "<ruta-al-kit>\upgrade_framework.ps1" -RootPath "<ruta-al-proyecto>"
 #
 # Parámetros:
 #   -RootPath (obligatorio): Ruta raíz del proyecto donde buscar dependencias-manifest.yml
@@ -82,10 +82,10 @@ $ErrorActionPreference = "Stop"
 # =============================================================================
 # Variables globales de seguridad
 # =============================================================================
-$script:AuditLogPath = "C:\Proyectos\Agents_IA_TECH\.bootstrap-audit.log"
+$script:AuditLogPath = Join-Path $PSScriptRoot '.bootstrap-audit.log'
 $script:MAX_CLONE_MB = if ($env:MAX_CLONE_MB) { [int]$env:MAX_CLONE_MB } else { 100 }
 $script:AuditChainLastHash = $null
-$script:AllowlistRotationPath = "C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\seguridad\allowlist-rotation.json"
+$script:AllowlistRotationPath = Join-Path $PSScriptRoot 'Documentacion/Agents_IA_TECH/seguridad/allowlist-rotation.json'
 
 function Initialize-AuditLog {
     param([string]$Path)
@@ -294,8 +294,9 @@ function Test-AuditLogIntegrity {
 function Validate-OpencodeSchema {
     param(
         [string]$OpencodePath,
-        [string]$SchemaPath = "C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\seguridad\opencode.schema.json"
+        [string]$SchemaPath = ""
     )
+    if (-not $SchemaPath) { $SchemaPath = Join-Path $PSScriptRoot 'Documentacion/Agents_IA_TECH/seguridad/opencode.schema.json' }
     try {
         if (-not (Test-Path -LiteralPath $OpencodePath)) {
             Write-Warn "T058: opencode.json no encontrado en $OpencodePath (validación omitida fail-open)"
@@ -1416,7 +1417,7 @@ try {
         try {
             $resolvedScript = (Resolve-Path -LiteralPath $scriptFullPath -ErrorAction Stop).Path
             $hashObj = Get-FileHash -LiteralPath $resolvedScript -Algorithm SHA256
-            $refFile = "C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\seguridad\upgrade_framework.sha256"
+            $refFile = Join-Path $PSScriptRoot 'Documentacion/Agents_IA_TECH/seguridad/upgrade_framework.sha256'
             if (Test-Path -LiteralPath $refFile) {
                 $expectedHash = (Get-Content -LiteralPath $refFile -Raw).Trim()
                 if ($hashObj.Hash -ne $expectedHash) {

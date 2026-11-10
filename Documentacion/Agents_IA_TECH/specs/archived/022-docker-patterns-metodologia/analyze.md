@@ -3,9 +3,9 @@
 **Feature:** Patrones Docker transversales de metodología para el KIT
 **Fecha de análisis:** 2026-10-21
 **Artefactos revisados:**
-- `spec.md` : C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\specs\022-docker-patterns-metodologia\spec.md
-- `plan.md` : C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\specs\022-docker-patterns-metodologia\plan.md
-- `tasks.md` : C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\specs\022-docker-patterns-metodologia\tasks.md
+- `spec.md` : $KitPath\Documentacion\Agents_IA_TECH\specs\022-docker-patterns-metodologia\spec.md
+- `plan.md` : $KitPath\Documentacion\Agents_IA_TECH\specs\022-docker-patterns-metodologia\plan.md
+- `tasks.md` : $KitPath\Documentacion\Agents_IA_TECH\specs\022-docker-patterns-metodologia\tasks.md
 
 ---
 

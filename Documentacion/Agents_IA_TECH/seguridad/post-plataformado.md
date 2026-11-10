@@ -44,7 +44,7 @@ La vista workspace unificada vía `graphify merge-graphs` combina grafos de vari
 
 ### R-4. Rutas absolutas en `Constitution_Wizard_Instructions.md` (baja severidad)
 
-**Aclaración**: El riesgo NO es para la máquina local del autor — es **si el documento se commitea y el repo se comparte**. Una ruta `C:\Users\<usuario>\...` revela el nombre de usuario del SO y el layout de disco a cualquiera que clone el repo (mismo principio que RF-S2 de `[SOLUCION-GENERICA]`: cero absolutas en versionados). Como es un doc de proyecto local, la severidad es **baja**.
+**Aclaración**: El riesgo NO es para la máquina local del autor — es **si el documento se commitea y el repo se comparte**. Una ruta `<HOME>\<usuario>\...` revela el nombre de usuario del SO y el layout de disco a cualquiera que clone el repo (mismo principio que RF-S2 de `[SOLUCION-GENERICA]`: cero absolutas en versionados). Como es un doc de proyecto local, la severidad es **baja**.
 
 **Puntos de validación:**
 - Rutas relativas o tokens (`<raiz-proyecto>\src\<App>`) en el documento, no absolutas con usuario.

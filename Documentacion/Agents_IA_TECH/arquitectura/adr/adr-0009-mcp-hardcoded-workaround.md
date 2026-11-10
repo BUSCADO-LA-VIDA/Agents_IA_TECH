@@ -45,10 +45,10 @@ Adoptar la **Opción A** para `opencode.json`: escribir los `command` de cada MC
 
 | MCP | `command` hardcodeado | Verificación |
 |-----|----------------------|--------------|
-| `context-mode` | `C:/Users/tomas/AppData/Roaming/npm/context-mode.ps1` | ✅ archivo existe |
-| `codebase-memory-mcp` | `C:/Users/tomas/.local/bin/codebase-memory-mcp.exe` | ✅ archivo existe |
-| `markitdown` | `C:/Python314/Scripts/markitdown.exe` | ✅ archivo existe |
-| `graphify` | `C:/Python314/python.exe -m graphify.serve C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json` | ✅ `python`, módulo `graphify`, `graph.json` existen |
+| `context-mode` | `<HOME>/AppData/Roaming/npm/context-mode.ps1` | ✅ archivo existe |
+| `codebase-memory-mcp` | `<HOME>/.local/bin/codebase-memory-mcp.exe` | ✅ archivo existe |
+| `markitdown` | `<PYTHON_HOME>/Scripts/markitdown.exe` | ✅ archivo existe |
+| `graphify` | `<PYTHON_HOME>/python.exe -m graphify.serve $KitPath/graphify-out/graph.json` | ✅ `python`, módulo `graphify`, `graph.json` existen |
 | `tokenslayer` | `node proyect_ext/tokenslayer/mcp-server/build/index.js` | ✅ `build/index.js` existe |
 
 `graphify` usa un comando compuesto (intérprete + módulo + ruta del grafo) replicando el patrón del proyecto consumidor que sí funciona. `tokenslayer` se mantiene con ruta **relativa al proyecto** porque el entry point se referencia bajo `proyect_ext/` y no expone usuario.

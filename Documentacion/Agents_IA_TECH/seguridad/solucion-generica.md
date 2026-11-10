@@ -15,7 +15,7 @@ Hallazgos verificados hoy (pre-RF, son la deuda que RF-S1..RF-S7 deben eliminar)
 
 - **Manifest** (`dependencias-manifest.yml` L101-140): 5 apps concretas **activas** (los 5 nombres de dominio del proyecto, lista en `specs/solucion-generica/spec.md` RF-S1) con URLs `https://github.com/tomasecastro/<repo>` (owner `tomasecastro` = cuenta personal del autor, repos **privados o ajenos al consumidor del kit**). Coexiste un placeholder comentado `apps_manifiesto` (L142-161, todo `TBD`, NO activo) que es el formato que RF-S5 quiere como único contenido.
 - **Bootstrap** (`scripts/plataformador-bootstrap.ps1`): L40 `-Apps` default con la lista fija de 5 dominios; L57 `$KnownApps` fijo con los mismos 5; allowlist `$TrustedOwners` (L61-69) incluye `tomasecastro` y el owner muerto `tomasgraph`. `Prepare-Apps` (L2044+) itera sobre lista conocida (L1766/L1789 `foreach ($known in $KnownApps)`).
-- **`opencode.json`** (versionado): 5 comandos MCP con **rutas absolutas del autor** — `C:/Users/tomas/...` (context-mode L65, codebase-memory L72, markitdown L79), `C:/Proyectos/Agents_IA_TECH/...` (tokenslayer L87), `C:\Python314\...` + `C:\Proyectos\Agents_IA_TECH\graphify-out\graph.json` (graphify L94/97). Mismo patrón duplicado en el bootstrap (L280/L285/L890/L930/L955/L971/L1026/L1041).
+- **`opencode.json`** (versionado): 5 comandos MCP con **rutas absolutas del autor** — `<HOME>/...` (context-mode L65, codebase-memory L72, markitdown L79), `$KitPath/...` (tokenslayer L87), `<PYTHON_HOME>\...` + `$KitPath\graphify-out\graph.json` (graphify L94/97). Mismo patrón duplicado en el bootstrap (L280/L285/L890/L930/L955/L971/L1026/L1041).
 - **Anonimización**: la spec decide registrar hallazgos modo-real como `AppXXX` (spec §Decisiones-2, pendientes `[SOLUCION-GENERICA]` T-D).
 
 ---
@@ -28,11 +28,11 @@ El manifest es la **lista de cosas que el bootstrap descarga y ejecuta**. Con 5 
 
 ### R-2. Rutas absolutas del autor en archivos versionados (exfiltran usuario/estructura; rompen reuso)
 
-`C:/Users/tomas/...` revela **nombre de usuario del SO + layout de disco** del autor a todo clonador (exfiltración pasiva de PII/estructura, útil para phishing dirigido o path-guessing). `C:/Proyectos/...` y `C:\Python314\...` asumen un disco y un intérprete que no existen en destino. Mitigación (ya en spec): RF-S2 (cero absolutas en versionados; relativas o tokens) + RF-S6 (plantilla con tokens + re-resolución en runtime local, jamás commiteada) + RF-S7 (grep anti-regresión sobre `git ls-files`). Condición adicional: el test debe cubrir **ambas barras** (`C:\` y `C:/`, la spec ya lo exige en RF-S2/AC-2) y el universo debe ser `git ls-files` (no el workdir, que incluye `.opencode/config.json` local con secrets legítimos no versionados).
+`<HOME>/...` revela **nombre de usuario del SO + layout de disco** del autor a todo clonador (exfiltración pasiva de PII/estructura, útil para phishing dirigido o path-guessing). `C:<sep>Proyectos/...` y `<PYTHON_HOME>\...` asumen un disco y un intérprete que no existen en destino. Mitigación (ya en spec): RF-S2 (cero absolutas en versionados; relativas o tokens) + RF-S6 (plantilla con tokens + re-resolución en runtime local, jamás commiteada) + RF-S7 (grep anti-regresión sobre `git ls-files`). Condición adicional: el test debe cubrir **ambas barras** (`C:\` y `C:/`, la spec ya lo exige en RF-S2/AC-2) y el universo debe ser `git ls-files` (no el workdir, que incluye `.opencode/config.json` local con secrets legítimos no versionados).
 
 ### R-3. `opencode.json` versionado con paths inexistentes → DoS de configuración en terceros
 
-Hoy un clonador hereda 5 comandos MCP que apuntan a rutas que **no existen en su máquina** (`C:/Users/tomas/...`, `C:/Proyectos/...`). El fallo es al arrancar el harness: MCPs caídos, errores opacos, usuario que "arregla" pegando sus propias absolutas y las commitea (re-contaminación). Es un **DoS de configuración auto-perpetuante**. Mitigación (ya en spec): RF-S6 (tokens + re-resolución en bootstrap; rutas reales solo en runtime local) + AC-6 (`Parser`/JSON válido antes y después). Condición adicional: la plantilla debe **arrancar degradada con WARN** (MCP deshabilitado + mensaje "ejecuta el bootstrap"), nunca con `enabled: true` apuntando a token sin resolver; y `permission.bash` (`pip install *`, `python *` en allow) no debe ampliarse al re-resolver.
+Hoy un clonador hereda 5 comandos MCP que apuntan a rutas que **no existen en su máquina** (`<HOME>/...`, `C:<sep>Proyectos/...`). El fallo es al arrancar el harness: MCPs caídos, errores opacos, usuario que "arregla" pegando sus propias absolutas y las commitea (re-contaminación). Es un **DoS de configuración auto-perpetuante**. Mitigación (ya en spec): RF-S6 (tokens + re-resolución en bootstrap; rutas reales solo en runtime local) + AC-6 (`Parser`/JSON válido antes y después). Condición adicional: la plantilla debe **arrancar degradada con WARN** (MCP deshabilitado + mensaje "ejecuta el bootstrap"), nunca con `enabled: true` apuntando a token sin resolver; y `permission.bash` (`pip install *`, `python *` en allow) no debe ampliarse al re-resolver.
 
 ### R-4. Borrado amplio ("todo lo que no es nuestro") = pérdida de datos; fail-closed exigible
 
@@ -65,14 +65,14 @@ Anonimizar el **nombre** de la app (dominio → `AppXXX`) es correcto para priva
 3. **`opencode.json`**: plantilla con tokens (`__NODE__`, `<tu-proyecto>`, etc.), MCPs sin ruta real con `enabled: false` + WARN "ejecuta el bootstrap"; el bootstrap re-resuelve a rutas reales solo en local (jamás commiteadas).
 4. **Borrado**: verificar AC-4 por código antes de cerrar T-I (ninguna destructiva por exclusión; `Remove-Item` solo sobre `$full` validado por allowlist + containment-check, patrón ya existente en L1263-1277).
 5. **Anonimización**: `AppXXX` solo para el nombre; conteos, tamaños, hashes, rutas relativas y logs se conservan verbatim.
-6. **Anti-regresión** (RF-S7/AC-7): grep dominio (los 5 nombres de dominio del proyecto, lista en `specs/solucion-generica/spec.md` RF-S1) + absolutas (`C:\Proyectos`, `C:/Users`, variantes) sobre `git ls-files`, exclusiones por ruta explícita (`testing/`, historial, incidentes), PASS en limpio + FAIL provocado con fixture señuelo.
+6. **Anti-regresión** (RF-S7/AC-7): grep dominio (los 5 nombres de dominio del proyecto, lista en `specs/solucion-generica/spec.md` RF-S1) + absolutas (`C:<sep>Proyectos`, `C:/Users`, variantes) sobre `git ls-files`, exclusiones por ruta explícita (`testing/`, historial, incidentes), PASS en limpio + FAIL provocado con fixture señuelo.
 
 ---
 
 ## 5. Qué NO hacer
 
 - ❌ **NO clonar/ejecutar nada de `tomasecastro/*`** desde el kit maestro; esas URLs salen del manifest activo en esta tarea.
-- ❌ **NO commitear rutas absolutas** (`C:\…`, `C:/…`, `/Users/…`, `/home/…`) en ningún archivo versionado; rutas reales solo en runtime local.
+- ❌ **NO commitear rutas absolutas** (`C:\…`, `C:/…`, `/<Users>/…`, `/<home>/…`) en ningún archivo versionado; rutas reales solo en runtime local.
 - ❌ **NO versionar `opencode.json` con paths reales** ni con `enabled: true` apuntando a tokens sin resolver.
 - ❌ **NO introducir borrado por exclusión** ("todo menos X") al quitar `$KnownApps`; solo allowlist de descarga/instalación + fail-closed.
 - ❌ **NO anonimizar números/logs/hashes** al pasar hallazgos a `AppXXX`; solo el nombre.

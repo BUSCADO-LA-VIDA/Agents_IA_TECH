@@ -33,7 +33,7 @@ Solo estos artefactos; nada fuera de esta lista:
 | ID | Requisito | Detalle |
 |----|-----------|---------|
 | **RF-S1** | **Cero dominio concreto fuera de historial** | Patrón de los nombres de dominio del proyecto (definido en el archivo de blocklist local no versionado `.opencode/local-domain-blocklist.txt`, gitignored) con cero matches en archivos versionados, **excepto** historial conservado: testing reports, notas de historial, evidencia de incidentes. Esas rutas/carpetas se conservan tal cual (ver Fuera de alcance). |
-| **RF-S2** | **Cero rutas absolutas en versionados** | Patrón `C:\Proyectos\…`, `C:/Users/…` (ambas barras) con cero matches en archivos versionados. Sustituir por relativas al repo o tokens (`<tu-proyecto>`, `__NODE__`, etc.). |
+| **RF-S2** | **Cero rutas absolutas en versionados** | Patrón `C:<sep>Proyectos\…`, `C:/<Users>/…` (ambas barras) con cero matches en archivos versionados. Sustituir por relativas al repo o tokens (`<tu-proyecto>`, `__NODE__`, etc.). |
 | **RF-S3** | **`-Apps` default `@()` + descubrimiento** | `-Apps` por defecto `@()` (vacío explícito). Fuente de apps: explícito por flag, o manifest del proyecto, o descubrimiento `src/*`. Eliminar `$KnownApps` fijo y la lista fija en `Prepare-Apps`. |
 | **RF-S4** | **Borrado/limpieza solo allowlist** | Borrado y limpieza solo sobre lo que se va a descargar/instalar (allowlist). Prohibido el patrón "todo lo que no es nuestro" (denylist abierta / borrado por exclusión). Fail-closed: lo no listado se conserva + aviso. |
 | **RF-S5** | **Manifest sin apps concretas activas** | El manifest del kit no declara apps concretas activas. Define el formato + un ejemplo comentado. Cada proyecto define las suyas en su propio manifest/copia local. |
@@ -45,7 +45,7 @@ Solo estos artefactos; nada fuera de esta lista:
 ## Criterios de aceptación
 
 1. **AC-1 (RF-S1)**: grep del patrón de dominio (desde `.opencode/local-domain-blocklist.txt`) → 0 matches fuera de `testing/`, notas de historial y evidencia de incidentes (lista de exclusiones explícita en el test).
-2. **AC-2 (RF-S2)**: grep de absolutas (`C:\Proyectos`, `C:/Users`, variantes con `/`) → 0 matches en versionados (`git ls-files` como universo); solo relativas o tokens.
+2. **AC-2 (RF-S2)**: grep de absolutas (`C:<sep>Proyectos`, `C:/Users`, variantes con `/`) → 0 matches en versionados (`git ls-files` como universo); solo relativas o tokens.
 3. **AC-3 (RF-S3)**: `Prepare-Apps` sin `$KnownApps` ni lista fija (`Select-String` 0 matches); `-Apps` default `@()`; con repo vacío no instala nada; con `src/MiApp` lo descubre.
 4. **AC-4 (RF-S4)**: revisión por código — ninguna rutina destructiva opera por exclusión abierta; toda ruta borrada pertenece a la allowlist de descarga/instalación; caso fuera de allowlist → conservado + aviso (fixture).
 5. **AC-5 (RF-S5)**: manifest del kit parsea válido, declara cero apps concretas activas y contiene formato + ejemplo comentado; un proyecto puede definir las suyas sin tocar el maestro.

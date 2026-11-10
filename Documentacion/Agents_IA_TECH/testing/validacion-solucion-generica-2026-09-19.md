@@ -68,7 +68,7 @@
 
 ## T-V3 — Absolutas + anti-regresión — **PASS**
 
-- **Absolutas en los 8 archivos** (`C:/Users/`, `C:\Proyectos\`, `C:/Proyectos/`, `Python314`):
+- **Absolutas en los 8 archivos** (`C:/<Users>/`, `C:<sep>Proyectos\`, `C:<sep>Proyectos/`, `Python314`):
   - `git grep` sobre `README.md`, `opencode.json`, `dependencias-manifest.yml`, `adr-0003-….md`, `spec.md`+`tasks.md` plataforma, `pendientes-implementacion.md`, `plataformador-bootstrap.ps1`, `.github/agents/`, `.opencode/agents/`, `.doc_agents/` → **0 matches**. ✅
 - **`opencode.json`**:
   - **Válido** (`ConvertFrom-Json` OK).
@@ -82,8 +82,8 @@
   - `Read-DependenciasManifest` devuelve `@()` sin sección activa (caso A lo confirma en runtime). ✅
 - **Anti-regresión ambos sentidos**:
   - Limpio → PASS (T-V1 0 + este T-V3 0).
-  - Señuelo en `$env:TEMP` (`<app-dominio-1-underscore>`, `C:\Proyectos\X`, `C:/Users/<user>/y`) → ambos patrones hacen match (FAIL provocado), señuelo eliminado.
-  - Control positivo real: `plan.md` L36/L47 (`C:\Proyectos\<project-external>`, `C:\Proyectos\<kit-root>`) sí matchean el patrón. ✅
+  - Señuelo en `$env:TEMP` (`<app-dominio-1-underscore>`, `<PROJECT_ROOT>\X`, `C:/<Users>/<user>/y`) → ambos patrones hacen match (FAIL provocado), señuelo eliminado.
+  - Control positivo real: `plan.md` L36/L47 (`C:<sep>Proyectos\<project-external>`, `C:<sep>Proyectos\<kit-root>`) sí matchean el patrón. ✅
 
 ---
 
@@ -92,7 +92,7 @@
 - **BUG-1 (menor, siguiente ronda `[RELOCATE]`-docs)**: `seguridad/relocate.md:14` usa nombres de dominio (`<canal-notif>`, `<app-dominio-1-underscore>`) como ejemplo de typo. Archivo fuera de la lista cerrada de 8; higienizar a genéricos (`AppFoo`/`app-foo`) cuando se toque esa doc.
 - **BUG-2 (info, patrón)**: `<canal-notif>` como token del grep da falso positivo en `.github/skills/docker/deployment-patterns/SKILL.md:64` (canal de notificación genérico, no app de dominio). Considerar afinar el patrón (p. ej. exigir contexto app/ruta) o lista de exclusión para skills genéricas. No bloquea.
 - **Fuera de alcance confirmados (no bugs, ya reportados o por diseño)**:
-  - `specs/plataforma-bootstrap-instalador-unico/plan.md:36,47` (absolutas `C:\Proyectos\…` — `plan.md` no está en la lista cerrada, que cubre solo `spec.md`+`tasks.md`).
+  - `specs/plataforma-bootstrap-instalador-unico/plan.md:36,47` (absolutas `C:<sep>Proyectos\…` — `plan.md` no está en la lista cerrada, que cubre solo `spec.md`+`tasks.md`).
   - `README-ECOSISTEMA-DOCUMENTACION.md:225-227,237-247,259-281,312,331,334` (absolutas — fuera de la lista cerrada).
   - `relocate-apps-to-src.ps1` ejemplos (otra tarea en curso).
   - Historial testing / notas manifest / evidencia (exclusiones explícitas RF-S1).

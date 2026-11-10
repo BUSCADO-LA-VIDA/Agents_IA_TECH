@@ -222,8 +222,8 @@ RESUMEN DE EJECUCIÓN — sync-kit.ps1
 Fecha inicio : 2026-11-04 10:15:00
 Fecha fin    : 2026-11-04 10:18:45
 Duración     : 00:03:45
-RootPath     : C:\Proyectos\Generator_IA_Projects
-StageDir     : C:\Proyectos\Agents_IA_TECH\scripts\stage
+RootPath     : <PROJECT_ROOT>
+StageDir     : $KitPath\scripts\stage
 Modo         : DryRun=False | Force=False | KeepBackups=2 | NoPrune=False
 Capas ejecutadas: 17
 ================================================================================

@@ -18,7 +18,7 @@
 
 ## T037 – Fuente local del kit para el sync (002-KITPATH)
 - **Descripción**: Agregar `-KitPath <ruta-kit-local>` a `scripts/sync-kit.ps1` para sincronizar desde un checkout local (rama + cambios sin pushear) en vez de clonar GitHub. Fail-closed: solo directorios locales con marcadores (`scripts/`, `.github/`, `.opencode/`, `.doc_agents/`, `AGENTS.md`); jamás URLs ni el propio destino; el directorio temporal solo se borra si es clon propio. Solo `-Force` controla sobrescritura (igual que en modo GitHub).
-- **Comando**: `pwsh scripts/sync-kit.ps1 -KitPath C:\\Proyectos\\Agents_IA_TECH -RootPath <proyecto> -Force`
+- **Comando**: `pwsh scripts/sync-kit.ps1 -KitPath $KitPath -RootPath <proyecto> -Force`
 - **Estado**: `[x]` Completado (2026-10-08: DryRun + sync real con `-Force` en proyecto consumidor; `scripts/ecc-orchestrator.ps1` entregado; los 10 scripts con hash idéntico al KIT; `.github/agents/pensador.agent.md` y `AGENTS.md` con hash idéntico; `Documentacion/<AppName>/` intacta; 0 errores).
 - **Dependencias**: T036.
 

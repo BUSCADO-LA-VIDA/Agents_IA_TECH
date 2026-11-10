@@ -2,19 +2,19 @@
 
 **Branch**: `039-eliminar-rutas-hardcoded-documentacion` | **Date**: 2026-11-09 | **Spec**: Documentacion/Agents_IA_TECH/specs/039-eliminar-rutas-hardcoded-documentacion/spec.md
 
-**Input**: Feature specification from Spec 039 — eliminar todas las rutas absolutas hardcodeadas (`C:\Proyectos\Agents_IA_TECH`, `C:\Proyectos\opencode`) de `README.md`, `AGENTS.md`, scripts `.ps1`/`.sh`, y artefactos generados; reemplazarlas por variables con comentarios explicativos, rutas relativas, o parámetros de línea de comandos; agregar validación en el bootstrap; limpiar artefactos de prueba con rutas locales; y agregar test de regresión.
+**Input**: Feature specification from Spec 039 — eliminar todas las rutas absolutas hardcodeadas (`$KitPath`, `C:<sep>Proyectos\opencode`) de `README.md`, `AGENTS.md`, scripts `.ps1`/`.sh`, y artefactos generados; reemplazarlas por variables con comentarios explicativos, rutas relativas, o parámetros de línea de comandos; agregar validación en el bootstrap; limpiar artefactos de prueba con rutas locales; y agregar test de regresión.
 
 ---
 
 ## Summary
 
-**Primary Requirement**: El kit Agents_IA_TECH es una aplicación redistribuible que debe funcionar en cualquier máquina sin rutas fijas. Actualmente contiene rutas absolutas hardcodeadas de la máquina del autor (`C:\Proyectos\Agents_IA_TECH`, `C:\Proyectos\opencode`) en documentación, scripts y artefactos generados, lo que rompe la portabilidad.
+**Primary Requirement**: El kit Agents_IA_TECH es una aplicación redistribuible que debe funcionar en cualquier máquina sin rutas fijas. Actualmente contiene rutas absolutas hardcodeadas de la máquina del autor (`$KitPath`, `C:<sep>Proyectos\opencode`) en documentación, scripts y artefactos generados, lo que rompe la portabilidad.
 
 **Technical Approach**: 
-1. **Escaneo y reemplazo sistemático** — Buscar `C:\\Proyectos` en todos los archivos distribuibles (`.md`, `.ps1`, `.sh` en `README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`, `scripts/`) y reemplazar por variables `$KitPath`, `$ProjectRoot`, `$PSScriptRoot` con comentarios `# <- ajusta a tu ruta`, o rutas relativas (`..\Agents_IA_TECH`, `./scripts`).
+1. **Escaneo y reemplazo sistemático** — Buscar `C:<sep>Proyectos` en todos los archivos distribuibles (`.md`, `.ps1`, `.sh` en `README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`, `scripts/`) y reemplazar por variables `$KitPath`, `$ProjectRoot`, `$PSScriptRoot` con comentarios `# <- ajusta a tu ruta`, o rutas relativas (`..\Agents_IA_TECH`, `./scripts`).
 2. **Validación en bootstrap** — Extender `plataformador-bootstrap.ps1` con switch `-CheckHardcodedPaths` que escanee el proyecto destino y reporte rutas absolutas sospechosas antes de completar el plataformado.
-3. **Limpieza de artefactos** — Eliminar `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md` (artefactos de prueba con rutas de la máquina de desarrollo).
-4. **Test de regresión** — Crear `tests/validate-no-hardcoded-paths.Tests.ps1` que valide `grep -r "C:\\\\Proyectos" ...` devuelve 0 resultados en archivos distribuibles.
+3. **Limpieza de artefactos** — Eliminar `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md` (artefactos de prueba con rutas de la máquina de desarrollo).
+4. **Test de regresión** — Crear `tests/validate-no-hardcoded-paths.Tests.ps1` que valide `grep -r "C:<sep>Proyectos" ...` devuelve 0 resultados en archivos distribuibles.
 
 ---
 
@@ -31,7 +31,7 @@
 
 **Testing**: Pester 5+ (PowerShell testing framework) para `tests/validate-no-hardcoded-paths.Tests.ps1`
 
-**Target Platform**: Windows (PowerShell), Linux/macOS (PowerShell Core / Bash equivalents), cualquier ruta de clonación (`/home/user/kits/Agents_IA_TECH`, `D:\Kits\Agents_IA_TECH`, `C:\Users\X\Agents_IA_TECH`)
+**Target Platform**: Windows (PowerShell), Linux/macOS (PowerShell Core / Bash equivalents), cualquier ruta de clonación (`<HOME>/kits/<KIT_NAME>`, `$KitPath`, `<HOME>\X\Agents_IA_TECH`)
 
 **Project Type**: Kit de agentes redistribuible / herramienta de configuración de proyectos (CLI + documentación + plantillas)
 
@@ -47,7 +47,7 @@
 **Scale/Scope**: 
 - Archivos a revisar: ~50 archivos `.md` en `README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`
 - Scripts a revisar: ~10 scripts `.ps1` en `scripts/` y raíz
-- Artefactos a limpiar: 2 archivos en `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\`
+- Artefactos a limpiar: 2 archivos en `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\`
 
 ---
 
@@ -127,9 +127,9 @@ Agents_IA_TECH/                    # Raíz del kit (variable $KitPath)
 
 **Artefactos externos a limpiar (T05)**:
 ```
-C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\
-├── mcp-validation-plan.md         # ELIMINAR - contiene rutas C:\Proyectos\opencode
-└── mcp-validation-tasks.md        # ELIMINAR - contiene rutas C:\Proyectos\opencode
+C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\
+├── mcp-validation-plan.md         # ELIMINAR - contiene rutas C:<sep>Proyectos\opencode
+└── mcp-validation-tasks.md        # ELIMINAR - contiene rutas C:<sep>Proyectos\opencode
 ```
 
 **Structure Decision**: Estructura single-project (kit redistribuible). No hay backend/frontend/api móviles. El kit se clona completo y se usa `plataformador-bootstrap.ps1` para instalar en proyectos destino.
@@ -151,7 +151,7 @@ C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\
 **Status**: SKIPPED — El spec no tiene `NEEDS CLARIFICATION` en Technical Context. Todas las decisiones técnicas están definidas:
 - Variables a usar: `$KitPath`, `$ProjectRoot`, `$PSScriptRoot`, parámetros `-RootPath`, `-KitPath` (ya existentes en bootstrap)
 - Patrón de comentarios: `# <- ajusta a tu ruta` (ya usado en README línea 22)
-- Validación: `grep -r "C:\\\\Proyectos"` en archivos distribuibles
+- Validación: `grep -r "C:<sep>Proyectos"` en archivos distribuibles
 - Test framework: Pester (estándar PowerShell en el kit)
 
 **Decisiones documentadas en spec**:
@@ -179,7 +179,7 @@ El kit no expone APIs externas, endpoints, CLIs públicas para terceros, ni gram
 ## Prerrequisitos
 - PowerShell 5.1+ o PowerShell 7+
 - Git
-- Kit clonado en ubicación arbitraria (ej: `/home/user/kits/Agents_IA_TECH`, `D:\Kits\Agents_IA_TECH`)
+- Kit clonado en ubicación arbitraria (ej: `<HOME>/kits/<KIT_NAME>`, `$KitPath`)
 
 ## Escenario 1: Verificar cero rutas absolutas en archivos distribuibles
 
@@ -189,14 +189,14 @@ cd <ruta-kit-clonado>
 
 # Test automático (T06/T07)
 Invoke-Pester tests/validate-no-hardcoded-paths.Tests.ps1 -Output Detailed
-# Debe pasar: 0 resultados para "C:\\Proyectos" en README.md, AGENTS.md, scripts/, .github/, .opencode/, .doc_agents/, Documentacion/
+# Debe pasar: 0 resultados para "C:<sep>Proyectos" en README.md, AGENTS.md, scripts/, .github/, .opencode/, .doc_agents/, Documentacion/
 ```
 
 ### Validación manual (grep)
 
 ```powershell
 # Debe devolver 0 líneas (o solo comentarios con variable $KitPath/$ProjectRoot)
-Select-String -Pattern "C:\\\\Proyectos" -Path README.md, AGENTS.md, scripts\*.ps1, .github\**\*.md, .opencode\**\*.md, .doc_agents\*.md, Documentacion\**\*.md -Recurse
+Select-String -Pattern "C:<sep>Proyectos" -Path README.md, AGENTS.md, scripts\*.ps1, .github\**\*.md, .opencode\**\*.md, .doc_agents\*.md, Documentacion\**\*.md -Recurse
 ```
 
 ## Escenario 2: Bootstrap detecta rutas hardcoded en proyecto destino
@@ -208,10 +208,10 @@ cd <proyecto-destino>
 # Ejecutar bootstrap con validación
 <ruta-kit-clonado>\scripts\plataformador-bootstrap.ps1 -RootPath . -KitPath <ruta-kit-clonado> -CheckHardcodedPaths
 
-# Salida esperada si el proyecto destino tiene rutas C:\Proyectos en su Documentacion/:
+# Salida esperada si el proyecto destino tiene rutas C:<sep>Proyectos en su Documentacion/:
 # ⚠️  ADVERTENCIA: Se detectaron rutas absolutas hardcodeadas en:
-#    Documentacion/MiApp/specs/001-xyz/spec.md:15  →  $ProjectRoot = "C:\Proyectos\MiApp"
-#    .github/agents/mi-agente.agent.md:42           →  C:\Proyectos\Agents_IA_TECH
+#    Documentacion/MiApp/specs/001-xyz/spec.md:15  →  $ProjectRoot = "C:<sep>Proyectos\MiApp"
+#    .github/agents/mi-agente.agent.md:42           →  $KitPath
 # Acción recomendada: Reemplace por variables $KitPath/$ProjectRoot con comentario "# <- ajusta a tu ruta"
 ```
 
@@ -222,7 +222,7 @@ cd <proyecto-destino>
 Copy-Item <ruta-kit>\README.md <proyecto-nuevo>\README.md
 
 # 2. Editar SOLO las líneas marcadas con "# <- ajusta a tu ruta"
-#    $ProjectRoot = "C:\Proyectos\MiProyecto"  # <- ajusta a tu ruta
+#    $ProjectRoot = "C:<sep>Proyectos\MiProyecto"  # <- ajusta a tu ruta
 #    $KitPath = "..\Agents_IA_TECH"             # <- ajusta a tu ruta
 
 # 3. Comandos del README deben funcionar sin más cambios
@@ -242,7 +242,7 @@ Copy-Item <ruta-kit>\README.md <proyecto-nuevo>\README.md
 | ADR | Título | Relevancia para este Plan |
 |---|---|---|
 | **ADR-0003** | Plataforma Bootstrap Instalador Único | Bootstrap ya usa `$PSScriptRoot`, `-RootPath`, `-KitPath`. La documentación (README, AGENTS.md) debe reflejar ese patrón: variables con comentarios, no rutas literales. |
-| **ADR-0004** | Post-Plataformado Speckit | Artefactos generados en `.specify/` (plan.md, tasks.md, etc.) deben ser locales al proyecto destino. Los archivos `mcp-validation-plan.md` y `mcp-validation-tasks.md` en `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\` violan esto: son artefactos de prueba con rutas de la máquina de desarrollo → **T05 los elimina**. |
+| **ADR-0004** | Post-Plataformado Speckit | Artefactos generados en `.specify/` (plan.md, tasks.md, etc.) deben ser locales al proyecto destino. Los archivos `mcp-validation-plan.md` y `mcp-validation-tasks.md` en `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\` violan esto: son artefactos de prueba con rutas de la máquina de desarrollo → **T05 los elimina**. |
 | **ADR-0005** | Orquestación Speckit por `pensador`/`Agent-SSD` | Este plan lo genera `Agent-SSD` bajo delegación de `pensador`. Las tareas T01-T07 se ejecutarán en fase `implement` por los agentes asignados (documentador, plataformador, qa-senior). |
 
 ---
@@ -253,10 +253,10 @@ Copy-Item <ruta-kit>\README.md <proyecto-nuevo>\README.md
 
 | Línea/Sección Actual | Cambio Requerido |
 |---|---|
-| L22: `$ProjectRoot = "C:\Proyectos\MiProyecto"` | Mantener variable pero asegurar comentario `# <- ajusta a tu ruta` (ya existe) |
-| Sección "Alternativa sin red": `C:\Proyectos\Agents_IA_TECH` | Reemplazar por `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` (patrón ya correcto en esa sección) |
-| Sección "sync-kit local": `C:\Proyectos\Agents_IA_TECH` | Reemplazar por `$KitPath` variable |
-| Cualquier otra ruta `C:\Proyectos\...` o `D:\...` | Reemplazar por variable `$KitPath`/`$ProjectRoot` o ruta relativa `./scripts`, `../Agents_IA_TECH` |
+| L22: `$ProjectRoot = "C:<sep>Proyectos\MiProyecto"` | Mantener variable pero asegurar comentario `# <- ajusta a tu ruta` (ya existe) |
+| Sección "Alternativa sin red": `$KitPath` | Reemplazar por `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` (patrón ya correcto en esa sección) |
+| Sección "sync-kit local": `$KitPath` | Reemplazar por `$KitPath` variable |
+| Cualquier otra ruta `C:<sep>Proyectos\...` o `D:<sep>...` | Reemplazar por variable `$KitPath`/`$ProjectRoot` o ruta relativa `./scripts`, `../Agents_IA_TECH` |
 
 **Archivos de referencia en README que pueden tener rutas**: comandos de ejemplo, rutas a scripts, referencias a `.specify/`.
 
@@ -264,7 +264,7 @@ Copy-Item <ruta-kit>\README.md <proyecto-nuevo>\README.md
 
 | Ubicación | Cambio Requerido |
 |---|---|
-| Cualquier ruta `C:\Proyectos\Agents_IA_TECH` o `C:\Proyectos\opencode` | Reemplazar por `$KitPath` con comentario `# <- ajusta a tu ruta` o ruta relativa |
+| Cualquier ruta `$KitPath` o `C:<sep>Proyectos\opencode` | Reemplazar por `$KitPath` con comentario `# <- ajusta a tu ruta` o ruta relativa |
 | Referencias a `.github/agents/`, `.opencode/agents/` | Usar rutas relativas desde raíz del kit (`./.github/agents/`) |
 | Ejemplos de rutas en agentes (`pensador`, `plataformador`, etc.) | Variables `$KitPath`, `$ProjectRoot` |
 
@@ -274,10 +274,10 @@ Copy-Item <ruta-kit>\README.md <proyecto-nuevo>\README.md
 
 | Script | Rutas Hardcodeadas a Eliminar | Reemplazo |
 |---|---|---|
-| `sync-agents.ps1` | `C:\Proyectos\Agents_IA_TECH` en rutas de origen/destino | `$PSScriptRoot` (raíz del kit) o parámetro `-KitPath` |
+| `sync-agents.ps1` | `$KitPath` en rutas de origen/destino | `$PSScriptRoot` (raíz del kit) o parámetro `-KitPath` |
 | `scripts/plataformador-bootstrap.ps1` | Verificar que no tenga rutas fijas; ya usa `$PSScriptRoot` | Confirmar y documentar patrón |
-| `scripts/*.ps1` (otros) | Cualquier `C:\Proyectos\...` | `$PSScriptRoot`, `$KitPath`, o parámetros |
-| `*.sh` (si existen) | `/home/...`, `/Users/...` | `$SCRIPT_DIR`, variables de entorno |
+| `scripts/*.ps1` (otros) | Cualquier `C:<sep>Proyectos\...` | `$PSScriptRoot`, `$KitPath`, o parámetros |
+| `*.sh` (si existen) | `/<home>/...`, `/<Users>/...` | `$SCRIPT_DIR`, variables de entorno |
 
 **Patrón obligatorio en scripts**:
 ```powershell
@@ -306,7 +306,7 @@ if ($CheckHardcodedPaths) {
     $hardcodedPaths = @()
     foreach ($pattern in $targetDocPaths) {
         $matches = Get-ChildItem -Path $RootPath -Recurse -Filter $pattern -ErrorAction SilentlyContinue |
-                   Select-String -Pattern "C:\\\\Proyectos|D:\\\\|/home/|/Users/" -ErrorAction SilentlyContinue
+                   Select-String -Pattern "C:<sep>Proyectos|D:<sep>|/<home>/|/<Users>/" -ErrorAction SilentlyContinue
         if ($matches) { $hardcodedPaths += $matches }
     }
     if ($hardcodedPaths) {
@@ -321,14 +321,14 @@ if ($CheckHardcodedPaths) {
 
 **Ubicación en script**: Al final del bootstrap, después de copiar archivos, antes de mensaje de éxito.
 
-### T05 — Eliminar artefactos en `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\` (Agente: `plataformador`)
+### T05 — Eliminar artefactos en `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\` (Agente: `plataformador`)
 
 | Archivo | Acción |
 |---|---|
-| `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` | **ELIMINAR** (archivo de prueba con rutas locales) |
-| `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md` | **ELIMINAR** (archivo de prueba con rutas locales) |
+| `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` | **ELIMINAR** (archivo de prueba con rutas locales) |
+| `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md` | **ELIMINAR** (archivo de prueba con rutas locales) |
 
-**Nota**: Estos archivos están FUERA del repo del kit (en `C:\Proyectos\opencode\...`). El agente `plataformador` debe ejecutar la limpieza en la máquina de desarrollo donde se generaron. No están en el repo Git del kit.
+**Nota**: Estos archivos están FUERA del repo del kit (en `C:<sep>Proyectos\opencode\...`). El agente `plataformador` debe ejecutar la limpieza en la máquina de desarrollo donde se generaron. No están en el repo Git del kit.
 
 ### T06 — Test `tests/validate-no-hardcoded-paths.Tests.ps1` (Agente: `qa-senior`)
 
@@ -339,7 +339,7 @@ if ($CheckHardcodedPaths) {
     Valida que el kit no contenga rutas absolutas hardcodeadas en archivos distribuibles.
 .DESCRIPTION
     Escanea README.md, AGENTS.md, scripts/, .github/, .opencode/, .doc_agents/, Documentacion/
-    buscando patrones de rutas absolutas Windows (C:\Proyectos, D:\), Linux (/home/, /Users/).
+    buscando patrones de rutas absolutas Windows (C:<sep>Proyectos, D:<sep>), Linux (/<home>/, /<Users>/).
     Debe devolver 0 resultados (excepto líneas de comentario con variable $KitPath/$ProjectRoot).
 #>
 
@@ -356,10 +356,10 @@ Describe "Kit Portability - No Hardcoded Absolute Paths" {
     )
 
     $forbiddenPatterns = @(
-        "C:\\\\Proyectos",      # Rutas Windows del autor
-        "D:\\\\",               # Otras unidades Windows
-        "/home/",               # Rutas Linux home
-        "/Users/"               # Rutas macOS Users
+        "C:<sep>Proyectos",      # Rutas Windows del autor
+        "D:<sep>",               # Otras unidades Windows
+        "/<home>/",               # Rutas Linux home
+        "/<Users>/"               # Rutas macOS Users
     )
 
     foreach ($pattern in $forbiddenPatterns) {
@@ -401,7 +401,7 @@ Invoke-Pester tests/validate-no-hardcoded-paths.Tests.ps1 -Output Detailed -Pass
 
 | Nivel | Qué Valida | Herramienta | Cuándo |
 |---|---|---|---|
-| **Unitario (T06/T07)** | Cero rutas `C:\Proyectos`, `D:\`, `/home/`, `/Users/` en archivos del kit | Pester 5+ (`tests/validate-no-hardcoded-paths.Tests.ps1`) | Pre-commit, CI, post-implement |
+| **Unitario (T06/T07)** | Cero rutas `C:<sep>Proyectos`, `D:<sep>`, `/<home>/`, `/<Users>/` en archivos del kit | Pester 5+ (`tests/validate-no-hardcoded-paths.Tests.ps1`) | Pre-commit, CI, post-implement |
 | **Integración (T04 manual)** | Bootstrap `-CheckHardcodedPaths` detecta rutas en proyecto destino | PowerShell manual / script | Pre-release, validación usuario |
 | **Funcional (README)** | README copiable/pegable funcionando solo cambiando variables marcadas | Manual (usuario nuevo) | Documentación release |
 
@@ -409,10 +409,10 @@ Invoke-Pester tests/validate-no-hardcoded-paths.Tests.ps1 -Output Detailed -Pass
 
 | Patrón | Archivos Escaneados | Excepción Permitida |
 |---|---|---|
-| `C:\\Proyectos` | README.md, AGENTS.md, scripts/*.ps1, .github/**/*.md, .opencode/**/*.md, .doc_agents/*.md, Documentacion/**/*.md | Línea comentada (`#`) que contiene `$KitPath` o `$ProjectRoot` |
-| `D:\\` | Mismo conjunto | Misma excepción |
-| `/home/` | Mismo conjunto | Misma excepción |
-| `/Users/` | Mismo conjunto | Misma excepción |
+| `C:<sep>Proyectos` | README.md, AGENTS.md, scripts/*.ps1, .github/**/*.md, .opencode/**/*.md, .doc_agents/*.md, Documentacion/**/*.md | Línea comentada (`#`) que contiene `$KitPath` o `$ProjectRoot` |
+| `D:<sep>` | Mismo conjunto | Misma excepción |
+| `/<home>/` | Mismo conjunto | Misma excepción |
+| `/<Users>/` | Mismo conjunto | Misma excepción |
 
 ### CI Integration
 
@@ -431,20 +431,20 @@ Agregar a pipeline CI (GitHub Actions / Azure DevOps / etc.):
 
 | AC # | Criterio de Aceptación (del Spec) | Verificación en Plan | Test Asociado |
 |---|---|---|---|
-| **AC-1** | `grep -r "C:\\\\Proyectos" README.md AGENTS.md scripts/ --include="*.md" --include="*.ps1"` → 0 resultados (excepto comentarios con variable) | T01, T02, T03 eliminan rutas; T06 test automatiza verificación | `validate-no-hardcoded-paths.Tests.ps1` (patrón `C:\\\\Proyectos`) |
-| **AC-2** | `grep -r "C:\\\\Proyectos" .github/ .opencode/ .doc_agents/ Documentacion/ --include="*.md"` → 0 resultados | T01, T02 cubren estos directorios; T06 test automatiza | `validate-no-hardcoded-paths.Tests.ps1` (patrón `C:\\\\Proyectos` en paths extendidos) |
-| **AC-3** | README copiable a `/home/user/mi-proyecto` o `D:\Proyectos\mi-proyecto` funcionando cambiando solo variables marcadas | T01 usa patrón `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta`; quickstart.md valida escenario | Quickstart Escenario 3 (manual) |
-| **AC-4** | Artefactos `.specify/mcp-validation-*.md` en `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\` no existen | T05 elimina explícitamente estos 2 archivos | Verificación manual post-T05 (`Test-Path` en ambas rutas → False) |
+| **AC-1** | `grep -r "C:<sep>Proyectos" README.md AGENTS.md scripts/ --include="*.md" --include="*.ps1"` → 0 resultados (excepto comentarios con variable) | T01, T02, T03 eliminan rutas; T06 test automatiza verificación | `validate-no-hardcoded-paths.Tests.ps1` (patrón `C:<sep>Proyectos`) |
+| **AC-2** | `grep -r "C:<sep>Proyectos" .github/ .opencode/ .doc_agents/ Documentacion/ --include="*.md"` → 0 resultados | T01, T02 cubren estos directorios; T06 test automatiza | `validate-no-hardcoded-paths.Tests.ps1` (patrón `C:<sep>Proyectos` en paths extendidos) |
+| **AC-3** | README copiable a `<HOME>/mi-proyecto` o `<PROJECT_ROOT>` funcionando cambiando solo variables marcadas | T01 usa patrón `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta`; quickstart.md valida escenario | Quickstart Escenario 3 (manual) |
+| **AC-4** | Artefactos `.specify/mcp-validation-*.md` en `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\` no existen | T05 elimina explícitamente estos 2 archivos | Verificación manual post-T05 (`Test-Path` en ambas rutas → False) |
 | **AC-5** | Test `tests/validate-no-hardcoded-paths.Tests.ps1` pasa en CI | T06 crea test; T07 ejecuta y confirma pass | CI pipeline ejecuta T07 automáticamente |
 
 ### Checklist de Verificación Pre-Entrega
 
 - [ ] T01: `README.md` — 0 rutas absolutas, variables con `# <- ajusta a tu ruta`
 - [ ] T02: `AGENTS.md` — 0 rutas absolutas
-- [ ] T03: `scripts/*.ps1`, `sync-agents.ps1` — usan `$PSScriptRoot`/parámetros, sin `C:\Proyectos`
+- [ ] T03: `scripts/*.ps1`, `sync-agents.ps1` — usan `$PSScriptRoot`/parámetros, sin `C:<sep>Proyectos`
 - [ ] T04: `plataformador-bootstrap.ps1` tiene `-CheckHardcodedPaths` funcional
-- [ ] T05: `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` **ELIMINADO**
-- [ ] T05: `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md` **ELIMINADO**
+- [ ] T05: `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` **ELIMINADO**
+- [ ] T05: `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md` **ELIMINADO**
 - [ ] T06: `tests/validate-no-hardcoded-paths.Tests.ps1` creado y pasa localmente
 - [ ] T07: Test pasa en CI (GitHub Actions configurado)
 - [ ] Quickstart.md valida los 3 escenarios (portabilidad, bootstrap check, README copiable)
@@ -457,9 +457,9 @@ Agregar a pipeline CI (GitHub Actions / Azure DevOps / etc.):
 |---|---|---|---|---|
 | **T01** | Revisar `README.md` completo y reemplazar rutas absolutas por variables/rutas relativas | `documentador` | `README.md` | Ninguna |
 | **T02** | Revisar `AGENTS.md` y eliminar rutas absolutas | `documentador` | `AGENTS.md` | Ninguna |
-| **T03** | Revisar scripts en `scripts/` y raíz: buscar `C:\Proyectos\Agents_IA_TECH` y reemplazar por `$PSScriptRoot` o parámetros | `plataformador` | `sync-agents.ps1`, `scripts/*.ps1` | T01/T02 (patrón de variables) |
+| **T03** | Revisar scripts en `scripts/` y raíz: buscar `$KitPath` y reemplazar por `$PSScriptRoot` o parámetros | `plataformador` | `sync-agents.ps1`, `scripts/*.ps1` | T01/T02 (patrón de variables) |
 | **T04** | Agregar validación `-CheckHardcodedPaths` en `plataformador-bootstrap.ps1` | `plataformador` | `scripts/plataformador-bootstrap.ps1` | T03 (scripts limpios) |
-| **T05** | Eliminar `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md` | `plataformador` | Archivos externos en `C:\Proyectos\opencode\...` | Ninguna (limpieza máquina dev) |
+| **T05** | Eliminar `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` y `mcp-validation-tasks.md` | `plataformador` | Archivos externos en `C:<sep>Proyectos\opencode\...` | Ninguna (limpieza máquina dev) |
 | **T06** | Agregar test en `tests/validate-no-hardcoded-paths.Tests.ps1` | `qa-senior` | `tests/validate-no-hardcoded-paths.Tests.ps1` | T01-T03 (archivos ya limpios) |
 | **T07** | Ejecutar test y confirmar 0 rutas absolutas en archivos distribuibles | `qa-senior` | Ejecución CI/local | T06 (test existe) |
 

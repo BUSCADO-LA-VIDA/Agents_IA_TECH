@@ -3,7 +3,7 @@
 **Spec ID:** 011-bootstrap-invokes-upgrade-framework  
 **Fecha auditoría:** 2026-10-04  
 **Auditor:** security-auditor  
-**Alcance:** `C:\Proyectos\Agents_IA_TECH\upgrade_framework.ps1` + `Documentacion\Agents_IA_TECH\seguridad\`  
+**Alcance:** `$KitPath\upgrade_framework.ps1` + `Documentacion\Agents_IA_TECH\seguridad\`  
 **Threat Model de referencia:** `011-bootstrap-upgrade-framework-threat-model.md`
 
 ---

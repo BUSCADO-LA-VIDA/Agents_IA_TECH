@@ -96,7 +96,7 @@ try {
         # cambios sin pushear incluidos). Fail-closed: solo directorios
         # locales con marcadores de kit; jamas URLs ni el propio destino.
         if ($KitPath -match '^[a-zA-Z][a-zA-Z0-9+.-]*://' -or $KitPath.StartsWith('git@')) {
-            throw "[SECURITY] -KitPath no acepta URLs ni esquemas remotos (fail-closed): $KitPath (usa una ruta local, ej. C:\Proyectos\Agents_IA_TECH)"
+            throw "[SECURITY] -KitPath no acepta URLs ni esquemas remotos (fail-closed): $KitPath (usa una ruta local, ej. <ruta-a-tu-kit>)"
         }
         try { $kitCanon = [IO.Path]::GetFullPath($KitPath) } catch { throw "sync-kit: -KitPath invalido ($KitPath): $_" }
         if (-not (Test-Path -LiteralPath $kitCanon -PathType Container)) {

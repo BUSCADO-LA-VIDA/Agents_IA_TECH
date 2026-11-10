@@ -4,7 +4,7 @@
 > Este archivo se usa antes de mover archivos para ordenar el proyecto.
 
 ## Información del proyecto
-- Ruta: C:\Proyectos\Agents_IA_TECH
+- Ruta: $KitPath
 - Fecha: 2026-10-10
 
 ## Validaciones pendientes

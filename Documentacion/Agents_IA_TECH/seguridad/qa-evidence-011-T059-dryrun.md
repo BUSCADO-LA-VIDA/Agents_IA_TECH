@@ -9,7 +9,7 @@
 Verificar que la ejecución de `upgrade_framework.ps1` con `-DryRun` no produce efectos secundarios en el filesystem del proyecto.
 
 ## Metodología
-1. Crear entorno aislado en `C:\Users\tomas\AppData\Local\Temp\upgrade_framework_dryrun_test`
+1. Crear entorno aislado en `<HOME>\AppData\Local\Temp\upgrade_framework_dryrun_test`
 2. Registrar lista de archivos y hash SHA256 del manifest antes de ejecución
 3. Ejecutar `upgrade_framework.ps1 -DryRun` con manifest mínimo
 4. Comparar lista de archivos y hash después de ejecución

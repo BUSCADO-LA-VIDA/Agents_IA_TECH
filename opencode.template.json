@@ -1,22 +1,9 @@
-﻿{
+{
     "$schema": "https://opencode.ai/config.json",
-    "model": "opencode/deepseek-v4.1-flash-free",
-    "small_model": "opencode/beam-free",
     "default_agent": "pensador",
     "instructions": [
         "AGENTS.md"
     ],
-    "lsp": {
-        "python": {
-            "command": [
-                "pyright-langserver",
-                "--stdio"
-            ],
-            "extensions": [
-                ".py"
-            ]
-        }
-    },
     "permission": {
         "edit": "allow",
         "bash": {
@@ -44,59 +31,66 @@
             "context-mode": {
                 "type": "local",
                 "command": [
-                    "C:/Program Files/nodejs/node.exe",
-                    "C:/Users/tomas/AppData/Roaming/npm/node_modules/context-mode/build/cli.js"
-                ]
+                    "{env:CONTEXT_MODE_CMD}"
+                ],
+                "enabled": false
             },
             "codebase-memory-mcp": {
                 "type": "local",
                 "command": [
-                    "C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"
-                ]
+                    "{env:CODEBASE_MEMORY_CMD}"
+                ],
+                "enabled": false
             },
             "markitdown": {
                 "type": "local",
                 "command": [
-                    "C:/Python314/Scripts/markitdown-mcp.exe"
-                ]
+                    "{env:MARKITDOWN_CMD}"
+                ],
+                "enabled": false
             },
             "graphify": {
                 "type": "local",
                 "command": [
-                    "C:/Python314/python.exe",
-                    "-m",
-                    "graphify.serve",
-                    "C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json"
+                    "{env:GRAPHIFY_CMD}"
                 ],
-                "enabled": true
+                "enabled": false
             },
             "github": {
                 "type": "local",
                 "command": [
-                    "C:/Users/tomas/.local/bin/github-mcp-server.exe",
+                    "{env:GITHUB_MCP_CMD}",
                     "stdio"
-                ]
+                ],
+                "enabled": false
             },
             "playwright": {
                 "type": "local",
                 "command": [
-                    "C:/Program Files/nodejs/node.exe",
-                    "C:/Users/tomas/AppData/Roaming/npm/node_modules/@playwright/mcp/cli.js"
-                ]
+                    "{env:PLAYWRIGHT_MCP_CMD}"
+                ],
+                "enabled": false
             },
             "tokenslayer": {
                 "type": "local",
                 "command": [
-                    "C:/Program Files/nodejs/node.exe",
-                    "C:/Proyectos/Agents_IA_TECH/proyect_ext/tokenslayer/mcp-server/build/index.js"
-                ]
+                    "{env:TOKENSLAYER_CMD}"
+                ],
+                "enabled": false
             },
             "context7": {
                 "type": "local",
                 "command": [
-                    "C:/Program Files/nodejs/node.exe",
-                    "C:/Users/tomas/AppData/Roaming/npm/node_modules/@upstash/context7-mcp/dist/index.js"
-                ]
+                    "{env:CONTEXT7_CMD}"
+                ],
+                "enabled": false
+            },
+            "semgrep": {
+                "type": "local",
+                "command": [
+                    "{env:SEMGREP_MCP_CMD}"
+                ],
+                "enabled": false
             }
         }
     }

@@ -62,27 +62,27 @@ Para completar la integración, se deben ejecutar los siguientes comandos en Pow
 
 ```powershell
 # spec-kit
-git clone --branch main https://github.com/github/spec-kit C:\Proyectos\Agents_IA_TECH\proyect_ext\spec-kit
+git clone --branch main https://github.com/github/spec-kit $KitPath\proyect_ext\spec-kit
 
 # graphify
-git clone --branch main https://github.com/tomasgraph/graphify C:\Proyectos\Agents_IA_TECH\proyect_ext\graphify
+git clone --branch main https://github.com/tomasgraph/graphify $KitPath\proyect_ext\graphify
 ```
 
 ### Comandos de copia dirigida (post-clonado)
 
 ```powershell
 # spec-kit → .github/skills/
-Copy-Item -Recurse -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\spec-kit\src\speckit-specify\* C:\Proyectos\Agents_IA_TECH\.github\skills\speckit-specify\
-Copy-Item -Recurse -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\spec-kit\src\speckit-plan\* C:\Proyectos\Agents_IA_TECH\.github\skills\speckit-plan\
-Copy-Item -Recurse -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\spec-kit\src\speckit-tasks\* C:\Proyectos\Agents_IA_TECH\.github\skills\speckit-tasks\
-Copy-Item -Recurse -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\spec-kit\src\speckit-converge\* C:\Proyectos\Agents_IA_TECH\.github\skills\speckit-converge\
-Copy-Item -Recurse -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\spec-kit\src\speckit-implement\* C:\Proyectos\Agents_IA_TECH\.github\skills\speckit-implement\
-Copy-Item -Recurse -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\spec-kit\src\speckit-analyze\* C:\Proyectos\Agents_IA_TECH\.github\skills\speckit-analyze\
-Copy-Item -Recurse -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\spec-kit\src\speckit-checklist\* C:\Proyectos\Agents_IA_TECH\.github\skills\speckit-checklist\
+Copy-Item -Recurse -Force $KitPath\proyect_ext\spec-kit\src\speckit-specify\* $KitPath\.github\skills\speckit-specify\
+Copy-Item -Recurse -Force $KitPath\proyect_ext\spec-kit\src\speckit-plan\* $KitPath\.github\skills\speckit-plan\
+Copy-Item -Recurse -Force $KitPath\proyect_ext\spec-kit\src\speckit-tasks\* $KitPath\.github\skills\speckit-tasks\
+Copy-Item -Recurse -Force $KitPath\proyect_ext\spec-kit\src\speckit-converge\* $KitPath\.github\skills\speckit-converge\
+Copy-Item -Recurse -Force $KitPath\proyect_ext\spec-kit\src\speckit-implement\* $KitPath\.github\skills\speckit-implement\
+Copy-Item -Recurse -Force $KitPath\proyect_ext\spec-kit\src\speckit-analyze\* $KitPath\.github\skills\speckit-analyze\
+Copy-Item -Recurse -Force $KitPath\proyect_ext\spec-kit\src\speckit-checklist\* $KitPath\.github\skills\speckit-checklist\
 
 # graphify → .opencode/
-Copy-Item -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\graphify\bin\graphify C:\Proyectos\Agents_IA_TECH\.opencode\bin\
-Copy-Item -Recurse -Force C:\Proyectos\Agents_IA_TECH\proyect_ext\graphify\lib\* C:\Proyectos\Agents_IA_TECH\.opencode\lib\graphify\
+Copy-Item -Force $KitPath\proyect_ext\graphify\bin\graphify $KitPath\.opencode\bin\
+Copy-Item -Recurse -Force $KitPath\proyect_ext\graphify\lib\* $KitPath\.opencode\lib\graphify\
 ```
 
 ## Fase 4: Personalizaciones inteligentes

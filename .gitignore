@@ -90,8 +90,17 @@ Thumbs.db
 #-----------------------------------------------------------------------------
 # 5. Logs y temporales (no se versionan)
 *.log
-!.bootstrap-audit.log
+# [044-D3] Audit log: cadena de hashes append-only + host/actor/rutas reales.
+# No se versiona (no se reescribe: romperia la cadena). Sigue escribiendose local.
+.bootstrap-audit.log
 logs/
 tmp/
 temp/
 #-----------------------------------------------------------------------------
+
+
+
+
+# [044-D2] opencode.json es config resuelta por maquina: se genera con lift-opencode.ps1 / bootstrap
+# desde opencode.template.json. La version portable es la plantilla, no el archivo resuelto.
+opencode.json

@@ -156,9 +156,9 @@ This skill targets advanced size/startup optimization — not basic one-file "sc
 | **版本号** (Version) | 语义化版本号 | `1.0.0` |
 | **发布者/公司名** (Publisher) | 控制面板显示的发布者 | `YourCompany` |
 | **主程序** (Exe Name) | 主可执行文件名 | `RedInk.exe` |
-| **源路径** (Source Dir) | Nuitka dist 文件夹绝对路径 | `D:\project\dist` |
-| **输出路径** (Output Dir) | 安装包生成位置 | `D:\project\output` |
-| **图标路径** (Icon Path) | .ico 文件绝对路径（可选但推荐） | `D:\project\icon.ico` |
+| **源路径** (Source Dir) | Nuitka dist 文件夹绝对路径 | `<DRIVE>:\project\dist` |
+| **输出路径** (Output Dir) | 安装包生成位置 | `<DRIVE>:\project\output` |
+| **图标路径** (Icon Path) | .ico 文件绝对路径（可选但推荐） | `<DRIVE>:\project\icon.ico` |
 | **官网地址** (URL) | 可选，用于控制面板链接 | `https://example.com` |
 
 **询问模板：**
@@ -822,9 +822,9 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}
 | `{{PUBLISHER}}` | 发布者/公司名 | `MyCompany` |
 | `{{APP_URL}}` | 官网地址 | `https://example.com` |
 | `{{EXE_NAME}}` | 主程序文件名 | `RedInk.exe` |
-| `{{SOURCE_DIR}}` | Nuitka dist 文件夹路径 | `D:\project\dist\RedInk.dist` |
-| `{{OUTPUT_DIR}}` | 安装包输出路径 | `D:\project\output` |
-| `{{ICON_PATH}}` | 图标文件路径 | `D:\project\icon.ico` |
+| `{{SOURCE_DIR}}` | Nuitka dist 文件夹路径 | `<DRIVE>:\project\dist\RedInk.dist` |
+| `{{OUTPUT_DIR}}` | 安装包输出路径 | `<DRIVE>:\project\output` |
+| `{{ICON_PATH}}` | 图标文件路径 | `<DRIVE>:\project\icon.ico` |
 | `{{GENERATE_RANDOM_GUID}}` | **需生成唯一GUID** | 使用 Inno Setup "Tools > Generate GUID" |
 
 ---

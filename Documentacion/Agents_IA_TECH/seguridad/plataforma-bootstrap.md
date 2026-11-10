@@ -149,7 +149,7 @@ Los tres riesgos que deben **tratarse como severidad crítica/alta innegociable*
 - los guardrails 1 y 3 se refuercen con **fail-closed** (rechazar URL fuera de allowlist y licencia no verificada);
 - el bootstrap maneje **configs sin secrets** y excluya `.opencode/config.json`;
 - **no ejecute** scripts descargados sin revisión;
-- `qa-senior` valide con `-DryRun` + caso real (p. ej. `C:\Proyectos\Metatrader`) que **no toca `Documentacion/<AppName>/`** (paso 8º del plan) antes del rollout;
+- `qa-senior` valide con `-DryRun` + caso real (p. ej. `C:<sep>Proyectos\Metatrader`) que **no toca `Documentacion/<AppName>/`** (paso 8º del plan) antes del rollout;
 - se corra `npx ecc-agentshield scan` (paso 10º) sobre los cambios en `.github/`.
 
 Con esas condiciones en los criterios de aceptación (spec), el diseño puede adoptarse sin bloqueo. Se recomienda además **cerrar la licencia `pendiente` de `graphify`** (guardrail 8) antes de copiarlo al kit, y registrar la atribución en `referencias.md`.

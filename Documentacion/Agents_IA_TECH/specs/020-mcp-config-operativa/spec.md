@@ -23,14 +23,14 @@ El kit sufrió reiteradas regresiones de MCP (tokens `{env:...}` sin resolver po
 
 | MCP | `command` hardcodeado | Versión verificada |
 |-----|----------------------|-------------------|
-| `context-mode` | `C:/Program Files/nodejs/node.exe` + `.../npm/node_modules/context-mode/build/cli.js` | responde `Usage:` RC=0 |
-| `codebase-memory-mcp` | `C:/Users/tomas/.local/bin/codebase-memory-mcp.exe` | 0.9.0 |
-| `markitdown` | `C:/Python314/Scripts/markitdown.exe` | markitdown-mcp 0.0.1a7 |
-| `graphify` | `C:/Python314/python.exe -m graphify.serve C:/Proyectos/Agents_IA_TECH/graphify-out/graph.json` | graphifyy 0.9.48 |
+| `context-mode` | `<NODE_HOME>/node.exe` + `.../npm/node_modules/context-mode/build/cli.js` | responde `Usage:` RC=0 |
+| `codebase-memory-mcp` | `<HOME>/.local/bin/codebase-memory-mcp.exe` | 0.9.0 |
+| `markitdown` | `<PYTHON_HOME>/Scripts/markitdown.exe` | markitdown-mcp 0.0.1a7 |
+| `graphify` | `<PYTHON_HOME>/python.exe -m graphify.serve $KitPath/graphify-out/graph.json` | graphifyy 0.9.48 |
 | `tokenslayer` | `node proyect_ext/tokenslayer/mcp-server/build/index.js` | build presente |
-| `github` | `C:/Users/tomas/.local/bin/github-mcp-server.exe stdio` | v2.0.2 oficial, 46 tools |
+| `github` | `<HOME>/.local/bin/github-mcp-server.exe stdio` | v2.0.2 oficial, 46 tools |
 | `playwright` | `node .../@playwright/mcp/cli.js` | v1.64.0, 25 tools |
-| `semgrep` | `C:/Users/tomas/.local/bin/semgrep.exe mcp` | CLI 1.180.0, 7 tools |
+| `semgrep` | `<HOME>/.local/bin/semgrep.exe mcp` | CLI 1.180.0, 7 tools |
 | `context7` | `node .../@upstash/context7-mcp/dist/index.js` | 2 tools |
 
 Reglas (ADR-0009): rutas absolutas con forward slashes; entry-point JS directo en vez de shim `.ps1`; `0` tokens `{env:}` en `mcp.command`; los 8 MCP extendidos originales sin binario NO se registran (solo github/playwright/semgrep/context7 que sí están instalados; sentry bloqueado, perplexity/pieces/testsprite pendientes de keys/apps).

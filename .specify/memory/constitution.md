@@ -203,7 +203,7 @@ El orquestador gobierna las fases y **nunca auto-continua** a la siguiente sin v
 El kit maestro es **portable y reutilizable**: se distribuye a otros proyectos.
 
 - **Cero nombres de dominio concreto** en codigo, plantillas y documentacion vigente. Se usan `MiApp`, `AppFoo`, `AppBar`, `AppBaz`, `AppQux`. Los nombres reales que aparecen en hallazgos de modo real se anonimizan **solo en el nombre** (`AppXXX`), nunca en numeros ni logs: los reportes de `testing/` y la evidencia de incidentes se conservan verbatim como fuente de verdad historica
-- **Cero rutas absolutas** en todo archivo versionado: rutas relativas, o tokens que se re-resuelven en runtime. Las rutas de usuario (`C:\Users\<user>\...`) no se versionan jamas. Unicas excepciones: documentacion de historial y reportes de evidencia
+- **Cero rutas absolutas** en todo archivo versionado: rutas relativas, o tokens que se re-resuelven en runtime. Las rutas de usuario (`<HOME>\<user>\...`) no se versionan jamas. Unicas excepciones: documentacion de historial y reportes de evidencia
 - **Cero apps concretas activas** en el manifest maestro: se declara el formato y un ejemplo comentado
 - Los comandos MCP se guardan como **plantilla con tokens** (p. ej. `__CONTEXT_MODE_CMD__`) y el bootstrap los re-resuelve en runtime. La plantilla arranca en `enabled: false` y el runtime promueve; un commit **nunca** fuerza `enabled: true` por resolucion
 

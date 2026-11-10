@@ -69,7 +69,7 @@ La spec prevé `yyyymmdd\` + sufijo de hora si la carpeta del día existe. Si do
 
 ### 1.7 Riesgo de fuga por log / informe (secret en consola)
 
-El flujo "informa qué se movió y dónde" y el log de borrado (1.3) pueden volcar más de la cuenta: contenido del archivo, rutas absolutas con nombre de usuario (`C:\Users\<nombre>\…`), o diffs con credenciales. Eso queda en la consola, en logs de CI y en `pendientes-implementacion.md` si se copia el detalle.
+El flujo "informa qué se movió y dónde" y el log de borrado (1.3) pueden volcar más de la cuenta: contenido del archivo, rutas absolutas con nombre de usuario (`<HOME>\<nombre>\…`), o diffs con credenciales. Eso queda en la consola, en logs de CI y en `pendientes-implementacion.md` si se copia el detalle.
 
 **Puntos de validación:**
 - Logs e informes con **rutas relativas + metadatos** (hash, tamaño, fecha); nunca contenido ni secrets.

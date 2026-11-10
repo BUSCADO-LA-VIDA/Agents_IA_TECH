@@ -12,10 +12,10 @@
 ## Contexto
 
 El kit **Agents_IA_TECH** es una herramienta redistribuible que se clona en máquinas de desarrolladores en rutas arbitrarias:
-- Windows: `C:\Users\dev\kits\Agents_IA_TECH`, `D:\Proyectos\Agents_IA_TECH`, `C:\Kits\Agents_IA_TECH`
-- Linux/macOS: `/home/dev/kits/Agents_IA_TECH`, `/opt/Agents_IA_TECH`, `~/Agents_IA_TECH`
+- Windows: `<HOME>\dev\kits\Agents_IA_TECH`, `<PROJECT_ROOT>\Agents_IA_TECH`, `C:\Kits\Agents_IA_TECH`
+- Linux/macOS: `<HOME>/kits/<KIT_NAME>`, `/opt/Agents_IA_TECH`, `~/Agents_IA_TECH`
 
-**Problema**: La documentación (`README.md`, `AGENTS.md`), scripts (`.ps1`, `.sh`) y artefactos generados (`.specify/`) contenían rutas absolutas hardcodeadas de la máquina del autor (`C:\Proyectos\Agents_IA_TECH`, `C:\Proyectos\opencode`). Esto rompía la portabilidad: un usuario que clonara el kit en otra ubicación no podría seguir el README ni ejecutar los scripts sin editar archivos.
+**Problema**: La documentación (`README.md`, `AGENTS.md`), scripts (`.ps1`, `.sh`) y artefactos generados (`.specify/`) contenían rutas absolutas hardcodeadas de la máquina del autor (`$KitPath`, `C:<sep>Proyectos\opencode`). Esto rompía la portabilidad: un usuario que clonara el kit en otra ubicación no podría seguir el README ni ejecutar los scripts sin editar archivos.
 
 **Regla violada**: Un kit portable/distribuible **nunca** debe tener rutas absolutas de la máquina del autor en su documentación, scripts ni artefactos generados.
 
@@ -31,7 +31,7 @@ Adoptamos **tres patrones complementarios** para referenciar rutas en el kit, en
 
 ```markdown
 # Variable de configuración — AJUSTA A TU ENTORNO
-$ProjectRoot = "C:\Proyectos\MiProyecto"  # <- ajusta a tu ruta
+$ProjectRoot = "C:<sep>Proyectos\MiProyecto"  # <- ajusta a tu ruta
 $KitPath = "..\Agents_IA_TECH"             # <- ajusta a tu ruta
 ```
 
@@ -66,7 +66,7 @@ KIT_PATH="$(dirname "$SCRIPT_DIR")"
 - `$PSScriptRoot` (PowerShell) o `$SCRIPT_DIR` (Bash) **siempre** apunta al directorio del script en ejecución
 - Para obtener la raíz del kit desde `scripts/`, usar `Split-Path $PSScriptRoot -Parent` (PowerShell) o `dirname "$SCRIPT_DIR"` (Bash)
 - Exponer `-RootPath` y `-KitPath` como parámetros con defaults basados en `$PSScriptRoot`
-- **Nunca** hardcodear `C:\Proyectos\...`, `/home/...`, `/Users/...`
+- **Nunca** hardcodear `C:<sep>Proyectos\...`, `/<home>/...`, `/<Users>/...`
 
 ### 3. Parámetros de Línea de Comandos (Bootstrap / CLI)
 
@@ -95,9 +95,9 @@ param(
 
 | Patrón | Ejemplo | Por qué está prohibido |
 |--------|---------|------------------------|
-| Ruta absoluta Windows | `C:\Proyectos\Agents_IA_TECH` | Solo funciona en máquina del autor |
-| Ruta absoluta Linux/macOS | `/home/user/Agents_IA_TECH` | Solo funciona en máquina del autor |
-| Unidad fija Windows | `D:\Kits\Agents_IA_TECH` | Asume letra de unidad específica |
+| Ruta absoluta Windows | `$KitPath` | Solo funciona en máquina del autor |
+| Ruta absoluta Linux/macOS | `<HOME>/<KIT_NAME>` | Solo funciona en máquina del autor |
+| Unidad fija Windows | `$KitPath` | Asume letra de unidad específica |
 | Variable sin comentario | `$KitPath = "..\Agents_IA_TECH"` | Usuario no sabe que debe cambiarla |
 
 ---
@@ -108,10 +108,10 @@ param(
 
 ```powershell
 $forbiddenPatterns = @(
-    "C:\\\\Proyectos",
-    "D:\\\\",
-    "/home/",
-    "/Users/"
+    "C:<sep>Proyectos",
+    "D:<sep>",
+    "/<home>/",
+    "/<Users>/"
 )
 # Escanea: README.md, AGENTS.md, scripts\*.ps1, .github\**\*.md, .opencode\**\*.md, .doc_agents\*.md, Documentacion\**\*.md
 # Excepción: líneas comentadas (#) que contengan $KitPath o $ProjectRoot
@@ -146,7 +146,7 @@ Reporta: `Archivo:Línea → Contenido ofensivo`
 - ⚠️ **Curva de aprendizaje**: Usuarios nuevos deben entender `$KitPath` vs `$ProjectRoot` vs `$PSScriptRoot`
 - ⚠️ **Falsos positivos**: Comentarios legítimos con rutas de ejemplo podrían disparar validación (mitigado: excepción para `# $KitPath`/`$ProjectRoot`)
 - ⚠️ **Mantenimiento**: Cambios en estructura de carpetas (ej. mover scripts/) requieren actualizar `Split-Path` logic
-- ⚠️ **Artefactos externos**: Archivos generados durante desarrollo en `C:\Proyectos\opencode\...` no están en repo y requieren limpieza manual única
+- ⚠️ **Artefactos externos**: Archivos generados durante desarrollo en `C:<sep>Proyectos\opencode\...` no están en repo y requieren limpieza manual única
 
 ### Neutrales
 - Los scripts existentes (`plataformador-bootstrap.ps1`) ya usaban este patrón (ADR-0003) — esta decisión lo formaliza y extiende a documentación

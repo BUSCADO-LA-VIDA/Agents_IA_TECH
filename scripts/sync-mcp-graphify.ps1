@@ -6,7 +6,8 @@
 [CmdletBinding()]
 param(
     [string]$StageDir = "",
-    [string]$RootPath = "C:/Proyectos/Agents_IA_TECH",
+    # [040-RF-08] Sin default de la maquina del autor: se deriva de la raiz del kit.
+    [string]$RootPath = "",
     [switch]$DryRun,
     [switch]$Force
 )
@@ -22,10 +23,10 @@ $commonPath = Join-Path $projectRoot "scripts/sync/lib/common.ps1"
 . $commonPath
 Initialize-SyncLog
 
-# Ruta absoluta a opencode.json
+# [040-RF-08] Default portable: la raiz del kit se deriva de la ubicacion del script.
 if (-not $RootPath -or [string]::IsNullOrWhiteSpace($RootPath)) {
-    Write-Fail "RootPath no puede estar vacío."
-    exit 1
+    $RootPath = $projectRoot
+    Write-Info "RootPath no informado; se usa la raiz del kit derivada de la ubicacion del script."
 }
 
 $opencodeJsonPath = Join-Path -Path $RootPath -ChildPath "opencode.json"

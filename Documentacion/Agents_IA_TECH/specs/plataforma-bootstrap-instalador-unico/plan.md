@@ -33,7 +33,7 @@ Plan por fases para implementar el ADR-0003 y la spec de `plataformador-bootstra
 |-------|--------|--------|--------|
 | 4º | `plataformador` | Refactorizar `plataformador-bootstrap.ps1`: agregar `Sync-TransversalKit`, resolución de app activa (`-App` + `cwd`), integración de Spec-kit y Graphify, respetando los guardrails del ADR-0003. | ⏳ Pendiente |
 | 5º | `devops` | Convertir `sync-agents.ps1` en wrapper que delega en `Sync-TransversalKit`. | ⏳ Pendiente |
-| 6º | `qa-senior` | Probar idempotencia, `-DryRun`, resolución de app activa y no-tocar-`Documentacion/<AppName>/` en un proyecto real (p. ej. `C:\Proyectos\Metatrader`). | ⏳ Pendiente |
+| 6º | `qa-senior` | Probar idempotencia, `-DryRun`, resolución de app activa y no-tocar-`Documentacion/<AppName>/` en un proyecto real (p. ej. `C:<sep>Proyectos\Metatrader`). | ⏳ Pendiente |
 | 7º | `gitflow` | Commits convencionales (`feat`, `refactor`, `docs`, `chore`). | ⏳ Pendiente |
 
 **Criterio de salida de la fase**: bootstrap implementado, `sync-agents.ps1` delegando, y tests de `qa-senior` pasando.
@@ -44,7 +44,7 @@ Plan por fases para implementar el ADR-0003 y la spec de `plataformador-bootstra
 
 | Orden | Acción |
 |-------|--------|
-| 8º | Ejecutar `.\plataformador-bootstrap.ps1 -DryRun` en `C:\Proyectos\Agents_IA_TECH` y `C:\Proyectos\Metatrader`; verificar que no toca `Documentacion/<AppName>/`. |
+| 8º | Ejecutar `.\plataformador-bootstrap.ps1 -DryRun` en `$KitPath` y `C:<sep>Proyectos\Metatrader`; verificar que no toca `Documentacion/<AppName>/`. |
 | 9º | Ejecutar sin `-DryRun`; verificar Spec-kit orientado a la app activa y Graphify configurado. |
 | 10º | Correr `npx ecc-agentshield scan` para validar seguridad de los cambios en `.github/`. |
 | 11º | Validar que al cargar VS Code los agentes, MCPs y Spec-kit funcionan sin re-ejecutar scripts (hooks SessionStart, plugin context-mode). |

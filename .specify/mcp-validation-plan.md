@@ -17,7 +17,7 @@ Validate the current MCP configuration in `.vscode\mcp.json` and synchronize wit
 ### Requerimientos Previos
 1. PowerShell 7.0+ en máquina objetivo
 2. Acceso de escritura a `.vscode\mcp.json` (backup se creará automáticamente)
-3. Conocimiento de rutas machine-specific (`C:/Users/tomas/...`)
+3. Conocimiento de rutas machine-specific (`<HOME>/...`)
 
 ## Execution Order
 
@@ -26,7 +26,7 @@ Validate the current MCP configuration in `.vscode\mcp.json` and synchronize wit
 #### Tarea T001: Verificar formato JSON
 ```powershell
 # Validar que .vscode\mcp.json sea JSON válido
-Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json
+Get-Content "$KitPath\.vscode\mcp.json" | ConvertFrom-Json
 ```
 **Resultado esperado**: JSON parseado sin errores  
 **Fallos posibles**: JSON corrupted, formato inesperado
@@ -34,7 +34,7 @@ Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json
 #### Tarea T002: Verificar estructura de servidores
 ```powershell
 # Contar servidores y validar estructura
-($mcp = Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json).servers.PSObject.Properties.Count
+($mcp = Get-Content "$KitPath\.vscode\mcp.json" | ConvertFrom-Json).servers.PSObject.Properties.Count
 ```
 **Resultado esperado**: 8  
 **Fallos posibles**: Distinto de 8 servidores
@@ -42,7 +42,7 @@ Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json
 #### Tarea T003: Verificar consistencia de tipo
 ```powershell
 # Confirmar que todos usan type: "stdio"
-($mcp = Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json).servers | ForEach-Object { $_.type -eq "stdio" }
+($mcp = Get-Content "$KitPath\.vscode\mcp.json" | ConvertFrom-Json).servers | ForEach-Object { $_.type -eq "stdio" }
 ```
 **Resultado esperado**: True para todas las entradas  
 **Fallos posibles**: Algun servidor usa tipo distinto
@@ -50,7 +50,7 @@ Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json
 #### Tarea T004: Verificar formato de args
 ```powershell
 # Confirmar que args usa formato array
-($mcp = Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json).servers | ForEach-Object { $_.args.GetType().IsArray }
+($mcp = Get-Content "$KitPath\.vscode\mcp.json" | ConvertFrom-Json).servers | ForEach-Object { $_.args.GetType().IsArray }
 ```
 **Resultado esperado**: True para todas las entradas  
 **Fallos posibles**: Algun servidor trae args como string
@@ -59,7 +59,7 @@ Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json
 
 #### Tarea T005: Ejecutar install.ps1 (portable por máquina)
 ```powershell
-.\scripts\sync\mcp\install.ps1 -RootPath "C:\Proyectos\Agents_IA_TECH"
+.\scripts\sync\mcp\install.ps1 -RootPath "$KitPath"
 ```
 **Propósito**: Instalar/MCP verificar en máquina actual  
 **Modo DryRun**: `.\\scripts\\sync\\mcp\\install.ps1 -RootPath "C:\\Proyectos\\Agents_IA_TECH" -DryRun`  
@@ -68,7 +68,7 @@ Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json
 
 #### Tarea T006: Ejecutar lift-vscode.ps1 (actualizar .vscode\mcp.json)
 ```powershell
-.\scripts\sync\mcp\lift-vscode.ps1 -StageDir "C:\Proyectos\Agents_IA_TECH" -Force
+.\scripts\sync\mcp\lift-vscode.ps1 -StageDir "$KitPath" -Force
 ```
 **Propósito**: Fusionar MCP desde maestro a .vscode\mcp.json  
 **Reglas**:
@@ -86,7 +86,7 @@ Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json
 
 #### Tarea T007: Ejecutar lift-opencode.ps1 (actualizar opencode.json)
 ```powershell
-.\scripts\sync\mcp\lift-opencode.ps1 -StageDir "C:\Proyectos\Agents_IA_TECH" -Force
+.\scripts\sync\mcp\lift-opencode.ps1 -StageDir "$KitPath" -Force
 ```
 **Propósito**: Fusionar bloque mcp de opencode.json desde maestro  
 **Mismo contrato** que lift-vscode.ps1 pero para OpenCode  
@@ -112,14 +112,14 @@ Get-Content "C:\Proyectos\Agents_IA_TECH\.vscode\mcp.json" | ConvertFrom-Json
 #### Tarea T009: Verificar resultados post-sync
 ```powershell
 # Revisar reporte de sincronización
-Get-Content "C:\Proyectos\Agents_IA_TECH\.kit-last-sync.json" | ConvertFrom-Json
+Get-Content "$KitPath\.kit-last-sync.json" | ConvertFrom-Json
 ```
 **Propósito**: Confirmar qué capas ejecutaron y resultados
 
 #### Tarea T010: Gestionar flag de restart
 ```powershell
 # Verificar si se requiere reinicio
-Test-Path "C:\Proyectos\Agents_IA_TECH\.kit-restart-required"
+Test-Path "$KitPath\.kit-restart-required"
 ```
 **Propósito**: Flag escrito por sync-kit-agents si los agents cambiaron
 
@@ -158,11 +158,11 @@ Test-Path "C:\Proyectos\Agents_IA_TECH\.kit-restart-required"
 ### A) .kit-last-sync.json
 - Reporte automático por sync-kit-agents después de ejecutar todas las capas
 - Contiene: tool, phase, commit, date, layers, results
-- Ubicación: `C:\Proyectos\Agents_IA_TECH\.kit-last-sync.json`
+- Ubicación: `$KitPath\.kit-last-sync.json`
 
 ### B) .kit-restart-required (si aplica)
 - Flag escrito si los agents de GitHub/OpenCode/VSCode reportaron cambios
-- Ubicación: `C:\Proyectos\Agents_IA_TECH\.kit-restart-required`
+- Ubicación: `$KitPath\.kit-restart-required`
 
 ### C) .kit-backup\<timestamp>\
 - Backups automáticos antes de modificaciones críticas

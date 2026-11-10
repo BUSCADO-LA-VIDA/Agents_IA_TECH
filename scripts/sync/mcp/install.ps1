@@ -14,7 +14,7 @@
 # [021]   context-mode/codebase-memory-mcp/markitdown/graphify/tokenslayer ->
 # [021]   scripts/plataformador-bootstrap.ps1:2939-2954,2992-3006 + `npm ls -g`
 # [021]   (context-mode@1.0.169, codebase-memory-mcp@0.11.0) + `pip show`
-# [021]   (markitdown-mcp 0.0.1a7 en C:\Python314; el pin 0.0.1a3 del bootstrap
+# [021]   (markitdown-mcp 0.0.1a7 en <PYTHON_HOME>; el pin 0.0.1a3 del bootstrap
 # [021]   esta desactualizado, por eso se instala SIN pin) + `uv tool list`
 # [021]   (graphifyy, semgrep) + bitacoras 2026-10-11-mcp-{github,playwright,
 # [021]   semgrep,context7}.md. github sin binario -> WARN manual con
@@ -143,7 +143,7 @@ $tools = @(
        InstallMissing = { Invoke-Installer "codebase-memory-mcp" "npm" @("install", "-g", "codebase-memory-mcp") };
        InstallForce = { Invoke-Installer "codebase-memory-mcp" "npm" @("install", "-g", "codebase-memory-mcp@latest") } },
     # [021] markitdown: shim markitdown-mcp via pip (verificado: pip show
-    # [021] markitdown-mcp 0.0.1a7 en C:\Python314); se inspecciono el .exe
+    # [021] markitdown-mcp 0.0.1a7 en <PYTHON_HOME>); se inspecciono el .exe
     # [021] solo para determinar origen pip (no se modifico nada).
     @{ Key = "markitdown"; Env = "MARKITDOWN_CMD";
        Detect = { $p = Resolve-OnPath "markitdown-mcp"; if ($p) { return @{ Path = $p; VerExe = $p; VerArgs = @() } }; return $null };

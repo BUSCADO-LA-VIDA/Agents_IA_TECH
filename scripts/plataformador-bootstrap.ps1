@@ -32,9 +32,10 @@ param(
     # herramientas externas (npm/pip/uv + build tokenslayer). Sin -Force los
     # archivos que difieren se conservan (avisa) y no se tocan herramientas.
     [switch]$Force,
-    # -CheckHardcodedPaths: escanea la documentación del proyecto destino
-    # buscando rutas absolutas hardcodeadas (C:\Proyectos, D:\, /home/, /Users/)
-    # y reporta advertencias con archivo:línea. No falla el bootstrap, solo advierte.
+    # -CheckHardcodedPaths: escanea TODO archivo versionado del proyecto destino
+    # (git ls-files; sin git, recorrido completo) buscando rutas absolutas
+    # literales. Reporta archivo:línea y sale con código 1 si hay coincidencias
+    # (fail-closed); con -DryRun solo informa. Spec 044 RF-03/RF-12.
     [switch]$CheckHardcodedPaths
 )
 
@@ -546,9 +547,18 @@ function Ensure-OpenCodeMcp {
 
     $opencodePath = Join-Path $RootPath "opencode.json"
     
+    # [044-RF-06] Fuente unica versionada: opencode.template.json (portable, sin rutas).
+    # Si el proyecto aun no tiene opencode.json, se genera desde la plantilla y la
+    # re-resolucion de tokens de mas abajo lo promueve a rutas locales.
     if (-not (Test-Path $opencodePath)) {
-        Write-Warn "No existe opencode.json en $RootPath; se omite configuración de MCP para OpenCode."
-        return
+        $templatePath = Join-Path $RootPath "opencode.template.json"
+        if (Test-Path -LiteralPath $templatePath) {
+            Copy-Item -LiteralPath $templatePath -Destination $opencodePath -Force
+            Write-OK "opencode.json generado desde opencode.template.json (portable)."
+        } else {
+            Write-Warn "No existe opencode.json ni opencode.template.json en $RootPath; se omite configuracion de MCP para OpenCode."
+            return
+        }
     }
 
 # Leer el JSON existente
@@ -3199,39 +3209,6 @@ Reload-ProjectWindow -RootPath $resolvedRoot
 # [BOOTSTRAP-FIXES] F5: cuadro resumen de la ejecución (WARNs/ERRORs únicos).
 Show-ExecutionSummary
 
-# [RF-06] Validación opcional de rutas hardcodeadas en documentación del proyecto destino
-if ($CheckHardcodedPaths) {
-    Write-Step "Validando rutas hardcodeadas en documentación del proyecto destino (-CheckHardcodedPaths)..."
-    $targetDocPaths = @(
-        "Documentacion\**\*.md",
-        ".github\**\*.md",
-        ".opencode\**\*.md",
-        ".doc_agents\*.md"
-    )
-    $hardcodedPaths = @()
-    $forbiddenPatterns = @("C:\\Proyectos", "D:\\", "/home/", "/Users/")
-    foreach ($pattern in $targetDocPaths) {
-        $matches = Get-ChildItem -Path $resolvedRoot -Recurse -Filter $pattern -ErrorAction SilentlyContinue |
-                   Select-String -Pattern ($forbiddenPatterns -join '|') -ErrorAction SilentlyContinue
-        if ($matches) {
-            foreach ($match in $matches) {
-                $lineText = $match.Line.Trim()
-                # Excepción: líneas de comentario que contienen $KitPath o $ProjectRoot
-                if (-not ($lineText.StartsWith("#") -and ($lineText -like '*$KitPath*' -or $lineText -like '*$ProjectRoot*'))) {
-                    $hardcodedPaths += "$($match.Path):$($match.LineNumber)  →  $lineText"
-                }
-            }
-        }
-    }
-    if ($hardcodedPaths) {
-        Write-Warn "ADVERTENCIA: Se detectaron rutas absolutas hardcodeadas en el proyecto destino:"
-        $hardcodedPaths | ForEach-Object { Write-Warn "  $_" }
-        Write-Warn "Acción recomendada: Reemplace por variables `$KitPath/`$ProjectRoot con comentario '# <- ajusta a tu ruta'"
-    } else {
-        Write-OK "Validación -CheckHardcodedPaths: No se detectaron rutas absolutas en documentación del proyecto destino."
-    }
-}
-
 Write-Host "" 
 Write-Host "===============================================================" -ForegroundColor Green
 Write-Host " Bootstrap completado" -ForegroundColor Green
@@ -3262,3 +3239,85 @@ Import-Module (Join-Path $PSScriptRoot 'modules\Manifest\ManifestManager.psm1') 
 Import-Module (Join-Path $PSScriptRoot 'modules\Manifest\ManifestReference.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'modules\Manifest\ManifestHooks.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'modules\Utils\YamlHelper.psm1') -Force
+
+# =============================================================================
+# [044-RF-03] Validacion de portabilidad del proyecto destino (-CheckHardcodedPaths)
+#   Universo: todo archivo versionado del proyecto (git ls-files). Sin git:
+#   recorrido recursivo completo, sin exclusiones de directorio.
+#   Patrones construidos por concatenacion de fragmentos: este archivo tambien
+#   se valida a si mismo (spec 044, R3).
+#   Fail-closed: exit 1 si hay coincidencias (salvo -DryRun).
+# =============================================================================
+if ($CheckHardcodedPaths) {
+    Write-Step "Validando rutas absolutas literales en el proyecto destino (-CheckHardcodedPaths)..."
+
+    $portableBs = [string][char]92
+    $portableFs = [string][char]47
+    # Patrones: rutas de la maquina del autor + unidades ajenas al clon.
+    $portablePatterns = @(
+        @{ Pattern = ('C:' + $portableBs + 'Proyectos');     IgnoreCase = $true },
+        @{ Pattern = ('C:' + $portableFs + 'Proyectos');     IgnoreCase = $true },
+        @{ Pattern = ('D:' + $portableBs + 'Proyectos');     IgnoreCase = $true },
+        @{ Pattern = ('D:' + $portableFs + 'Proyectos');     IgnoreCase = $true },
+        @{ Pattern = ('C:' + $portableBs + 'Users' + $portableBs); IgnoreCase = $true },
+        @{ Pattern = ('C:' + $portableFs + 'Users' + $portableFs); IgnoreCase = $true },
+        @{ Pattern = ('C:' + $portableBs + 'Python314');     IgnoreCase = $true },
+        @{ Pattern = ('C:' + $portableFs + 'Python314');     IgnoreCase = $true },
+        @{ Pattern = ('C:' + $portableBs + 'Program Files'); IgnoreCase = $true },
+        @{ Pattern = ('C:' + $portableFs + 'Program Files'); IgnoreCase = $true },
+        @{ Pattern = ('D:' + $portableBs);                   IgnoreCase = $true },
+        @{ Pattern = ('D:' + $portableFs);                   IgnoreCase = $true },
+        @{ Pattern = ($portableFs + 'home' + $portableFs);   IgnoreCase = $false },
+        @{ Pattern = ($portableFs + 'Users' + $portableFs);  IgnoreCase = $false }
+    )
+
+    $portableFiles = @()
+    if (Get-Command git -ErrorAction SilentlyContinue) {
+        Push-Location -LiteralPath $resolvedRoot
+        try { $portableFiles = @(& git ls-files 2>$null) } finally { Pop-Location }
+    }
+    if (-not $portableFiles -or $portableFiles.Count -eq 0) {
+        $portableFiles = @(
+            Get-ChildItem -LiteralPath $resolvedRoot -Recurse -File -Force -ErrorAction SilentlyContinue |
+                ForEach-Object { [IO.Path]::GetRelativePath($resolvedRoot, $_.FullName) }
+        )
+    }
+
+    $portableHits = [System.Collections.Generic.List[string]]::new()
+    foreach ($rel in $portableFiles) {
+        $full = Join-Path $resolvedRoot $rel
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
+        $isText = $true
+        try {
+            $stream = [IO.File]::OpenRead($full)
+            try {
+                $buffer = New-Object byte[] 8192
+                $read = $stream.Read($buffer, 0, $buffer.Length)
+                for ($i = 0; $i -lt $read; $i++) { if ($buffer[$i] -eq 0) { $isText = $false; break } }
+            } finally { $stream.Dispose() }
+        } catch { $isText = $false }
+        if (-not $isText) { continue }
+
+        $lineNo = 0
+        foreach ($line in [IO.File]::ReadLines($full)) {
+            $lineNo++
+            foreach ($entry in $portablePatterns) {
+                $comparison = if ($entry.IgnoreCase) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
+                if ($line.IndexOf($entry.Pattern, $comparison) -ge 0) {
+                    $portableHits.Add(('{0}:{1} -> {2}' -f $rel, $lineNo, $line.Trim()))
+                    break
+                }
+            }
+        }
+    }
+
+    if ($portableHits.Count -gt 0) {
+        Write-Warn ("ADVERTENCIA: {0} lineas con rutas absolutas literales en {1} archivos versionados." -f $portableHits.Count, $portableFiles.Count)
+        $portableHits | Select-Object -First 50 | ForEach-Object { Write-Warn ('  ' + $_) }
+        if ($portableHits.Count -gt 50) { Write-Warn ('  ... y {0} mas' -f ($portableHits.Count - 50)) }
+        Write-Warn 'Accion: sustituir por $KitPath / $ProjectRoot / <DRIVE>: / <HOME> (nunca rutas literales de la maquina).'
+        if (-not $DryRun) { exit 1 }
+    } else {
+        Write-OK ("Validacion -CheckHardcodedPaths: 0 coincidencias en {0} archivos versionados." -f $portableFiles.Count)
+    }
+}

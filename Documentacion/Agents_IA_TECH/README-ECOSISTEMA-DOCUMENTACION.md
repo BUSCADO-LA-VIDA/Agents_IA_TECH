@@ -222,9 +222,9 @@ flowchart TD
 
 | MCP | Ruta del binario |
 |-----|------------------|
-| `context-mode` | `C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd` |
-| `codebase-memory-mcp` | `C:/Users/tomas/.local/bin/codebase-memory-mcp.exe` (v0.9.0) |
-| `markitdown` | `C:/Python314/Scripts/markitdown-mcp.exe` |
+| `context-mode` | `<HOME>/AppData/Roaming/npm/context-mode.cmd` |
+| `codebase-memory-mcp` | `<HOME>/.local/bin/codebase-memory-mcp.exe` (v0.9.0) |
+| `markitdown` | `<PYTHON_HOME>/Scripts/markitdown-mcp.exe` |
 
 ### Cómo activarlos en OpenCode (✅ YA HECHO)
 
@@ -234,17 +234,17 @@ La sección `mcp` ya está agregada al `opencode.json` del proyecto (formato val
 "mcp": {
   "context-mode": {
     "type": "local",
-    "command": ["C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd"],
+    "command": ["<HOME>/AppData/Roaming/npm/context-mode.cmd"],
     "enabled": true
   },
   "codebase-memory-mcp": {
     "type": "local",
-    "command": ["C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"],
+    "command": ["<HOME>/.local/bin/codebase-memory-mcp.exe"],
     "enabled": true
   },
   "markitdown": {
     "type": "local",
-    "command": ["C:/Python314/Scripts/markitdown-mcp.exe"],
+    "command": ["<PYTHON_HOME>/Scripts/markitdown-mcp.exe"],
     "enabled": true
   }
 }
@@ -256,9 +256,9 @@ La sección `mcp` ya está agregada al `opencode.json` del proyecto (formato val
 
 | MCP | Ruta del binario |
 |-----|------------------|
-| `context-mode` | `C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd` |
-| `codebase-memory-mcp` | `C:/Users/tomas/.local/bin/codebase-memory-mcp.exe` (v0.9.0) |
-| `markitdown` | `C:/Python314/Scripts/markitdown-mcp.exe` |
+| `context-mode` | `<HOME>/AppData/Roaming/npm/context-mode.cmd` |
+| `codebase-memory-mcp` | `<HOME>/.local/bin/codebase-memory-mcp.exe` (v0.9.0) |
+| `markitdown` | `<PYTHON_HOME>/Scripts/markitdown-mcp.exe` |
 
 ### Cómo activarlos en OpenCode
 
@@ -268,17 +268,17 @@ Agregar la sección `mcp` al `opencode.json` del proyecto (formato validado cont
 "mcp": {
   "context-mode": {
     "type": "local",
-    "command": ["C:/Users/tomas/AppData/Roaming/npm/context-mode.cmd"],
+    "command": ["<HOME>/AppData/Roaming/npm/context-mode.cmd"],
     "enabled": true
   },
   "codebase-memory-mcp": {
     "type": "local",
-    "command": ["C:/Users/tomas/.local/bin/codebase-memory-mcp.exe"],
+    "command": ["<HOME>/.local/bin/codebase-memory-mcp.exe"],
     "enabled": true
   },
   "markitdown": {
     "type": "local",
-    "command": ["C:/Python314/Scripts/markitdown-mcp.exe"],
+    "command": ["<PYTHON_HOME>/Scripts/markitdown-mcp.exe"],
     "enabled": true
   }
 }
@@ -292,8 +292,8 @@ Agregar la sección `mcp` al `opencode.json` del proyecto (formato validado cont
 
 | MCP | Ubicación del índice | Nota |
 |-----|----------------------|------|
-| `codebase-memory-mcp` | `C:\Users\tomas\.cache\codebase-memory-mcp\<nombre-proyecto>.db` | Un `.db` por proyecto. Ej: `C-Proyectos-Agents_IA_TECH.db` (39 MB, 13.216 nodos) |
-| `context-mode` | `C:\Users\tomas\AppData\Roaming\opencode\context-mode\content` | Base FTS5 por proyecto (archivos `.db` por source) |
+| `codebase-memory-mcp` | `<HOME>\.cache\codebase-memory-mcp\<nombre-proyecto>.db` | Un `.db` por proyecto. Ej: `C-Proyectos-Agents_IA_TECH.db` (39 MB, 13.216 nodos) |
+| `context-mode` | `<HOME>\AppData\Roaming\opencode\context-mode\content` | Base FTS5 por proyecto (archivos `.db` por source) |
 | `markitdown` | No guarda índices | Solo convierte formatos a Markdown |
 
 ---
@@ -309,7 +309,7 @@ Agregar la sección `mcp` al `opencode.json` del proyecto (formato validado cont
 codebase-memory-mcp cli list_projects
 
 # Indexar un proyecto (el código fuente)
-codebase-memory-mcp cli index_repository --path "C:/Proyectos/Boleteria Cardenales"
+codebase-memory-mcp cli index_repository --path "C:<sep>Proyectos/Boleteria Cardenales"
 
 # Estado del índice de un proyecto
 codebase-memory-mcp cli index_status --project "<nombre-de-list_projects>"
@@ -328,10 +328,10 @@ codebase-memory-mcp cli delete_project '{"project":"<nombre>"}'
 
 ```powershell
 # Indexar un directorio (código y/o documentación)
-context-mode index "C:/Proyectos/Boleteria Cardenales"
+context-mode index "C:<sep>Proyectos/Boleteria Cardenales"
 
 # Indexar solo la documentación
-context-mode index "C:/Proyectos/Boleteria Cardenales/Documentacion"
+context-mode index "C:<sep>Proyectos/Boleteria Cardenales/Documentacion"
 
 # Buscar en la base de conocimiento
 context-mode search "consulta..."

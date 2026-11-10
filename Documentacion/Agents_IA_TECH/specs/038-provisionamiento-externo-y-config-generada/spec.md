@@ -281,7 +281,7 @@ dependencias_externas:
   "context-mode": {
     "tipo": "mcp-workspace",
     "requerido": true,
-    "comando_resuelto": "C:/Users/<usuario>/AppData/Roaming/npm/node_modules/context-mode/cli.mjs",
+    "comando_resuelto": "<HOME>/<usuario>/AppData/Roaming/npm/node_modules/context-mode/cli.mjs",
     "version_instalada": "2.1.0",
     "version_ultima": "2.1.0",
     "fuente": "https://registry.npmjs.org/context-mode/latest",
@@ -314,7 +314,7 @@ Fila = capacidad. Columnas obligatorias: capacidad, mecanismo OpenCode, mecanism
 - **SC-004**: `validate-parity` reporta el mismo conjunto de servidores en `opencode.json` y `.vscode/mcp.json`, con diferencias de capacidad justificadas por la matriz.
 - **SC-005**: el manifest declara tipo y autoridad de versión para el 100% de las dependencias externas existentes; ninguna queda sin tipo.
 - **SC-006**: la sonda de ECC y spec-kit responde `al-dia` o `desactualizado` con SHA y fecha, y coincide con lo que devuelve el remoto en una verificación manual.
-- **SC-007**: ningún archivo de configuración versionado contiene una ruta absoluta de la máquina (`C:\Users\...`).
+- **SC-007**: ningún archivo de configuración versionado contiene una ruta absoluta de la máquina (`<HOME>\...`).
 - **SC-008**: ninguna escritura de configuración usa la forma plana `mcp.<nombre>`; `validate` la detecta como FAIL si reaparece.
 - **SC-009**: no existe ningún `AGENTS.md`, `CLAUDE.md` ni `.mcp.json` de un clon externo bajo la raíz del workspace.
 - **SC-010**: la matriz de capacidades cubre las cuatro capacidades iniciales con fuente y versión, y `validate-parity` falla si se usa una capacidad no declarada.

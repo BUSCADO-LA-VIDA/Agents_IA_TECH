@@ -4,7 +4,7 @@
 
 **Motivo reportado por el usuario**: los modelos FREE no aparecen y hay "error de Token Inválido".
 
-**Versión detectada**: OpenCode `v2.0.32` (channel `latest`), Python 3.14, Node en `C:\Program Files\nodejs`.
+**Versión detectada**: OpenCode `v2.0.32` (channel `latest`), Python 3.14, Node en `<NODE_HOME>`.
 
 ---
 
@@ -269,7 +269,7 @@ small_model: opencode/beam-free (gratuito, verificado)
 
 ## 7. Alcance de la intervención
 
-La intervención se limitó a `C:\Proyectos\Agents_IA_TECH`. **No se modificó ningún otro proyecto**: `trading_bot` y `Generator_IA_Projects` siguen con su configuración en forma V1 y conservan sus propios MCPs.
+La intervención se limitó a `$KitPath`. **No se modificó ningún otro proyecto**: `trading_bot` y `Generator_IA_Projects` siguen con su configuración en forma V1 y conservan sus propios MCPs.
 
 Consecuencia conocida y **no resuelta**: `scripts/sync/mcp/lift-opencode.ps1` sigue iterando `@($master.mcp.PSObject.Properties)` tratando cada clave de `mcp` como un servidor. Con este maestro en V2 interpretará `servers` y `timeout` como nombres de MCP y corromperá el `opencode.json` de cualquier destino. Está registrado como `020-T010` y **debe resolverse antes de volver a correr el orquestador de sincronización**.
 

@@ -155,8 +155,8 @@
     `Core facts`, `## Commands`. `opencode.json`: `default_agent: pensador`.
 - **Comando de aplicación** (una sola pasada, desde el maestro):
   ```powershell
-  pwsh -File C:\Proyectos\Agents_IA_TECH\scripts\sync-kit-agents.ps1 `
-    -RootPath <destino> -KitPath C:\Proyectos\Agents_IA_TECH `
+  pwsh -File $KitPath\scripts\sync-kit-agents.ps1 `
+    -RootPath <destino> -KitPath $KitPath `
     -Only "kit-files,agents-github,agents-opencode,agents-vscode,mcp-lift-opencode,mcp-lift-vscode"
   ```
   Si el destino necesita además skills/rules/prompts/workflows/tests (defectos D2 y D4 abiertos),

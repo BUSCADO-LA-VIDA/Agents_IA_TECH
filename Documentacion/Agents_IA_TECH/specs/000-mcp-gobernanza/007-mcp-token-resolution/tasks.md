@@ -203,7 +203,7 @@ Proyecto único de tooling (sin `src/`/`tests/`):
 **Purpose**: Validación end-to-end, seguridad e idempotencia final.
 
 - [x] T901 [P] Ejecutar la matriz completa T-01…T-11 de `quickstart.md`/`plan.md` y registrar evidencia por escenario. Criterio done: cada escenario con resultado esperado vs obtenido.
-- [x] T902 [P] Verificar `git check-ignore .env.mcp` → exit 0 y que la plantilla `opencode.json` versionada no contiene rutas absolutas de la PC (`Select-String -Pattern 'C:\\|/Users/'`). Criterio done: SC-003 cumplido. [RNF-01]
+- [x] T902 [P] Verificar `git check-ignore .env.mcp` → exit 0 y que la plantilla `opencode.json` versionada no contiene rutas absolutas de la PC (`Select-String -Pattern 'C:\\|/<Users>/'`). Criterio done: SC-003 cumplido. [RNF-01]
 - [x] T903 [P] Verificar idempotencia final end-to-end (2 corridas consecutivas + 1 con `-Force`) en un proyecto consumidor genérico. Criterio done: SC-002 cumplido. [RNF-03]
 - [x] T904 [P] Verificar cierre de seguridad: `.env.mcp` y `.opencode/config.json` gitignored; sin credenciales en la plantilla; Allowlist de `Update-Self` intacta. Criterio done: `npx ecc-agentshield scan` sin hallazgos nuevos en archivos tocados. [RNF-01]
 - [x] T905 Actualizar `quickstart.md` con el contrato de carga de `.env.mcp` (exportar vars o confiar en `environment`) y el ciclo de re-ejecución de `Update-Self`. Criterio done: contrato documentado. [D2/R-01, D4]

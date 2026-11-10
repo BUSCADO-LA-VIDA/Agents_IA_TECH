@@ -329,7 +329,7 @@ uv tool list | Select-String graphify
 
 **Fecha de revisión:** 2026-10-05  
 **Agente documentador:** `documentador`  
-**Evidencia base:** `C:\Proyectos\Agents_IA_TECH\Documentacion\Agents_IA_TECH\seguridad\qa-evidence-011-T059-dryrun.md`
+**Evidencia base:** `$KitPath\Documentacion\Agents_IA_TECH\seguridad\qa-evidence-011-T059-dryrun.md`
 
 ### Resumen de evidencia disponible
 

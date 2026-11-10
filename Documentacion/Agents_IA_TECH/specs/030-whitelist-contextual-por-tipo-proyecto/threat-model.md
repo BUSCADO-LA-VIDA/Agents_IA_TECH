@@ -394,7 +394,7 @@ Cada amenaza lleva id `SR-NN`, la task de `tasks.md` que la mitiga (o la declara
 - `.gitignore` L23 ignora `proyect_ext/*` (clones externos), L10 ignora `.env.mcp`, L13 ignora `.opencode/node_modules/`. Son rutas que **existen en el workspace del kit** y que un glob de "workspace completo" alcanza.
 - `.gitignore` no es una whitelist de escritura: es una lista de "no versionar". El `developer` puede escribir `.env.mcp` y el archivo no se versiona, pero el daño ya ocurrió (el token se sobrescribió).
 - `.github/skills/` y `.opencode/skills/` son transversales **y** están dentro de "workspace completo": el `developer` del kit puede mutar una skill que se propaga a N consumidores (se combina con SR-05).
-- No hay forma conocida de verificar "no hay submódulos anidados" de forma permanente sin inspeccionar `.gitmodules`; y un consumidor anidado **sin** submódulo (un checkout dentro de otro, p. ej. `C:\Proyectos\Generator_IA_Projects` dentro de un directorio superior) no figura en `.gitmodules` y es indetectable desde el kit.
+- No hay forma conocida de verificar "no hay submódulos anidados" de forma permanente sin inspeccionar `.gitmodules`; y un consumidor anidado **sin** submódulo (un checkout dentro de otro, p. ej. `<PROJECT_ROOT>` dentro de un directorio superior) no figura en `.gitmodules` y es indetectable desde el kit.
 
 **Escenario de abuso paso a paso.**
 

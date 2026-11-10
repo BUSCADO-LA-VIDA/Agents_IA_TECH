@@ -38,7 +38,7 @@
 | A7 | Terminology Drift | LOW | spec.md: "variables con comentarios", plan.md: "patrón de variables", tasks.md: "variable pattern standard" | Three terms for same concept: "variable pattern", "patrón de variables", "variable/pattern conventions" | Standardize on "variable pattern" (English) across all artifacts per kit convention |
 | A8 | Task Redundancy | LOW | tasks.md:T004 vs T007, T005 vs T009 | T004 (verify line 22) and T005 (verify Alternativa sin red) are subsets of T007 (full scan) and T009 (verify section) | Keep T007 as comprehensive; mark T004/T005/T009 as sub-tasks of T007 or remove if redundant |
 | A9 | Missing CI Task | MEDIUM | plan.md:L417-426 (CI Integration), tasks.md:T027 (update quickstart.md) | Plan documents CI YAML snippet but no task creates/updates `.github/workflows/` file | Add task T036: "Create/update GitHub Actions workflow for validate-no-hardcoded-paths test" if CI enforcement is required |
-| A10 | External Dependency | MEDIUM | spec.md:RF-07, plan.md:T05, tasks.md:T022-T024 | T022-T023 require `plataformador` to run on specific dev machine (`C:\Proyectos\opencode\...`) — not reproducible | Document manual cleanup steps in quickstart.md; add note that these files are outside repo and cleanup is one-time |
+| A10 | External Dependency | MEDIUM | spec.md:RF-07, plan.md:T05, tasks.md:T022-T024 | T022-T023 require `plataformador` to run on specific dev machine (`C:<sep>Proyectos\opencode\...`) — not reproducible | Document manual cleanup steps in quickstart.md; add note that these files are outside repo and cleanup is one-time |
 
 ---
 

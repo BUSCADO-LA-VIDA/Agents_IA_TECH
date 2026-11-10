@@ -58,10 +58,10 @@ Desde la raíz del kit (o del proyecto consumidor):
 
 ```powershell
 # Opción A: desde el kit maestro, apuntando al consumidor
-pwsh -NoProfile -File scripts/sync-agents.ps1 -DryRun -KitPath C:\Proyectos\Agents_IA_TECH -RootPath C:\Proyectos\Generator_IA_Projects
+pwsh -NoProfile -File scripts/sync-agents.ps1 -DryRun -KitPath $KitPath -RootPath <PROJECT_ROOT>
 
 # Opción B: desde dentro del proyecto consumidor
-cd C:\Proyectos\Generator_IA_Projects
+cd <PROJECT_ROOT>
 pwsh -NoProfile -File sync-agents.ps1 -DryRun
 ```
 

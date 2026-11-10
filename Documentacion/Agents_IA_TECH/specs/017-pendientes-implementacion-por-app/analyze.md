@@ -27,7 +27,7 @@
 ### Hallazgos
 1. **Contexto previo no documentado en la spec**: El spec.md menciona el contexto previo pero no lo tiene como una task explícita. **Recomendación**: Agregar T003 al tasks.md (ya hecho).
 2. **Validación de placeholders es crítica**: Constitution Art.IX prohíbe placeholders. La validación T005 es el gate principal. Si no se cumple, no se continúa.
-3. **Rutas absolutas son un riesgo de seguridad**: T008 aborda esto. Las rutas absolutas de usuario (`C:\Users\tomas\...`) no deben versionarse. Los comandos MCP usan tokens (`__CONTEXT_MODE_CMD__`).
+3. **Rutas absolutas son un riesgo de seguridad**: T008 aborda esto. Las rutas absolutas de usuario (`<HOME>\...`) no deben versionarse. Los comandos MCP usan tokens (`__CONTEXT_MODE_CMD__`).
 4. **Aislamiento por app es nuevo**: No existía anteriormente (se perdió en la migración a Specs). Este feature 017 lo recupera.
 5. **El archivo "vivo" es el objetivo principal**: T010 resume el propósito. El archivo debe responder "qué hay que hacer", "qué se está haciendo", "qué se terminó" y "quién lo hace" sin que el usuario pregunte.
 

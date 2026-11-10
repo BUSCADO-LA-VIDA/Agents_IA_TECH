@@ -32,7 +32,7 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
 
 **Purpose**: Establish the variable/pattern conventions that all subsequent tasks will follow. These patterns are already defined in the spec and README.
 
-- [x] T002 Confirm variable pattern standard: `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` and `$ProjectRoot = "C:\Proyectos\MiProyecto"  # <- ajusta a tu ruta` as documented in spec RF-01, RF-02, RF-03
+- [x] T002 Confirm variable pattern standard: `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` and `$ProjectRoot = "C:<sep>Proyectos\MiProyecto"  # <- ajusta a tu ruta` as documented in spec RF-01, RF-02, RF-03
   **Validation**: Pattern exists in README.md "Alternativa sin red" section (already correct per spec line 108)
 - [x] T003 Confirm script pattern standard: `$PSScriptRoot` for kit root, `Split-Path $PSScriptRoot -Parent` for parent, parameters `-RootPath` and `-KitPath` as per ADR-0003
   **Validation**: `plataformador-bootstrap.ps1` already uses these patterns
@@ -43,17 +43,17 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
 
 **Goal**: Eliminate all hardcoded absolute paths from README.md and replace with variables with explanatory comments or relative paths.
 
-**Independent Test**: `Select-String -Pattern "C:\\\\Proyectos|D:\\\\|/home/|/Users/" -Path README.md` returns 0 results (except comment lines containing `$KitPath` or `$ProjectRoot`)
+**Independent Test**: `Select-String -Pattern "C:<sep>Proyectos|D:<sep>|/<home>/|/<Users>/" -Path README.md` returns 0 results (except comment lines containing `$KitPath` or `$ProjectRoot`)
 
 ### Implementation for RF-01
 
-- [x] T004 [RF-01] Replace `$ProjectRoot = "C:\Proyectos\MiProyecto"` on line 22 with variable keeping comment `# <- ajusta a tu ruta` (already compliant per spec line 108, verify only)
+- [x] T004 [RF-01] Replace `$ProjectRoot = "C:<sep>Proyectos\MiProyecto"` on line 22 with variable keeping comment `# <- ajusta a tu ruta` (already compliant per spec line 108, verify only)
   **File**: `README.md:22`
-- [x] T005 [RF-01] Replace `C:\Proyectos\Agents_IA_TECH` in "Alternativa sin red" section with `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` (pattern already correct per spec line 108, verify only)
+- [x] T005 [RF-01] Replace `$KitPath` in "Alternativa sin red" section with `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` (pattern already correct per spec line 108, verify only)
   **File**: `README.md` (section "Alternativa sin red")
-- [x] T006 [RF-01] Replace `C:\Proyectos\Agents_IA_TECH` in "sync-kit local" section with `$KitPath` variable reference
+- [x] T006 [RF-01] Replace `$KitPath` in "sync-kit local" section with `$KitPath` variable reference
   **File**: `README.md` (section "sync-kit local")
-- [x] T007 [RF-01] Scan entire README.md for any other absolute paths (`C:\`, `D:\`, `/home/`, `/Users/`) and replace with `$KitPath`, `$ProjectRoot`, or relative paths (`./scripts`, `../Agents_IA_TECH`)
+- [x] T007 [RF-01] Scan entire README.md for any other absolute paths (`C:\`, `D:<sep>`, `/<home>/`, `/<Users>/`) and replace with `$KitPath`, `$ProjectRoot`, or relative paths (`./scripts`, `../Agents_IA_TECH`)
   **File**: `README.md` (full file scan)
 - [x] T008 [RF-01] Verify all script command examples in README.md use `$KitPath` and `$ProjectRoot` variables instead of literal paths
   **File**: `README.md` (command examples)
@@ -70,7 +70,7 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
 
 - [x] T009 [RF-02] Verify "Alternativa sin red" section uses `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` (already correct per spec)
   **File**: `README.md` (section "Alternativa sin red")
-- [x] T010 [RF-03] Update "sync-kit local" section to use `$KitPath` variable instead of hardcoded `C:\Proyectos\Agents_IA_TECH`
+- [x] T010 [RF-03] Update "sync-kit local" section to use `$KitPath` variable instead of hardcoded `$KitPath`
   **File**: `README.md` (section "sync-kit local")
 
 ---
@@ -79,11 +79,11 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
 
 **Goal**: Remove all hardcoded absolute paths from AGENTS.md (kit base rules document).
 
-**Independent Test**: `Select-String -Pattern "C:\\\\Proyectos|D:\\\\|/home/|/Users/" -Path AGENTS.md` returns 0 results (except comment lines with `$KitPath`/`$ProjectRoot`)
+**Independent Test**: `Select-String -Pattern "C:<sep>Proyectos|D:<sep>|/<home>/|/<Users>/" -Path AGENTS.md` returns 0 results (except comment lines with `$KitPath`/`$ProjectRoot`)
 
 ### Implementation for RF-04
 
-- [x] T011 [RF-04] Scan AGENTS.md for any `C:\Proyectos\Agents_IA_TECH` or `C:\Proyectos\opencode` references and replace with `$KitPath` variable with `# <- ajusta a tu ruta` comment
+- [x] T011 [RF-04] Scan AGENTS.md for any `$KitPath` or `C:<sep>Proyectos\opencode` references and replace with `$KitPath` variable with `# <- ajusta a tu ruta` comment
   **File**: `AGENTS.md` (full file scan)
 - [x] T012 [RF-04] Replace any absolute path references to `.github/agents/`, `.opencode/agents/` with relative paths from kit root (`./.github/agents/`, `./.opencode/agents/`)
   **File**: `AGENTS.md`
@@ -94,19 +94,19 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
 
 ## Phase 6: RF-05 — Scripts del kit: Sin rutas hardcodeadas (Priority: Must)
 
-**Goal**: Ensure all distributed scripts (.ps1/.sh) use `$PSScriptRoot`, parameters, or relative paths instead of hardcoded `C:\Proyectos\Agents_IA_TECH`.
+**Goal**: Ensure all distributed scripts (.ps1/.sh) use `$PSScriptRoot`, parameters, or relative paths instead of hardcoded `$KitPath`.
 
-**Independent Test**: `Select-String -Pattern "C:\\\\Proyectos" -Path scripts\*.ps1, sync-agents.ps1` returns 0 results
+**Independent Test**: `Select-String -Pattern "C:<sep>Proyectos" -Path scripts\*.ps1, sync-agents.ps1` returns 0 results
 
 ### Implementation for RF-05
 
-- [x] T014 [RF-05] Scan `sync-agents.ps1` for `C:\Proyectos\Agents_IA_TECH` in source/destination paths and replace with `$PSScriptRoot` (kit root) or `-KitPath` parameter
+- [x] T014 [RF-05] Scan `sync-agents.ps1` for `$KitPath` in source/destination paths and replace with `$PSScriptRoot` (kit root) or `-KitPath` parameter
   **File**: `sync-agents.ps1`
 - [x] T015 [RF-05] Verify `scripts/plataformador-bootstrap.ps1` has no hardcoded paths; confirm it uses `$PSScriptRoot` and `-RootPath`/`-KitPath` parameters (already compliant per ADR-0003)
   **File**: `scripts/plataformador-bootstrap.ps1`
-- [x] T016 [RF-05] Scan all `scripts/*.ps1` for any `C:\Proyectos\...` references and replace with `$PSScriptRoot`, `Split-Path $PSScriptRoot -Parent`, `$KitPath`, or parameters
+- [x] T016 [RF-05] Scan all `scripts/*.ps1` for any `C:<sep>Proyectos\...` references and replace with `$PSScriptRoot`, `Split-Path $PSScriptRoot -Parent`, `$KitPath`, or parameters
   **File**: `scripts/*.ps1` (all PowerShell scripts in scripts folder)
-- [x] T017 [RF-05] If any `.sh` scripts exist, scan for `/home/...` or `/Users/...` and replace with `$SCRIPT_DIR` or environment variables
+- [x] T017 [RF-05] If any `.sh` scripts exist, scan for `/<home>/...` or `/<Users>/...` and replace with `$SCRIPT_DIR` or environment variables
   **File**: `scripts/*.sh` (if any exist)
 - [x] T018 [RF-05] Add standard header comment to each distributed script documenting the path pattern:
   ```powershell
@@ -129,7 +129,7 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
   **File**: `scripts/plataformador-bootstrap.ps1` (param block)
 - [x] T020 [RF-06] Implement validation logic at end of bootstrap (after file copy, before success message):
   - Scan `$RootPath` for `Documentacion\**\*.md`, `.github\**\*.md`, `.opencode\**\*.md`, `.doc_agents\*.md`
-  - Patterns: `C:\\Proyectos`, `D:\\`, `/home/`, `/Users/`
+  - Patterns: `C:<sep>Proyectos`, `D:<sep>`, `/<home>/`, `/<Users>/`
   - Report each match with file path, line number, and offending line
   - Allow exception: comment lines (`#`) containing `$KitPath` or `$ProjectRoot`
   **File**: `scripts/plataformador-bootstrap.ps1` (before final success message)
@@ -138,18 +138,18 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
 
 ---
 
-## Phase 8: RF-07 — Limpiar artefactos de prueba en C:\Proyectos\opencode (Priority: Must)
+## Phase 8: RF-07 — Limpiar artefactos de prueba en C:<sep>Proyectos\opencode (Priority: Must)
 
 **Goal**: Remove the two test artifact files generated during development that contain machine-specific absolute paths.
 
-**Independent Test**: `Test-Path "C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md"` and `...mcp-validation-tasks.md` both return `False`
+**Independent Test**: `Test-Path "C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md"` and `...mcp-validation-tasks.md` both return `False`
 
 ### Implementation for RF-07
 
-- [x] T022 [RF-07] Delete `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md`
-  **File**: `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` (external to repo)
-- [x] T023 [RF-07] Delete `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md`
-  **File**: `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md` (external to repo)
+- [x] T022 [RF-07] Delete `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md`
+  **File**: `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md` (external to repo)
+- [x] T023 [RF-07] Delete `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md`
+  **File**: `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-tasks.md` (external to repo)
 - [x] T024 [RF-07] Verify deletion: both paths return `False` for `Test-Path`
   **Validation**: Run `Test-Path` on both paths in PowerShell
 
@@ -166,7 +166,7 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
 - [x] T025 [RF-08] Create `tests/validate-no-hardcoded-paths.Tests.ps1` with:
   - Kit root detection: `$kitRoot = (Split-Path $PSScriptRoot -Parent)`
   - Distributable paths array: README.md, AGENTS.md, scripts\*.ps1, .github\**\*.md, .opencode\**\*.md, .doc_agents\*.md, Documentacion\**\*.md
-  - Forbidden patterns: `C:\\Proyectos`, `D:\\`, `/home/`, `/Users/`
+  - Forbidden patterns: `C:<sep>Proyectos`, `D:<sep>`, `/<home>/`, `/<Users>/`
   - Exception logic: allow comment lines (`#`) containing `$KitPath` or `$ProjectRoot`
   - Pester `Describe`/`It` blocks per pattern
   **File**: `tests/validate-no-hardcoded-paths.Tests.ps1`
@@ -200,13 +200,13 @@ description: "Task list for Spec 039 - Eliminar rutas hardcoded de la documentac
 
 ### Validation Tasks
 
-- [x] T031 [AC-1] Verify `Select-String -Pattern "C:\\\\Proyectos" -Path README.md, AGENTS.md, scripts\*.ps1` returns 0 results (except allowed comments)
+- [x] T031 [AC-1] Verify `Select-String -Pattern "C:<sep>Proyectos" -Path README.md, AGENTS.md, scripts\*.ps1` returns 0 results (except allowed comments)
   **Validation**: Run grep/Select-String command from spec AC-1
-- [x] T032 [AC-2] Verify `Select-String -Pattern "C:\\\\Proyectos" -Path .github\**\*.md, .opencode\**\*.md, .doc_agents\*.md, Documentacion\**\*.md -Recurse` returns 0 results
+- [x] T032 [AC-2] Verify `Select-String -Pattern "C:<sep>Proyectos" -Path .github\**\*.md, .opencode\**\*.md, .doc_agents\*.md, Documentacion\**\*.md -Recurse` returns 0 results
   **Validation**: Run grep/Select-String command from spec AC-2 (distributed files clean; Documentacion/ matches are in app-specific specs documenting the patterns)
-- [x] T033 [AC-3] Validate README portability: copy README.md to test project at `D:\TestProyecto` and `/home/user/test-proyecto`, change only marked variables, verify commands work
+- [x] T033 [AC-3] Validate README portability: copy README.md to test project at `<PROJECT_ROOT>` and `<HOME>/test-proyecto`, change only marked variables, verify commands work
   **Validation**: Manual test per quickstart.md Escenario 3 - README uses `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` pattern
-- [x] T034 [AC-4] Confirm artifact cleanup: `Test-Path "C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md"` → False, same for tasks.md
+- [x] T034 [AC-4] Confirm artifact cleanup: `Test-Path "C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\mcp-validation-plan.md"` → False, same for tasks.md
   **Validation**: Run Test-Path on both external paths - both return False
 - [x] T035 [AC-5] Confirm test passes in CI: simulate CI run with `-EnableExit`
   **Validation**: `Invoke-Pester tests/validate-no-hardcoded-paths.Tests.ps1` passes with 4 passed, 0 failed (Pester 6 sets exit code automatically)
@@ -305,7 +305,7 @@ With the agent assignments from spec/plan:
 | T011-T013 | RF-04 | `documentador` | `AGENTS.md` |
 | T014-T018 | RF-05 | `plataformador` | `sync-agents.ps1`, `scripts/*.ps1` |
 | T019-T021 | RF-06 | `plataformador` | `scripts/plataformador-bootstrap.ps1` |
-| T022-T024 | RF-07 | `plataformador` | External: `C:\Proyectos\opencode\...` |
+| T022-T024 | RF-07 | `plataformador` | External: `C:<sep>Proyectos\opencode\...` |
 | T025-T030 | RF-08 | `qa-senior` | `tests/validate-no-hardcoded-paths.Tests.ps1`, CI docs |
 | T031-T035 | AC Validation | (all) | All distributable files |
 
@@ -314,7 +314,7 @@ With the agent assignments from spec/plan:
 ## Notes
 
 - **No placeholders**: Every task has specific file paths, patterns to replace, and acceptance criteria
-- **External cleanup (T022-T023)**: These files are outside the Git repo at `C:\Proyectos\opencode\src\Agents_IA_TECH\.specify\` — `plataformador` must run on the development machine where they exist
+- **External cleanup (T022-T023)**: These files are outside the Git repo at `C:<sep>Proyectos\opencode\src\Agents_IA_TECH\.specify\` — `plataformador` must run on the development machine where they exist
 - **Exception handling**: Tests allow comment lines (`#`) containing `$KitPath` or `$ProjectRoot` — this preserves the documented variable examples in README.md
 - **Variable pattern**: `$KitPath = "..\Agents_IA_TECH"  # <- ajusta a tu ruta` is the canonical pattern from spec line 108
 - **Script pattern**: `$PSScriptRoot` for kit root, `Split-Path $PSScriptRoot -Parent` for parent, `-RootPath`/`-KitPath` parameters per ADR-0003

@@ -66,11 +66,12 @@
 
 | ID | Severidad | Hallazgo | Resolución |
 |---|---|---|---|
-| H1 | **HIGH** | El validador comparaba con `Ordinal` (sensible a mayúsculas). `scripts/init-pensador.ps1` tenía `c:\Proyectos\...` en minúsculas y **pasaba el test** | Comparación `OrdinalIgnoreCase` para rutas Windows; default del script sustituido por `$PSScriptRoot`; 2 documentos en minúsculas redactados |
+| H1 | **HIGH** | El validador comparaba con `Ordinal` (sensible a mayúsculas). `scripts/init-pensador.ps1` tenía una ruta con la unidad en minúsculas y **pasaba el test** | Comparación `OrdinalIgnoreCase` para rutas Windows; default del script sustituido por `$PSScriptRoot`; 2 documentos en minúsculas redactados |
 | H2 | MEDIUM | Al hacer todo case-insensitive, `/<Users>/` producía falsos positivos en endpoints de API (`/api/v1/users/{id}`) | Comparación partida: Windows sin distinguir, POSIX distinguiendo |
 | H3 | **HIGH** | `cleanup-legacy-docs.ps1` (versionado) tenía rutas de la máquina y ejecutaba `Remove-Item -Recurse -Force` sin confirmación | Reescrito: raíz desde `$PSScriptRoot`, dry-run por defecto, `-Confirm` para aplicar |
 | H4 | MEDIUM | AC-7 no es concluyente antes de commit/push: el bootstrap de un proyecto limpio **sincroniza el kit publicado**, así que valida el remoto (versión antigua) y no el working tree | AC-7 se re-ejecuta después del commit; queda registrado como pendiente con causa |
 | H5 | LOW | El inventario §2.6 del spec (24 archivos) era incompleto: la pasada real tocó 62 `.md` | Asumido: el universo lo fija el validador, no una lista escrita a mano |
+| H6 | MEDIUM | El universo es `git ls-files`: un documento **no versionado todavía** no se valida. La primera corrida "16/16" fue sobre un universo sin los specs 044/045/046 (aún untracked) | Tras `git add`, aparecieron 6 grupos rojos en los propios artefactos de la 044; redactados y verificado 16/16 con 781 archivos versionados. Regla operativa: validar **después** de `git add` |
 
 ## 6. Archivos del cambio (resumen)
 

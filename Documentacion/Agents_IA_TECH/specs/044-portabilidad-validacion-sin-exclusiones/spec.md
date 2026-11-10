@@ -55,8 +55,8 @@ Comando reproducible (patrones construidos por concatenación para no autoincump
 ```powershell
 $sep = [IO.Path]::DirectorySeparatorChar
 $patterns = @(
-  ('C:' + $sep + 'Proyectos'), ('C:/Proyectos'),
-  ('C:' + $sep + 'Users'),     ('C:/Users'),
+  ('C:' + $sep + 'Proyectos'), ('C:' + '/' + 'Proyectos'),
+  ('C:' + $sep + 'Users'),     ('C:' + '/' + 'Users'),
   ('D:' + $sep),
   ('/' + 'home' + '/'),
   ('/' + 'Users' + '/')
@@ -79,7 +79,7 @@ Resultado al 2026-11-09: **34 archivos versionados, 236 coincidencias**. Clasifi
 
 | Archivo | Coincidencias | Contenido | Acción |
 |---|---:|---|---|
-| `opencode.json` | 12 | `command[]` de 8 MCP con `C:/Users/<usuario>/...`, `C:/Python314/...`, `C:/Proyectos/<kit>/...` | **Convertir a portable** (nombres en `PATH` + `{env:...}` + rutas relativas al proyecto). Ver D2 |
+| `opencode.json` | 12 | `command[]` de 8 MCP con rutas absolutas del perfil, del intérprete y del kit (`<HOME>/...`, `<PYTHON_HOME>/...`, `<KIT_ROOT>/...`) | **Convertir a portable** (nombres en `PATH` + `{env:...}` + rutas relativas al proyecto). Ver D2 |
 | `.mcp.json` | 9 | Ídem para el arnés VS Code/Copilot | **Convertir a portable** (nombres en `PATH` + `${workspaceFolder}`) |
 
 ### 2.3 Código de detección (contiene los patrones como literales)
@@ -93,13 +93,13 @@ Resultado al 2026-11-09: **34 archivos versionados, 236 coincidencias**. Clasifi
 
 | Archivo | Coincidencias | Problema | Acción |
 |---|---:|---|---|
-| `scripts/sync-mcp-graphify.ps1` | 1 | `[string]$RootPath = "C:/Proyectos/<kit>"` | `$RootPath` derivado de `$PSScriptRoot` (raíz del kit) |
+| `scripts/sync-mcp-graphify.ps1` | 1 | `[string]$RootPath = "<ruta absoluta del kit>"` | `$RootPath` derivado de `$PSScriptRoot` (raíz del kit) |
 
 ### 2.5 Fixture de baseline (disparador del hallazgo)
 
 | Archivo | Coincidencias | Problema | Acción |
 |---|---:|---|---|
-| `tests/fixtures/baseline-036.md` | 2 | Documenta la ejecución sobre `C:\Proyectos\<kit>` y la ruta del audit log | **Redactar**: `$KitPath` y `$KitPath/.bootstrap-audit.log`; conservar todas las métricas y hashes (valor probatorio intacto) |
+| `tests/fixtures/baseline-036.md` | 2 | Documenta la ejecución sobre la raíz del kit y la ruta del audit log | **Redactar**: `$KitPath` y `$KitPath/.bootstrap-audit.log`; conservar todas las métricas y hashes (valor probatorio intacto) |
 
 ### 2.6 Documentación técnica (PII + rutas del autor)
 
@@ -172,7 +172,7 @@ Resultado al 2026-11-09: **34 archivos versionados, 236 coincidencias**. Clasifi
 
 | ID | Requisito |
 |---|---|
-| NFR-01 | El kit se clona en cualquier ruta y arnés (Windows `D:\`, Linux `~/`, macOS `~/`) y arranca sin editar archivos versionados |
+| NFR-01 | El kit se clona en cualquier ruta y arnés (unidad ajena, home POSIX o home de macOS) y arranca sin editar archivos versionados |
 | NFR-02 | Coste del test: < 10 s sobre 769 archivos versionados |
 | NFR-03 | Cero regresiones en `tests/harness-default.ps1`, `tests/kit-sync-merge.ps1`, `tests/kb-parity.ps1`, `tests/mcp-refresh-parity.ps1`, `tests/agents-parity.ps1` |
 | NFR-04 | El arnés en ejecución no se rompe: `opencode.json` resultante debe seguir siendo JSON válido y arrancar los MCP declarados en esta máquina |

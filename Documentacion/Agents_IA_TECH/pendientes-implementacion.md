@@ -12,7 +12,7 @@
 | Spec | Estado | Qué falta | Dónde está | Cómo se retoma |
 |---|---|---|---|---|
 | **039** | Activa — implementada v1.0.0; AC-1/AC-2 superados por la 044 | Nada dentro de su alcance original. Decidir si se cierra formalmente o queda como antecedente | `specs/039-eliminar-rutas-hardcoded-documentacion/` | revisar `converge.md` y marcar cierre en este archivo |
-| **044** | Implementada — validación automática 16/16 (764 archivos), sin `converge.md` ni commit | T009 señuelo, T014 mapeo de tokens, T016 arranque del arnés, T017 rollback, T026 bootstrap en proyecto limpio, T027 regresión de 5 suites, T028 commit | `specs/044-portabilidad-validacion-sin-exclusiones/` | `Invoke-Pester tests\validate-no-hardcoded-paths.Tests.ps1` |
+| **044** | Implementada — 16/16 sobre 781 archivos, AC-7 y AC-9 verificados, 7 commits publicados | Solo AC-6 (arranque del arnés tras reinicio) y cierre formal | `specs/044-portabilidad-validacion-sin-exclusiones/` | recargar el arnés y revisar los MCP |
 | **045** | Implementada (hotfix) v1.0.0 | AC-4: confirmar tras recargar el arnés que las lecturas > 16 KB ya no se deniegan | `specs/045-hook-context-mode-lecturas-bloqueadas/` | recargar VS Code y abrir un `.md` grande |
 | **046** | Borrador con plan | Generar `tasks.md` e implementar G1 (maestro portable), G2 (`graphify` por destino), G3 (`tokenslayer` relativo), G4 (bootstrap sin plantilla) | `specs/046-generacion-portable-opencode-json/` | `speckit-tasks` de 046 |
 
@@ -20,13 +20,13 @@
 
 | ID | Tarea | Responsable | Estado | Criterio de done |
 |---|---|---|---|---|
-| 044-T009 | Señuelo: archivo temporal con ruta literal → detección y `exit 1`; luego borrarlo | `qa-senior` | Pendiente | salida con `archivo:línea` y exit code 1 |
-| 044-T014 | Mapear cada `{env:<VAR>}` de la plantilla a su clave de `.env.mcp` | `plataformador` | Pendiente | tabla VAR → clave verificada |
+| 044-T009 | Señuelo: archivo temporal con ruta literal → detección y `exit 1`; luego borrarlo | `qa-senior` | **Cerrada** | detectado y exit 1 en proyecto temporal |
+| 044-T014 | Mapear cada `{env:<VAR>}` de la plantilla a su clave de `.env.mcp` | `plataformador` | **Cerrada** | 9/9 variables presentes, sin claves sin uso |
 | 044-T016 | Verificar arranque del arnés con la configuración resuelta | `plataformador` | Pendiente | 8 MCP activos tras reinicio |
-| 044-T017 | Documentar rollback de las dos configuraciones | `plataformador` | Pendiente | sección en bitácora |
-| 044-T026 | Bootstrap `-CheckHardcodedPaths` en proyecto limpio | `plataformador` | Pendiente | `[OK] 0/N` |
-| 044-T027 | Regresión de las 5 suites (`harness-default`, `kit-sync-merge`, `agents-parity`, `kb-parity`, `mcp-refresh-parity`) | `qa-senior` | Pendiente | exit 0 (o divergencia preexistente documentada) |
-| 044-T028 | `converge.md` + commit conventional | `documentador` + `gitflow` | Pendiente | `git log -1` y `converge.md` presente |
+| 044-T017 | Documentar rollback de las dos configuraciones | `plataformador` | **Cerrada** | bitácora 2026-11-09, §4 |
+| 044-T026 | Bootstrap `-CheckHardcodedPaths` en proyecto limpio | `plataformador` | **Cerrada** | 0 coincidencias en 136 archivos, exit 0 |
+| 044-T027 | Regresión de las 5 suites (`harness-default`, `kit-sync-merge`, `agents-parity`, `kb-parity`, `mcp-refresh-parity`) | `qa-senior` | **Cerrada** | 4/5 exit 0 + divergencia preexistente documentada |
+| 044-T028 | `converge.md` + commit conventional | `documentador` + `gitflow` | **Parcial** | converge y 7 commits publicados; cierre formal pendiente de AC-6 |
 | 044-DEC-01 | Decidir el destino de `.bootstrap-audit.log` (fuera del índice, en disco) | usuario | Pendiente | decisión registrada |
 
 

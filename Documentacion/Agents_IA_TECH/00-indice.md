@@ -238,7 +238,7 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 - **Próximo paso**: `plataformador` aplica la enmienda v2.1.0 (el tier documental tiene `edit` denegado sobre `.specify/`), y después `Agent-SSD` ejecuta `speckit-plan`.
 
 ### 039-eliminar-rutas-hardcoded-documentacion
-- **Estado**: **Aprobada — v1.0.0** (2026-11-09) — Ciclo Speckit completo (spec → plan → tasks → analyze → converge). Converge aprobado para implementación.
+- **Estado**: **Aprobada — v1.0.0** (2026-11-09) — Ciclo Speckit completo (spec → plan → tasks → analyze → converge). Converge aprobado para implementación. **AC-1/AC-2 superados por la Spec 044** (universo de validación pasa de lista de directorios a `git ls-files`); no se archiva.
 - **Ubicación**: `specs/039-eliminar-rutas-hardcoded-documentacion/`
 - **Objetivo**: Eliminar todas las rutas absolutas hardcodeadas (`$KitPath`, `C:<sep>Proyectos\opencode`) de la documentación (`README.md`, `AGENTS.md`, `.github/`, `.opencode/`, `.doc_agents/`, `Documentacion/`), scripts (`sync-agents.ps1`, `scripts/*.ps1`), y artefactos generados; reemplazarlas por variables con comentarios explicativos (`$KitPath`, `$ProjectRoot` + `# <- ajusta a tu ruta`), rutas relativas, o parámetros de línea de comandos (`-RootPath`, `-KitPath`, `-CheckHardcodedPaths`); agregar validación en el bootstrap; limpiar artefactos de prueba con rutas locales; y agregar test de regresión automatizado.
 - **Métricas**: 8 RF (RF-01..RF-08), 3 NFR, 5 AC, 35 tareas, 1 ADR (ADR-039), 1 Threat Model. Cobertura 100% RFs y ACs.
@@ -274,7 +274,7 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 - **Seguimiento**: re-habilitar `PreToolUse` solo si el umbral pasa a ser configurable o supera el tamaño máximo de la documentación.
 
 ### 046-generacion-portable-opencode-json
-- **Estado**: **Borrador con plan** (2026-11-10) — `spec.md` y `plan.md` escritos; pendiente `tasks.md` e implementación.
+- **Estado**: **Borrador con plan y tasks** (2026-11-10) — `spec.md`, `plan.md` y `tasks.md` escritos (22 tareas); pendiente implementación. Incluye la regla de oro: los artefactos generados no se editan a mano.
 - **Ubicación**: `specs/046-generacion-portable-opencode-json/`
 - **Validado**: la generación de `opencode.json` existe y funciona (`scripts/sync/mcp/lift-opencode.ps1`, capa `mcp-lift-opencode` de `sync-kit-agents.ps1`, modo individual y bootstrap). En un destino vacío crea el archivo con `default_agent: pensador` y 8 entradas `mcp.servers`.
 - **Defectos (G1-G4)**: el generado hereda las rutas absolutas del maestro; `graphify` no se regenera al destino; `tokenslayer` apunta al kit; el bootstrap no crea el archivo si falta y no hay plantilla.

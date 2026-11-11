@@ -43,6 +43,7 @@
 | G6 | `context-mode` 2.x cambió de layout: el bin es el CLI y el servidor MCP es `server.mjs --agent <id>` | `Cannot find module .../build/cli.js` | MCP caído y el generador lo reproduce |
 | G7 | `markitdown-mcp 0.0.1a8` exige `mcp>=2.1.1`, pero `gptme` exige `mcp<2` | `ModuleNotFoundError: mcp.server.mcpserver` | Dos paquetes incompatibles: el pin del kit (`0.0.1a3`) es la salida |
 | G8 | `.mcp.json` usa `context-mode`, `npx` y `${workspaceFolder}` | spawn real: `ENOENT` para shims; `${...}` no se expande | MCP de VS Code caídos: los nombres "portables" no son ejecutables |
+| G9 | Hay artefactos generados que siguen **versionados**: `.vscode/mcp.json` e `index-preflight.md` | la corrida T019 los reescribió (el primero con rutas absolutas) y hubo que restaurarlos | Churn en cada corrida y riesgo de contaminar el repo: deben dejar de versionarse o estabilizarse |
 
 ## 3. Requisitos funcionales
 

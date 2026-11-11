@@ -378,6 +378,17 @@ function Resolve-McpCommand {
     return $null
 }
 
+function Resolve-ContextModeCommand {
+    # [046] context-mode 2.x: el bin es el CLI; el MCP es server.mjs + --agent.
+    $node = Get-Command node -ErrorAction SilentlyContinue
+    $cli  = Get-Command context-mode -ErrorAction SilentlyContinue
+    if (-not $node -or -not $cli) { return $null }
+    $npmRoot = Split-Path -Parent $cli.Source
+    $server  = Join-Path $npmRoot 'node_modules\context-mode\server.mjs'
+    if (-not (Test-Path -LiteralPath $server)) { return $null }
+    return @(($node.Source -replace '\\', '/'), ($server -replace '\\', '/'), '--agent', 'opencode')
+}
+
 # [007-MCP] D2/RF-03: fuente de rutas MCP portable por proyecto (`.env.mcp`).
 # Crea <root>/.env.mcp si no existe (idempotente; con -Force re-escribe) con
 # las claves base + extendidas [000-MCP] (valores vacíos; se resuelven en
@@ -688,8 +699,15 @@ function Ensure-OpenCodeMcp {
 
     # [007-MCP] Determinar si mcp es diccionario (para acceso correcto a propiedades)
     $mcpIsDict = $false
+    $mcpRoot = $null
     if ($null -ne $existing.mcp) {
         $mcpIsDict = $existing.mcp -is [System.Collections.IDictionary]
+        # [046] OpenCode 2 usa mcp.servers.<nombre>; el codigo legacy usaba mcp.<nombre>.
+        if ((-not $mcpIsDict) -and $existing.mcp.PSObject.Properties['servers']) {
+            $mcpRoot = $existing.mcp.servers
+        } else {
+            $mcpRoot = $existing.mcp
+        }
     }
 
     if ($null -ne $existing.mcp) {
@@ -701,10 +719,10 @@ function Ensure-OpenCodeMcp {
         # por indexer cuando es diccionario (mismo patrón que tokenslayer L614).
         foreach ($name in @($tokenMap.Keys)) {
             if ($mcpIsDict) {
-                if (-not $existing.mcp.Contains($name)) { continue }
-                $entry = [pscustomobject]@{ Value = $existing.mcp[$name] }
+                if (-not $mcpRoot.Contains($name)) { continue }
+                $entry = [pscustomobject]@{ Value = $mcpRoot[$name] }
             } else {
-                $entry = $existing.mcp.PSObject.Properties[$name]
+                $entry = $mcpRoot.PSObject.Properties[$name]
             }
             if ($null -eq $entry) { continue }
             $cmd0 = @($entry.Value.command)[0]
@@ -730,6 +748,14 @@ function Ensure-OpenCodeMcp {
                 $needsResolve = $true
             }
 
+            # [046] entrada rota: el command apunta a un script .js/.mjs inexistente
+            $scriptArgs = @(@($entry.Value.command) | Where-Object { $_ -match '\.(mjs|js)$' })
+            if ($scriptArgs.Count -gt 0) {
+                foreach ($sa in $scriptArgs) { if (-not (Test-Path -LiteralPath $sa)) { $needsResolve = $true; $mcpReasons[$name] = "script inexistente: $sa" } }
+            } elseif ($name -eq 'context-mode') {
+                $needsResolve = $true
+                $mcpReasons[$name] = "sin server.mjs declarado"
+            }
             if (-not $needsResolve) {
                 if ($entry.Value.enabled) {
                     # Normalizar rutas existentes con backslashes a forward slashes para evitar InvalidEscapeCharacter en JSON
@@ -746,15 +772,20 @@ function Ensure-OpenCodeMcp {
                 continue
             }
 
-            $real = Resolve-McpCommand -ToolName $tokenMap[$name].Tool -Token $tokenMap[$name].Token
-            if ($real) {
-                $realNorm = $real -replace '\\','/'
+            if ($name -eq 'context-mode') {
+                $realCmd = Resolve-ContextModeCommand
+            } else {
+                $single = Resolve-McpCommand -ToolName $tokenMap[$name].Tool -Token $tokenMap[$name].Token
+                if ($single) { $realCmd = @(($single -replace '\\', '/' )) } else { $realCmd = $null }
+            }
+            if ($realCmd) {
+                $realNorm = ($realCmd -join ' ')
                 if ($DryRun) {
                     $mcpReasons[$name] = "resolveria a ruta local ($realNorm)"
                     Write-Info "DryRun: MCP '$name' -> $realNorm (enabled=true)"
                 } else {
-                    $entry.Value.command = @($realNorm)
-                    $entry.Value.enabled = $true
+                    $entry.Value.command = @($realCmd)
+                    if ($entry.Value.PSObject.Properties['enabled']) { $entry.Value.enabled = $true } else { $entry.Value | Add-Member -NotePropertyName enabled -NotePropertyValue $true -Force }
                     $mcpReasons[$name] = "ruta resuelta"
                     Write-OK "MCP '$name' re-resuelto a ruta local."
                 }
@@ -763,7 +794,7 @@ function Ensure-OpenCodeMcp {
                     if ($cmd0 -eq $tokenMap[$name].Token) {
                         $entry.Value.command = @("{env:$($tokenMap[$name].Var)}")
                     }
-                    $entry.Value.enabled = $false
+                        if ($entry.Value.PSObject.Properties['enabled']) { $entry.Value.enabled = $false } else { $entry.Value | Add-Member -NotePropertyName enabled -NotePropertyValue $false -Force }
                 }
                 $mcpReasons[$name] = "herramienta ausente ($($tokenMap[$name].Tool)); enabled=false"
             }
@@ -781,7 +812,7 @@ function Ensure-OpenCodeMcp {
     # install ejecuta código de terceros). Estilo existente intacto
     # (Add-Member -Force, Write-*, $DryRun/$Force).
     if ($null -ne $existing.mcp) {
-        if (($null -ne $existing.mcp.tokenslayer) -and (-not $Force)) {
+        if (($null -ne $mcpRoot.tokenslayer) -and (-not $Force)) {
             Write-OK "opencode.json ya registra tokenslayer; se conserva (usa -Force para sobrescribir)."
         } else {
             $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
@@ -867,7 +898,7 @@ function Ensure-OpenCodeMcp {
     if ($mcpReasons) { foreach ($k in @($mcpReasons.Keys)) { $reportReasons[$k] = $mcpReasons[$k] } }
     Write-Host ""
     Write-Host "  --- MCPs en opencode.json (estado por entrada) ---" -ForegroundColor Cyan
-    if ($null -ne $existing.mcp) {
+    if ($null -ne $mcpRoot) {
         # [007-MCP] BUG-2: enumerar según el tipo real de `mcp`. Sobre un
         # OrderedDictionary, `PSObject.Properties` lista meta-propiedades
         # (Count/Keys/Values/...) en vez de las entradas reales. Con -is

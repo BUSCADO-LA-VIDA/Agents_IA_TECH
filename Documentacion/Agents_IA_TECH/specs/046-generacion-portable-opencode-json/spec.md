@@ -39,6 +39,10 @@
 | G2 | `graphify` no se regenera al destino | `graphify` apunta a `<KIT_ROOT>/graphify-out/graph.json` en un proyecto distinto | El MCP sirve el grafo del kit |
 | G3 | `tokenslayer` apunta a la ruta absoluta del kit | `node <KIT_ROOT>/proyect_ext/.../index.js` | No existe en otro proyecto |
 | G4 | El bootstrap no crea el archivo si falta y no hay plantilla | rama `else` de `Ensure-OpenCodeMcp` | Un clon sin sync previo queda sin `opencode.json` |
+| G5 | El resolvedor de `Ensure-OpenCodeMcp` itera `mcp.<nombre>` (forma legacy) y **no ve** `mcp.servers.<nombre>` | archivo real con `mcp.servers`: la entrada rota nunca se repara | El generador no corrige nada de lo que sí usa OpenCode 2 |
+| G6 | `context-mode` 2.x cambió de layout: el bin es el CLI y el servidor MCP es `server.mjs --agent <id>` | `Cannot find module .../build/cli.js` | MCP caído y el generador lo reproduce |
+| G7 | `markitdown-mcp 0.0.1a8` exige `mcp>=2.1.1`, pero `gptme` exige `mcp<2` | `ModuleNotFoundError: mcp.server.mcpserver` | Dos paquetes incompatibles: el pin del kit (`0.0.1a3`) es la salida |
+| G8 | `.mcp.json` usa `context-mode`, `npx` y `${workspaceFolder}` | spawn real: `ENOENT` para shims; `${...}` no se expande | MCP de VS Code caídos: los nombres "portables" no son ejecutables |
 
 ## 3. Requisitos funcionales
 
@@ -88,8 +92,20 @@
 | Tokens `{env:...}` no resueltos dejan MCP deshabilitados | El resolvedor del bootstrap promueve a `enabled:true`; var ausente = degradado con WARN | `git checkout` del generado |
 | `graphify` relativo depende de `cwd` = raíz del proyecto | Verificar con ejecución real; si no, dejar absoluto resuelto por el bootstrap | mismo |
 
-## 7. Estado
+## 7. Regla de oro (vinculante)
 
-- Generación: implementada y validada.
-- Portabilidad del contenido generado: **no resuelta** (G1-G4).
+Un artefacto generado **no se edita a mano**. `opencode.json`, `.env.mcp` y `.vscode/mcp.json` son *salida* de los scripts.
+
+| Situación | Acción correcta | Acción prohibida |
+|---|---|---|
+| Falta una entrada o está mal en `opencode.json` | Ajustar el generador (`Ensure-OpenCodeMcp`, `lift-opencode`, `sync-opencode-config`) y volver a generarlo | Editar el JSON del proyecto |
+| Una ruta de MCP cambió | Ajustar el resolvedor y `.env.mcp` (fuente), regenerar | Poner la ruta a mano |
+| Hace falta verificar | Ejecutar el generador en un temporal y **probar la salida** | Copiar el archivo corregido de otra máquina |
+
+Estado local no reproducible (2026-11-11): la entrada `context-mode` del `opencode.json` del proyecto se corrigió a mano para desbloquear el arnés. Se considera deuda: T019 la regenera con el script y T013-T018 lo prueban.
+
+## 8. Estado
+
+- Generación: implementada y validada (§1).
+- Portabilidad del contenido generado: **no resuelta** (G1-G8).
 - Esta spec es la que cierra el circuito; no se implementa sin aprobación.

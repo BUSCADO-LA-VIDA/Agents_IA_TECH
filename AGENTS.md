@@ -88,6 +88,12 @@
 - Contenido completo: todo archivo generado por cualquier agente debe tener contenido real en cada sección. Prohibido esqueletos vacíos, plantillas sin rellenar, tablas vacías o placeholders (TBD/TODO/pendiente/N/A).
 - Si un agente no está configurado correctamente (falta sección MCPs, estructura, etc.), llamar al agente correspondiente (`plataformador` para nivelar, `arquitecto`/`documentador` para specs).
 
+### Reglas de flujo y artefactos generados (vinculantes)
+
+- **Flujo Speckit obligatorio**: ningún agente salta fases (`specify → plan → tasks → analyze → converge → implement`) ni implementa sin aprobación explícita del usuario. Un cambio que excede el alcance de la spec en curso se documenta como **spec nueva**, no se cuela dentro.
+- **Los artefactos generados no se editan a mano**: `opencode.json`, `.env.mcp`, `.vscode/mcp.json`, logs de auditoría y cualquier archivo producido por un script son **salida**. El cambio se hace en el **script generador** y se prueba **lo que el script genera** (directorio temporal: sembrar entrada → ejecutar → inspeccionar salida). Corregir el archivo directamente es una violación, incluso si desbloquea el trabajo: se registra como deuda y se regenera.
+- **Verificación antes de marcar `[x]`**: una tarea de generación no se cierra sin la salida generada y comprobada.
+
 ---
 
 ## Core facts an agent must know

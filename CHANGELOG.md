@@ -6,6 +6,8 @@
 
 ## [1.2.0] - 2026-11-09 - Spec 045: hook `context-mode` bloqueaba lecturas
 
+> Spec renombrada el 2026-11-11 a `045-retirar-pretooluse-hook-context-mode`: el slug describe la decisión, no el síntoma. El cambio de esta entrada (retirar `PreToolUse`) se mantiene.
+
 ### Corregido
 - **Lecturas denegadas por el hook**: `PreToolUse` de `context-mode` devolvía `permissionDecision: "deny"` para cualquier archivo de más de 16 384 bytes (constante interna, sin variable de entorno para ajustarla). En este kit —specs y bitácoras de decenas de KB— bloqueaba el trabajo y se reportaba como caída total de herramientas.
 - **Alcance real del bloqueo**: se verificó con payloads que `Edit`, `Bash` y las consultas MCP a GitHub **no** estaban bloqueadas; solo `Read` de archivos grandes.
@@ -16,7 +18,10 @@
 
 ### Documentación
 - Bitácora `Documentacion/Agents_IA_TECH/bitacoras/2026-11-09-hook-context-mode-bloqueo-read.md`.
-- Spec `Documentacion/Agents_IA_TECH/specs/045-hook-context-mode-lecturas-bloqueadas/spec.md`.
+- Spec `Documentacion/Agents_IA_TECH/specs/045-retirar-pretooluse-hook-context-mode/spec.md` (v2.0.0, ciclo Speckit completo el 2026-11-11).
+
+### Pendiente (declarado 2026-11-11)
+- `Ensure-ContextHooks` (bootstrap) todavía emite `PreToolUse` y `validar-mcps.ps1` todavía lo exige: un `bootstrap -Force` revierte este cambio. La política debe vivir en el generador (spec 045, T005-T006).
 
 ## [1.1.0] - 2026-11-09 - Spec 044: portabilidad con validación sin exclusiones
 

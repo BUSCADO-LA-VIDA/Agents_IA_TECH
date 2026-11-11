@@ -263,15 +263,18 @@ Asegurar que cada proyecto tenga su documentación, la estructura base y los MCP
 - **Relación con la 039**: la 039 sigue activa; la 044 amplía su criterio de aceptación (el universo pasa de lista de directorios a conjunto versionado). No se archiva ninguna.
 - **Fuera de alcance (separado por decisión del usuario, 2026-11-09)**: el hook `context-mode` → spec **045**; la generación portable de `opencode.json` (G1-G4) → spec **046**. La 044 se limita a validador, patrones, remediación y CI.
 
-### 045-hook-context-mode-lecturas-bloqueadas
-- **Estado**: **Implementada (hotfix) — v1.0.0** (2026-11-09). AC-4 pendiente de confirmar tras recargar el arnés.
-- **Ubicación**: `specs/045-hook-context-mode-lecturas-bloqueadas/`
-- **Problema**: `PreToolUse` de `context-mode` devolvía `permissionDecision: "deny"` para cualquier archivo de más de 16 384 bytes (constante interna `q = 16384`, sin variable de entorno). En este kit, specs y bitácoras superan ese tamaño, así que el agente reportaba "todas las herramientas rechazadas".
+### 045-retirar-pretooluse-hook-context-mode
+- **Estado**: **Aprobada — v2.0.0** (2026-11-11) — ciclo Speckit completo (spec → plan → tasks → analyze → converge). Implementación **parcial**: registro y documentación cerrados; `Ensure-ContextHooks` y `validar-mcps.ps1` todavía contradicen la decisión (T005-T006, delegadas a `developer`). AC-4 pendiente de recarga del arnés.
+- **Ubicación**: `specs/045-retirar-pretooluse-hook-context-mode/`
+- **Renombre**: antes `045-hook-context-mode-lecturas-bloqueadas`. El slug describe ahora **la decisión** (retirar `PreToolUse`), no el síntoma (lecturas bloqueadas).
+- **Problema**: `PreToolUse` de `context-mode` devolvía `permissionDecision: "deny"` para cualquier archivo de más de 16 384 bytes (constante interna `16384`, sin variable de entorno; sigue fija en `context-mode 2.1.0`). En este kit, specs y bitácoras superan ese tamaño, así que el agente reportaba "todas las herramientas rechazadas".
 - **Evidencia**: `Read` de 39 590 bytes → deny; `Edit`, `Bash` y `mcp__github__list_workflows` → allow. El bloqueo nunca afectó a GitHub Actions.
-- **Solución**: se retira solo `PreToolUse` del registro `.github/hooks/context-mode.json`; se conservan `SessionStart` y `PostToolUse`. Respaldo `.github/hooks/context-mode.json.bak-20261109`.
-- **Artefactos**: `spec.md`, bitácora `bitacoras/2026-11-09-hook-context-mode-bloqueo-read.md`.
+- **Decisión**: se retira solo `PreToolUse` del registro `.github/hooks/context-mode.json`; se conservan `SessionStart` y `PostToolUse`. Respaldo `.github/hooks/context-mode.json.bak-20261109`.
+- **Hallazgo crítico (H1)**: el registro **es generado** por `Ensure-ContextHooks` (bootstrap L1436-1477), que aún emite `PreToolUse`. Un `bootstrap -Force` o un clon nuevo revierten la decisión: la política debe vivir en el generador.
+- **Hallazgo crítico (H2)**: `validar-mcps.ps1` (L230-235) exige `PreToolUse` y hoy imprime `[FAIL] Falta hook 'PreToolUse'`: el kit se contradice a sí mismo.
+- **Artefactos**: `spec.md` (v2.0.0), `plan.md`, `tasks.md` (14 tareas, 8 cerradas), `analyze.md`, `converge.md`, bitácora `bitacoras/2026-11-09-hook-context-mode-bloqueo-read.md`.
 - **Rollback**: `Copy-Item .github/hooks/context-mode.json.bak-20261109 .github/hooks/context-mode.json -Force`.
-- **Seguimiento**: re-habilitar `PreToolUse` solo si el umbral pasa a ser configurable o supera el tamaño máximo de la documentación.
+- **Seguimiento**: re-habilitar `PreToolUse` solo si el umbral pasa a ser configurable o supera el tamaño máximo de la documentación; exige **spec nueva**, no una edición del JSON.
 
 ### 046-generacion-portable-opencode-json
 - **Estado**: **Borrador con plan y tasks** (2026-11-10) — `spec.md`, `plan.md` y `tasks.md` escritos (22 tareas); pendiente implementación. Incluye la regla de oro: los artefactos generados no se editan a mano.

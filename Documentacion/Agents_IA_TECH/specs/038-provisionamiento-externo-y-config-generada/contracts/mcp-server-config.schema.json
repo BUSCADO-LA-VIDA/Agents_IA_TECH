@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-ia-tech.local/schemas/mcp-server-config.schema.json",
+  "title": "McpServerConfig",
+  "description": "Estructura de una entrada mcp.servers.<nombre> en opencode.json y .vscode/mcp.json generados (FR-08, FR-11, NFR-04). Forma canonica ADR-0010; type stdio obligatorio (D5).",
+  "type": "object",
+  "required": ["type", "command"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "stdio",
+      "description": "Obligatorio y unico valor admitido (D5, FR-11)."
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Comando que debe resolver en el momento de generar (FR-08)."
+    },
+    "args": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Argumentos del comando. Sin rutas absolutas de maquina cuando el comando resuelve por nombre (NFR-06)."
+    },
+    "env": {
+      "type": "object",
+      "description": "Variables de entorno por nombre. Solo referencias {env:VAR}; nunca valores secretos (NFR-04).",
+      "propertyNames": { "pattern": "^[A-Z][A-Z0-9_]*$" },
+      "additionalProperties": { "type": "string" }
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

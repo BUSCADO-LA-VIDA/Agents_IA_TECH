@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-ia-tech.local/schemas/mcp-state.schema.json",
+  "title": "ProvisioningState",
+  "description": "Estructura de .opencode/mcp-state.json (FR-05, FR-12, NFR-03, NFR-04). No versionado; escribe solo validate/apply con escritura atomica.",
+  "type": "object",
+  "description": "Mapa nombre de dependencia -> estado observado por workspace.",
+  "propertyNames": { "pattern": "^[a-zA-Z0-9._-]+$" },
+  "additionalProperties": { "$ref": "#/$defs/stateEntry" },
+  "$defs": {
+    "stateEntry": {
+      "type": "object",
+      "required": ["tipo", "requerido", "estado", "ultimo_check"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "type": "string",
+          "enum": ["kit-integrado", "kit-fuente", "mcp-workspace", "mcp-build-local", "entorno"]
+        },
+        "requerido": {
+          "type": "boolean",
+          "description": "Persistido desde el manifest para no depender del contexto de ejecucion (FR-12)."
+        },
+        "comando_resuelto": {
+          "type": "string",
+          "description": "Ruta absoluta o comando resuelto en esta maquina. Ausente si no resuelve (NFR-06)."
+        },
+        "version_instalada": { "type": ["string", "null"] },
+        "version_ultima": { "type": ["string", "null"] },
+        "fuente": {
+          "type": "string",
+          "format": "uri",
+          "description": "Registro o repo_url consultado para la ultima version."
+        },
+        "estado": {
+          "type": "string",
+          "enum": ["ok", "al-dia", "desactualizado", "missing", "degraded", "desconocido", "absent"],
+          "description": "Unico conjunto de valores valido. Ningun otro valor se admite."
+        },
+        "ultimo_check": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rama_seguida": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Solo tipos clon."
+        },
+        "ultimo_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$",
+          "description": "Solo tipos clon: git rev-parse HEAD."
+        },
+        "sha_remoto": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$",
+          "description": "Solo tipos clon: git ls-remote refs/heads/<rama_seguida>."
+        },
+        "causa": {
+          "type": "string",
+          "description": "Motivo reportado cuando el estado es degraded o desconocido (NFR-05)."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "tipo": { "enum": ["kit-integrado", "kit-fuente"] } }, "required": ["tipo"] },
+          "then": {
+            "required": ["rama_seguida", "ultimo_sha", "sha_remoto"]
+          }
+        },
+        {
+          "if": { "properties": { "estado": { "enum": ["degraded", "desconocido"] } }, "required": ["estado"] },
+          "then": { "required": ["causa"] }
+        },
+        {
+          "if": { "properties": { "estado": { "const": "ok" } }, "required": ["estado"] },
+          "then": { "required": ["comando_resuelto", "version_instalada"] }
+        }
+      ]
+    }
+  }
+}

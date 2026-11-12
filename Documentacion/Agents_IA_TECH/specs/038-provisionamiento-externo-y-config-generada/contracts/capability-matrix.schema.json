@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-ia-tech.local/schemas/capability-matrix.schema.json",
+  "title": "CapabilityMatrixRow",
+  "description": "Estructura de una fila de Documentacion/Agents_IA_TECH/capacidades-por-harness.md (FR-15). Valida la fila ya parseada de la tabla Markdown.",
+  "type": "object",
+  "required": ["capacidad", "mecanismo_opencode", "mecanismo_copilot", "estado", "fuente", "version_verificada", "prueba", "spec_responsable"],
+  "additionalProperties": false,
+  "properties": {
+    "capacidad": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Nombre unico de la capacidad (p. ej. subagentes/delegacion)."
+    },
+    "mecanismo_opencode": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Mecanismo concreto en OpenCode, o 'no-soportado'."
+    },
+    "mecanismo_copilot": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Mecanismo concreto en GitHub Copilot VS Code, o 'no-soportado'."
+    },
+    "estado": {
+      "type": "string",
+      "enum": ["soportado", "equivalente-distinto", "soportado-con-limite", "no-soportado"],
+      "description": "Estado de la capacidad en el conjunto de arneses (FR-15)."
+    },
+    "fuente": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Referencia documental o issue. Sin fuente la fila no entra (FR-15)."
+    },
+    "version_verificada": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Version del arnes o del tool donde se verifico la capacidad."
+    },
+    "prueba": {
+      "type": "string",
+      "description": "Evidencia de cierre. Vacia = en trabajo; completa = corregida (FR-15)."
+    },
+    "spec_responsable": {
+      "type": "string",
+      "pattern": "^$|^[0-9]{3}$",
+      "description": "Spec que corrige la inconsistencia. Vacio = documentada sin dueno (WARN)."
+    }
+  }
+}

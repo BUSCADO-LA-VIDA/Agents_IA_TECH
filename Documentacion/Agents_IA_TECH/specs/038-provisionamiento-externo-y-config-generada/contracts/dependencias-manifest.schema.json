@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-ia-tech.local/schemas/dependencias-manifest.schema.json",
+  "title": "DependencyManifest",
+  "description": "Estructura de dependencias-manifest.yml (FR-01, FR-02, FR-03, NFR-06). Unica fuente de verdad de las dependencias externas del kit.",
+  "type": "object",
+  "required": ["version_manifest", "updated", "dependencias_externas"],
+  "additionalProperties": false,
+  "properties": {
+    "version_manifest": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version semantica del propio manifest."
+    },
+    "updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha ISO8601 de la ultima modificacion del manifest."
+    },
+    "dependencias_externas": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Lista de dependencias externas declaradas. El nombre es unico (case-insensitive).",
+      "items": { "$ref": "#/$defs/externalDependency" }
+    }
+  },
+  "$defs": {
+    "externalDependency": {
+      "type": "object",
+      "required": ["nombre", "tipo_provisionamiento", "requerido", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "nombre": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9._-]+$",
+          "description": "Identificador unico de la dependencia."
+        },
+        "tipo_provisionamiento": {
+          "type": "string",
+          "enum": ["kit-integrado", "kit-fuente", "mcp-workspace", "mcp-build-local", "entorno"],
+          "description": "Taxonomia obligatoria (FR-01). Ausente o desconocido es FAIL (FR-02)."
+        },
+        "requerido": {
+          "type": "boolean",
+          "description": "true: ausente es FAIL; false: ausente es WARN (FR-12)."
+        },
+        "ruta_local": {
+          "type": "string",
+          "pattern": "^proyect_ext/[^/\\\\\\\\].*$",
+          "description": "Ruta relativa del clon dentro de proyect_ext/ (FR-13, NFR-06). Sin unidad ni ruta absoluta."
+        },
+        "repo_url": {
+          "type": "string",
+          "pattern": "^https://",
+          "description": "URL del repositorio de origen para clones."
+        },
+        "rama_seguida": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Rama o tag que se sigue para calcular el SHA remoto (FR-04)."
+        },
+        "gestor": {
+          "type": "string",
+          "enum": ["npm", "pypi", "uv"],
+          "description": "Gestor de paquetes para mcp-workspace."
+        },
+        "paquete": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nombre del paquete en el gestor."
+        },
+        "comando": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Comando resolubre que expone la dependencia."
+        },
+        "version": { "$ref": "#/$defs/versionProbe" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "tipo_provisionamiento": { "const": "kit-integrado" } }, "required": ["tipo_provisionamiento"] },
+          "then": {
+            "required": ["repo_url", "rama_seguida", "ruta_local", "version"],
+            "properties": {
+              "version": { "$ref": "#/$defs/versionProbeBranchHead" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "tipo_provisionamiento": { "const": "kit-fuente" } }, "required": ["tipo_provisionamiento"] },
+          "then": {
+            "required": ["repo_url", "rama_seguida", "ruta_local", "version"],
+            "properties": {
+              "version": { "$ref": "#/$defs/versionProbeBranchHead" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "tipo_provisionamiento": { "const": "mcp-workspace" } }, "required": ["tipo_provisionamiento"] },
+          "then": {
+            "required": ["gestor", "paquete", "comando", "version"],
+            "properties": {
+              "version": { "$ref": "#/$defs/versionProbeRegistry" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "tipo_provisionamiento": { "const": "mcp-build-local" } }, "required": ["tipo_provisionamiento"] },
+          "then": {
+            "required": ["repo_url", "ruta_local", "comando", "version"],
+            "properties": {
+              "version": { "$ref": "#/$defs/versionProbeReleaseArtifact" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "tipo_provisionamiento": { "const": "entorno" } }, "required": ["tipo_provisionamiento"] },
+          "then": {
+            "required": ["comando", "version"],
+            "properties": {
+              "version": { "$ref": "#/$defs/versionProbeRuntime" }
+            }
+          }
+        }
+      ]
+    },
+    "versionProbe": {
+      "type": "object",
+      "required": ["autoridad"],
+      "additionalProperties": false,
+      "properties": {
+        "autoridad": {
+          "type": "string",
+          "enum": ["branch-head", "gestor-paquetes", "release+artefacto", "runtime"],
+          "description": "Autoridad de version por tipo (FR-03)."
+        },
+        "archivo_local": {
+          "type": ["string", "null"],
+          "description": "Archivo relativo dentro del clon donde vive la version declarada."
+        },
+        "campo_local": {
+          "type": ["string", "null"],
+          "description": "Campo del archivo local que contiene la version, si aplica."
+        },
+        "upstream_api": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Endpoint de consulta de la ultima version disponible."
+        }
+      }
+    },
+    "versionProbeBranchHead": {
+      "allOf": [
+        { "$ref": "#/$defs/versionProbe" },
+        { "properties": { "autoridad": { "const": "branch-head" } } }
+      ]
+    },
+    "versionProbeRegistry": {
+      "allOf": [
+        { "$ref": "#/$defs/versionProbe" },
+        { "required": ["upstream_api"], "properties": { "autoridad": { "const": "gestor-paquetes" } } }
+      ]
+    },
+    "versionProbeReleaseArtifact": {
+      "allOf": [
+        { "$ref": "#/$defs/versionProbe" },
+        { "required": ["archivo_local"], "properties": { "autoridad": { "const": "release+artefacto" } } }
+      ]
+    },
+    "versionProbeRuntime": {
+      "allOf": [
+        { "$ref": "#/$defs/versionProbe" },
+        { "properties": { "autoridad": { "const": "runtime" } } }
+      ]
+    }
+  }
+}

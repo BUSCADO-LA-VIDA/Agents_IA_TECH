@@ -25,19 +25,19 @@
 - [x] T004b [RF-03] Conservar el respaldo con las tres etapas | verificar: `(Get-Content .github/hooks/context-mode.json.bak-20261109 -Raw | ConvertFrom-Json).hooks.PSObject.Properties.Name` → `PreToolUse`, `PostToolUse`, `SessionStart`
 - [x] T004c [RF-01] Verificar que el registro es JSON válido | verificar: `Get-Content .github/hooks/context-mode.json -Raw | ConvertFrom-Json`
 
-## Fase 2 — Política en el código (pendiente · `developer`)
+## Fase 2 — Política en el código (hecho · `developer` · 2026-11-12)
 
-Estas dos tareas escriben en `scripts/`, fuera del dominio documental: se delegan en `developer` y no se ejecutan desde el `pensador`. Hasta que estén hechas, la decisión del registro no es reproducible.
+> Estas dos tareas escriben en `scripts/`, fuera del dominio documental: se delegan en `developer`. La decisión del registro ya es reproducible y verificada (P4-P7).
 
-- [ ] T005 [RF-05] `Ensure-ContextHooks` deja de emitir `PreToolUse` y añade el comentario de decisión con la condición de re-habilitación | verificar: bootstrap en temporal vacío → la salida no contiene la clave `PreToolUse`
-- [ ] T006 [RF-06] `validar-mcps.ps1` (bloque 3) deja de exigir `PreToolUse`; pasa a exigirlo ausente y falla si reaparece, con mensaje que nombra la spec 045 | verificar: `pwsh -NoProfile -File scripts/validar-mcps.ps1` sin `[FAIL]` de hooks; luego, con el `.bak` sembrado, `[FAIL] PreToolUse reapareció`
+- [x] T005 [RF-05] `Ensure-ContextHooks` deja de emitir `PreToolUse`, añade el comentario de decisión (L1443) y normaliza un registro existente que la reintroduzca (L1475-1488) | verificar: P4 (vacío → sin `PreToolUse`) y P5 (`.bak` sembrado + normalización → sin `PreToolUse`) **en verde**
+- [x] T006 [RF-06] `validar-mcps.ps1` (bloque 3) invierte la aserción: vigila la **ausencia** de `PreToolUse` y falla si reaparece, con mensaje que nombra la spec 045 (L230-236) | verificar: P6 (`[OK] PreToolUse retirado`, sin FAIL) y P7 (`[FAIL] ... spec 045 ...`) **en verde**
 
-## Fase 3 — Pruebas de la salida generada (pendiente · `developer`)
+## Fase 3 — Pruebas de la salida generada (hecho · `developer` · 2026-11-12)
 
-- [ ] T007 [RF-05, AC-6] `tests/hooks-context-mode.Tests.ps1`: P4 (temporal vacío → sin `PreToolUse`) y P5 (`.bak` sembrado + `-Force` → sigue sin `PreToolUse`) | verificar: `Invoke-Pester tests/hooks-context-mode.Tests.ps1` en verde
-- [ ] T008 [RF-06, AC-7] Misma suite: P6 (validador en verde sobre el repo) y P7 (validador falla si `PreToolUse` reaparece) | verificar: ambas aserciones en verde
-- [ ] T009 [AC-9] Comparar el registro del repo con la salida del generador (normalizada: sin BOM, sin CRLF, claves ordenadas) | verificar: comparación devuelve `$true`
-- [ ] T009b [AC-8] Regresión de portabilidad | verificar: `Invoke-Pester tests/validate-no-hardcoded-paths.Tests.ps1` → 16/16
+- [x] T007 [RF-05, AC-6] `tests/hooks-context-mode.Tests.ps1` ejecuta el bootstrap REAL y prueba la **salida** en temporal, no el archivo del proyecto; cubre P4 (vacío) y P5 (sembrado) | verificar: suite 16/16 **en verde**
+- [x] T008 [RF-06, AC-7] Misma suite: P6 (validador no falla por ausencia) y P7 (validador falla si reintroducido) | verificar: suite 16/16 **en verde**
+- [x] T009 [AC-9] La suite compara las claves del repo (P8) contra la salida generada (normalizada con Sort; el orden no es contrato) y los comandos | verificar: P8 **en verde**
+- [x] T009b [AC-8] Regresión de portabilidad | verificar: `Invoke-Pester tests/validate-no-hardcoded-paths.Tests.ps1` → **16/16** (2026-11-12)
 
 ## Fase 4 — Cierre documental (parcial)
 
@@ -81,8 +81,7 @@ Estas dos tareas escriben en `scripts/`, fuera del dominio documental: se delega
 |---|---|---|
 | 0 Evidencia | T001-T003 | 3/3 |
 | 1 Registro | T004, T004b, T004c | 3/3 |
-| 2 Código | T005, T006 | 0/2 |
-| 3 Pruebas | T007, T008, T009, T009b | 0/4 |
-| 4 Cierre | T010-T014 | 2/5 (T010, T011) |
-
-**Total**: 8/14 tareas cerradas; 6 abiertas, de las cuales 4 son código (`developer`) y 2 requieren evidencia (T012 manual, T013/T014 dependen de las anteriores).
+| 2 Código | T005, T006 | 2/2 |
+| 3 Pruebas | T007, T008, T009, T009b | 4/4 |
+| 4 Cierre | T010-T014 | 3/5 (T010, T011, T013; T014 converge se completa en este paso) |
+**Total**: 15/16 tareas cerradas tras completo T014; 1 abierta (T012, manual: recarga del arnés para AC-4).

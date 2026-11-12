@@ -1,11 +1,11 @@
-﻿# Pendientes de implementación — Agents_IA_TECH
+# Pendientes de implementación — Agents_IA_TECH
 
 ## Estado general del proyecto
-- **Última actualización:** 2026-11-11
-- **Fase actual:** Spec 044 implementada con validación automática en verde (16/16 Pester); solo resta AC-6 (recarga del arnés). Spec 045 reconstruida con el ciclo Speckit completo y renombrada a `045-retirar-pretooluse-hook-context-mode`; su implementación es **parcial** (T005-T006 de código delegadas). Spec 046 en implementación (T004-T007 y T019 hechos). Spec 039 activa, con su criterio de aceptación ampliado por la 044.
+- **Última actualización:** 2026-11-12
+- **Fase actual:** Spec 045 **implementada y verificada** (T005-T009 en verde: suite `hooks-context-mode.Tests.ps1` 16/16 + portabilidad 16/16); solo resta AC-4 (recarga del arnés, manual). Spec 044 implementada (solo AC-6). Spec 046 en implementación (T004-T007 y T019 hechos). Spec 039 activa.
 - **Specs con tareas:** 21 (incl. 036, 037, 039, 044, 045 y 046)
-- **Total de tareas inventariadas:** 251 base + 28 de la spec 044 + 14 de la 045 + 22 de la 046
-- **Próxima tarea:** delegar en `developer` las tareas de código de la 045 (T005-T006: política en `Ensure-ContextHooks` y guard en `validar-mcps.ps1`); después cerrar la 046 (T008, T010-T012, T015, T017-T018, T020-T022)
+- **Total de tareas inventariadas:** 251 base + 28 de la spec 044 + 16 de la 045 + 22 de la 046
+- **Próxima tarea:** validar AC-4 de la 045 (recarga del arnés); luego cerrar formalmente 044 (AC-6) y seguir la 046 (T008, T010-T012, T015, T017-T018, T020-T022)
 
 ## Specs 039–046 — estado para retomar
 
@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | **039** | Activa — implementada v1.0.0; AC-1/AC-2 superados por la 044 | Nada dentro de su alcance original. Decidir si se cierra formalmente o queda como antecedente | `specs/039-eliminar-rutas-hardcoded-documentacion/` | revisar `converge.md` y marcar cierre en este archivo |
 | **044** | Implementada — 16/16 sobre 781 archivos, AC-7 y AC-9 verificados, 7 commits publicados | Solo AC-6 (arranque del arnés tras reinicio) y cierre formal | `specs/044-portabilidad-validacion-sin-exclusiones/` | recargar el arnés y revisar los MCP |
-| **045** | Aprobada v2.0.0 — implementación parcial (8/14 tareas) | T005 (política en `Ensure-ContextHooks`), T006 (guard en `validar-mcps.ps1`), T007-T009 (Pester de la salida generada), T012 (AC-4 tras recargar) | `specs/045-retirar-pretooluse-hook-context-mode/` | delegar T005-T006 en `developer`; luego `Invoke-Pester tests/hooks-context-mode.Tests.ps1` |
+| **045** | Aprobada v2.0.0 — implementación completa (T005-T009 en verde) | Solo T012 (AC-4: recarga del arnés, manual) | `specs/045-retirar-pretooluse-hook-context-mode/` | AC-4 por el usuario; luego cierre formal |
 | **046** | Borrador con plan | Generar `tasks.md` e implementar G1 (maestro portable), G2 (`graphify` por destino), G3 (`tokenslayer` relativo), G4 (bootstrap sin plantilla) | `specs/046-generacion-portable-opencode-json/` | `speckit-tasks` de 046 |
 
 ### Tareas pendientes de la Spec 044
@@ -31,15 +31,15 @@
 
 ### Tareas pendientes de la Spec 045 — `045-retirar-pretooluse-hook-context-mode`
 
-> La spec está completa (spec → plan → tasks → analyze → converge). El registro ya no declara `PreToolUse`; lo que falta es que el generador y el validador afirmen lo mismo.
+> La spec está completa (spec → plan → tasks → analyze → converge). **T005-T009 quedaron en verde el 2026-11-12** (suite `hooks-context-mode.Tests.ps1` 16/16 + portabilidad 16/16). Solo resta T012 (AC-4, manual).
 
 | ID | Tarea | Responsable | Estado | Criterio de done |
 |---|---|---|---|---|
-| 045-T005 | Quitar `PreToolUse` de `Ensure-ContextHooks` + comentario de decisión y condición de re-habilitación | `developer` | Pendiente | bootstrap en temporal vacío → la salida no contiene `PreToolUse` |
-| 045-T006 | Invertir la aserción de hooks en `validar-mcps.ps1` (exigir ausencia de `PreToolUse`, fallar si reaparece) | `developer` | Pendiente | validador sin `[FAIL]` de hooks; `.bak` sembrado → `[FAIL] PreToolUse reapareció` |
-| 045-T007 | `tests/hooks-context-mode.Tests.ps1`: P4 (temporal vacío) y P5 (`-Force` con `.bak` sembrado) | `developer` | Pendiente | Pester en verde, probando la **salida** del generador |
-| 045-T008 | Misma suite: P6 (validador en verde) y P7 (validador falla con `PreToolUse` reintroducido) | `developer` | Pendiente | Pester en verde |
-| 045-T009 | Comparar registro del repo ≡ salida del generador, normalizada | `developer` | Pendiente | comparación `$true` (AC-9) |
+| 045-T005 | Quitar `PreToolUse` de `Ensure-ContextHooks` + comentario de decisión y condición de re-habilitación | `developer` | **Cerrada** (2026-11-12) | P4/P5 en verde: bootstrap vacío y sembrado sin `PreToolUse` |
+| 045-T006 | Invertir la aserción de hooks en `validar-mcps.ps1` (exigir ausencia de `PreToolUse`, fallar si reaparece) | `developer` | **Cerrada** (2026-11-12) | P6/P7 en verde |
+| 045-T007 | `tests/hooks-context-mode.Tests.ps1`: P4 (temporal vacío) y P5 (`.bak` sembrado) | `developer` | **Cerrada** (2026-11-12) | Pester 16/16 en verde |
+| 045-T008 | Misma suite: P6 (validador en verde) y P7 (validador falla con `PreToolUse` reintroducido) | `developer` | **Cerrada** (2026-11-12) | Pester 16/16 en verde |
+| 045-T009 | Comparar registro del repo ≡ salida del generador, normalizada | `developer` | **Cerrada** (2026-11-12) | P8 en verde (AC-9) |
 | 045-T012 | AC-4: confirmar tras recargar el arnés que un `.md` > 16 KB se lee sin `deny` | usuario | Pendiente | lectura de `specs/044-.../spec.md` (20 KB) sin `deny` |
 | 045-T013 | Sincronizar índice, pendientes y CHANGELOG con el nombre nuevo | `pensador` | **Cerrada** | `git grep "045-hook-context-mode"` sin resultados operativos |
 | 045-T014 | `converge.md` firmado con matriz de AC y veredicto | `pensador` | **Cerrada** | `converge.md` presente, 5 PASS / 2 FAIL abiertos declarados |

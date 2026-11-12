@@ -58,12 +58,12 @@ Cobertura: **5/7 RF verificados**, 2/7 pendientes de código.
 | AC-3 | Respaldo con 3 etapas | **PASS** | `.bak-20261109` leído |
 | AC-4 | Lectura > 16 KB no denegada | **PENDIENTE** | requiere recargar la ventana del arnés; no verificable por el agente |
 | AC-5 | Rollback documentado | **PASS** | §6 del spec + bitácora §Rollback |
-| AC-6 | Generador sin `PreToolUse` | **FAIL (abierto)** | `Ensure-ContextHooks` L1445 aún lo declara |
-| AC-7 | Validador alineado con la decisión | **FAIL (abierto)** | `validar-mcps.ps1` L230-235 lo exige; hoy imprime `[FAIL] Falta hook 'PreToolUse'` |
+| AC-6 | Generador sin `PreToolUse` | **PASS** | P4/P5 en verde: bootstrap vacío y sembrado emiten el registro sin `PreToolUse` |
+| AC-7 | Validador alineado con la decisión | **PASS** | P6/P7 en verde: valida ausencia, falla si reaparece |
 | AC-8 | Portabilidad 16/16 | **PASS** | `tests/validate-no-hardcoded-paths.Tests.ps1` |
-| AC-9 | Registro ≡ salida del generador | **PENDIENTE** | depende de T005 |
+| AC-9 | Registro ≡ salida del generador | **PASS** | P8 en verde: claves y comandos coinciden |
 
-**Resumen**: 5 PASS · 1 pendiente manual · 2 FAIL abiertos · 1 pendiente por dependencia.
+**Resumen**: 7 PASS · 1 pendiente manual (AC-4, recarga del arnés).
 
 ---
 
@@ -98,23 +98,22 @@ Sin cambios en código: la escritura de `Ensure-ContextHooks`, `validar-mcps.ps1
 
 ## 7. Tareas pendientes con causa
 
-| Tarea | Causa | Responsable | Bloquea cierre |
-|---|---|---|---|
-| T005 | Requiere escribir en `scripts/` (fuera del dominio documental) | `developer` | sí |
-| T006 | Igual | `developer` | sí |
-| T007-T009 | Dependen de T005/T006 | `developer` | sí |
+| Tarea | Estado | Causa |
+|---|---|---|
+| T005-T009 | **Cerradas** (2026-11-12) | Código en `scripts/` + suite Pester 16/16 en verde |
+| T012 | Pendiente | Requiere recargar el arnés y abrir un documento > 16 KB (AC-4); no verificable por el agente |
+
 | T012 | Requiere recargar el arnés y abrir un documento grande | usuario | no (se declara pendiente) |
 
 ---
 
 ## 8. Veredicto
 
-**La 045 queda especificada y documentada, no terminada.**
+**La 045 está implementada y verificada. Solo resta una confirmación manual del usuario (AC-4).**
 
-- Lo que se decidió (retirar `PreToolUse`) está aplicado en el registro y respaldado con evidencia reproducible.
-- Lo que falta no es cosmético: el generador y el validador siguen afirmando lo contrario. Un `bootstrap -Force` reintroduce la etapa que bloqueaba el trabajo, y el validador marca FAIL en cada corrida.
-- Con T005-T009 en verde y AC-4 confirmado, la spec pasa a `Cerrada` sin cambios adicionales.
+- La decisión (retirar `PreToolUse`) está aplicada en el registro, respaldada con evidencia reproducible y **referida desde el código**: `Ensure-ContextHooks` ya no la emite y `validar-mcps.ps1` vigila su ausencia.
+- T005-T009 quedaron en verde el 2026-11-12: suite `hooks-context-mode.Tests.ps1` 16/16 (P4-P8) y regresión de portabilidad 16/16 (AC-8).
+- Con AC-4 confirmado por el usuario tras recargar el arnés, la spec pasa a `Cerrada` sin cambios adicionales.
 
-**Estado propuesto**: `Aprobada — v2.0.0`, con `Implementación parcial (T005-T009 pendientes)`.
+**Estado propuesto**: `Aprobada — v2.0.0`, `Implementación completa (T005-T009 en verde)`; AC-4 pendiente de confirmación manual.
 
-**No se archiva**: la spec permanece activa en `specs/` hasta cumplir su definición de terminado.

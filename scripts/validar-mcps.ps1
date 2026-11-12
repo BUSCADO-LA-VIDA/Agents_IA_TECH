@@ -227,8 +227,15 @@ if ($contextMode -and $contextMode.RequiereHooks) {
     } else {
         try {
             $hooks = Get-Content $hooksPath -Raw | ConvertFrom-Json
-            $hookTypes = @("PreToolUse", "PostToolUse", "SessionStart")
-            foreach ($hookType in $hookTypes) {
+            # [045] Politica vigente: PreToolUse retirado (denegaba Read > 16 KB con
+            # umbral fijo). El validador vigila la decision: falla si reaparece.
+            $hasPre = ($null -ne $hooks.hooks) -and ($null -ne $hooks.hooks.PSObject.Properties['PreToolUse'])
+            if ($hasPre) {
+                Write-Fail "Hook 'PreToolUse' presente en $hooksPath. La spec 045 lo retira: denegaba lecturas > 16 KB (specs/045-retirar-pretooluse-hook-context-mode)."
+            } else {
+                Write-Ok "Hook 'PreToolUse' retirado (decision de la spec 045)"
+            }
+            foreach ($hookType in @("PostToolUse", "SessionStart")) {
                 if ($hooks.hooks.$hookType) {
                     Write-Ok "Hook '$hookType' configurado"
                 } else {

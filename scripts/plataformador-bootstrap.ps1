@@ -1440,14 +1440,12 @@ function Ensure-ContextHooks {
     $hooksDir = Split-Path $hooksPath -Parent
     Ensure-Directory $hooksDir
 
+    # [045] PreToolUse se retira por decision (spec 045): context-mode 2.x deniega
+    # Read > 16 KB con umbral fijo (16384) y sin variable de entorno. No re-habilitar
+    # sin cumplir la condicion de la spec (umbral configurable o > tamano maximo de
+    # la documentacion del kit). La decision vive aqui, no en el archivo generado.
     $hooksJson = [ordered]@{
         hooks = [ordered]@{
-            PreToolUse = @(
-                [ordered]@{
-                    type = "command"
-                    command = "context-mode hook vscode-copilot pretooluse"
-                }
-            )
             PostToolUse = @(
                 [ordered]@{
                     type = "command"
@@ -1471,8 +1469,28 @@ function Ensure-ContextHooks {
 
         $hooksJson | ConvertTo-Json -Depth 10 | Set-Content -Path $hooksPath -Encoding UTF8
         Write-OK "Hooks de context-mode creados: $hooksPath"
-    } else {
-        Write-OK "Hooks de context-mode ya existen: $hooksPath"
+        return
+    }
+
+    # [045] Normalizacion: si el registro existente reintroduce PreToolUse (restauracion
+    # del .bak, copia de otro repo o edicion manual), se retira. Se preserva el resto
+    # del documento para no pisar configuracion ajena.
+    try {
+        $existingHooks = Get-Content $hooksPath -Raw | ConvertFrom-Json
+        $hasPre = ($null -ne $existingHooks.hooks) -and ($null -ne $existingHooks.hooks.PSObject.Properties['PreToolUse'])
+        if ($hasPre) {
+            if ($DryRun) {
+                Write-Info "DryRun: retiraria PreToolUse de $hooksPath (spec 045)"
+                return
+            }
+            $existingHooks.hooks.PSObject.Properties.Remove('PreToolUse')
+            $existingHooks | ConvertTo-Json -Depth 10 | Set-Content -Path $hooksPath -Encoding UTF8
+            Write-OK "Hooks de context-mode normalizados: PreToolUse retirado (spec 045)"
+        } else {
+            Write-OK "Hooks de context-mode ya existen: $hooksPath"
+        }
+    } catch {
+        Write-Warn "No se pudo normalizar ${hooksPath}: $($_.Exception.Message). Se conserva el archivo tal cual."
     }
 }
 

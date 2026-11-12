@@ -44,16 +44,28 @@ dependencias_externas:
   - nombre: spec-kit
     url: https://github.com/github/spec-kit
     rama: main
-    version_actual: v0.0.0  # Se actualizará en la primera ejecución
-    ultimo_check: 2026-09-05
-    componentes_a_copiar:
-      - src/speckit-specify/ → .github/skills/speckit-specify/
-      - src/speckit-plan/ → .github/skills/speckit-plan/
-      - src/speckit-tasks/ → .github/skills/speckit-tasks/
-      - src/speckit-converge/ → .github/skills/speckit-converge/
-      - src/speckit-implement/ → .github/skills/speckit-implement/
-      - src/speckit-analyze/ → .github/skills/speckit-analyze/
-      - src/speckit-checklist/ → .github/skills/speckit-checklist/
+    version_actual: v1.4.0  # release 2026-11-10; verificado 2026-11-12
+    ultimo_check: 2026-11-12
+    licencia: MIT  # Verificada 2026-11-12 via API de GitHub (SPDX: MIT)
+    mecanismo: >
+      CLI `specify` (specify-cli instalado con `uv tool`) + `specify integration upgrade --script ps`.
+      NO se copian carpetas a mano: el manifest de la integracion trackea hashes por archivo.
+    instalacion: uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@v1.4.0
+    componentes_gestionados:
+      - .specify/scripts/powershell/{check-prerequisites,common,create-new-feature,resolve-template,setup-plan,setup-tasks}.ps1
+      - .specify/templates/{spec,plan,tasks,checklist,constitution}-template.md
+      - .specify/.gitignore
+      - .github/skills/speckit-{analyze,checklist,clarify,constitution,converge,implement,plan,specify,tasks}/SKILL.md (9, dentro del manifest)
+      - .github/skills/speckit-taskstoissues/SKILL.md (retirado por 1.4.0; el kit lo conserva fuera del manifest)
+      - .opencode/skills/speckit-*/SKILL.md (mismo prompt 1.4.0 + bloque Documentation First del kit)
+    parches_del_kit:
+      - .specify/scripts/powershell/check-prerequisites.ps1 -> gate Documentation First (rechaza FEATURE_DIR fuera de Documentacion/<AppName>/specs/, sin allowlist)
+      - .specify/.gitignore -> bloque graphify-out/* (1.4.0 lo reemplazo por integrations/packages/)
+    nota_actualizacion: >
+      Los dos parches no sobreviven a `specify integration upgrade --force`: hay que re-aplicarlos
+      (deuda DD-10 en Documentacion/Agents_IA_TECH/pendientes-implementacion.md).
+      `specify integration status` queda en WARNING con 2 archivos modificados, a proposito:
+      los hashes del manifest son los de 1.4.0 y el contraste frena un upgrade silencioso.
 
   - nombre: graphify
     url: https://github.com/Graphify-Labs/graphify
@@ -159,4 +171,5 @@ dependencias_externas:
 # [2026-09-18] Registrado tokenslayer-mcp-server (v1.5.0, MIT ✅) — MCP server standalone de https://github.com/ajvikram/TokenSlayer (carpeta mcp-server/, clonar + compilar con Node v24.14.0). Rol: compactación de contexto (esqueletos AST + call graphs + patch estructural). Fase documental tarea [TOKENSLAYER] (documentador).
 # [2026-09-18] Instalado tokenslayer-mcp-server v1.5.0 (commit 9a380c041209e5599ad63ffd897dc99c7936327e) en proyect_ext/tokenslayer — fase implementación tarea [TOKENSLAYER] (devops): npm install + npm audit (0 críticas; 1 low/2 moderate/3 high transitivas del SDK) + npm run build OK + handshake MCP OK (8 herramientas). Registrado en opencode.json + .vscode/mcp.json (clave `tokenslayer`, sin secrets).
 # [2026-09-18] BUG-3 QA (tarea [TOKENSLAYER]): aclarado skew de versiones en tokenslayer-mcp-server — tag repo v1.5.0 (commit 9a380c04) vs server interno 1.3.0 (package.json + handshake MCP); skew upstream documentado en MCPs/tokenslayer.md, no afecta funcionamiento.
+# [2026-11-12] spec-kit actualizado de 1.0.0 a v1.4.0: CLI via uv tool, `.specify/` regenerado con `specify integration upgrade --force`, skills de ambos arneses alineadas al prompt 1.4.0. Re-aplicados el gate Documentation First y el bloque graphify-out; deuda DD-10 (automatizar la re-aplicacion).
 # [2026-09-18] Corregida entrada graphify (tarea [GRAPHIFY-INSTALL], devops RF-19): URL muerta tomasgraph/graphify (404) → upstream real Graphify-Labs/graphify; tipo paquete Python PyPI `graphifyy` (doble-y, oficialidad repo↔PyPI verificada); pin exacto 0.9.48 (uv tool + pip alineados, extra [mcp]); licencia dual Apache-2.0/MIT aceptada por el usuario (guardrail 8 satisfecho con nota); handshake MCP stdio OK (10 herramientas, `triage_prs` solo-lectura verificado en código: solo `gh pr list/view/diff` + prompt LLM, cero POST/PATCH/PUT/DELETE); `Configure-Graphify` real en el bootstrap (Rama A MCP-preferida, stdio siempre, sin secrets).

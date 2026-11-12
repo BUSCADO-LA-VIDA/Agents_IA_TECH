@@ -4,6 +4,31 @@
 
 ---
 
+## [1.3.0] - 2026-11-12 - spec-kit 1.4.0 re-integrado en el kit
+
+### Cambiado
+- **CLI `specify` 1.0.0 -> 1.4.0** (release upstream del 2026-11-10, licencia MIT). Instalado con `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@v1.4.0`; `specify --version` informa `1.4.0`. El primer intento con `specify self upgrade` falló con `Acceso denegado (os error 5)` al borrar `...\uv\tools\specify-cli\Scripts` y dejó el CLI roto; se reparó con la reinstalación forzada.
+- **`.specify/` regenerado** con `specify integration upgrade --force --script ps` (exit 0, `Removed 1 stale file(s)`): `common.ps1` (34 245 -> 35 316 B, con soporte de `SPECIFY_FEATURE_DIRECTORY` y `feature.json`), `create-new-feature.ps1`, `resolve-template.ps1`, `setup-plan.ps1`, `setup-tasks.ps1` y `check-prerequisites.ps1`; `init-options.json` e `integration.json` declaran `speckit_version: 1.4.0`.
+- **`.github/skills/speckit-*` (9 skills) actualizadas** al prompt 1.4.0: nueva política cuando `.specify/extensions.yml` no se puede leer (reportar en vez de saltar en silencio), resolución de `spec-template` por la pila de presets (`resolve-template.ps1 spec-template -Json` y `TEMPLATE_CONTENT`) y ajustes en analyze, clarify, converge, implement, plan y tasks.
+- **`.opencode/skills/speckit-*` reconstruidas sobre la base 1.4.0** re-aplicando el parche del kit, no copiadas a ciegas: el bloque **Documentation First** sigue en las 9 skills y en `speckit-taskstoissues` (delta uniforme de 430 B por skill) y `speckit-specify` conserva la resolución de `SPECIFY_FEATURE_DIRECTORY` bajo `Documentacion/<AppName>/specs/`. Se verificó que no quedaba ningún otro contenido del kit que se pudiera perder.
+
+### Conservado a propósito (divergencia declarada)
+- **Gate Documentation First en `.specify/scripts/powershell/check-prerequisites.ps1`**: 1.4.0 no lo trae. Re-insertado sobre las variables del archivo nuevo (`$paths.FEATURE_DIR`, `$paths.REPO_ROOT`, normalizadas con `GetFullPath`). Verificado: spec 038 -> exit 0 con `AVAILABLE_DOCS` (`research.md`, `data-model.md`, `contracts/`, `quickstart.md`, `tasks.md`); `src/FakeApp/specs/001-x` -> exit 1 con el mensaje del gate; `Documentacion/OtraApp/specs/999-x` -> pasa el gate y falla por directorio inexistente (prueba de que no hay allowlist).
+- **Bloque `graphify-out/*` en `.specify/.gitignore`**: 1.4.0 lo sustituyó por `integrations/packages/` y `integrations/packages.json`. Re-añadido después de las entradas nuevas.
+- **`speckit-taskstoissues`**: 1.4.0 lo retira de `.github/skills`. Se restaura idéntico en los dos arneses (con el bloque Documentation First) porque el kit no tiene reemplazo y la Regla 3 exige paridad. Queda fuera del manifest de la integración, así que los próximos upgrades no lo borran.
+
+### Consecuencia operativa
+- `specify integration status` informa **WARNING con 2 archivos gestionados modificados** (`check-prerequisites.ps1` y `.specify/.gitignore`). Es intencional: el manifest conserva los hashes de 1.4.0 y esa diferencia es el freno que impide que un `upgrade` sin `--force` sobrescriba el parche en silencio.
+
+### Verificado
+- `check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` -> exit 0 con `FEATURE_DIR` de la 038.
+- `setup-plan.ps1 -Json` y `setup-tasks.ps1 -Json` -> exit 0 en sandbox temporal con `Documentacion/DemoApp/specs/001-demo`, antes y después del gate.
+- `tests/validate-no-hardcoded-paths.Tests.ps1` -> 16/16 en 54,8 s.
+- `scripts/validate-agents-skills.ps1` -> 9 OK, 2 WARN y 1 FAIL preexistente (VAL-06: 6 skills de `.github` sin par en `.opencode`, ajenas a spec-kit y sin cambios en este trabajo).
+
+### Deuda
+- DD-10: los dos parches sobre `.specify` no sobreviven a `specify integration upgrade --force`; hay que re-aplicarlos a mano hasta que el bootstrap los genere.
+
 ## [1.2.0] - 2026-11-09 - Spec 045: hook `context-mode` bloqueaba lecturas
 
 > Spec renombrada el 2026-11-11 a `045-retirar-pretooluse-hook-context-mode`: el slug describe la decisión, no el síntoma. El cambio de esta entrada (retirar `PreToolUse`) se mantiene.

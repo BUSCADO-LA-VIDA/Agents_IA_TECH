@@ -9,6 +9,7 @@
 #
 # OPTIONS:
 #   -Json               Output in JSON format
+#   -RequireSpec        Require spec.md to exist (for analysis phase)
 #   -RequireTasks       Require tasks.md to exist (for implementation phase)
 #   -IncludeTasks       Include tasks.md in AVAILABLE_DOCS list
 #   -PathsOnly          Only output path variables (no validation)
@@ -18,6 +19,7 @@
 [CmdletBinding()]
 param(
     [switch]$Json,
+    [switch]$RequireSpec,
     [switch]$RequireTasks,
     [switch]$IncludeTasks,
     [switch]$PathsOnly,
@@ -36,6 +38,7 @@ Consolidated prerequisite checking for Spec-Driven Development workflow.
 
 OPTIONS:
   -Json               Output in JSON format
+  -RequireSpec        Require spec.md to exist (for analysis phase)
   -RequireTasks       Require tasks.md to exist (for implementation phase)
   -IncludeTasks       Include tasks.md in AVAILABLE_DOCS list
   -PathsOnly          Only output path variables (no prerequisite validation)
@@ -93,9 +96,10 @@ if ($PathsOnly) {
 # Validate FEATURE_DIR is under Documentacion/<AppName>/specs/ (Documentation First)
 # Derive the app name from the resolved feature path: no hardcoded app and no
 # allowlist, so a new app under Documentacion/ validates without touching this file.
-$resolvedFeatureDir = $paths.FEATURE_DIR
+$resolvedFeatureDir = [System.IO.Path]::GetFullPath($paths.FEATURE_DIR)
+$resolvedRepoRoot = [System.IO.Path]::GetFullPath($paths.REPO_ROOT).TrimEnd([System.IO.Path]::DirectorySeparatorChar)
 $relFeatureDir = $resolvedFeatureDir
-$repoPrefix = $paths.REPO_ROOT + [System.IO.Path]::DirectorySeparatorChar
+$repoPrefix = $resolvedRepoRoot + [System.IO.Path]::DirectorySeparatorChar
 if ($relFeatureDir.StartsWith($repoPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
     $relFeatureDir = $relFeatureDir.Substring($repoPrefix.Length)
 }
@@ -104,41 +108,43 @@ if ($relFeatureDir -notmatch '^Documentacion[\\/][^\\/]+[\\/]specs[\\/]') {
     exit 1
 }
 
-# Validate required directories and files in proper cycle order:
-# 1. FEATURE_DIR must exist
-# 2. SPECS must exist and be validated (speckit-analyze)
-# 3. plan.md must exist (generated from specs via speckit-plan)
-# 4. tasks.md must exist if -RequireTasks (generated from plan via speckit-tasks)
-
-if (-not (Test-Path $paths.FEATURE_DIR -PathType Container)) {
+# Validate required directories and files
+if (-not (Test-Path -LiteralPath $paths.FEATURE_DIR -PathType Container)) {
     [Console]::Error.WriteLine("ERROR: Feature directory not found: $($paths.FEATURE_DIR)")
     $specifyCommand = '/speckit-specify'
     [Console]::Error.WriteLine("Run $specifyCommand first to create the feature structure.")
     exit 1
 }
 
-# Validate specs exist and have been analyzed (speckit-analyze)
-if (-not (Test-Path $paths.FEATURE_SPEC -PathType Leaf)) {
-    [Console]::Error.WriteLine("ERROR: Feature spec not found in $($paths.FEATURE_DIR)")
-    [Console]::Error.WriteLine("Specs must be created and validated before planning.")
+if (-not (Test-Path -LiteralPath $paths.IMPL_PLAN -PathType Leaf)) {
+    [Console]::Error.WriteLine("ERROR: plan.md not found in $($paths.FEATURE_DIR)")
+    $planCommand = '/speckit-plan'
+    [Console]::Error.WriteLine("Run $planCommand first to create the implementation plan.")
+    exit 1
+}
+
+if ((Get-Item -LiteralPath $paths.IMPL_PLAN).Length -eq 0) {
+    [Console]::Error.WriteLine("ERROR: plan.md is empty in $($paths.FEATURE_DIR)")
+    $planCommand = '/speckit-plan'
+    [Console]::Error.WriteLine(
+        "Populate it, or remove the empty file and rerun $planCommand with a valid plan template."
+    )
+    exit 1
+}
+
+# Check for spec.md if required
+if ($RequireSpec -and -not (Test-Path -LiteralPath $paths.FEATURE_SPEC -PathType Leaf)) {
+    [Console]::Error.WriteLine("ERROR: spec.md not found in $($paths.FEATURE_DIR)")
     $specifyCommand = '/speckit-specify'
     [Console]::Error.WriteLine("Run $specifyCommand first to create the feature specification.")
     exit 1
 }
 
-# Validate plan.md exists (must be generated from specs via speckit-plan)
-if (-not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
-    [Console]::Error.WriteLine("ERROR: plan.md not found in $($paths.FEATURE_DIR)")
-    $planCommand = '/speckit-plan'
-    [Console]::Error.WriteLine("Run $planCommand first to create the implementation plan from specs.")
-    exit 1
-}
-
-# Check for tasks.md if required (must exist after plan is created via speckit-tasks)
-if ($RequireTasks -and -not (Test-Path $paths.TASKS -PathType Leaf)) {
+# Check for tasks.md if required
+if ($RequireTasks -and -not (Test-Path -LiteralPath $paths.TASKS -PathType Leaf)) {
     [Console]::Error.WriteLine("ERROR: tasks.md not found in $($paths.FEATURE_DIR)")
     $tasksCommand = '/speckit-tasks'
-    [Console]::Error.WriteLine("Run $tasksCommand first to create the task list from the plan.")
+    [Console]::Error.WriteLine("Run $tasksCommand first to create the task list.")
     exit 1
 }
 
@@ -146,18 +152,18 @@ if ($RequireTasks -and -not (Test-Path $paths.TASKS -PathType Leaf)) {
 $docs = @()
 
 # Always check these optional docs
-if (Test-Path $paths.RESEARCH) { $docs += 'research.md' }
-if (Test-Path $paths.DATA_MODEL) { $docs += 'data-model.md' }
+if (Test-Path -LiteralPath $paths.RESEARCH) { $docs += 'research.md' }
+if (Test-Path -LiteralPath $paths.DATA_MODEL) { $docs += 'data-model.md' }
 
 # Check contracts directory (only if it exists and has files)
-if ((Test-Path $paths.CONTRACTS_DIR) -and (Get-ChildItem -Path $paths.CONTRACTS_DIR -ErrorAction SilentlyContinue | Select-Object -First 1)) {
+if ((Test-Path -LiteralPath $paths.CONTRACTS_DIR) -and (Get-ChildItem -LiteralPath $paths.CONTRACTS_DIR -ErrorAction SilentlyContinue | Select-Object -First 1)) {
     $docs += 'contracts/'
 }
 
-if (Test-Path $paths.QUICKSTART) { $docs += 'quickstart.md' }
+if (Test-Path -LiteralPath $paths.QUICKSTART) { $docs += 'quickstart.md' }
 
 # Include tasks.md if requested and it exists
-if ($IncludeTasks -and (Test-Path $paths.TASKS)) {
+if ($IncludeTasks -and (Test-Path -LiteralPath $paths.TASKS)) {
     $docs += 'tasks.md'
 }
 

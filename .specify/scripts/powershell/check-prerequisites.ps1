@@ -91,9 +91,16 @@ if ($PathsOnly) {
 }
 
 # Validate FEATURE_DIR is under Documentacion/<AppName>/specs/ (Documentation First)
-$docFeatureDir = Join-Path $RepoRoot "Documentacion" $AppName "specs"
-if (-not $featureDir.StartsWith($docFeatureDir)) {
-    Write-Error "ERROR: FEATURE_DIRECTORY ($featureDir) debe estar bajo Documentacion/$AppName/specs/. Actual: $featureDir"
+# Derive the app name from the resolved feature path: no hardcoded app and no
+# allowlist, so a new app under Documentacion/ validates without touching this file.
+$resolvedFeatureDir = $paths.FEATURE_DIR
+$relFeatureDir = $resolvedFeatureDir
+$repoPrefix = $paths.REPO_ROOT + [System.IO.Path]::DirectorySeparatorChar
+if ($relFeatureDir.StartsWith($repoPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+    $relFeatureDir = $relFeatureDir.Substring($repoPrefix.Length)
+}
+if ($relFeatureDir -notmatch '^Documentacion[\\/][^\\/]+[\\/]specs[\\/]') {
+    [Console]::Error.WriteLine("ERROR: FEATURE_DIRECTORY ($resolvedFeatureDir) debe estar bajo Documentacion/<AppName>/specs/.")
     exit 1
 }
 
